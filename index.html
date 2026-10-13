@@ -1160,6 +1160,33 @@ html[data-theme="ponoc"]{
 .mf-ico svg.ftic{ width:70px; height:84px; }
 .thumb-box.pdf-thumb svg.ftic{ width:62%; height:auto; }
 .trash-thumb svg.ftic{ width:62%; height:auto; }
+.trash-thumb{ cursor:pointer; }
+/* v147: korpa kao album */
+.tr-icons{ margin-top:6px; }
+.tr-icons .alb-ico.on .alb-ico-sq{ background:var(--brass-glow); border-color:var(--brass); }
+.tr-icons .alb-ico.danger .alb-ico-sq{ color:var(--danger); }
+.tr-search{ display:flex; align-items:center; gap:8px; height:52px; padding:0 8px 0 14px; margin:6px 0 4px; border-radius:26px; border:1px solid var(--brass); background:var(--surface); }
+.tr-search-ic{ color:var(--brass); display:flex; }
+.tr-search input{ flex:1; min-width:0; height:100%; border:none; background:none; color:var(--ink); font:500 16px var(--font-ui); outline:none; }
+.tr-search-x{ width:40px; height:40px; border:none; background:none; color:var(--brass); font-size:18px; cursor:pointer; }
+.tr-sec{ font:600 13px/1.3 var(--font-ui); color:var(--ink-dim); margin:14px 2px 6px; letter-spacing:.02em; }
+.tr-alb{ display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px; border-radius:14px; border:1px solid var(--line); background:var(--surface); cursor:pointer; }
+.tr-alb-ic{ color:var(--brass); display:flex; flex:none; }
+.tr-alb-t{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.tr-alb-t b{ font:600 15.5px/1.25 var(--font-ui); color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tr-alb-t small{ font-size:12px; color:var(--ink-dim); }
+.tr-alb-btn{ flex:none; height:40px; padding:0 12px; border-radius:12px; border:1px solid var(--brass); background:none; color:var(--brass); font:600 13.5px var(--font-ui); cursor:pointer; }
+.tr-ghead{ display:flex; align-items:center; gap:8px; margin:6px 0 10px; }
+.tr-gacts{ display:flex; gap:10px; margin-bottom:12px; }
+.trash-btn.tr-gall, .trash-btn.tr-info-ok{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+button.trash-name{ display:block; width:100%; text-align:left; border:none; background:none; padding:0; font-family:inherit; cursor:pointer;
+  text-decoration:underline dotted var(--ink-faint); text-underline-offset:3px; }
+.tr-empty{ padding-top:14px; }
+.tr-info{ padding:2px 4px 6px; }
+.tr-info-row{ display:flex; justify-content:space-between; gap:14px; padding:11px 2px; border-bottom:1px solid var(--line); font-size:14.5px; }
+.tr-info-row span:first-child{ color:var(--ink-dim); flex:none; }
+.tr-info-row span:last-child{ color:var(--ink); text-align:right; overflow-wrap:anywhere; }
+.tr-info-acts{ display:flex; gap:10px; margin-top:14px; }
 .ws-src-th svg.ftic{ width:62%; height:auto; }
 .mf-ico .mf-ext{ position:absolute; left:50%; bottom:14px; transform:translateX(-50%); font-family:var(--font-ui); font-size:12px; font-weight:800;
   letter-spacing:.6px; color:var(--on-accent); background:var(--accent); border-radius:6px; padding:2px 7px; max-width:90px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
@@ -2966,11 +2993,22 @@ const I18N = {
     delItemsOk: 'U korpu',
     delAlbumTitle: 'Obriši album',
     delSubTitle: 'Obriši podalbum',
-    delAlbumText: '„{name}“ biće obrisan{subs}. {items} Obrisan album se ne može vratiti.',
+    delAlbumText: '„{name}“ biće obrisan{subs}. {items}',
     delAlbumSubs: ' zajedno sa podalbumima ({n})',
-    delAlbumItems: 'Slike i dokumenti iz njega ({n}) ostaju u „Bez albuma“.',
-    delAlbumEmpty: 'U njemu nema slika ni dokumenata.',
-    delAlbumOk: 'Obriši',
+    delAlbumItems: 'Slike i dokumenti iz njega ({n}) idu u korpu, odakle ih možeš vratiti zajedno sa albumom.',
+    delAlbumEmpty: 'U njemu nema slika ni dokumenata, pa se ne čuva u korpi.',
+    delAlbumDone: '„{name}“ je u korpi ({n}).', delAlbumDoneEmpty: '„{name}“ je obrisan.', trUndo: 'Vrati',
+    trTitle: 'Korpa', trEmpty: 'Korpa je prazna.', trNone: 'Ništa ne odgovara izboru.', trSelAll: 'Izaberi sve', trUnsel: 'Poništi izbor',
+    trEmptyBtn: 'Isprazni', trEmptyTitle: 'Isprazni korpu', trEmptyText: 'Trajno obrisati sve iz korpe ({n})? Nema vraćanja.', trDays: 'Dana',
+    trDaysLbl: 'čuvaj obrisano (dana)', trDaysHint: 'Obrisane slike, dokumenti i albumi čekaju ovde. Kad prođe ovoliko dana, trajno se brišu pri otvaranju aplikacije. Korpa se ne čuva u rezervnoj kopiji.',
+    trSearchPh: 'Pretraži korpu…', trSecAlb: 'Obrisani albumi', trSecItems: 'Obrisane stavke', trAlbSub: 'album · {n} · obrisan {d} · {left}',
+    trRestoreAlb: 'Vrati album', trRestoredAlb: 'Album „{name}“ je vraćen ({n}).', trGroupSub: 'obrisan album · {left}', trRestoreAllN: 'Vrati ceo album ({n})',
+    trRestoreN: 'Vrati ({n})', trPurgeN: 'Obriši trajno ({n})', trSortNew: 'Po datumu brisanja, najnovije prvo', trSortOld: 'Po datumu brisanja, najstarije prvo',
+    trToday: 'briše se danas', trLeft1: 'još 1 dan', trLeftN: 'još {n} dana', trFrom: 'Obrisano iz', trBackTo: 'Vraća se u', trRemade: ' (napraviće se ponovo)',
+    trAdded: 'Dodato u Arhivu', trDeleted: 'Obrisano', trKind: 'Vrsta', trKindImg: 'Slika', trKindDoc: 'Dokument', trPage1: '1 strana', trPages: '{n} strana',
+    trSrc: 'Nastalo od', trSrcGone: 'dokument koji više ne postoji', trValid: 'Rok važenja', trRestore1: 'Vrati', trClose: 'Zatvori', trRestored1: 'Vraćeno u „{to}“.',
+    trRestoredN: 'Vraćeno: {n}.', trPurgeTitle: 'Trajno brisanje', trPurgeText: 'Trajno obrisati izabrano ({n})? Nema vraćanja.', trPurgeOk: 'Obriši trajno',
+    trPurged: 'Trajno obrisano: {n}.', trTileSub: '{n} · čuva {d} dana', trTileEmpty: 'prazna', delAlbumOk: 'Obriši',
     mergeConfirmText: 'Stranice idu redom kojim si označavao, ukupno {p}. Naziv, album i podsetnik uzimaju se od „{name}“ (podsetnik prelazi na nov dokument). Originali ostaju u albumu; ako ti ne trebaju, označi ih i obriši.',
     mergeOk: 'Spoji',
     delModalTrash: 'Ide u korpu, gde čeka {days} dana i može se vratiti.',
@@ -3503,11 +3541,22 @@ const I18N = {
     delItemsOk: 'To trash',
     delAlbumTitle: 'Delete album',
     delSubTitle: 'Delete sub-album',
-    delAlbumText: '“{name}” will be deleted{subs}. {items} A deleted album cannot be restored.',
+    delAlbumText: '“{name}” will be deleted{subs}. {items}',
     delAlbumSubs: ' together with its sub-albums ({n})',
-    delAlbumItems: 'Its images and documents ({n}) stay in “No album”.',
-    delAlbumEmpty: 'It has no images or documents.',
-    delAlbumOk: 'Delete',
+    delAlbumItems: 'Its images and documents ({n}) go to the trash, from where you can restore them together with the album.',
+    delAlbumEmpty: 'It has no images or documents, so it is not kept in the trash.',
+    delAlbumDone: '“{name}” is in the trash ({n}).', delAlbumDoneEmpty: '“{name}” was deleted.', trUndo: 'Undo',
+    trTitle: 'Trash', trEmpty: 'The trash is empty.', trNone: 'Nothing matches the selection.', trSelAll: 'Select all', trUnsel: 'Clear selection',
+    trEmptyBtn: 'Empty', trEmptyTitle: 'Empty the trash', trEmptyText: 'Permanently delete everything in the trash ({n})? This cannot be undone.', trDays: 'Days',
+    trDaysLbl: 'keep deleted items (days)', trDaysHint: 'Deleted images, documents and albums wait here. After this many days they are permanently deleted when the app opens. The trash is not saved in the backup.',
+    trSearchPh: 'Search the trash…', trSecAlb: 'Deleted albums', trSecItems: 'Deleted items', trAlbSub: 'album · {n} · deleted {d} · {left}',
+    trRestoreAlb: 'Restore album', trRestoredAlb: 'Album “{name}” was restored ({n}).', trGroupSub: 'deleted album · {left}', trRestoreAllN: 'Restore whole album ({n})',
+    trRestoreN: 'Restore ({n})', trPurgeN: 'Delete forever ({n})', trSortNew: 'By deletion date, newest first', trSortOld: 'By deletion date, oldest first',
+    trToday: 'deleted today', trLeft1: '1 day left', trLeftN: '{n} days left', trFrom: 'Deleted from', trBackTo: 'Returns to', trRemade: ' (will be created again)',
+    trAdded: 'Added to Arhiva', trDeleted: 'Deleted', trKind: 'Type', trKindImg: 'Image', trKindDoc: 'Document', trPage1: '1 page', trPages: '{n} pages',
+    trSrc: 'Made from', trSrcGone: 'a document that no longer exists', trValid: 'Valid until', trRestore1: 'Restore', trClose: 'Close', trRestored1: 'Restored to “{to}”.',
+    trRestoredN: 'Restored: {n}.', trPurgeTitle: 'Permanent deletion', trPurgeText: 'Permanently delete the selection ({n})? This cannot be undone.', trPurgeOk: 'Delete forever',
+    trPurged: 'Permanently deleted: {n}.', trTileSub: '{n} · keeps {d} days', trTileEmpty: 'empty', delAlbumOk: 'Delete',
     mergeConfirmText: 'Pages follow the order you selected them in, {p} in total. The name, album and reminder come from “{name}” (the reminder moves to the new document). The originals stay in the album; if you do not need them, select and delete them.',
     mergeOk: 'Merge',
     delModalTrash: 'It goes to the trash, where it waits {days} days and can be restored.',
@@ -8002,77 +8051,226 @@ function trashDaysLeft(it){
 }
 function trashTileSub(){
   const n = trash.length;
-  return (n === 0 ? 'prazna' : stavkeTxt(n)) + ' \u00B7 čuva ' + getTrashDays() + ' dana';
+  return t('trTileSub', {n:n === 0 ? t('trTileEmpty') : stavkeTxtL(n), d:getTrashDays()});
 }
 let trashSel = new Set();
+/* v147: korpa kao album — red ikonica (Pretraži, Sortiraj, Izaberi, Isprazni, Dana), Sve/Slike/Dokumenti, obrisani albumi
+   kao kartice (otvaraju se, vraćaju celi ili stavka po stavka), dodir na sličicu = izbor, dodir na naziv = podaci o stavci */
+let trQ = '', trSearchOn = false, trKind = 'all', trView = null, trDaysOn = false;
+function trSort(){ const v = localStorage.getItem(LS_PREFIX + 'trashSort'); return v === 'old' || v === 'alpha' ? v : 'new'; }
+function trSorted(list){
+  const m = trSort(), a = list.slice();
+  if(m === 'alpha') a.sort((x, y)=>itemLabel(x).localeCompare(itemLabel(y), 'sr', {sensitivity:'base', numeric:true}));
+  else a.sort((x, y)=>m === 'old' ? x.deletedAt - y.deletedAt : y.deletedAt - x.deletedAt);
+  return a;
+}
+function trLeftTxt(left){ return left === 0 ? t('trToday') : t(left === 1 ? 'trLeft1' : 'trLeftN', {n:left}); }
+function trDate(ms){ const d = new Date(ms); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'; }
+function trFiltered(){
+  const q = trSearchOn ? normalizeSr(trQ.trim()) : '';
+  return trash.filter(it=>(trKind === 'all' || (trKind === 'img' ? it.type === 'image' : it.type !== 'image')) &&
+    (!q || hitWords(normalizeSr(itemLabel(it)), q)));
+}
+function trCell(it){
+  const cell = document.createElement('div');
+  cell.className = 'trash-cell' + (trashSel.has(it.id) ? ' sel' : '');
+  const inner = it.type === 'image'
+    ? (it.thumb ? '<img src="'+it.thumb+'" alt="">' : pdfIconSvg() + '<span>SLIKA</span>')
+    : fileTypeIcon(fileTypeOf(it));
+  cell.innerHTML = '<div class="trash-thumb">'+inner+'<span class="trash-check">'+(trashSel.has(it.id)?'\u2713':'')+'</span></div>'+
+    '<button type="button" class="trash-name"></button><div class="trash-left"></div>';
+  cell.querySelector('.trash-name').textContent = itemLabel(it);
+  cell.querySelector('.trash-left').textContent = trLeftTxt(trashDaysLeft(it));
+  cell.querySelector('.trash-thumb').onclick = ()=>{ if(trashSel.has(it.id)) trashSel.delete(it.id); else trashSel.add(it.id); renderTrashList(); };
+  cell.querySelector('.trash-name').onclick = ()=>trInfo(it);
+  return cell;
+}
+function trIco(row, svg, label, fn, cls){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'alb-ico ' + (cls || '');
+  b.innerHTML = '<span class="alb-ico-sq">'+svg+'</span><span class="alb-ico-tx"></span>';
+  b.querySelector('.alb-ico-tx').textContent = label;
+  b.onclick = fn; row.appendChild(b);
+}
 function renderTrashList(){
   const list = document.getElementById('trashList');
   const bar = document.getElementById('trashBar');
   if(!list || !bar) return;
-  trashSel = new Set(Array.from(trashSel).filter(id=>trash.some(t=>t.id===id)));
+  trashSel = new Set(Array.from(trashSel).filter(id=>trash.some(x=>x.id === id)));
+  const groups = trAlbs().filter(g=>trash.some(it=>it.trashGroup === g.gid));
+  if(trView && !groups.some(g=>g.gid === trView)) trView = null;
+  const ttl = document.querySelector('.settings-sub-title, #settingsSubTitle');
   list.innerHTML = '';
-  if(trash.length === 0){
-    list.innerHTML = '<div class="settings-hint" style="padding-top:18px;">korpa je prazna.</div>';
-    bar.classList.remove('show');
-    return;
+  if(trView){ trRenderGroup(list, groups.find(g=>g.gid === trView)); trBar(); return; }
+  if(trash.length === 0 && !trDaysOn){
+    list.innerHTML = '<div class="settings-hint tr-empty"></div>';
+    list.firstChild.textContent = t('trEmpty');
   }
-  const top = document.createElement('div');
-  top.className = 'trash-top';
-  const allSel = trashSel.size === trash.length;
-  top.innerHTML = '<button type="button" class="trash-link" id="trashSelAll">'+(allSel ? 'poništi izbor' : 'izaberi sve')+'</button>'+
-    '<button type="button" class="trash-link danger" id="trashEmpty">isprazni korpu</button>';
-  list.appendChild(top);
-  const grid = document.createElement('div');
-  grid.className = 'trash-grid';
-  trash.slice().sort((a,b)=>b.deletedAt-a.deletedAt).forEach(it=>{
-    const cell = document.createElement('div');
-    cell.className = 'trash-cell' + (trashSel.has(it.id) ? ' sel' : '');
-    const left = trashDaysLeft(it);
-    const inner = it.type === 'image'
-      ? (it.thumb ? '<img src="'+it.thumb+'" alt="">' : pdfIconSvg() + '<span>SLIKA</span>')
-      : fileTypeIcon(fileTypeOf(it));
-    cell.innerHTML = '<div class="trash-thumb">'+inner+'<span class="trash-check">'+(trashSel.has(it.id)?'\u2713':'')+'</span></div>'+
-      '<div class="trash-name">'+escapeHtml(itemLabel(it))+'</div>'+
-      '<div class="trash-left">'+(left === 0 ? 'briše se danas' : 'još '+left+(left===1?' dan':' dana'))+'</div>';
-    cell.onclick = ()=>{
-      if(trashSel.has(it.id)) trashSel.delete(it.id); else trashSel.add(it.id);
-      renderTrashList();
-    };
-    grid.appendChild(cell);
+  /* red ikonica */
+  const row = document.createElement('div'); row.className = 'alb-icons tr-icons';
+  const CHECKS = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12l5 5L22 7"></path><path d="M2 12l5 5m5-5l5-5"></path></svg>';
+  const BIN = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4h6v3"></path></svg>';
+  const CAL = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18"></path></svg>';
+  const vis = trFiltered();
+  const allSel = vis.length > 0 && vis.every(it=>trashSel.has(it.id));
+  trIco(row, SEARCH_SVG, t('icoSearch'), ()=>{ trSearchOn = !trSearchOn; if(!trSearchOn) trQ = ''; renderTrashList(); if(trSearchOn){ const f = document.getElementById('trSearch'); if(f) f.focus(); } }, trSearchOn ? 'on' : '');
+  trIco(row, SORT_SVG, t('icoSort'), trSortChoice);
+  trIco(row, CHECKS, t(allSel ? 'trUnsel' : 'trSelAll'), ()=>{ if(allSel) vis.forEach(it=>trashSel.delete(it.id)); else vis.forEach(it=>trashSel.add(it.id)); renderTrashList(); });
+  trIco(row, BIN, t('trEmptyBtn'), ()=>{
+    if(!trash.length) return;
+    askConfirm({icon:'🗑️', title:t('trEmptyTitle'), text:t('trEmptyText', {n:trash.length}), okIcon:'🗑️', okLabel:t('trEmptyBtn')})
+      .then(yes=>{ if(yes) purgeTrash(trash.slice()); });
+  }, 'danger');
+  trIco(row, CAL, t('trDays'), ()=>{ trDaysOn = !trDaysOn; renderTrashList(); }, trDaysOn ? 'on' : '');
+  list.appendChild(row);
+  if(trDaysOn){
+    const c = document.createElement('div');
+    c.innerHTML = '<div class="settings-card"><div class="settings-field"><label for="trashDaysInput"></label><input type="number" inputmode="numeric" min="1" id="trashDaysInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div></div><div class="settings-hint"></div>';
+    c.querySelector('label').textContent = t('trDaysLbl');
+    const inp = c.querySelector('input'); inp.value = getTrashDays(); inp.oninput = ()=>{ const n = parseInt(inp.value); if(n && n > 0) localStorage.setItem(LS_PREFIX+'trashDays', String(n)); };
+    inp.onchange = ()=>renderTrashList();
+    c.querySelector('.settings-hint').textContent = t('trDaysHint');
+    list.appendChild(c);
+  }
+  if(!trash.length) { trBar(); return; }
+  if(trSearchOn){
+    const sr = document.createElement('div'); sr.className = 'tr-search';
+    sr.innerHTML = '<span class="tr-search-ic">'+SEARCH_SVG+'</span><input id="trSearch" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button type="button" class="tr-search-x" aria-label="✕">✕</button>';
+    const f = sr.querySelector('input'); f.value = trQ; f.placeholder = t('trSearchPh');
+    f.oninput = ()=>{ trQ = f.value; trRenderBody(); };
+    wireBackspace(f, ()=>{ trQ = f.value; trRenderBody(); });
+    sr.querySelector('button').onclick = ()=>{ trSearchOn = false; trQ = ''; renderTrashList(); };
+    list.appendChild(sr);
+  }
+  const ch = document.createElement('div'); ch.className = 'all-chips';
+  [['all','allKindAll'],['img','allKindImg'],['doc','allKindDoc']].forEach(([k, key])=>{
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'all-chip' + (trKind === k ? ' on' : ''); b.textContent = t(key);
+    b.onclick = ()=>{ if(trKind === k) return; trKind = k; renderTrashList(); };
+    ch.appendChild(b);
   });
+  list.appendChild(ch);
+  const body = document.createElement('div'); body.id = 'trBody'; list.appendChild(body);
+  trRenderBody();
+  trBar();
+}
+function trRenderBody(){
+  const body = document.getElementById('trBody'); if(!body) return;
+  body.innerHTML = '';
+  const vis = trFiltered();
+  const groups = trAlbs().filter(g=>vis.some(it=>it.trashGroup === g.gid));
+  if(trSort() === 'alpha') groups.sort((a, b)=>a.name.localeCompare(b.name, 'sr', {sensitivity:'base', numeric:true}));
+  else groups.sort((a, b)=>trSort() === 'old' ? a.at - b.at : b.at - a.at);
+  const loose = trSorted(vis.filter(it=>!it.trashGroup || !groups.some(g=>g.gid === it.trashGroup)));
+  if(!groups.length && !loose.length){ const e = document.createElement('div'); e.className = 'settings-hint tr-empty'; e.textContent = t('trNone'); body.appendChild(e); return; }
+  if(groups.length){
+    const h = document.createElement('div'); h.className = 'tr-sec'; h.textContent = t('trSecAlb'); body.appendChild(h);
+    groups.forEach(g=>{
+      const its = trash.filter(it=>it.trashGroup === g.gid), n = its.length;
+      const left = Math.min.apply(null, its.map(trashDaysLeft));
+      const c = document.createElement('div'); c.className = 'tr-alb';
+      c.innerHTML = '<span class="tr-alb-ic">'+FOLDER_PLUS_SVG.replace(/<line[^>]*>/g, '').replace('width="18" height="18"', 'width="26" height="26"')+'</span><span class="tr-alb-t"><b></b><small></small></span><button type="button" class="tr-alb-btn"></button>';
+      c.querySelector('b').textContent = (g.path && g.path.length ? g.path[0].name + ' › ' : '') + g.name;
+      c.querySelector('small').textContent = t('trAlbSub', {n:stavkeTxtL(n), d:trDate(g.at), left:trLeftTxt(left)});
+      const btn = c.querySelector('.tr-alb-btn'); btn.textContent = t('trRestoreAlb');
+      btn.onclick = e=>{ e.stopPropagation(); const k = trRestoreGroup(g.gid); render(); renderTrashList(); toast(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(k)})); };
+      c.onclick = ()=>{ trView = g.gid; trashSel = new Set(); renderTrashList(); pushBack(()=>{ trView = null; trashSel = new Set(); renderTrashList(); }); };
+      body.appendChild(c);
+    });
+  }
+  if(loose.length){
+    if(groups.length){ const h = document.createElement('div'); h.className = 'tr-sec'; h.textContent = t('trSecItems'); body.appendChild(h); }
+    const grid = document.createElement('div'); grid.className = 'trash-grid';
+    loose.forEach(it=>grid.appendChild(trCell(it)));
+    body.appendChild(grid);
+  }
+}
+function stavkeTxtL(n){ return appLang() === 'en' ? n + (n === 1 ? ' item' : ' items') : stavkeTxt(n); }
+function trRenderGroup(list, g){
+  const its = trSorted(trash.filter(it=>it.trashGroup === g.gid));
+  const left = Math.min.apply(null, its.map(trashDaysLeft));
+  const hd = document.createElement('div'); hd.className = 'tr-ghead';
+  hd.innerHTML = '<button type="button" class="back-btn tr-gback"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span class="tr-alb-t"><b></b><small></small></span>';
+  hd.querySelector('b').textContent = (g.path && g.path.length ? g.path[0].name + ' › ' : '') + g.name;
+  hd.querySelector('small').textContent = t('trGroupSub', {left:trLeftTxt(left)});
+  hd.querySelector('.tr-gback').onclick = ()=>requestClose();
+  list.appendChild(hd);
+  const acts = document.createElement('div'); acts.className = 'tr-gacts';
+  const allSel = its.every(it=>trashSel.has(it.id));
+  acts.innerHTML = '<button type="button" class="trash-btn tr-gall"></button><button type="button" class="trash-btn tr-gsel"></button>';
+  acts.querySelector('.tr-gall').textContent = t('trRestoreAllN', {n:its.length});
+  acts.querySelector('.tr-gall').onclick = ()=>{ const k = trRestoreGroup(g.gid); render(); requestClose(); toast(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(k)})); };
+  acts.querySelector('.tr-gsel').textContent = t(allSel ? 'trUnsel' : 'trSelAll');
+  acts.querySelector('.tr-gsel').onclick = ()=>{ if(allSel) its.forEach(it=>trashSel.delete(it.id)); else its.forEach(it=>trashSel.add(it.id)); renderTrashList(); };
+  list.appendChild(acts);
+  const grid = document.createElement('div'); grid.className = 'trash-grid';
+  its.forEach(it=>grid.appendChild(trCell(it)));
   list.appendChild(grid);
-  document.getElementById('trashSelAll').onclick = ()=>{
-    trashSel = allSel ? new Set() : new Set(trash.map(t=>t.id));
-    renderTrashList();
-  };
-  document.getElementById('trashEmpty').onclick = ()=>{
-    askConfirm({
-      icon:'🗑️', title:'Isprazni korpu',
-      text:'Trajno obrisati sve iz korpe ('+trash.length+')? Nema vraćanja.',
-      okIcon:'🗑️', okLabel:'Isprazni'
-    }).then(yes=>{ if(yes) purgeTrash(trash.slice()); });
-  };
+}
+function trBar(){
+  const bar = document.getElementById('trashBar'); if(!bar) return;
   const n = trashSel.size;
   bar.classList.toggle('show', n > 0);
-  document.getElementById('trashRestoreBtn').textContent = 'Vrati (' + n + ')';
-  document.getElementById('trashPurgeBtn').textContent = 'Obriši trajno (' + n + ')';
+  document.getElementById('trashRestoreBtn').textContent = t('trRestoreN', {n});
+  document.getElementById('trashPurgeBtn').textContent = t('trPurgeN', {n});
+}
+function trSortChoice(){
+  const bg = document.getElementById('pickSheet'), lst = document.getElementById('pickList');
+  document.getElementById('pickTitle').textContent = t('sortTitle');
+  lst.innerHTML = '';
+  [['new', t('trSortNew')], ['old', t('trSortOld')], ['alpha', t('sortByName')]].forEach(([mode, label])=>{
+    const r = document.createElement('button'); r.type = 'button'; r.className = 'pick-row' + (trSort() === mode ? ' on' : '');
+    r.setAttribute('role', 'option'); r.setAttribute('aria-selected', trSort() === mode ? 'true' : 'false');
+    r.innerHTML = '<span class="pick-tx"></span><span class="pick-rb" aria-hidden="true"></span>';
+    r.querySelector('.pick-tx').textContent = label;
+    r.onclick = ()=>{ try{ localStorage.setItem(LS_PREFIX + 'trashSort', mode); }catch(e){} requestClose(); renderTrashList(); };
+    lst.appendChild(r);
+  });
+  bg.classList.add('open');
+  pushBack(()=>bg.classList.remove('open'));
+}
+/* podaci o obrisanoj stavci (dodir na naziv) */
+function trPathTxt(path){ return Array.isArray(path) && path.length ? path.map(n=>n.name).join(' › ') : t('allImages'); }
+function trInfo(it){
+  const bg = document.getElementById('pickSheet'), lst = document.getElementById('pickList');
+  document.getElementById('pickTitle').textContent = itemLabel(it);
+  lst.innerHTML = '';
+  const exists = it.category && catById(it.category);
+  const back = exists ? trPathTxt(trPathOf(it.category)) : (it.trashPath && it.trashPath.length ? trPathTxt(it.trashPath) + t('trRemade') : t('allImages'));
+  const n = Math.max(1, pageCount(it)), ft = fileTypeOf(it);
+  const kind = it.type === 'image' ? t('trKindImg') + (n > 1 ? ' · ' + t('trPages', {n}) : '') : (ft ? ft.toUpperCase() : t('trKindDoc')) + ' · ' + t(n === 1 ? 'trPage1' : 'trPages', {n});
+  const src = it.derivedFrom ? (items.concat(trash).find(x=>x.id === it.derivedFrom)) : null;
+  const rows = [[t('trFrom'), trPathTxt(it.trashPath || (exists ? trPathOf(it.category) : null))], [t('trBackTo'), back],
+    [t('trAdded'), it.ts ? trDate(it.ts) : '—'], [t('trDeleted'), trDate(it.deletedAt) + ' · ' + trLeftTxt(trashDaysLeft(it))], [t('trKind'), kind]];
+  if(it.derivedFrom) rows.push([t('trSrc'), src ? itemLabel(src) : t('trSrcGone')]);
+  if(it.validUntil) rows.push([t('trValid'), trDate(new Date(it.validUntil).getTime())]);
+  const box = document.createElement('div'); box.className = 'tr-info';
+  rows.forEach(([k, v])=>{ const r = document.createElement('div'); r.className = 'tr-info-row'; r.innerHTML = '<span></span><span></span>'; r.firstChild.textContent = k; r.lastChild.textContent = v; box.appendChild(r); });
+  const acts = document.createElement('div'); acts.className = 'tr-info-acts';
+  acts.innerHTML = '<button type="button" class="trash-btn tr-info-ok"></button><button type="button" class="trash-btn"></button>';
+  acts.firstChild.textContent = t('trRestore1'); acts.lastChild.textContent = t('trClose');
+  acts.firstChild.onclick = ()=>{ requestClose(); restoreFromTrash([it]); trashSel.delete(it.id); render(); renderTrashList(); toast(t('trRestored1', {to:trPathTxt(it.category ? trPathOf(it.category) : null)})); };
+  acts.lastChild.onclick = ()=>requestClose();
+  box.appendChild(acts);
+  lst.appendChild(box);
+  bg.classList.add('open');
+  pushBack(()=>bg.classList.remove('open'));
 }
 function trashRestoreSelected(){
-  const list = trash.filter(t=>trashSel.has(t.id));
+  const list = trash.filter(x=>trashSel.has(x.id));
   if(!list.length) return;
   restoreFromTrash(list);
   trashSel = new Set();
   render();
   renderTrashList();
-  toast(list.length === 1 ? 'Vraćeno.' : 'Vraćeno: ' + list.length + '.');
+  toast(t('trRestoredN', {n:stavkeTxtL(list.length)}));
 }
 function trashPurgeSelected(){
   const list = trash.filter(t=>trashSel.has(t.id));
   if(!list.length) return;
   askConfirm({
-    icon:'🗑️', title:'Trajno brisanje',
-    text:'Trajno obrisati izabrano ('+list.length+')? Nema vraćanja.',
-    okIcon:'🗑️', okLabel:'Obriši trajno'
+    icon:'🗑️', title:t('trPurgeTitle'),
+    text:t('trPurgeText', {n:list.length}),
+    okIcon:'🗑️', okLabel:t('trPurgeOk')
   }).then(yes=>{ if(yes) purgeTrash(list); });
 }
 function purgeTrash(list){
@@ -8080,8 +8278,9 @@ function purgeTrash(list){
   trash = trash.filter(t=>!ids.has(t.id));
   list.forEach(it=>{ setThumbUrl(it, null); idbDelete(it.id).catch(e=>console.error(e)); });
   trashSel = new Set();
+  trAlbPrune();
   renderTrashList();
-  toast(list.length === 1 ? 'Trajno obrisano.' : 'Trajno obrisano: ' + list.length + '.');
+  toast(t('trPurged', {n:stavkeTxtL(list.length)}));
 }
 function saveBackupInterval(v){
   setBackupIntervalDays(parseInt(v) || 7);
@@ -8154,7 +8353,7 @@ function renderSettingsTiles(){
     settingsTile('🗑', 'obriši sve podatke', 'trajno briše sve slike, dokumente i albume', 'wipeAllData()', 'danger')+
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
-    '<div class="settings-hint set-build">verzija 146</div>'+
+    '<div class="settings-hint set-build">verzija 147</div>'+
     '</div>';
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
@@ -8205,14 +8404,9 @@ function openSettingsSub(which){
       '<button type="button" class="settings-row" onclick="confirmDeleteOldData()"><span class="row-icon">🗑️</span><span class="row-label" style="color:var(--danger);">'+escapeHtml(t('oldDelete'))+'</span><span class="chevron">›</span></button>'+
       '</div>';
   }else if(which === 'trash'){
-    title = 'korpa';
-    trashSel = new Set();
-    body =
-      '<div class="settings-card">'+
-      '<div class="settings-field"><label for="trashDaysInput">čuvaj obrisano (dana)</label><input type="number" inputmode="numeric" min="1" id="trashDaysInput" value="'+getTrashDays()+'" oninput="saveTrashDays(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>'+
-      '</div>'+
-      '<div class="settings-hint">obrisane slike i dokumenti čekaju ovde. kad prođe ovoliko dana, trajno se brišu pri otvaranju aplikacije. korpa se ne čuva u rezervnoj kopiji.</div>'+
-      '<div id="trashList"></div>';
+    title = t('trTitle');
+    trashSel = new Set(); trView = null; trSearchOn = false; trQ = ''; trDaysOn = false;
+    body = '<div id="trashList"></div>';
   }else if(which === 'expiry'){
     title = t('expSetTile');
     body =
@@ -8229,7 +8423,7 @@ function openSettingsSub(which){
     body = guideHtml();
   }else{ return; }
   settingsPanel.innerHTML = settingsHeader(title)+'<div class="set-body">'+body+'</div>'+
-    (which === 'trash' ? '<div class="trash-bar" id="trashBar"><button type="button" class="trash-btn" id="trashRestoreBtn" onclick="trashRestoreSelected()">Vrati</button><button type="button" class="trash-btn danger" id="trashPurgeBtn" onclick="trashPurgeSelected()">Obriši trajno</button></div>' : '');
+    (which === 'trash' ? '<div class="trash-bar" id="trashBar"><button type="button" class="trash-btn tr-info-ok" id="trashRestoreBtn" onclick="trashRestoreSelected()"></button><button type="button" class="trash-btn danger" id="trashPurgeBtn" onclick="trashPurgeSelected()"></button></div>' : '');
   if(which === 'trash') renderTrashList();
   if(which === 'backup') refreshBackupDirRow();
   if(which === 'ai') aiWireSettings();
