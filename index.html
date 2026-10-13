@@ -4580,7 +4580,8 @@ function docRecord(it){
     createdAt: it.ts || Date.now(), updatedAt: it.updatedAt || Date.now(),
     deletedAt: it.deletedAt || null,
     validUntil: it.validUntil || null, validNote: it.validNote || null, lang: it.lang || null, derivedFrom: it.derivedFrom || null,
-    sourceSig: it.sourceSig || null, hasText: !!it.hasText
+    sourceSig: it.sourceSig || null, hasText: !!it.hasText,
+    trashPath: it.trashPath || null, trashGroup: it.trashGroup || null
   };
 }
 function itemFromRecord(r){
@@ -4592,6 +4593,8 @@ function itemFromRecord(r){
   };
   if(r.ext) it.ext = r.ext;
   if(r.deletedAt) it.deletedAt = r.deletedAt;
+  if(r.trashPath) it.trashPath = r.trashPath;
+  if(r.trashGroup) it.trashGroup = r.trashGroup;
   return it;
 }
 function setThumbUrl(item, blob){
@@ -4834,6 +4837,7 @@ async function loadAll(){
       trash = trash.filter(i=>i.deletedAt >= limit);
       for(const it of expired){ try{ setThumbUrl(it, null); await idbDelete(it.id); }catch(err){ console.error(err); } }
     }
+    trAlbPrune();
     // Slike: category = ID albuma. Staro ime se prevodi u ID; nepoznat album se vraca u spisak.
     let recovered = 0;
     for(const it of items){
@@ -6245,16 +6249,24 @@ function deleteAlbumNow(catId){
   const name = cat.name;
   const isSub = !!cat.parent;
   /* album + njegovi podalbumi (potvrda je već data); slike idu u Bez albuma */
+  /* v147: album + podalbumi se brišu, a njihove slike i dokumenti idu u korpu kao jedan obrisan album (može se vratiti) */
   const ids = albumIdSet(catId);
-  const removed = categories.map((c,idx)=>({c, idx})).filter(x=>ids.has(x.c.id));
-  const affected = items.filter(it=>ids.has(it.category)).map(it=>({it, was: it.category}));
-  affected.forEach(a=>{ a.it.category = null; idbPut(a.it).catch(e=>console.error(e)); });
+  const removed = categories.filter(c=>ids.has(c.id));
+  const affected = items.filter(it=>ids.has(it.category));
+  if(affected.length){
+    const par = cat.parent ? catById(cat.parent) : null;
+    const g = {gid:cat.id, name, at:Date.now(), sub:isSub,
+      path: par ? [{id:par.id, name:par.name, pinned:!!par.pinned}] : [],
+      cats: removed.map(c=>({id:c.id, name:c.name, pinned:!!c.pinned}))};
+    trAlbsSave(trAlbs().filter(x=>x.gid !== g.gid).concat([g]));
+    moveToTrash(affected, cat.id);
+  }
   categories = categories.filter(c=>!ids.has(c.id));
   saveCategories();
   if(ids.has(currentFolder)) currentFolder = null;
   render();
-  const subCount = removed.length - 1;
-  toast((isSub ? 'Podalbum "' : 'Album "') + name + '" obrisan' + (subCount > 0 ? ' (i podalbuma: '+subCount+').' : '.'));
+  if(affected.length) toastAction(t('delAlbumDone', {name, n:affected.length}), t('trUndo'), ()=>{ trRestoreGroup(cat.id); render(); });
+  else toast(t('delAlbumDoneEmpty', {name}));
 }
 /* Premestanje albuma u drugi album / nazad na pocetni ekran */
 function moveTargetsFor(cat){
@@ -7415,12 +7427,23 @@ async function deleteSelected(){
 }
 /* ---------- Korpa ---------- */
 /* Upisuje se odmah: ako se aplikacija zatvori, stavka ostaje u korpi (ne nestaje, ne vraca se sama). */
-function moveToTrash(list){
+/* v147: stavka pamti iz kog albuma je obrisana (putanja imena), da se vrati tamo i kad album više ne postoji;
+   stavke obrisanog albuma nose i oznaku tog albuma (trashGroup), pa se u korpi prikazuju kao jedan album. */
+function trPathOf(catId){
+  const c = catById(catId);
+  if(!c) return null;
+  const node = x=>({id:x.id, name:x.name, pinned:!!x.pinned});
+  const p = c.parent ? catById(c.parent) : null;
+  return p ? [node(p), node(c)] : [node(c)];
+}
+function moveToTrash(list, group){
   const now = Date.now();
   const ids = new Set(list.map(i=>i.id));
   items = items.filter(i=>!ids.has(i.id));
   list.forEach(it=>{
     it.deletedAt = now;
+    it.trashPath = trPathOf(it.category);
+    if(group) it.trashGroup = group; else delete it.trashGroup;
     if(!trash.includes(it)) trash.push(it);
     idbPut(it).catch(e=>console.error(e));
   });
@@ -7430,10 +7453,47 @@ function restoreFromTrash(list){
   trash = trash.filter(i=>!ids.has(i.id));
   list.forEach(it=>{
     delete it.deletedAt;
-    if(it.category && !catById(it.category)) it.category = null;   /* album vise ne postoji -> Bez albuma */
+    if(it.category && !catById(it.category)) it.category = trEnsurePath(it.trashPath);   /* v147: album ne postoji -> napravi se ponovo */
+    delete it.trashPath; delete it.trashGroup;
     if(!items.includes(it)) items.push(it);
     idbPut(it).catch(e=>console.error(e));
   });
+  if(_trMadeAlb){ _trMadeAlb = false; saveCategories(); }
+  trAlbPrune();
+}
+/* v147: obrisani albumi u korpi — opis (ime, podalbumi, kad je obrisan) u localStorage; stavke su u korpi sa trashGroup */
+function trAlbs(){ try{ const v = JSON.parse(localStorage.getItem(LS_PREFIX + 'trashAlbums') || '[]'); return Array.isArray(v) ? v : []; }catch(e){ return []; } }
+function trAlbsSave(v){ try{ localStorage.setItem(LS_PREFIX + 'trashAlbums', JSON.stringify(v)); }catch(e){} }
+function trAlbPrune(){ const a = trAlbs(), b = a.filter(g=>trash.some(it=>it.trashGroup === g.gid)); if(b.length !== a.length) trAlbsSave(b); }
+let _trMadeAlb = false;
+/* putanja [{id, name}] → postojeći album (po ID-u, pa po imenu na istom mestu) ili nov sa istim imenom */
+function trEnsurePath(path){
+  if(!Array.isArray(path) || !path.length) return null;
+  let parent = null;
+  for(const nd of path.slice(0, 2)){
+    let c = categories.find(x=>x.id === nd.id && (x.parent || null) === parent) ||
+            categories.find(x=>(x.parent || null) === parent && x.name === nd.name);
+    if(!c){
+      c = {id:newCatId(), name:nd.name || '—', pinned:!parent && !!nd.pinned, cover:null, parent};
+      categories.push(c); _trMadeAlb = true;
+    }
+    parent = c.id;
+  }
+  return parent;
+}
+/* ceo obrisan album nazad: i prazni podalbumi, pa sve njegove stavke */
+function trRestoreGroup(gid){
+  const g = trAlbs().find(x=>x.gid === gid);
+  if(g){
+    const root = (g.cats || []).find(c=>c.id === g.gid);
+    const rootPath = (g.path || []).concat(root ? [root] : []);
+    trEnsurePath(rootPath);
+    (g.cats || []).filter(c=>c.id !== g.gid).forEach(c=>trEnsurePath(rootPath.concat([c])));
+  }
+  if(_trMadeAlb){ _trMadeAlb = false; saveCategories(); }
+  const list = trash.filter(it=>it.trashGroup === gid);
+  restoreFromTrash(list);
+  return list.length;
 }
 
 async function shareSelected(list){
