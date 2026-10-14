@@ -2119,6 +2119,19 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
 .home-inbox .hi-ct{ flex:none; font-size:14px; color:var(--ink-dim); white-space:nowrap; }
 /* v118: na uskom ekranu okrugla dugmad gore malo manja, da stane i broj albuma */
 @media (max-width:380px){ body:not(.in-album) .header-actions .icon-btn{ width:40px; height:40px; } body:not(.in-album) .header-actions{ gap:6px; } }
+/* v148 (Zoran 14.10.): iskačući prozori se otvaraju gore, odmah ispod zamrznutog zaglavlja ekrana (--pop-top, updatePopTop).
+   Zaglavlje ostaje svetlo; dodir na njega zatvara prozor kao dodir na zatamnjeno. Prozori preko celog ekrana ostaju kakvi su. */
+.sheet-bg:not(.sheet-full):not(#wsTplSheet){ align-items:flex-start;
+  background:linear-gradient(to bottom, transparent 0, transparent var(--pop-top,0px), var(--scrim) var(--pop-top,0px)); }
+.sheet-bg:not(.sheet-full):not(#wsTplSheet) .sheet{ margin-top:var(--pop-top,0px); border-top:none; border-bottom:1px solid var(--brass-soft);
+  border-radius:0 0 20px 20px; max-height:calc(100vh - var(--pop-top,0px) - 12px); max-height:calc(100dvh - var(--pop-top,0px) - 12px);
+  overflow-y:auto; overscroll-behavior:contain; box-sizing:border-box; padding-top:14px; }
+:where(html[data-theme]:not([data-theme="klasicna"])) .sheet-bg:not(.sheet-full):not(#wsTplSheet) .sheet{ border-bottom:1px solid var(--line); }
+.exit-modal-backdrop{ align-items:flex-start;
+  background:linear-gradient(to bottom, transparent 0, transparent var(--pop-top,0px), var(--scrim) var(--pop-top,0px)); }
+.exit-modal-backdrop .exit-modal{ margin-top:calc(var(--pop-top,0px) + 12px); max-height:calc(100dvh - var(--pop-top,0px) - 24px); overflow-y:auto; box-sizing:border-box; }
+/* v148: ukupan broj stavki iste veličine kao broj albuma */
+.mark-cnt-2{ font-size:1em; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
@@ -5629,6 +5642,41 @@ function openFromSearch(item){ navToAlbum(item.category || INBOX, ()=>openModal(
 /* v108: obaveštenje na mestu putanje; dodir bilo gde ga zatvara i radi ono što je dodirnuto */
 let _note = null, _noteTimer = null, _notePoll = null, _noteWarn = null;
 /* Ekrani preko celog ekrana, redom kako su u stranici (kasniji je iznad ranijeg pri istom z-index) */
+/* v148: --pop-top = donja ivica zamrznutog zaglavlja ekrana ispod prozora koji se otvara (merenje u trenutku otvaranja). */
+const POP_HEADS = { modalBg:['#modalPath','#modalBar'], docRd:['.dr-head'], pageEditor:['.set-header'], pgView:['.pv-head','#pvHint'],
+  aiWs:['.set-header','#wsTop'], wsResScr:['.set-header'], wsFill:['.set-header','.wf-top'], wsEditW:['.set-header'],
+  settingsScreen:['.set-header'], expScreen:['.set-header'], migrateScreen:['.set-header'] };
+function popTopFor(pop){
+  const pz = pop ? (parseInt(getComputedStyle(pop).zIndex, 10) || 0) : 1e9;
+  let host = null, hz = -1;
+  document.querySelectorAll('body > .open').forEach(el=>{
+    if(el === pop || el.classList.contains('exit-modal-backdrop')) return;
+    const full = POP_HEADS[el.id] || (el.classList.contains('sheet-full') || el.id === 'wsTplSheet');
+    if(!full) return;
+    const z = parseInt(getComputedStyle(el).zIndex, 10) || 0;
+    if(z < pz && z >= hz){ hz = z; host = el; }
+  });
+  const sels = host ? (POP_HEADS[host.id] || ['.sheet-head']) : ['#stickyTop'];
+  const root = host || document;
+  let b = 0;
+  for(const q of sels){ const el = root.querySelector(q); if(!el || el.hidden) continue;
+    const r = el.getBoundingClientRect(); if(r.height > 0 && r.bottom > b) b = r.bottom; }
+  if(noteTop.classList.contains('on')) b = Math.max(b, noteTop.getBoundingClientRect().bottom);
+  return Math.round(Math.max(0, Math.min(b, window.innerHeight * 0.55)));
+}
+let _popRaf = 0;
+function updatePopTop(){
+  let pop = null, pz = -1;
+  document.querySelectorAll('body > .sheet-bg.open:not(.sheet-full):not(#wsTplSheet), body > .exit-modal-backdrop.open').forEach(el=>{
+    const z = parseInt(getComputedStyle(el).zIndex, 10) || 0; if(z >= pz){ pz = z; pop = el; } });
+  if(!pop) return;
+  document.documentElement.style.setProperty('--pop-top', popTopFor(pop) + 'px');
+}
+new MutationObserver(ms=>{
+  if(!ms.some(m=>m.target.parentNode === document.body)) return;
+  updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
+}).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
+window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
 const NOTE_SCREENS = ['modalBg','docRd','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','wsAddSheet','settingsScreen','expScreen','migrateScreen'];
 function noteHost(){
   let best = null, bz = -1;
@@ -8352,7 +8400,7 @@ function renderSettingsTiles(){
     settingsTile('🗑', 'obriši sve podatke', 'trajno briše sve slike, dokumente i albume', 'wipeAllData()', 'danger')+
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
-    '<div class="settings-hint set-build">verzija 147</div>'+
+    '<div class="settings-hint set-build">verzija 148</div>'+
     '</div>';
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
