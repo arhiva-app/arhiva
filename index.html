@@ -1975,6 +1975,10 @@ header .icon-btn svg{ width:24px; height:24px; }
 .note-bar span{ min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 /* v110: sve poruke na vrhu; „!“ za poruke koje nisu potvrda; dugme „Vrati“ / „Podeli“ desno */
 .note-bar.warn svg{ color:var(--ink-dim); }
+/* v153: „NIJE SAČUVANO!“ — jedina zaista crvena poruka; ceo tekst staje (do 3 reda) */
+.note-bar.save-fail{ height:auto; min-height:46px; padding:8px 12px; background:var(--danger-soft); border:1.5px solid var(--danger); color:var(--ink); font-weight:600; }
+.note-bar.save-fail svg{ color:var(--danger); }
+.note-bar.save-fail span{ -webkit-line-clamp:3; }
 .note-bar .note-act{ flex:none; margin-left:auto; height:34px; padding:0 14px; border-radius:10px; border:1px solid var(--brass); background:none; color:var(--brass); font:inherit; font-size:14px; font-weight:600; cursor:pointer; pointer-events:auto; }
 .note-top{ display:none; position:fixed; top:0; left:0; right:0; z-index:86; padding:8px 12px 0; height:54px; box-sizing:border-box; background:var(--bg); pointer-events:none; }
 .note-top.on{ display:block; }
@@ -3443,6 +3447,7 @@ const I18N = {
     errCopied: 'Dnevnik je kopiran — nalepi ga u čet.', errCopyFail: 'Kopiranje nije uspelo.',
     errClearQ: 'Obrisati dnevnik grešaka?', errClearSub: 'Brišu se samo zapisi o greškama. Slike, dokumenti i albumi ostaju.', errClearOk: 'Obriši', errCleared: 'Dnevnik je obrisan.',
     errWhereApp: 'aplikacija', errWhereSave: 'čuvanje',
+    saveFailWarn: 'NIJE SAČUVANO! Memorija je puna ili nedostupna — napravi rezervnu kopiju.',
     guideTileSub: 'kako se koristi Arhiva',
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
@@ -3460,7 +3465,7 @@ const I18N = {
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Arhiva ga pri vraćanju napravi ponovo sa istim imenom.'],,
       ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Vraćanje dodaje samo ono što nedostaje, bez duplikata. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
       ['Teme', 'Podešavanja → tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
-      ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.'],
+      ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
     ],
     migTitle: 'Nov način čuvanja',
@@ -4005,6 +4010,7 @@ const I18N = {
     errCopied: 'The log is copied — paste it into the chat.', errCopyFail: 'Copying failed.',
     errClearQ: 'Clear the error log?', errClearSub: 'Only the error records are removed. Images, documents and albums stay.', errClearOk: 'Clear', errCleared: 'The log is cleared.',
     errWhereApp: 'app', errWhereSave: 'saving',
+    saveFailWarn: 'NOT SAVED! Storage is full or unavailable — make a backup right away.',
     guideTileSub: 'how to use Arhiva',
     guideIntro: 'Tap a title to open the explanation.',
     guide: [
@@ -4022,7 +4028,7 @@ const I18N = {
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Arhiva creates it again with the same name when restoring.'],,
       ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'Restoring adds only what is missing, without duplicates. A bar at the top reminds you when the set number of days has passed since the last backup.'],
       ['Themes', 'Settings → theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
-      ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.'],
+      ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
     ],
     migTitle: 'New storage',
@@ -4681,7 +4687,14 @@ function db2Run(stores, mode, work){
     tx.oncomplete = ()=>resolve(out.v);
     tx.onerror = ()=>reject(tx.error);
     tx.onabort = ()=>reject(tx.error || new Error('abort'));
-  }));
+  })).catch(e=>{ if(mode === 'readwrite') warnSaveFailed(e); throw e; });
+}
+/* Svaki upis u bazu ide kroz db2Run: neuspeh (puna memorija, zabrana, prekid) se ne guta tiho. */
+let _saveFailAt = 0;
+function warnSaveFailed(e){
+  try{ logError(t('errWhereSave'), ((e && e.name) || 'Error') + ': ' + ((e && e.message) || '')); }catch(_){}
+  const n = Date.now(); if(n - _saveFailAt < 4000) return; _saveFailAt = n;
+  showNote(t('saveFailWarn'), 6000, {warn:true, saveFail:true});
 }
 function db2Get(store, key){
   return db2Run([store], 'readonly', (st, o)=>{ const r = st(store).get(key); r.onsuccess = ()=>{ o.v = r.result; }; });
@@ -5762,9 +5775,14 @@ function noteIsWarn(text){
   if(/Greška|nije |ne može|već postoji|Nema |nije uspelo|nije podržano/.test(text)) return true;
   return _noteWarn.some(v => v && text.indexOf(v) === 0);
 }
+/* Upozorenje „NIJE SAČUVANO!“ (po modulu bekap-bezbednost v1, samo taj deo — Arhiva ima svoju kopiju i trajno čuvanje):
+   dok stoji (~6 s), druge poruke ga ne prekrivaju i ne gase (ni potvrda, ni kraj poruke napretka). */
+function saveFailOn(){ return !!(_note && _note.saveFail && Date.now() < _note.until); }
 function showNote(text, ms, opt){
   opt = opt || {};
-  _note = {text, sticky:!!opt.sticky, action:opt.action || null, warn: opt.warn != null ? opt.warn : noteIsWarn(String(text))};
+  if(!opt.saveFail && saveFailOn()) return;
+  _note = {text, sticky:!!opt.sticky, action:opt.action || null, warn: opt.warn != null ? opt.warn : noteIsWarn(String(text)),
+    saveFail:!!opt.saveFail, until:opt.saveFail ? Date.now() + (ms || 4000) - 100 : 0};
   clearTimeout(_noteTimer);
   _noteHideWait = false;
   if(!_note.sticky) _noteTimer = setTimeout(noteTimeUp, ms || 4000);
@@ -5772,12 +5790,13 @@ function showNote(text, ms, opt){
   applyNote(true);
 }
 function hideNote(){
+  if(saveFailOn()) return;
   _note = null; clearTimeout(_noteTimer); clearInterval(_notePoll); _notePoll = null;
   applyNote(true);
 }
 function buildNoteBar(){
   const el = document.createElement('div');
-  el.className = 'note-bar' + (_note.warn ? ' warn' : ''); el.setAttribute('role', 'status');
+  el.className = 'note-bar' + (_note.warn ? ' warn' : '') + (_note.saveFail ? ' save-fail' : ''); el.setAttribute('role', 'status');
   el.innerHTML = (_note.warn
     ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"></circle><line x1="12" y1="7.5" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12.01" y2="16.5"></line></svg>'
     : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>')
@@ -8084,7 +8103,6 @@ async function addFile(file, category, o){
     return item;
   }catch(e){
     console.error(e);
-    logError(t('errWhereSave'), (e && (e.name || (e.target && e.target.error && e.target.error.name))) + ': ' + ((e && e.message) || (e && e.target && e.target.error && e.target.error.message) || ''));
     if(e && (e.name === 'QuotaExceededError' || (e.target && e.target.error && e.target.error.name === 'QuotaExceededError'))){ toast('Nema više prostora za nove stavke u browseru.'); }
     else{ toast('Greška pri dodavanju.'); }
   }
@@ -8445,7 +8463,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 152;
+const APP_VERSION = 153;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9792,7 +9810,6 @@ document.getElementById('pgSave').onclick = async ()=>{
   }catch(e){
     console.error(e);
     if(ed){ ed.busy = false; renderPageEditor(); }
-    logError(t('errWhereSave'), ((e && e.name) || 'Error') + ': ' + ((e && e.message) || ''));
     toast(e && e.name === 'QuotaExceededError' ? 'Nema više prostora za nove stavke u browseru.' : t('saveErr'));
   }
 };
