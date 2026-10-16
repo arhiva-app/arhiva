@@ -595,6 +595,12 @@
 .settings-row .chevron{ color:var(--ink-dim); font-size:13px; flex:none; }
 .settings-hint{ font-size:11px; color:var(--ink-dim); padding:8px 4px 0; line-height:1.5; }
 .set-build{ text-align:center; padding-top:18px; }
+/* MODUL dnevnik-gresaka v1 — CSS: značka uz broj verzije i redovi dnevnika */
+.err-count{ display:inline-flex; align-items:center; margin-left:8px; padding:3px 10px; border-radius:999px; font:600 12px var(--font-ui); cursor:pointer;
+  color:var(--danger); background:var(--danger-soft); border:1px solid var(--danger-line); vertical-align:middle; }
+.err-row{ margin-top:10px; padding:10px 12px; border-radius:14px; background:var(--surface); border:1px solid var(--line); }
+.err-meta{ font:600 12px var(--font-ui); color:var(--ink-dim); }
+.err-msg{ margin-top:4px; font:500 14px/1.4 var(--font-ui); color:var(--ink); overflow-wrap:anywhere; white-space:pre-wrap; }
 /* prelazak na novu bazu */
 .mig-p{ font-size:14.5px; line-height:1.55; color:var(--ink); margin:0 0 12px; }
 .mig-strong{ font-weight:700; }
@@ -3430,6 +3436,13 @@ const I18N = {
     aiSetUsageEmpty: 'još nema obrada.',
     aiSetFreeHint: 'na besplatnom nivou obrada ništa ne košta. iznos pokazuje koliko bi koštalo na plaćenom nivou, po Google-ovim cenama (izlaz uključuje i „razmišljanje“ modela). tačna ograničenja besplatnog nivoa za tvoj ključ vide se u Google AI Studio.',
     guideTile: 'uputstvo',
+    errTitle: 'dnevnik grešaka',
+    errLead: 'greške koje su se desile na ovom telefonu. kad nešto ne radi kako treba, dodirni „kopiraj dnevnik“ i nalepi tekst u čet sa Claude-om.',
+    errNone: 'nema zabeleženih grešaka.',
+    errCopy: 'kopiraj dnevnik', errClear: 'obriši dnevnik',
+    errCopied: 'Dnevnik je kopiran — nalepi ga u čet.', errCopyFail: 'Kopiranje nije uspelo.',
+    errClearQ: 'Obrisati dnevnik grešaka?', errClearSub: 'Brišu se samo zapisi o greškama. Slike, dokumenti i albumi ostaju.', errClearOk: 'Obriši', errCleared: 'Dnevnik je obrisan.',
+    errWhereApp: 'aplikacija', errWhereSave: 'čuvanje',
     guideTileSub: 'kako se koristi Arhiva',
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
@@ -3447,6 +3460,7 @@ const I18N = {
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Arhiva ga pri vraćanju napravi ponovo sa istim imenom.'],,
       ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Vraćanje dodaje samo ono što nedostaje, bez duplikata. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
       ['Teme', 'Podešavanja → tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
+      ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
     ],
     migTitle: 'Nov način čuvanja',
@@ -3984,6 +3998,13 @@ const I18N = {
     aiSetUsageEmpty: 'no runs yet.',
     aiSetFreeHint: 'on the free tier processing costs nothing. the amount shows what it would cost on the paid tier, at Google prices (output includes the model thinking). the exact free tier limits for your key are shown in Google AI Studio.',
     guideTile: 'guide',
+    errTitle: 'error log',
+    errLead: 'errors that happened on this phone. when something does not work right, tap “copy log” and paste the text into the chat with Claude.',
+    errNone: 'no errors recorded.',
+    errCopy: 'copy log', errClear: 'clear log',
+    errCopied: 'The log is copied — paste it into the chat.', errCopyFail: 'Copying failed.',
+    errClearQ: 'Clear the error log?', errClearSub: 'Only the error records are removed. Images, documents and albums stay.', errClearOk: 'Clear', errCleared: 'The log is cleared.',
+    errWhereApp: 'app', errWhereSave: 'saving',
     guideTileSub: 'how to use Arhiva',
     guideIntro: 'Tap a title to open the explanation.',
     guide: [
@@ -4001,6 +4022,7 @@ const I18N = {
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Arhiva creates it again with the same name when restoring.'],,
       ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'Restoring adds only what is missing, without duplicates. A bar at the top reminds you when the set number of days has passed since the last backup.'],
       ['Themes', 'Settings → theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
+      ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
     ],
     migTitle: 'New storage',
@@ -8062,6 +8084,7 @@ async function addFile(file, category, o){
     return item;
   }catch(e){
     console.error(e);
+    logError(t('errWhereSave'), (e && (e.name || (e.target && e.target.error && e.target.error.name))) + ': ' + ((e && e.message) || (e && e.target && e.target.error && e.target.error.message) || ''));
     if(e && (e.name === 'QuotaExceededError' || (e.target && e.target.error && e.target.error.name === 'QuotaExceededError'))){ toast('Nema više prostora za nove stavke u browseru.'); }
     else{ toast('Greška pri dodavanju.'); }
   }
@@ -8419,6 +8442,65 @@ const settingsScreen = document.getElementById('settingsScreen');
 const settingsPanel = document.getElementById('settingsPanel');
 let settingsSubOpen = false;
 const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+/* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
+   ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
+   Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
+const APP_VERSION = 152;
+const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
+function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function logError(where, msg){
+  try{
+    const list = getErrLog();
+    list.unshift({ at: new Date().toISOString(), v: APP_VERSION, where: String(where||''), msg: String(msg||'').slice(0,400) });
+    localStorage.setItem(ERRLOG_KEY, JSON.stringify(list.slice(0, ERRLOG_MAX)));
+  }catch(e){}
+  try{ updateErrBadge(); }catch(e){}
+}
+window.addEventListener('error', (e)=>{
+  if(!e || !e.message) return;
+  const f = e.filename ? ' — '+String(e.filename).split('/').pop().split('?')[0]+':'+e.lineno : '';
+  logError(t('errWhereApp'), e.message + f);
+});
+window.addEventListener('unhandledrejection', (e)=>{
+  const r = e && e.reason; if(r && r.name === 'AbortError') return;
+  logError(t('errWhereApp'), (r && r.message) ? r.message : String(r));
+});
+function greskeRec(n){
+  if(appLang() !== 'sr') return n === 1 ? 'error' : 'errors';
+  const d = n%10, s = n%100; if(d===1 && s!==11) return 'greška'; if(d>=2 && d<=4 && (s<12 || s>14)) return 'greške'; return 'grešaka';
+}
+function errBadgeHtml(){ const n = getErrLog().length; return n ? '<button type="button" class="err-count" id="errCount" onclick="openSettingsSub(\'errlog\')">'+n+' '+greskeRec(n)+'</button>' : ''; }
+function updateErrBadge(){ const v = document.querySelector('#settingsScreen .set-build'); if(v) v.innerHTML = 'verzija '+APP_VERSION+errBadgeHtml(); }
+function errTimeText(iso){ const d = new Date(iso), p = n=>String(n).padStart(2,'0'); return p(d.getDate())+'.'+p(d.getMonth()+1)+'. '+p(d.getHours())+':'+p(d.getMinutes()); }
+function errLogText(){ return getErrLog().map(x=> errTimeText(x.at)+' · v'+x.v+' · '+x.where+'\n'+x.msg).join('\n\n'); }
+function errLogBodyHtml(){
+  const list = getErrLog();
+  if(!list.length) return '<div class="settings-hint" style="padding-top:0">'+escapeHtml(t('errNone'))+'</div>';
+  return '<div class="settings-hint" style="padding-top:0">'+escapeHtml(t('errLead'))+'</div>'+
+    '<div class="settings-card" style="margin-top:10px">'+
+    '<button type="button" class="settings-row" id="errCopyBtn" onclick="copyErrLog()"><span class="row-icon">📋</span><span class="row-label">'+escapeHtml(t('errCopy'))+'</span><span class="chevron">›</span></button>'+
+    '<button type="button" class="settings-row" id="errClearBtn" onclick="clearErrLog()"><span class="row-icon">🗑</span><span class="row-label" style="color:var(--danger)">'+escapeHtml(t('errClear'))+'</span><span class="chevron">›</span></button>'+
+    '</div>'+
+    list.map(x=>'<div class="err-row"><div class="err-meta">'+escapeHtml(errTimeText(x.at)+' · v'+x.v+' · '+x.where)+'</div><div class="err-msg">'+escapeHtml(x.msg)+'</div></div>').join('');
+}
+function copyErrLog(){
+  const txt = 'Arhiva — ' + t('errTitle') + '\n\n' + errLogText();
+  const ok = ()=> toast(t('errCopied'));
+  const fallback = ()=>{
+    const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly',''); ta.style.cssText = 'position:fixed;top:-1000px;opacity:0;';
+    document.body.appendChild(ta); ta.select(); let done = false; try{ done = document.execCommand('copy'); }catch(e){}
+    ta.remove(); if(done) ok(); else toast(t('errCopyFail'));
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fallback); else fallback();
+}
+async function clearErrLog(){
+  if(!await askConfirm({icon:'🗑️', title:t('errClearQ'), text:t('errClearSub'), okIcon:'🗑️', okLabel:t('errClearOk')})) return;
+  try{ localStorage.removeItem(ERRLOG_KEY); }catch(e){}
+  updateErrBadge();
+  const bd = document.querySelector('#settingsScreen .set-body'); if(bd) bd.innerHTML = errLogBodyHtml();
+  toast(t('errCleared'));
+}
+
 function settingsHeader(title){
   return '<div class="set-header"><button type="button" class="set-back" onclick="requestClose()" aria-label="nazad">'+SETTINGS_BACK_SVG+'</button><h2 class="set-title">'+escapeHtml(title)+'</h2></div>';
 }
@@ -8441,7 +8523,7 @@ function renderSettingsTiles(){
     settingsTile('🗑', 'obriši sve podatke', 'trajno briše sve slike, dokumente i albume', 'wipeAllData()', 'danger')+
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
-    '<div class="settings-hint set-build">verzija 151</div>'+
+    '<div class="settings-hint set-build">verzija '+APP_VERSION+errBadgeHtml()+'</div>'+
     '</div>';
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
@@ -8509,6 +8591,9 @@ function openSettingsSub(which){
   }else if(which === 'guide'){
     title = t('guideTile');
     body = guideHtml();
+  }else if(which === 'errlog'){
+    title = t('errTitle');
+    body = errLogBodyHtml();
   }else{ return; }
   settingsPanel.innerHTML = settingsHeader(title)+'<div class="set-body">'+body+'</div>'+
     (which === 'trash' ? '<div class="trash-bar" id="trashBar"><button type="button" class="trash-btn tr-info-ok" id="trashRestoreBtn" onclick="trashRestoreSelected()"></button><button type="button" class="trash-btn danger" id="trashPurgeBtn" onclick="trashPurgeSelected()"></button></div>' : '');
@@ -9707,6 +9792,7 @@ document.getElementById('pgSave').onclick = async ()=>{
   }catch(e){
     console.error(e);
     if(ed){ ed.busy = false; renderPageEditor(); }
+    logError(t('errWhereSave'), ((e && e.name) || 'Error') + ': ' + ((e && e.message) || ''));
     toast(e && e.name === 'QuotaExceededError' ? 'Nema više prostora za nove stavke u browseru.' : t('saveErr'));
   }
 };
@@ -10016,6 +10102,13 @@ async function geminiFetch(models, body, key, signal){
 /* Jedan poziv Gemini API-ja (generateContent). Sa šemom prvo ide zvanični oblik responseFormat;
    ako ga server odbije kao nepoznato polje, ponavlja se jednom sa responseMimeType (oblik koji koriste Troškovi). */
 async function aiRequest(parts, o){
+  try{ return await aiRequestOnce(parts, o); }
+  catch(e){
+    if(!(e && e.name === 'AbortError') && !(e && e.aiCode === 'aiErrNoKey')) logError('AI', (e && e.aiCode ? e.aiCode + ': ' : '') + aiErrText(e));
+    throw e;
+  }
+}
+async function aiRequestOnce(parts, o){
   o = o || {};
   const key = aiGetKey();
   if(!key) throw aiError('aiErrNoKey');
