@@ -3148,9 +3148,9 @@ const I18N = {
     aiClose: 'Zatvori',
     aiErrNoKey: 'Nije upisan Gemini ključ. Upiši ga u Podešavanja → AI obrada.',
     aiErrKey: 'Google ne prihvata ključ (neispravan je ili nema dozvolu).',
-    aiErrQuota: 'Dostignuto je ograničenje besplatnog nivoa. Pokušaj ponovo za minut; ako se ponavlja, ograničenje za danas je potrošeno.',
+    aiErrQuota: 'Google je odbio zahtev zbog ograničenja na tvom nalogu, i posle 4 pokušaja (i sa rezervnim modelom). Pokušaj ponovo za minut; ako se ponavlja, ograničenje za danas je potrošeno.',
     aiErrNet: 'Nema veze sa Google-om. Proveri internet i pokušaj ponovo.',
-    aiErrServer: 'Google trenutno ne odgovara (greška {code}). Pokušaj ponovo malo kasnije.',
+    aiErrServer: 'Google trenutno ne odgovara (greška {code}), ni posle 4 pokušaja i rezervnog modela. Pokušaj ponovo za par minuta.',
     aiErrModel: 'Model {m} nije dostupan za ovaj ključ. Izaberi drugi u Podešavanja → AI obrada.',
     aiErrBlocked: 'Google je odbio da obradi ovaj dokument.',
     aiErrParse: 'Odgovor nije u očekivanom obliku. Pokušaj ponovo ili izaberi drugi model.',
@@ -3702,9 +3702,9 @@ const I18N = {
     aiClose: 'Close',
     aiErrNoKey: 'No Gemini key is saved. Enter it in Settings → AI processing.',
     aiErrKey: 'Google does not accept the key (it is invalid or not allowed).',
-    aiErrQuota: 'The free tier limit has been reached. Try again in a minute; if it keeps happening, the limit for today is used up.',
+    aiErrQuota: 'Google refused the request due to your account limit, even after 4 attempts (including the backup model). Try again in a minute; if it keeps happening, the limit for today is used up.',
     aiErrNet: 'No connection to Google. Check the internet and try again.',
-    aiErrServer: 'Google is not responding right now (error {code}). Try again a bit later.',
+    aiErrServer: 'Google is not responding right now (error {code}), even after 4 attempts and the backup model. Try again in a few minutes.',
     aiErrModel: 'Model {m} is not available for this key. Choose another in Settings → AI processing.',
     aiErrBlocked: 'Google refused to process this document.',
     aiErrParse: 'The answer is not in the expected form. Try again or choose another model.',
@@ -8441,7 +8441,7 @@ function renderSettingsTiles(){
     settingsTile('🗑', 'obriši sve podatke', 'trajno briše sve slike, dokumente i albume', 'wipeAllData()', 'danger')+
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
-    '<div class="settings-hint set-build">verzija 150</div>'+
+    '<div class="settings-hint set-build">verzija 151</div>'+
     '</div>';
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
@@ -9984,14 +9984,42 @@ function aiErrText(e){
   return t('aiErrOther', {code:'?', msg:String((e && e.message) || e).slice(0, 160)});
 }
 
+/* MODUL gemini v1 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida i čekanje,
+   rezervni model = drugi iz AI_MODELS, trošak po modelu koji je stvarno odgovorio.
+   408/429/5xx → ~1 s isti model → ~2 s rezervni → ~4 s rezervni. Ključ u zaglavlju x-goog-api-key (ne u adresi). */
+const GEMINI_RETRY_STATUS = [408,429,500,502,503,504];
+function geminiPause(ms, signal){
+  return new Promise((res, rej)=>{
+    const ab = ()=>{ clearTimeout(tm); rej(new DOMException('Aborted', 'AbortError')); };
+    const tm = setTimeout(()=>{ if(signal) signal.removeEventListener('abort', ab); res(); }, ms + Math.floor(Math.random()*400));
+    if(signal){ if(signal.aborted){ ab(); return; } signal.addEventListener('abort', ab, {once:true}); }
+  });
+}
+function aiBackupModel(m){ return AI_MODELS.find(x=>x.id !== m.id) || null; }
+/* Jedan zahtev sa ponavljanjem: vraća poslednji odgovor (i model koji ga je dao) */
+async function geminiFetch(models, body, key, signal){
+  const plan = [[models[0],0],[models[0],1000],[models[1],2000],[models[1],4000]].filter(x=>x[0]);
+  let res = null, used = models[0];
+  for(let i = 0; i < plan.length; i++){
+    if(plan[i][1]) await geminiPause(plan[i][1], signal);
+    used = plan[i][0];
+    try{
+      res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + used.id + ':generateContent',
+        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(body), signal});
+    }catch(e){ if(e && e.name === 'AbortError') throw e; throw aiError('aiErrNet'); }
+    if(GEMINI_RETRY_STATUS.indexOf(res.status) < 0 || i === plan.length - 1) break;
+    await res.text().catch(()=>'');
+  }
+  return {res, model:used};
+}
+
 /* Jedan poziv Gemini API-ja (generateContent). Sa šemom prvo ide zvanični oblik responseFormat;
    ako ga server odbije kao nepoznato polje, ponavlja se jednom sa responseMimeType (oblik koji koriste Troškovi). */
 async function aiRequest(parts, o){
   o = o || {};
   const key = aiGetKey();
   if(!key) throw aiError('aiErrNoKey');
-  const model = o.model || aiModel();
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model.id + ':generateContent?key=' + encodeURIComponent(key);
+  let model = o.model || aiModel();
   const contents = [{role:'user', parts}];
   const bodies = o.schema
     /* verzija 77: u responseFormat je mimeType nabrojana vrednost (APPLICATION_JSON), ne tekst 'application/json' —
@@ -10001,9 +10029,9 @@ async function aiRequest(parts, o){
     : [{contents}];
   let data = null, schemaRej = '';
   for(let i = 0; i < bodies.length; i++){
-    let res;
-    try{ res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(bodies[i]), signal:o.signal}); }
-    catch(e){ if(e && e.name === 'AbortError') throw e; throw aiError('aiErrNet'); }
+    const g = await geminiFetch([model, aiBackupModel(model)], bodies[i], key, o.signal);
+    const res = g.res;
+    model = g.model;   /* rezervni model ostaje i za drugi oblik zahteva i za trošak */
     let j = null;
     try{ j = await res.json(); }catch(e){ if(e && e.name === 'AbortError') throw e; }
     if(res.ok){ data = j; break; }
