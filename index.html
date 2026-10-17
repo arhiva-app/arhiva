@@ -5821,7 +5821,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['modalBg','docRd','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','wsAddSheet','settingsScreen','expScreen','migrateScreen'];
+const NOTE_SCREENS = ['modalBg','docRd','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','wsAddSheet','settingsScreen','expScreen','migrateScreen','zsScr'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -8531,7 +8531,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 154;
+const APP_VERSION = 155;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -13805,8 +13805,12 @@ async function zsSave(fmt){
     items.push(item);
     render();
     toastHide();
-    if(_zs === z) z.saved = true;
-    toast(t('zsSaved', {name, album:zsAlbumName(albumId)}));
+    /* v155: jasan kraj — spisak se zatvara (rezultat, pa ekran), a potvrda se vidi u albumu gde je nov dokument */
+    const msg = t('zsSaved', {name, album:zsAlbumName(albumId)});
+    if(_zs === z){
+      z.saved = true;
+      requestCloseThen(()=>{ if(_zs === z) requestCloseThen(()=>toast(msg)); else toast(msg); });
+    }else toast(msg);
   }catch(e){
     console.error(e);
     toastHide();
