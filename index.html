@@ -13716,6 +13716,13 @@ function zsRenderRes(){
   document.getElementById('zsPdf').onclick = ()=>zsSave('pdf');
   document.getElementById('zsXlsx').onclick = ()=>zsSave('xlsx');
 }
+/* posle čuvanja: nov dokument se vidi ceo u albumu (album inače zadrži staru poziciju) */
+function zsShowNew(id){
+  setTimeout(()=>{
+    const el = document.querySelector('#contentArea [data-id="' + id + '"]');
+    if(el) try{ el.scrollIntoView({block:'center'}); }catch(e){}
+  }, 80);
+}
 function zsName(){ return t('zsName', {d:zsYmdShow(todayYmd()).replace(/\.$/, '')}); }
 /* ručni upis polja koje AI nije pronašao */
 let _zsCell = null;
@@ -13809,7 +13816,8 @@ async function zsSave(fmt){
     const msg = t('zsSaved', {name, album:zsAlbumName(albumId)});
     if(_zs === z){
       z.saved = true;
-      requestCloseThen(()=>{ if(_zs === z) requestCloseThen(()=>toast(msg)); else toast(msg); });
+      const show = ()=>{ toast(msg); zsShowNew(item.id); };
+      requestCloseThen(()=>{ if(_zs === z) requestCloseThen(show); else show(); });
     }else toast(msg);
   }catch(e){
     console.error(e);
