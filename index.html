@@ -4501,12 +4501,12 @@ let _expNoticeBusy = false;
 function expRank(days){ return EXP_RANK[expLevel(days)] || 0; }
 async function loadExpNotified(){
   if(_expNotified) return _expNotified;
-  try{ const r = await db2Get('meta', 'expNotified'); _expNotified = (r && r.map) ? r.map : {}; }
+  try{ const r = await Skladiste.meta('expNotified'); _expNotified = (r && r.map) ? r.map : {}; }
   catch(e){ console.error(e); _expNotified = {}; }
   return _expNotified;
 }
 async function saveExpNotified(){
-  try{ await db2Put('meta', {key:'expNotified', map:_expNotified, updatedAt:Date.now()}); }catch(e){ console.error(e); }
+  try{ await Skladiste.sacuvajMeta({key:'expNotified', map:_expNotified, updatedAt:Date.now()}); }catch(e){ console.error(e); }
 }
 /* korisnik je sam upisao rok: za trenutni nivo nema obaveštenja (već zna) */
 async function markExpSeen(item){
@@ -4750,78 +4750,263 @@ document.getElementById('pgExpLbl').textContent = t('expTitle').toLowerCase();
 document.getElementById('pgExpField').onclick = pgOpenExpiry;
 document.getElementById('pgExpField').addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pgOpenExpiry(); } });
 
-/* ================= SKLADIŠTE: baza arhivaDB =================
-   Stara baza galerijaDB (verzija 1) se NE menja: otvaraju je photo.html i arhiva-slika.
-   Nova baza je odvojena:
-     albums  – albumi (umesto localStorage)
-     docs    – podaci o dokumentu (mali zapisi; svi se učitavaju pri otvaranju)
-     files   – sadržaj fajla kao Blob (čita se tek kad se dokument otvori)
-     thumbs  – male sličice za prikaz (ključ = ID fajla)
-     texts   – izvučen tekst za pretragu (učitava se tek pri pretrazi po sadržaju)
-     meta    – stanje prelaska i slično
-   Trajno brisanje ostavlja oznaku (purged), a ne prazninu — zbog kasnije sinhronizacije. */
-const OLD_DB = 'galerijaDB';
-const OLD_STORE = 'items';
-const DB2 = 'arhivaDB';
-const DB2_STORES = {albums:'id', docs:'id', files:'id', thumbs:'id', texts:'id', meta:'key'};
+/* ================= SKLADIŠTE (v159) =================
+   JEDINO mesto koje zna KAKO se podaci čuvaju. Ostatak aplikacije zove samo Skladiste.* — nikad indexedDB,
+   imena baza ili skladišta. Kasnije (npr. Google Drive) dolazi druga verzija ovog modula sa ISTIM funkcijama.
+   Zapisi koje modul prima i vraća: dokument = docRecord(), album = albumRecord(), fajl = Blob.
+   Ova verzija: IndexedDB 'arhivaDB' na uređaju (raspored skladišta se ne menja — postojeći podaci rade):
+     albums – albumi · docs – podaci o dokumentu · files – sadržaj (Blob, ključ = ID fajla)
+     thumbs – sličice (ključ = ID fajla) · texts – tekst za pretragu (ključ = ID dokumenta) · meta – ostalo (šabloni tpl:<id>…)
+   Trajno brisanje ostavlja oznaku (purged) — zbog kasnije sinhronizacije.
+   Stara baza galerijaDB (pre v59) se samo čita za prelazak (Skladiste.stara), a fascikla za kopiju je podatak samo ovog
+   uređaja (Skladiste.uredjaj). */
 const REC_SCHEMA = 1;
-let _db2P = null;
-function db2Open(){
-  if(_db2P) return _db2P;
-  const createMissing = (db)=>{
-    Object.keys(DB2_STORES).forEach(n=>{
-      if(!db.objectStoreNames.contains(n)) db.createObjectStore(n, {keyPath: DB2_STORES[n]});
-    });
-  };
-  const attach = (db)=>{ db.onversionchange = ()=>{ db.close(); _db2P = null; }; return db; };
-  _db2P = new Promise((resolve, reject)=>{
-    const req = indexedDB.open(DB2);
-    req.onupgradeneeded = ()=>createMissing(req.result);
-    req.onsuccess = ()=>{
-      const db = req.result;
-      const missing = Object.keys(DB2_STORES).some(n=>!db.objectStoreNames.contains(n));
-      if(!missing){ resolve(attach(db)); return; }
-      /* baza postoji bez nekog skladišta: dodaje se novom verzijom */
-      const v = db.version + 1;
-      db.close();
-      const r2 = indexedDB.open(DB2, v);
-      r2.onupgradeneeded = ()=>createMissing(r2.result);
-      r2.onsuccess = ()=>resolve(attach(r2.result));
-      r2.onerror = ()=>reject(r2.error);
+const Skladiste = (()=>{
+  const DB = 'arhivaDB';
+  const STORES = {albums:'id', docs:'id', files:'id', thumbs:'id', texts:'id', meta:'key'};
+  let _dbP = null;
+  function open(){
+    if(_dbP) return _dbP;
+    const createMissing = (db)=>{
+      Object.keys(STORES).forEach(n=>{ if(!db.objectStoreNames.contains(n)) db.createObjectStore(n, {keyPath: STORES[n]}); });
     };
-    req.onerror = ()=>reject(req.error);
-  });
-  _db2P.catch(()=>{ _db2P = null; });
-  return _db2P;
-}
-/* Jedna transakcija: work(st, out) — st(ime) daje skladište, out.v je rezultat. */
-function db2Run(stores, mode, work){
-  return db2Open().then(db=>new Promise((resolve, reject)=>{
-    let tx;
-    try{ tx = db.transaction(stores, mode); }catch(e){ _db2P = null; reject(e); return; }
-    const out = {};
-    try{ work(n=>tx.objectStore(n), out); }catch(e){ try{ tx.abort(); }catch(_){} reject(e); return; }
-    tx.oncomplete = ()=>resolve(out.v);
-    tx.onerror = ()=>reject(tx.error);
-    tx.onabort = ()=>reject(tx.error || new Error('abort'));
-  })).catch(e=>{ if(mode === 'readwrite') warnSaveFailed(e); throw e; });
-}
-/* Svaki upis u bazu ide kroz db2Run: neuspeh (puna memorija, zabrana, prekid) se ne guta tiho. */
+    const attach = (db)=>{ db.onversionchange = ()=>{ db.close(); _dbP = null; }; return db; };
+    _dbP = new Promise((resolve, reject)=>{
+      const req = indexedDB.open(DB);
+      req.onupgradeneeded = ()=>createMissing(req.result);
+      req.onsuccess = ()=>{
+        const db = req.result;
+        const missing = Object.keys(STORES).some(n=>!db.objectStoreNames.contains(n));
+        if(!missing){ resolve(attach(db)); return; }
+        /* baza postoji bez nekog skladišta: dodaje se novom verzijom */
+        const v = db.version + 1;
+        db.close();
+        const r2 = indexedDB.open(DB, v);
+        r2.onupgradeneeded = ()=>createMissing(r2.result);
+        r2.onsuccess = ()=>resolve(attach(r2.result));
+        r2.onerror = ()=>reject(r2.error);
+      };
+      req.onerror = ()=>reject(req.error);
+    });
+    _dbP.catch(()=>{ _dbP = null; });
+    return _dbP;
+  }
+  /* Jedna transakcija: work(st, out) — st(ime) daje skladište, out.v je rezultat. Neuspeh upisa se ne guta tiho. */
+  function run(stores, mode, work){
+    return open().then(db=>new Promise((resolve, reject)=>{
+      let tx;
+      try{ tx = db.transaction(stores, mode); }catch(e){ _dbP = null; reject(e); return; }
+      const out = {};
+      try{ work(n=>tx.objectStore(n), out); }catch(e){ try{ tx.abort(); }catch(_){} reject(e); return; }
+      tx.oncomplete = ()=>resolve(out.v);
+      tx.onerror = ()=>reject(tx.error);
+      tx.onabort = ()=>reject(tx.error || new Error('abort'));
+    })).catch(e=>{ if(mode === 'readwrite' && api.kadNeuspeh){ try{ api.kadNeuspeh(e); }catch(_){} } throw e; });
+  }
+  const get = (store, key)=>run([store], 'readonly', (st, o)=>{ const r = st(store).get(key); r.onsuccess = ()=>{ o.v = r.result; }; });
+  const getAll = (store)=>run([store], 'readonly', (st, o)=>{ const r = st(store).getAll(); r.onsuccess = ()=>{ o.v = r.result || []; }; });
+  const blobOf = (r)=>(r && r.blob) || null;
+
+  /* ---- stara baza (pre v59): samo čitanje za prelazak, i brisanje na zahtev ---- */
+  const OLD_DB = 'galerijaDB', OLD_STORE = 'items';
+  function oldOpen(){
+    return new Promise((resolve, reject)=>{
+      const req = indexedDB.open(OLD_DB, 1);
+      req.onupgradeneeded = ()=>{ const db = req.result; if(!db.objectStoreNames.contains(OLD_STORE)) db.createObjectStore(OLD_STORE, {keyPath:'id'}); };
+      req.onsuccess = ()=>resolve(req.result);
+      req.onerror = ()=>reject(req.error);
+    });
+  }
+  async function oldReq(fn){
+    const db = await oldOpen();
+    try{
+      return await new Promise((resolve, reject)=>{
+        const r = fn(db.transaction(OLD_STORE, 'readonly').objectStore(OLD_STORE));
+        r.onsuccess = ()=>resolve(r.result);
+        r.onerror = ()=>reject(r.error);
+      });
+    }finally{ db.close(); }
+  }
+  async function listed(name){
+    if(!indexedDB.databases) return null;
+    try{ return (await indexedDB.databases()).some(d=>d.name === name); }catch(e){ return null; }
+  }
+
+  /* ---- fascikla za kopiju: podatak samo ovog uređaja (posebna mala baza) ---- */
+  const DIR_DB = 'arhivaBackupDir';
+  function dirOpen(){
+    return new Promise((res, rej)=>{
+      const r = indexedDB.open(DIR_DB, 1);
+      r.onupgradeneeded = ()=>r.result.createObjectStore('h');
+      r.onsuccess = ()=>res(r.result);
+      r.onerror = ()=>rej(r.error);
+    });
+  }
+
+  const api = {
+    /* app postavlja: šta da se uradi kad upis ne uspe (poruka „NIJE SAČUVANO!“) */
+    kadNeuspeh: null,
+
+    /* ---------- čitanje ---------- */
+    /* sve što treba pri otvaranju: zapisi albuma, zapisi dokumenata (i oznake obrisanih), sličice {id, blob} */
+    async ucitajSve(){
+      const [albums, docs, thumbs] = await Promise.all([getAll('albums'), getAll('docs'), getAll('thumbs')]);
+      return {albums, docs, thumbs};
+    },
+    dokumenti(){ return getAll('docs'); },
+    albumi(){ return getAll('albums'); },
+    async fajl(fileId){ return blobOf(await get('files', fileId)); },
+    async slicica(fileId){ return blobOf(await get('thumbs', fileId)); },
+    async tekst(docId){ const r = await get('texts', docId); return r ? r.text : null; },
+    sviTekstovi(){ return getAll('texts'); },   /* [{id, text}] */
+
+    /* ---------- upis ---------- */
+    /* Sve u JEDNOJ transakciji (sve ili ništa):
+       o.docs [zapis], o.files [{id, doc, blob}], o.thumbs [{id, blob}], o.texts [{id, text}],
+       o.vlasnik [{file, doc}] — fajl prelazi drugom dokumentu (izdvajanje stranice),
+       o.brisi {docs:[id], files:[id], thumbs:[id], texts:[id]} */
+    upisi(o){
+      return run(['docs','files','thumbs','texts'], 'readwrite', (st)=>{
+        const b = o.brisi || {};
+        (b.files || []).forEach(id=>st('files').delete(id));
+        (b.thumbs || []).forEach(id=>st('thumbs').delete(id));
+        (b.texts || []).forEach(id=>st('texts').delete(id));
+        (b.docs || []).forEach(id=>st('docs').delete(id));
+        (o.files || []).forEach(f=>st('files').put({id:f.id, doc:f.doc, blob:f.blob}));
+        (o.thumbs || []).forEach(t=>st('thumbs').put({id:t.id, blob:t.blob}));
+        (o.texts || []).forEach(t=>st('texts').put({id:t.id, text:t.text}));
+        (o.vlasnik || []).forEach(v=>{
+          const r = st('files').get(v.file);
+          r.onsuccess = ()=>{ if(r.result){ r.result.doc = v.doc; st('files').put(r.result); } };
+        });
+        (o.docs || []).forEach(d=>st('docs').put(d));
+      });
+    },
+    /* podaci dokumenta (ime, album, korpa…); uz tekst ako je dat — zajedno */
+    sacuvajDokument(rec, text){
+      return api.upisi({docs:[rec], texts: (text != null) ? [{id:rec.id, text}] : []});
+    },
+    /* trajno brisanje: sadržaj, sličice i tekst nestaju, ostaje oznaka da je obrisano */
+    obrisiTrajno(id){
+      const now = Date.now();
+      return run(['docs','files','thumbs','texts'], 'readwrite', (st)=>{
+        const r = st('docs').get(id);
+        r.onsuccess = ()=>{
+          const d = r.result;
+          if(d && Array.isArray(d.pages)) d.pages.forEach(p=>{ st('files').delete(p.file); st('thumbs').delete(p.file); });
+          st('texts').delete(id);
+          st('docs').put({id, schema:REC_SCHEMA, purged:true, deletedAt:(d && d.deletedAt) || now, updatedAt:now});
+        };
+      });
+    },
+    sacuvajAlbume(recs){
+      if(!recs || !recs.length) return Promise.resolve();
+      return run(['albums'], 'readwrite', (st)=>{ recs.forEach(r=>st('albums').put(r)); });
+    },
+
+    /* ---------- ostali podaci (šabloni, stanje podsetnika, prelazak) ---------- */
+    meta(key){ return get('meta', key); },
+    svaMeta(){ return getAll('meta'); },
+    sacuvajMeta(obj){ return run(['meta'], 'readwrite', (st)=>{ st('meta').put(obj); }); },
+
+    /* sve stavke, albumi, korpa, i navedeni ključevi iz meta (šabloni) — jedna transakcija */
+    obrisiSve(metaKeys){
+      return run(['albums','docs','files','thumbs','texts','meta'], 'readwrite', (st)=>{
+        ['albums','docs','files','thumbs','texts'].forEach(n=>st(n).clear());
+        (metaKeys || []).forEach(k=>st('meta').delete(k));
+      });
+    },
+
+    /* ---------- čuvanje na uređaju ---------- */
+    /* zaštita od automatskog brisanja (Chrome odlučuje sam) */
+    traziTrajno(){
+      try{
+        if(navigator.storage && navigator.storage.persist)
+          navigator.storage.persisted().then(p=>{ if(!p) return navigator.storage.persist(); }).catch(()=>{});
+      }catch(e){}
+    },
+    async jeTrajno(){
+      try{ return (navigator.storage && navigator.storage.persisted) ? await navigator.storage.persisted() : null; }catch(e){ return null; }
+    },
+    /* {usage, quota} u bajtovima ili null */
+    async zauzece(){
+      try{ return (navigator.storage && navigator.storage.estimate) ? await navigator.storage.estimate() : null; }catch(e){ return null; }
+    },
+
+    /* ---------- stara baza (pre v59) ---------- */
+    stara: {
+      postoji(){ return listed(OLD_DB); },   /* true / false / null (ne zna se) */
+      async broj(){ try{ return await oldReq(s=>s.count()); }catch(e){ return 0; } },
+      kljucevi(){ return oldReq(s=>s.getAllKeys()); },
+      stavka(key){ return oldReq(s=>s.get(key)); },
+      /* vrlo stare verzije su stavke držale u localStorage: prebaci ih u staru bazu */
+      async uvuciIzLocalStorage(prefix){
+        const raw = localStorage.getItem(prefix + 'item-ids');
+        if(!raw) return;
+        const ids = JSON.parse(raw);
+        if(Array.isArray(ids) && ids.length){
+          const db = await oldOpen();
+          for(const id of ids){
+            const raw2 = localStorage.getItem(prefix + 'item:' + id);
+            if(raw2){
+              await new Promise((res)=>{
+                const tx = db.transaction(OLD_STORE, 'readwrite');
+                try{ tx.objectStore(OLD_STORE).put(JSON.parse(raw2)); }catch(e){ console.error(e); }
+                tx.oncomplete = res; tx.onerror = res; tx.onabort = res;
+              });
+              localStorage.removeItem(prefix + 'item:' + id);
+            }
+          }
+          db.close();
+        }
+        localStorage.removeItem(prefix + 'item-ids');
+      },
+      obrisi(){
+        return new Promise((resolve, reject)=>{
+          const r = indexedDB.deleteDatabase(OLD_DB);
+          let blockedTimer = null;
+          r.onsuccess = ()=>{ clearTimeout(blockedTimer); resolve(); };
+          r.onerror = ()=>{ clearTimeout(blockedTimer); reject(r.error); };
+          r.onblocked = ()=>{ blockedTimer = setTimeout(()=>reject(new Error('BLOCKED')), 4000); };
+        });
+      }
+    },
+
+    /* ---------- podaci samo ovog uređaja ---------- */
+    uredjaj: {
+      async fascikla(){
+        const d = await dirOpen();
+        try{
+          return await new Promise((res, rej)=>{
+            const q = d.transaction('h').objectStore('h').get('dir');
+            q.onsuccess = ()=>res(q.result || null); q.onerror = ()=>rej(q.error);
+          });
+        }finally{ d.close(); }
+      },
+      async sacuvajFasciklu(h){
+        const d = await dirOpen();
+        try{
+          await new Promise((res, rej)=>{
+            const t = d.transaction('h', 'readwrite');
+            if(h) t.objectStore('h').put(h, 'dir'); else t.objectStore('h').delete('dir');
+            t.oncomplete = res; t.onerror = ()=>rej(t.error);
+          });
+        }finally{ d.close(); }
+      }
+    }
+  };
+  return api;
+})();
+/* ================= kraj SKLADIŠTA ================= */
+
+/* Neuspeh upisa (puna memorija, zabrana, prekid) se ne guta tiho */
 let _saveFailAt = 0;
 function warnSaveFailed(e){
   try{ logError(t('errWhereSave'), ((e && e.name) || 'Error') + ': ' + ((e && e.message) || '')); }catch(_){}
   const n = Date.now(); if(n - _saveFailAt < 4000) return; _saveFailAt = n;
   showNote(t('saveFailWarn'), 6000, {warn:true, saveFail:true});
 }
-function db2Get(store, key){
-  return db2Run([store], 'readonly', (st, o)=>{ const r = st(store).get(key); r.onsuccess = ()=>{ o.v = r.result; }; });
-}
-function db2GetAll(store){
-  return db2Run([store], 'readonly', (st, o)=>{ const r = st(store).getAll(); r.onsuccess = ()=>{ o.v = r.result || []; }; });
-}
-function db2Put(store, val){
-  return db2Run([store], 'readwrite', (st)=>{ st(store).put(val); });
-}
+Skladiste.kadNeuspeh = warnSaveFailed;
 function newFileId(){ return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2,10); }
 function newItemId(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,8); }
 
@@ -4861,7 +5046,7 @@ function setThumbUrl(item, blob){
 /* Čuvanje podataka o dokumentu (ime, album, korpa…). Ime ostaje zbog postojećih poziva. */
 async function idbPut(item){
   item.updatedAt = Date.now();
-  await db2Put('docs', docRecord(item));
+  await Skladiste.sacuvajDokument(docRecord(item));
 }
 /* Nov dokument: podaci, fajlovi, sličice i tekst u JEDNOJ transakciji (sve ili ništa). */
 async function db2AddDoc(item, pages, text, opts){
@@ -4870,14 +5055,11 @@ async function db2AddDoc(item, pages, text, opts){
   /* vraćanje kopije zadržava vreme izmene iz kopije (inače bi novija kopija izgledala starije) */
   item.updatedAt = (opts && opts.updatedAt > 0) ? opts.updatedAt : Date.now();
   if(text){ item.content = text; item.hasText = true; }
-  await db2Run(['docs','files','thumbs','texts'], 'readwrite', (st)=>{
-    pages.forEach((p, i)=>{
-      const f = item.pages[i];
-      st('files').put({id:f.file, doc:item.id, blob:p.blob});
-      if(p.thumbBlob) st('thumbs').put({id:f.file, blob:p.thumbBlob});
-    });
-    if(text) st('texts').put({id:item.id, text});
-    st('docs').put(docRecord(item));
+  await Skladiste.upisi({
+    files: pages.map((p, i)=>({id:item.pages[i].file, doc:item.id, blob:p.blob})),
+    thumbs: pages.map((p, i)=>p.thumbBlob ? {id:item.pages[i].file, blob:p.thumbBlob} : null).filter(Boolean),
+    texts: text ? [{id:item.id, text}] : [],
+    docs: [docRecord(item)]
   });
   if(!(opts && opts.noUrl)){
     const tb = pages[0] && pages[0].thumbBlob;
@@ -4888,30 +5070,16 @@ async function saveDocText(item, text){
   item.content = text;
   item.hasText = true;
   item.updatedAt = Date.now();
-  await db2Run(['docs','texts'], 'readwrite', (st)=>{
-    st('texts').put({id:item.id, text});
-    st('docs').put(docRecord(item));
-  });
+  await Skladiste.sacuvajDokument(docRecord(item), text);
 }
 /* Trajno brisanje: sadržaj, sličice i tekst nestaju, ostaje samo oznaka da je obrisano. */
-async function idbDelete(id){
-  const now = Date.now();
-  await db2Run(['docs','files','thumbs','texts'], 'readwrite', (st)=>{
-    const r = st('docs').get(id);
-    r.onsuccess = ()=>{
-      const d = r.result;
-      if(d && Array.isArray(d.pages)) d.pages.forEach(p=>{ st('files').delete(p.file); st('thumbs').delete(p.file); });
-      st('texts').delete(id);
-      st('docs').put({id, schema:REC_SCHEMA, purged:true, deletedAt:(d && d.deletedAt) || now, updatedAt:now});
-    };
-  });
-}
+async function idbDelete(id){ await Skladiste.obrisiTrajno(id); }
 async function getFileBlob(item, pageIndex){
   const p = (item.pages || [])[pageIndex || 0];
   if(!p) throw new Error('nema fajla');
-  const rec = await db2Get('files', p.file);
-  if(!rec || !rec.blob) throw new Error('fajl nedostaje');
-  return rec.blob;
+  const blob = await Skladiste.fajl(p.file);
+  if(!blob) throw new Error('fajl nedostaje');
+  return blob;
 }
 /* Pun prikaz: pamti se nekoliko poslednjih, starije adrese se oslobađaju */
 const _fullUrls = new Map();
@@ -4938,7 +5106,7 @@ async function fullUrlFor(item, pageIndex){
 let _textsLoaded = false;
 async function loadTexts(){
   if(_textsLoaded) return;
-  const all = await db2GetAll('texts');
+  const all = await Skladiste.sviTekstovi();
   const map = new Map(all.map(x=>[x.id, x.text]));
   items.concat(trash).forEach(it=>{ if(map.has(it.id)) it.content = map.get(it.id); });
   _textsLoaded = true;
@@ -4948,11 +5116,7 @@ let _persistAsked = false;
 function requestPersistOnce(){
   if(_persistAsked) return;
   _persistAsked = true;
-  try{
-    if(navigator.storage && navigator.storage.persist){
-      navigator.storage.persisted().then(p=>{ if(!p) return navigator.storage.persist(); }).catch(()=>{});
-    }
-  }catch(e){}
+  Skladiste.traziTrajno();
 }
 
 /* ---------- Albumi u bazi ---------- */
@@ -4984,56 +5148,13 @@ function saveCategories(){
     }
   });
   if(!puts.length) return Promise.resolve();
-  return db2Run(['albums'], 'readwrite', (st)=>{ puts.forEach(r=>st('albums').put(r)); })
+  return Skladiste.sacuvajAlbume(puts)
     .catch(e=>{ console.error(e); toast(t('saveErr')); });
 }
 
-/* ---------- Stara baza (samo za prelazak, staru kopiju i brisanje starih podataka) ---------- */
-async function dbListed(name){
-  if(!indexedDB.databases) return null;
-  try{ return (await indexedDB.databases()).some(d=>d.name === name); }catch(e){ return null; }
-}
-function oldDbOpen(){
-  return new Promise((resolve, reject)=>{
-    const req = indexedDB.open(OLD_DB, 1);
-    req.onupgradeneeded = ()=>{
-      const db = req.result;
-      if(!db.objectStoreNames.contains(OLD_STORE)) db.createObjectStore(OLD_STORE, {keyPath:'id'});
-    };
-    req.onsuccess = ()=>resolve(req.result);
-    req.onerror = ()=>reject(req.error);
-  });
-}
-function oldReq(db, fn){
-  return new Promise((resolve, reject)=>{
-    const r = fn(db.transaction(OLD_STORE, 'readonly').objectStore(OLD_STORE));
-    r.onsuccess = ()=>resolve(r.result);
-    r.onerror = ()=>reject(r.error);
-  });
-}
-/* Vrlo stare verzije su stavke držale u localStorage: prvo ih prebaci u staru bazu */
+/* ---------- Stara baza (samo za prelazak, staru kopiju i brisanje starih podataka): Skladiste.stara ---------- */
 async function migrateLegacyLocalStorageItems(){
-  try{
-    const raw = localStorage.getItem(LS_PREFIX+'item-ids');
-    if(!raw) return;
-    const ids = JSON.parse(raw);
-    if(Array.isArray(ids) && ids.length){
-      const db = await oldDbOpen();
-      for(const id of ids){
-        const raw2 = localStorage.getItem(LS_PREFIX+'item:'+id);
-        if(raw2){
-          await new Promise((res)=>{
-            const tx = db.transaction(OLD_STORE, 'readwrite');
-            try{ tx.objectStore(OLD_STORE).put(JSON.parse(raw2)); }catch(e){ console.error(e); }
-            tx.oncomplete = res; tx.onerror = res; tx.onabort = res;
-          });
-          localStorage.removeItem(LS_PREFIX+'item:'+id);
-        }
-      }
-      db.close();
-    }
-    localStorage.removeItem(LS_PREFIX+'item-ids');
-  }catch(e){ console.error(e); }
+  try{ await Skladiste.stara.uvuciIzLocalStorage(LS_PREFIX); }catch(e){ console.error(e); }
 }
 /* Albumi iz starog zapisa (localStorage), sređeni isto kao ranije */
 function legacyCategories(){
@@ -5064,7 +5185,7 @@ function normKind(tp){ return tp === 'pdf' ? 'pdf' : (tp === 'doc' ? 'doc' : 'im
 async function loadAll(){
   try{
     await ensureMigrated();
-    const [albumRecs, docRecs, thumbRecs] = await Promise.all([db2GetAll('albums'), db2GetAll('docs'), db2GetAll('thumbs')]);
+    const {albums:albumRecs, docs:docRecs, thumbs:thumbRecs} = await Skladiste.ucitajSve();
     const liveAlbums = albumRecs.filter(a=>!a.deletedAt).sort((a,b)=>(a.order||0)-(b.order||0));
     categories = liveAlbums.map(a=>({id:a.id, name:a.name, pinned:!!a.pinned, cover:a.cover || null, parent:a.parent || null, createdAt:a.createdAt || 0, updatedAt:a.updatedAt || 0}));
     _albumSaved = new Map();
@@ -5134,10 +5255,7 @@ async function ensureMissingThumbs(){
         const r = await makeThumb(blob);
         it.pages[0].thumb = true;
         if(r.w){ it.pages[0].w = r.w; it.pages[0].h = r.h; }
-        await db2Run(['thumbs','docs'], 'readwrite', (st)=>{
-          st('thumbs').put({id:it.pages[0].file, blob:r.tblob});
-          st('docs').put(docRecord(it));
-        });
+        await Skladiste.upisi({thumbs:[{id:it.pages[0].file, blob:r.tblob}], docs:[docRecord(it)]});
         setThumbUrl(it, r.tblob);
       }catch(e){ it._thumbFailed = true; console.error(e); }
     }
@@ -5150,36 +5268,26 @@ async function ensureMissingThumbs(){
    (podaci + fajl + sličica + tekst zajedno), pa se prekid može nastaviti; 3) svaki fajl se
    pročita nazad i uporedi veličina; 4) stara baza ostaje netaknuta. */
 async function ensureMigrated(){
-  const m = await db2Get('meta', 'migration');
+  const m = await Skladiste.meta('migration');
   if(m && m.state === 'done') return;
   await migrateLegacyLocalStorageItems();
   let count = 0;
-  const listed = await dbListed(OLD_DB);
-  if(listed !== false){
-    try{
-      const odb = await oldDbOpen();
-      count = await oldReq(odb, s=>s.count());
-      odb.close();
-    }catch(e){ console.error(e); count = 0; }
-  }
+  const listed = await Skladiste.stara.postoji();
+  if(listed !== false) count = await Skladiste.stara.broj();
   const cats = legacyCategories();
   if(count === 0){
     /* nema slika: albumi (ako ih ima) se prenose odmah, bez rizika */
     await migrateAlbums(cats);
-    await db2Put('meta', {key:'migration', state:'done', doneAt:Date.now(), count:0, albums:cats.length});
+    await Skladiste.sacuvajMeta({key:'migration', state:'done', doneAt:Date.now(), count:0, albums:cats.length});
     return;
   }
   await new Promise(resolve=>showMigrationScreen({count, albums:cats.length, resumed: !!(m && m.state === 'running')}, resolve));
 }
 async function migrateAlbums(cats){
-  const have = new Set((await db2GetAll('albums')).map(a=>a.id));
+  const have = new Set((await Skladiste.albumi()).map(a=>a.id));
   const now = Date.now();
-  await db2Run(['albums'], 'readwrite', (st)=>{
-    cats.forEach((c, i)=>{
-      if(have.has(c.id)) return;
-      st('albums').put({id:c.id, schema:REC_SCHEMA, name:c.name, parent:c.parent || null, pinned:!!c.pinned, cover:c.cover || null, order:i, createdAt:now, updatedAt:now});
-    });
-  });
+  await Skladiste.sacuvajAlbume(cats.map((c, i)=>have.has(c.id) ? null :
+    {id:c.id, schema:REC_SCHEMA, name:c.name, parent:c.parent || null, pinned:!!c.pinned, cover:c.cover || null, order:i, createdAt:now, updatedAt:now}).filter(Boolean));
 }
 function backupRecent(){
   const last = getLastBackupDate();
@@ -5231,7 +5339,7 @@ function showMigrationScreen(info, onDone){
     requestPersistOnce();
     try{
       progress(t('migCheckingSpace'), 0, 0, '');
-      const est = (navigator.storage && navigator.storage.estimate) ? await navigator.storage.estimate().catch(()=>null) : null;
+      const est = await Skladiste.zauzece();
       if(est && est.quota){
         const need = (est.usage || 0) * 0.8 + info.count * 60 * 1024;
         const free = est.quota - (est.usage || 0);
@@ -5263,31 +5371,30 @@ function showMigrationScreen(info, onDone){
   intro();
 }
 async function migrateAllItems(onProgress){
-  const prev = await db2Get('meta', 'migration');
-  await db2Put('meta', {key:'migration', state:'running', startedAt:(prev && prev.startedAt) || Date.now()});
+  const prev = await Skladiste.meta('migration');
+  await Skladiste.sacuvajMeta({key:'migration', state:'running', startedAt:(prev && prev.startedAt) || Date.now()});
   const cats = legacyCategories();
   await migrateAlbums(cats);
-  const odb = await oldDbOpen();
-  try{
-    const keys = await oldReq(odb, s=>s.getAllKeys());
-    const done = new Set((await db2GetAll('docs')).map(d=>d.id));
+  {
+    const keys = await Skladiste.stara.kljucevi();
+    const done = new Set((await Skladiste.dokumenti()).map(d=>d.id));
     const skipped = [];
     let n = 0;
     for(const key of keys){
       n++;
       if(n === 1 || n % 3 === 0 || n === keys.length) onProgress(n, keys.length);
       if(done.has(key)) continue;   /* već prenet (podaci i fajl su upisani zajedno) */
-      const it = await oldReq(odb, s=>s.get(key));
+      const it = await Skladiste.stara.stavka(key);
       if(!it) continue;
       try{ await migrateOneItem(it); }
       catch(e){ console.error('prelazak stavke', key, e); skipped.push(it.name || String(key)); }
     }
     onProgress(keys.length, keys.length);
-    const now = new Set((await db2GetAll('docs')).map(d=>d.id));
+    const now = new Set((await Skladiste.dokumenti()).map(d=>d.id));
     const moved = keys.filter(k=>now.has(k)).length;
-    await db2Put('meta', {key:'migration', state:'done', doneAt:Date.now(), count:moved, total:keys.length, albums:cats.length});
+    await Skladiste.sacuvajMeta({key:'migration', state:'done', doneAt:Date.now(), count:moved, total:keys.length, albums:cats.length});
     return {count:moved, albums:cats.length, skipped};
-  }finally{ odb.close(); }
+  }
 }
 async function migrateOneItem(it){
   let blob;
@@ -5304,11 +5411,9 @@ async function migrateOneItem(it){
   if(it.deletedAt) item.deletedAt = it.deletedAt;
   await db2AddDoc(item, [{blob, thumbBlob, w, h}], it.content || null, {noUrl:true, keepName:true});
   /* provera: fajl se čita nazad i veličina mora biti ista */
-  const rec = await db2Get('files', item.pages[0].file);
-  if(!rec || !rec.blob || rec.blob.size !== blob.size){
-    await db2Run(['docs','files','thumbs','texts'], 'readwrite', (st)=>{
-      st('docs').delete(item.id); st('files').delete(item.pages[0].file); st('thumbs').delete(item.pages[0].file); st('texts').delete(item.id);
-    });
+  const back = await Skladiste.fajl(item.pages[0].file);
+  if(!back || back.size !== blob.size){
+    await Skladiste.upisi({brisi:{docs:[item.id], files:[item.pages[0].file], thumbs:[item.pages[0].file], texts:[item.id]}});
     throw new Error('provera fajla nije prošla');
   }
 }
@@ -5318,22 +5423,20 @@ async function legacyExportBackup(){
   const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
   toastPersist(t('bkBuilding', {n:0, total:'…'}));
   try{
-    const odb = await oldDbOpen();
-    const keys = await oldReq(odb, s=>s.getAllKeys());
+    const keys = await Skladiste.stara.kljucevi();
     const parts = [];
     const cats = legacyCategories().map(c=>({id:c.id, name:c.name, pinned:!!c.pinned, cover:c.cover || null, parent:c.parent || null}));
     parts.push('{"version":2,"exportedAt":'+JSON.stringify(new Date().toISOString())+',"categories":'+JSON.stringify(cats)+',"items":[');
     let first = true, n = 0;
     for(const key of keys){
       n++;
-      const it = await oldReq(odb, s=>s.get(key));
+      const it = await Skladiste.stara.stavka(key);
       if(it && !it.deletedAt && it.dataUrl){
         parts.push((first ? '' : ',') + JSON.stringify(it));
         first = false;
       }
       if(n % 5 === 0) toastPersist(t('bkBuilding', {n, total:keys.length}));
     }
-    odb.close();
     parts.push('],"settings":'+JSON.stringify({theme:getTheme()})+'}');
     const blob = new Blob(parts, {type:'application/json'});
     const msg = await saveBackupFile(blob, backupFileName('json'), dirOk);
@@ -5463,8 +5566,7 @@ function openMergeEditor(){
     for(const [pg, it, i] of slots){
       try{
         pg.blob = await getFileBlob(it, i);
-        const tr = it.pages[i].thumb ? await db2Get('thumbs', it.pages[i].file) : null;
-        pg.thumbBlob = tr ? tr.blob : null;
+        pg.thumbBlob = it.pages[i].thumb ? await Skladiste.slicica(it.pages[i].file) : null;
         pg.url = URL.createObjectURL(pg.thumbBlob || pg.blob);
       }catch(e){ console.error(e); }
       pg.pending = false;
@@ -7698,11 +7800,11 @@ async function copyDoc(orig, catId){
   const pages = [];
   for(let i=0;i<orig.pages.length;i++){
     const blob = await getFileBlob(orig, i);
-    const trec = orig.pages[i].thumb ? await db2Get('thumbs', orig.pages[i].file) : null;
-    pages.push({blob, thumbBlob: trec ? trec.blob : null, w: orig.pages[i].w, h: orig.pages[i].h});
+    const tb = orig.pages[i].thumb ? await Skladiste.slicica(orig.pages[i].file) : null;
+    pages.push({blob, thumbBlob: tb, w: orig.pages[i].w, h: orig.pages[i].h});
   }
   let text = orig.content || null;
-  if(!text && orig.hasText){ const tr = await db2Get('texts', orig.id); text = tr ? tr.text : null; }
+  if(!text && orig.hasText){ text = await Skladiste.tekst(orig.id); }
   const clone = { id:newItemId(), name: autoNameParts(orig.name) ? orig.name : orig.name + t('copySuffix'), ts:Date.now(), category:catId || null, type: orig.type, validUntil: orig.validUntil || null, validNote: orig.validNote || null, derivedFrom: orig.derivedFrom || null };
   if(orig.ext) clone.ext = orig.ext;
   await db2AddDoc(clone, pages, text);
@@ -8775,13 +8877,11 @@ function updateStorageInfo(){
   const infoEl = document.getElementById('storageInfo');
   if(!infoEl) return;
   const pEl = document.getElementById('persistInfo');
-  if(pEl && navigator.storage && navigator.storage.persisted){
-    navigator.storage.persisted().then(p=>{ pEl.textContent = p ? t('persistOn') : t('persistOff'); }).catch(()=>{});
-  }
+  if(pEl) Skladiste.jeTrajno().then(p=>{ if(p !== null) pEl.textContent = p ? t('persistOn') : t('persistOff'); });
   const trashPart = trash.length ? ' (u korpi ' + trash.length + ')' : '';
   infoEl.textContent = 'Iskorišćeno: ~' + mb.toFixed(1) + ' MB \u00B7 ' + stavkeTxt(items.length) + trashPart;
-  if(navigator.storage && navigator.storage.estimate){
-    navigator.storage.estimate().then(est=>{
+  {
+    Skladiste.zauzece().then(est=>{
       if(est && est.quota){
         const usedMb = (est.usage || 0) / 1024 / 1024;
         const quotaMb = est.quota / 1024 / 1024;
@@ -8796,38 +8896,15 @@ function updateStorageInfo(){
    Izabrana fascikla se pamti u posebnoj maloj bazi (NE u galerijaDB — njenu verziju
    otvaraju i arhiva-slika i photo.html). Chrome na Androidu pamti fasciklu, ali dozvolu
    trazi ponovo posle zatvaranja: zato upis ide na dodir, uz najvise jedno pitanje "Dozvoli". */
-const BACKUP_DIR_DB = 'arhivaBackupDir';
 const BACKUP_KEEP = 3;
 const BACKUP_NAME_RE = /^arhiva-backup-\d{4}-\d{2}-\d{2}\.(json|zip)$/;
 let backupDirHandle = null;
 function backupDirSupported(){ return 'showDirectoryPicker' in window; }
-function backupDirDb(){
-  return new Promise((res, rej)=>{
-    const r = indexedDB.open(BACKUP_DIR_DB, 1);
-    r.onupgradeneeded = ()=>r.result.createObjectStore('h');
-    r.onsuccess = ()=>res(r.result);
-    r.onerror = ()=>rej(r.error);
-  });
-}
-async function backupDirSave(h){
-  const d = await backupDirDb();
-  await new Promise((res, rej)=>{
-    const t = d.transaction('h', 'readwrite');
-    if(h) t.objectStore('h').put(h, 'dir'); else t.objectStore('h').delete('dir');
-    t.oncomplete = res; t.onerror = ()=>rej(t.error);
-  });
-  d.close();
-}
+async function backupDirSave(h){ await Skladiste.uredjaj.sacuvajFasciklu(h); }
 async function backupDirLoad(){
   if(!backupDirSupported()) return;
-  try{
-    const d = await backupDirDb();
-    backupDirHandle = await new Promise((res, rej)=>{
-      const q = d.transaction('h').objectStore('h').get('dir');
-      q.onsuccess = ()=>res(q.result || null); q.onerror = ()=>rej(q.error);
-    });
-    d.close();
-  }catch(e){ console.error(e); backupDirHandle = null; }
+  try{ backupDirHandle = await Skladiste.uredjaj.fascikla(); }
+  catch(e){ console.error(e); backupDirHandle = null; }
 }
 backupDirLoad();
 async function chooseBackupDir(){
@@ -9064,8 +9141,9 @@ async function exportBackup(){
     });
     const thumbEntries = [];
     for(const pg of thumbTodo){
-      const tr = await db2Get('thumbs', pg.file).catch(()=>null);
-      if(!tr || !tr.blob){ pg.thumb = false; continue; }
+      const tb = await Skladiste.slicica(pg.file).catch(()=>null);
+      if(!tb){ pg.thumb = false; continue; }
+      const tr = {blob:tb};
       const m = /^image\/([a-z0-9]+)/i.exec(tr.blob.type || '');
       pg.thumbPath = 'Sličice/' + pg.file + '.' + (m ? (m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase()) : 'jpg');
       thumbEntries.push({name:pg.thumbPath, blob:tr.blob, ts:Date.now()});
@@ -9106,10 +9184,7 @@ async function bkRefreshDoc(it, d, catId){
   if(d.sources && d.sources.length) it.sources = d.sources.slice();
   it.updatedAt = (d.updatedAt > 0) ? d.updatedAt : Date.now();
   try{
-    await db2Run(text ? ['docs', 'texts'] : ['docs'], 'readwrite', (st)=>{
-      if(text) st('texts').put({id:it.id, text});
-      st('docs').put(docRecord(it));
-    });
+    await Skladiste.sacuvajDokument(docRecord(it), text);
   }catch(e){ Object.assign(it, old); throw e; }
 }
 async function mergeBackup(src, opts){
@@ -9338,10 +9413,7 @@ importInput.addEventListener('change', async (e)=>{
 /* Briše sve stavke, albume, korpu i šablone (jedna transakcija). Koriste je „Obriši sve“ i „Zameni sve“ (v157). */
 async function storeWipeAll(){
   const tplKeys = (await tplAllRaw()).map(r=>r.key);
-  await db2Run(['albums','docs','files','thumbs','texts','meta'], 'readwrite', (st)=>{
-    ['albums','docs','files','thumbs','texts'].forEach(n=>st(n).clear());
-    tplKeys.forEach(k=>st('meta').delete(k));
-  });
+  await Skladiste.obrisiSve(tplKeys);
   _tpls = [];
   items.concat(trash).forEach(it=>setThumbUrl(it, null));
   items = [];
@@ -9380,22 +9452,16 @@ async function wipeAllData(){
 /* ---------- Stari podaci (od pre prelaska) ---------- */
 let _oldDbPresent = false;
 async function refreshOldDbPresent(){
-  const listed = await dbListed(OLD_DB);
+  const listed = await Skladiste.stara.postoji();
   _oldDbPresent = listed === true;
   return _oldDbPresent;
 }
-function deleteOldDb(){
-  return new Promise((resolve, reject)=>{
-    const r = indexedDB.deleteDatabase(OLD_DB);
-    let blockedTimer = null;
-    r.onsuccess = ()=>{ clearTimeout(blockedTimer); try{ localStorage.removeItem(LS_PREFIX+'categories'); }catch(e){} _oldDbPresent = false; resolve(); };
-    r.onerror = ()=>{ clearTimeout(blockedTimer); reject(r.error); };
-    r.onblocked = ()=>{ blockedTimer = setTimeout(()=>reject(new Error('BLOCKED')), 4000); };
-  });
+async function deleteOldDb(){
+  await Skladiste.stara.obrisi();
+  try{ localStorage.removeItem(LS_PREFIX+'categories'); }catch(e){}
+  _oldDbPresent = false;
 }
-async function oldDataCount(){
-  try{ const db = await oldDbOpen(); const n = await oldReq(db, s=>s.count()); db.close(); return n; }catch(e){ return 0; }
-}
+function oldDataCount(){ return Skladiste.stara.broj(); }
 async function confirmDeleteOldData(){
   if(!await askConfirm({icon:'🗄️', title:t('oldConfirmTitle'), text:t('oldConfirmText'), okIcon:'🗑️', okLabel:t('oldDelete')})) return;
   try{
@@ -9477,9 +9543,9 @@ async function pageThumbUrl(item, i){
   if(!p) return '';
   if(i === 0 && item.thumb) return item.thumb;
   if(_pageThumbs.has(p.file)) return _pageThumbs.get(p.file);
-  const rec = p.thumb ? await db2Get('thumbs', p.file) : null;
-  if(!rec || !rec.blob) return '';
-  const u = URL.createObjectURL(rec.blob);
+  const tb = p.thumb ? await Skladiste.slicica(p.file) : null;
+  if(!tb) return '';
+  const u = URL.createObjectURL(tb);
   _pageThumbs.set(p.file, u);
   while(_pageThumbs.size > 80){
     const k = _pageThumbs.keys().next().value;
@@ -9522,31 +9588,23 @@ async function db2UpdatePages(item, newPages, name, detach, extra){
     return it;
   });
   const upd = Object.assign({}, item, extra || {}, {pages:meta, name, updatedAt:now});
-  await db2Run(['docs','files','thumbs'], 'readwrite', (st)=>{
-    newPages.forEach((p, i)=>{
-      if(p.file) return;
-      st('files').put({id:meta[i].file, doc:item.id, blob:p.blob});
-      if(p.thumbBlob) st('thumbs').put({id:meta[i].file, blob:p.thumbBlob});
-    });
-    detItems.forEach(d=>{
-      const f = d.pages[0].file;
-      const r = st('files').get(f);
-      r.onsuccess = ()=>{ if(r.result){ r.result.doc = d.id; st('files').put(r.result); } };
-      st('docs').put(docRecord(d));
-    });
-    st('docs').put(docRecord(upd));
+  await Skladiste.upisi({
+    files: newPages.map((p, i)=>p.file ? null : {id:meta[i].file, doc:item.id, blob:p.blob}).filter(Boolean),
+    thumbs: newPages.map((p, i)=>(!p.file && p.thumbBlob) ? {id:meta[i].file, blob:p.thumbBlob} : null).filter(Boolean),
+    vlasnik: detItems.map(d=>({file:d.pages[0].file, doc:d.id})),
+    docs: detItems.map(d=>docRecord(d)).concat([docRecord(upd)])
   });
   /* upisano: uskladi prikaz */
   const oldFirst = item.pages[0] && item.pages[0].file;
   item.pages = meta; item.name = name; item.updatedAt = now;
   if(extra) Object.assign(item, extra);
   if(meta[0].file !== oldFirst){
-    const nb = newPages[0].thumbBlob || ((await db2Get('thumbs', meta[0].file)) || {}).blob || null;
+    const nb = newPages[0].thumbBlob || (await Skladiste.slicica(meta[0].file)) || null;
     setThumbUrl(item, nb);
   }
   for(const d of detItems){
-    const tr = await db2Get('thumbs', d.pages[0].file).catch(()=>null);
-    if(tr && tr.blob) setThumbUrl(d, tr.blob);
+    const tb = await Skladiste.slicica(d.pages[0].file).catch(()=>null);
+    if(tb) setThumbUrl(d, tb);
     if(d.deletedAt) trash.push(d); else items.push(d);
   }
   return detItems;
@@ -9677,7 +9735,7 @@ async function pvSrc(){
   if(pv.mode === 'edit'){
     const pg = ed && ed.pages[pv.idx]; if(!pg) return null;
     if(pg.blob) return pg.blob;
-    if(pg.file){ const r = await db2Get('files', pg.file); return r ? r.blob : null; }
+    if(pg.file) return await Skladiste.fajl(pg.file);
     return null;
   }
   return await getFileBlob(pv.item, pv.idx);
@@ -10705,10 +10763,7 @@ async function aiApply(item, ch){
   if(!done.length){ toast(t('aiNoChange')); return; }
   item.updatedAt = Date.now();
   try{
-    await db2Run(textNorm ? ['docs', 'texts'] : ['docs'], 'readwrite', (st)=>{
-      if(textNorm) st('texts').put({id:item.id, text:textNorm});
-      st('docs').put(docRecord(item));
-    });
+    await Skladiste.sacuvajDokument(docRecord(item), textNorm || null);
   }catch(e){
     Object.assign(item, old);
     console.error(e);
@@ -11825,14 +11880,14 @@ async function wsTplFromFull(full){
    Obrisan šablon ostaje kao oznaka {id, deletedAt, updatedAt}, da ga starija rezervna kopija ne vrati. Ulazi u kopiju (arhiva.json: templates). */
 let _tpls = [];
 async function tplAllRaw(){
-  const all = await db2GetAll('meta');
+  const all = await Skladiste.svaMeta();
   return all.filter(r=>r && typeof r.key === 'string' && r.key.indexOf('tpl:') === 0 && r.tpl && r.tpl.id);
 }
 async function tplLoad(){
   _tpls = (await tplAllRaw()).map(r=>r.tpl).filter(x=>!x.deletedAt).sort((a, b)=>(b.updatedAt || 0) - (a.updatedAt || 0));
   return _tpls;
 }
-function tplPut(tpl){ return db2Put('meta', {key:'tpl:' + tpl.id, tpl}); }
+function tplPut(tpl){ return Skladiste.sacuvajMeta({key:'tpl:' + tpl.id, tpl}); }
 function wrSavedBarHtml(){
   const sv = _ws.saved, sep = '<span class="path-sep">\u203A</span>';
   return '<span class="wrs-ok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
