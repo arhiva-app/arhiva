@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Arhiva</title>
+<!-- Stranica za precice pojedinacnih slika. Namerno je van instalirane Arhive (drugi repozitorijum),
+     da Chrome prečicu ne bi vezivao za aplikaciju. Podaci su isti (isti domen). -->
 <script>
 /* tema se postavlja pre prvog iscrtavanja, da ne bi "bljesnula" klasična */
 (function(){ try{ var t = localStorage.getItem('galerija:theme'); var bars = {banka:'#0E2747', crna:'#1B1B1E', ponoc:'#000000', koza:'#1F3A2E'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); } }catch(e){} })();
@@ -114,6 +116,20 @@
     padding:4px 12px;border-radius:12px;background:var(--accent);color:var(--on-accent);
     font-family:var(--font-num);font-size:12.5px;letter-spacing:.5px;pointer-events:none;}
   .sheet-tabs button.active{background:var(--paper-head);color:var(--brass);border-color:var(--paper-head);}
+/* traka-uputstvo za ikonicu na početnom ekranu (privremeno, dok ne postoji Android aplikacija) */
+  .sc-hint{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:50;display:flex;align-items:center;gap:10px;
+    padding:10px 12px 10px 8px;border-radius:14px;background:var(--surface);color:var(--ink);border:1px solid var(--line);
+    box-shadow:0 6px 20px rgba(0,0,0,.35);font-family:var(--font-ui);font-size:14px;line-height:1.35;}
+  .sc-hint[hidden]{display:none;}
+  /* v133: uputstvo je skriveno iza ⓘ gore desno; otvara se samo dodirom */
+  .sc-info{position:fixed;right:10px;top:calc(10px + env(safe-area-inset-top));z-index:49;width:40px;height:40px;border-radius:50%;
+    border:1.5px solid var(--brass);background:var(--surface);color:var(--brass);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;}
+  .sc-info[hidden]{display:none;}
+  .sc-tx{flex:1;min-width:0;}
+  .sc-tx b{color:var(--brass);font-weight:600;}
+  .sc-x{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink-dim);
+    font-size:15px;cursor:pointer;padding:0;}
+  .sc-ar{flex:none;color:var(--brass);align-self:flex-start;}
 /* =========================================================
    TEME (vrednosti preuzete iz aplikacije Troškovi)
    Klasična = :root iznad (dosadašnji izgled Arhive)
@@ -189,9 +205,19 @@ html[data-theme="ponoc"]{
 </style>
 </head>
 <body>
+<button type="button" class="sc-info" id="scInfo" hidden aria-label="Kako do ikonice na početnom ekranu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="11" x2="12" y2="17"></line><circle cx="12" cy="7.5" r="0.6" fill="currentColor"></circle></svg></button>
+<div class="sc-hint" id="scHint" hidden>
+  <button type="button" class="sc-x" id="scHintX" aria-label="Zatvori">&#x2715;</button>
+  <div class="sc-tx">Za ikonicu na početnom ekranu: <b>&#x22EE;</b> gore desno &rarr; <b>„Dodaj na početni ekran“</b> ili <b>„Instaliraj i kreiraj prečicu“</b></div>
+  <svg class="sc-ar" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8 7 17 7 17 16"></polyline></svg>
+</div>
 <div id="content"><p class="missing">Učitavanje...</p></div>
 
 <script>
+/* ================= SKLADIŠTE — samo čitanje (Arhiva v159) =================
+   JEDINO mesto na ovoj stranici koje zna kako se podaci čuvaju; ostatak zove samo SkladisteCitanje.stavka(id).
+   Kasnije (Google Drive) dolazi druga verzija ovog dela sa istom funkcijom. Prati modul Skladiste u Arhivi (Galerija-). */
+const SkladisteCitanje = (()=>{
 /* Čita stavku prvo iz nove baze (arhivaDB), pa iz stare (galerijaDB, verzija 1 — ne menja se).
    Nova baza se NIKAD ne pravi odavde: ako ne postoji, otvaranje se prekida (verziju i skladišta
    određuje samo Arhiva). Vraća {id, name, type, ext, deletedAt, blob, mime} ili null. */
@@ -267,33 +293,44 @@ async function idbGetItem(id){
   if(n !== undefined) return n;
   return await itemFromOldDb(id);
 }
+return {stavka: idbGetItem};
+})();
+/* ================= kraj SKLADIŠTA ================= */
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 const params = new URLSearchParams(location.search);
 const id = params.get('p');
+/* v133: uputstvo je zatvoreno; ⓘ gore desno ga otvara, ✕ (ili ponovo ⓘ) ga zatvara */
+(function(){
+  const h = document.getElementById('scHint'), btn = document.getElementById('scInfo'); if(!h || !btn || !id) return;
+  btn.hidden = false;
+  const set = (on)=>{ h.hidden = !on; btn.hidden = on; };
+  btn.onclick = ()=>set(true);
+  document.getElementById('scHintX').onclick = ()=>set(false);
+})();
 const content = document.getElementById('content');
 
 (async ()=>{
-  const item = id ? await idbGetItem(id) : null;
+  const item = id ? await SkladisteCitanje.stavka(id) : null;
 
   if(!item){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Stavka nije pronađena u ovom browseru.</p>' +
-      '<a class="back" href="index.html">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/Galerija-/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   if(item.deletedAt){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Ova slika je u korpi.</p>' +
       '<p style="margin:8px 0 0;opacity:.75;font-size:14px;">Vrati je u Arhivi: Podešavanja \u2192 korpa.</p>' +
-      '<a class="back" href="index.html">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/Galerija-/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   if(!item.blob){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Fajl nije pronađen.</p>' +
-      '<a class="back" href="index.html">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/Galerija-/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   document.title = item.name;
@@ -302,7 +339,7 @@ const content = document.getElementById('content');
   const isPdf = item.type === 'pdf' || mime === 'application/pdf';
   const isImage = !isPdf && (item.type === 'image' || (item.type !== 'doc' && mime.indexOf('image/') === 0));
 
-  const backTiny = '<a class="back tiny" href="index.html">Arhiva</a>';
+  const backTiny = '<a class="back tiny" href="/Galerija-/">Arhiva</a>';
 
   if(isImage){
     const pages = (item.pages && item.pages.length) ? item.pages : [{blob:item.blob}];
@@ -422,7 +459,7 @@ const content = document.getElementById('content');
         const result = await mammoth.convertToHtml({arrayBuffer: await item.blob.arrayBuffer()});
         content.innerHTML =
           '<div class="doc-reader"><div class="doc-reader-inner">'+result.value+'</div></div>' +
-          '<div class="doc-reader-bar"><a class="back-inline" href="index.html">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
+          '<div class="doc-reader-bar"><a class="back-inline" href="/Galerija-/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
         document.title = item.name;
         document.getElementById('openDoc').onclick = downloadFile;
       }catch(e){
@@ -446,7 +483,7 @@ const content = document.getElementById('content');
             : '';
           content.innerHTML =
             '<div class="doc-reader"><div class="doc-reader-inner">'+tabsHtml+html+'</div></div>' +
-            '<div class="doc-reader-bar"><a class="back-inline" href="index.html">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
+            '<div class="doc-reader-bar"><a class="back-inline" href="/Galerija-/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
           document.title = item.name;
           document.getElementById('openDoc').onclick = downloadFile;
           content.querySelectorAll('.sheet-tabs button').forEach(btn=>{
