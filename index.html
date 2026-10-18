@@ -556,6 +556,8 @@
   .exit-modal h2{font-family:var(--font-title);font-weight:600;font-size:21px;color:var(--ink);margin:0 0 8px;}
   .exit-modal .sub{color:var(--ink-dim);font-size:14px;margin-bottom:20px;}
   .exit-actions{display:flex;gap:10px;}
+  .exit-actions.three{flex-direction:column;}
+  .exit-actions.three #cfAlt{order:1;} .exit-actions.three #cfOk{order:2;} .exit-actions.three #cfCancel{order:3;}
   .exit-btn{flex:1;padding:13px 6px;border-radius:10px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:var(--font-ui);display:flex;align-items:center;justify-content:center;gap:6px;border:none;}
   .exit-btn.stay{background:var(--surface-2);border:1px solid var(--brass-soft);color:var(--brass);}
   .exit-btn.leave{background:var(--danger-soft);border:1px solid var(--danger-line);color:var(--danger);}
@@ -2723,6 +2725,7 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
     <div class="sub" id="cfSub"></div>
     <div class="exit-actions">
       <button type="button" class="exit-btn stay" id="cfCancel"><span class="ic">↩️</span>Otkaži</button>
+      <button type="button" class="exit-btn go" id="cfAlt" style="display:none"><span class="ic" id="cfAltIc"></span><span id="cfAltLabel"></span></button>
       <button type="button" class="exit-btn leave" id="cfOk"><span class="ic" id="cfOkIc"></span><span id="cfOkLabel"></span></button>
     </div>
   </div>
@@ -2822,6 +2825,13 @@ function askConfirm(o){
     document.getElementById('cfOkIc').style.display = o.okIcon ? '' : 'none';
     document.getElementById('cfOkLabel').textContent = o.okLabel || 'U redu';
     const okBtn = document.getElementById('cfOk');
+    /* v157: treće dugme (izbor između dve radnje) — rezultat 'alt' */
+    const altBtn = document.getElementById('cfAlt');
+    altBtn.style.display = o.altLabel ? '' : 'none';
+    altBtn.parentNode.classList.toggle('three', !!o.altLabel);
+    document.getElementById('cfAltIc').textContent = o.altIcon || '';
+    document.getElementById('cfAltLabel').textContent = o.altLabel || '';
+    altBtn.onclick = ()=>{ result = 'alt'; requestClose(); };
     okBtn.classList.toggle('leave', o.danger !== false);
     okBtn.classList.toggle('stay', o.danger === false);
     let result = false;
@@ -3530,7 +3540,7 @@ const I18N = {
       ['Pretraga', 'Lupa pretražuje nazive albuma, slika i dokumenata. „Detaljno“ traži i reči unutar PDF, Word i Excel dokumenata.', 'U albumu dodirni ikonicu „Pretraži“: na mestu reda ikonica otvara se polje za pretragu, a pretraga obuhvata i podalbume. Možeš upisati i delove više reči, bilo kojim redom: „info ori“ nalazi „Informatika račun original“. Ćirilica i latinica su isto: „info“ nalazi i „Информатика“, a „инфо“ i „Informatika“. ✕ ili korak nazad zatvara pretragu i vraća ikonice.'],
       ['Prečica na početnom ekranu', 'Označi jednu stavku (dugi pritisak), pa „Prečica“ u donjem redu (preimenovanje je sada u „Više“ i olovkom u pregledu). Stavka se otvara u Chrome-u, a iz Chrome menija biraš „Dodaj na početni ekran“. Prečica dokumenta od više stranica lista sve stranice.'],
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Arhiva ga pri vraćanju napravi ponovo sa istim imenom.'],,
-      ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Vraćanje dodaje samo ono što nedostaje, bez duplikata. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
+      ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Pri vraćanju biraš „Dodaj postojećim“ (samo ono što nedostaje, bez duplikata) ili „Zameni sve“. Kopija se prvo proveri; oštećena se ne uvozi. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
       ['Teme', 'Podešavanja → tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
@@ -3560,6 +3570,16 @@ const I18N = {
     never: 'nikad',
     bkBuilding: 'Pravim rezervnu kopiju: {n} / {total}…',
     bkReading: 'Čitam kopiju…',
+    bkChecking: 'Proveravam kopiju: {n} / {total}…',
+    bkAskTitle: 'Vraćanje kopije',
+    bkAskText: 'Kopija od {date} je proverena i ispravna (stavki: {docs}, albuma: {albums}). Kako da je vratim?',
+    bkAskAdd: 'Dodaj postojećim',
+    bkAskReplace: 'Zameni sve',
+    bkRepTitle: 'Zameni sve?',
+    bkRepText: 'Sve što je sada u Arhivi, uključujući korpu i šablone, biće obrisano i zamenjeno sadržajem kopije.',
+    bkReplaced: 'Arhiva je vraćena iz kopije (stavki: {added}, albuma: {albums}).',
+    bkBroken: 'Kopija je oštećena, ništa nije promenjeno. Neispravnih fajlova: {n} (npr. „{name}“).',
+    bkFailedKeep: 'Vraćanje kopije nije uspelo. Kopija nije oštećena — pokušaj ponovo.',
     bkRestoring: 'Vraćam: {n} / {total}…',
     bkRestored: 'Vraćeno: {added}. Već postoji: {skipped}.',
     bkRestoredUpd: 'Vraćeno: {added}. Osveženo: {updated}. Već postoji: {skipped}.',
@@ -3631,7 +3651,7 @@ const I18N = {
     expSetField: 'podseti me (dana ranije)',
     expSetHint1: 'kad do datuma ostane ovoliko dana ili manje, Arhiva te jednom obavesti, a na zvoncetu na početnom ekranu pojavi se broj. još po jednom te obavesti 7 dana pre i kad datum prođe.',
     expSetHint2: 'obaveštenje vidiš kad otvoriš Arhivu. obaveštenja dok je aplikacija zatvorena za sada ne postoje.',
-    bkHintZip: 'rezervna kopija je jedan ZIP fajl: u njemu su tvoji dokumenti kao obične slike i PDF-ovi, složeni po albumima, pa se mogu otvoriti i bez Arhive. uvoz prima i stare .json kopije. vraćanje dodaje samo ono što nedostaje, bez duplikata.'
+    bkHintZip: 'rezervna kopija je jedan ZIP fajl: u njemu su tvoji dokumenti kao obične slike i PDF-ovi, složeni po albumima, pa se mogu otvoriti i bez Arhive. uvoz prima i stare .json kopije. pri vraćanju biraš: dodaj postojećim (bez duplikata) ili zameni sve. kopija se prvo proveri.'
   },
   en: {
     addMulti: 'Multi-page document',
@@ -4108,7 +4128,7 @@ const I18N = {
       ['Search', 'The magnifier searches the names of albums, images and documents. “Detailed” also searches words inside PDF, Word and Excel documents.', 'Inside an album, tap the “Search” icon: a search field opens in place of the icon row, and search also covers sub-albums. You can type parts of several words, in any order: “info ori” finds “Informatika račun original”. Cyrillic and Latin letters count as the same: “info” also finds “Информатика”, and “инфо” finds “Informatika”. ✕ or Back closes the search and brings the icons back.'],
       ['Home screen shortcut', 'Select one item (long-press), then “Shortcut” in the bottom row (renaming is now in “More” and with the pencil in the viewer). The item opens in Chrome; choose “Add to home screen” from the Chrome menu. The shortcut of a multi-page document shows all pages.'],
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Arhiva creates it again with the same name when restoring.'],,
-      ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'Restoring adds only what is missing, without duplicates. A bar at the top reminds you when the set number of days has passed since the last backup.'],
+      ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'When restoring, choose “Add to existing” (only what is missing, no duplicates) or “Replace all”. The backup is checked first; a damaged one is not imported. A bar at the top reminds you when the set number of days has passed since the last backup.'],
       ['Themes', 'Settings → theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
@@ -4138,6 +4158,16 @@ const I18N = {
     never: 'never',
     bkBuilding: 'Making backup: {n} / {total}…',
     bkReading: 'Reading backup…',
+    bkChecking: 'Checking backup: {n} / {total}…',
+    bkAskTitle: 'Restore backup',
+    bkAskText: 'The backup from {date} is checked and valid (items: {docs}, albums: {albums}). How should it be restored?',
+    bkAskAdd: 'Add to existing',
+    bkAskReplace: 'Replace all',
+    bkRepTitle: 'Replace all?',
+    bkRepText: 'Everything now in Arhiva, including the trash and templates, will be deleted and replaced with the backup.',
+    bkReplaced: 'Arhiva restored from backup: {added} items, {albums} albums.',
+    bkBroken: 'The backup is damaged, nothing was changed. Bad files: {n} (e.g. “{name}”).',
+    bkFailedKeep: 'Restoring the backup failed. The backup is not damaged — try again.',
     bkRestoring: 'Restoring: {n} / {total}…',
     bkRestored: 'Restored: {added}. Already here: {skipped}.',
     bkRestoredUpd: 'Restored: {added}. Updated: {updated}. Already here: {skipped}.',
@@ -4209,7 +4239,7 @@ const I18N = {
     expSetField: 'remind me (days earlier)',
     expSetHint1: 'when this many days or fewer are left until the date, Arhiva notifies you once and a number appears on the bell on the home screen. You are notified once more 7 days before and when the date has passed.',
     expSetHint2: 'you see the notification when you open Arhiva. Notifications while the app is closed are not available yet.',
-    bkHintZip: 'the backup is one ZIP file: your documents are inside as ordinary images and PDFs, sorted by album, so they open even without Arhiva. import also accepts old .json backups. restoring adds only what is missing, without duplicates.'
+    bkHintZip: 'the backup is one ZIP file: your documents are inside as ordinary images and PDFs, sorted by album, so they open even without Arhiva. import also accepts old .json backups. when restoring choose: add to existing (no duplicates) or replace all. the backup is checked first.'
   }
 };
 function appLang(){
@@ -4801,7 +4831,8 @@ function docRecord(it){
     deletedAt: it.deletedAt || null,
     validUntil: it.validUntil || null, validNote: it.validNote || null, lang: it.lang || null, derivedFrom: it.derivedFrom || null,
     sourceSig: it.sourceSig || null, hasText: !!it.hasText,
-    trashPath: it.trashPath || null, trashGroup: it.trashGroup || null
+    trashPath: it.trashPath || null, trashGroup: it.trashGroup || null,
+    sources: (Array.isArray(it.sources) && it.sources.length) ? it.sources.slice() : null   /* v157: izvori Zbirnog spiska */
   };
 }
 function itemFromRecord(r){
@@ -4815,6 +4846,7 @@ function itemFromRecord(r){
   if(r.deletedAt) it.deletedAt = r.deletedAt;
   if(r.trashPath) it.trashPath = r.trashPath;
   if(r.trashGroup) it.trashGroup = r.trashGroup;
+  if(Array.isArray(r.sources) && r.sources.length) it.sources = r.sources.slice();
   return it;
 }
 function setThumbUrl(item, blob){
@@ -8563,7 +8595,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 156;
+const APP_VERSION = 157;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9007,6 +9039,7 @@ async function exportBackup(){
     const docs = items.slice().sort((a,b)=>a.ts-b.ts);
     const used = new Set(['arhiva.json']);
     const fileEntries = [];
+    const thumbTodo = [];
     const docOut = docs.map(it=>{
       const rec = docRecord(it);
       rec.pages = rec.pages.map((p, i)=>{
@@ -9016,11 +9049,22 @@ async function exportBackup(){
         while(used.has(path.toLowerCase())){ path = base + ' (' + k + ').' + ext; k++; }
         used.add(path.toLowerCase());
         fileEntries.push({it, i, path});
-        return Object.assign({}, p, {path});
+        const out = Object.assign({}, p, {path});
+        /* v157: sličica dokumenta koji nije slika (npr. PDF iz AI) ide u kopiju — ne može se ponovo napraviti */
+        if(p.thumb && it.type !== 'image') thumbTodo.push(out);
+        return out;
       });
       if(it.content) rec.text = it.content;
       return rec;
     });
+    const thumbEntries = [];
+    for(const pg of thumbTodo){
+      const tr = await db2Get('thumbs', pg.file).catch(()=>null);
+      if(!tr || !tr.blob){ pg.thumb = false; continue; }
+      const m = /^image\/([a-z0-9]+)/i.exec(tr.blob.type || '');
+      pg.thumbPath = 'Sličice/' + pg.file + '.' + (m ? (m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase()) : 'jpg');
+      thumbEntries.push({name:pg.thumbPath, blob:tr.blob, ts:Date.now()});
+    }
     const albums = categories.map((c, i)=>Object.assign(albumRecord(c, i), {createdAt:c.createdAt || 0, updatedAt:c.updatedAt || 0}));
     const templates = await tplLoad().catch(e=>{ console.error(e); return []; });
     const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:getExpiryDays()}, albums, docs:docOut, templates};
@@ -9028,6 +9072,7 @@ async function exportBackup(){
     for(const fe of fileEntries){
       entries.push({name:fe.path, blob:await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
     }
+    thumbEntries.forEach(e=>entries.push(e));
     const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n, total})); });
     const msg = await saveBackupFile(zip, backupFileName('zip'), dirOk);
     toastHide();
@@ -9047,12 +9092,13 @@ async function exportBackup(){
    Zapis dokumenta i tekst idu u JEDNOJ transakciji; vreme izmene ostaje ono iz kopije. */
 async function bkRefreshDoc(it, d, catId){
   const old = {name:it.name, category:it.category, validUntil:it.validUntil, validNote:it.validNote, lang:it.lang,
-    content:it.content, hasText:it.hasText, updatedAt:it.updatedAt};
+    content:it.content, hasText:it.hasText, updatedAt:it.updatedAt, sources:it.sources};
   it.name = d.name || it.name;
   it.category = (catId && catById(catId)) ? catId : null;
   if(d.validUntil !== undefined){ it.validUntil = d.validUntil || null; it.validNote = d.validUntil ? (d.validNote || null) : null; }
   const text = d.text || null;
   if(text){ it.content = text; it.hasText = true; if(d.lang) it.lang = d.lang; }
+  if(d.sources && d.sources.length) it.sources = d.sources.slice();
   it.updatedAt = (d.updatedAt > 0) ? d.updatedAt : Date.now();
   try{
     await db2Run(text ? ['docs', 'texts'] : ['docs'], 'readwrite', (st)=>{
@@ -9061,7 +9107,7 @@ async function bkRefreshDoc(it, d, catId){
     });
   }catch(e){ Object.assign(it, old); throw e; }
 }
-async function mergeBackup(src){
+async function mergeBackup(src, opts){
   /* src: {albums:[{key, id?, name, parentKey, pinned, cover, updatedAt}], docs:[{id?, name, albumKey, kind, ext, createdAt, updatedAt,
      validUntil, lang, derivedFrom, sourceSig, text, pages:[{mime, w, h, getBlob}]}], coverOf:{albumKey: docId}} */
   const idMap = {};
@@ -9073,6 +9119,7 @@ async function mergeBackup(src){
       cat = categories.find(x=>(x.parent || null) === parentId && x.name === a.name) || null;
       if(!cat){
         cat = {id: a.id || newCatId(), name:a.name, pinned:!!a.pinned, cover:null, parent:parentId};
+        if(a.createdAt > 0) cat.createdAt = a.createdAt;   /* v157: datum albuma iz kopije */
         categories.push(cat);
       }
     }
@@ -9084,6 +9131,11 @@ async function mergeBackup(src){
     const par = pid ? catById(pid) : null;
     place(a, par && !par.parent ? pid : null);
   });
+  /* v157: „Zameni sve“ — albumi u istom redosledu kao u kopiji */
+  if(opts && opts.replace){
+    const ord = new Map(src.albums.map((a, i)=>[idMap[a.key], i]));
+    categories.sort((x, y)=>(ord.has(x.id) ? ord.get(x.id) : 1e9) - (ord.has(y.id) ? ord.get(y.id) : 1e9));
+  }
   await saveCategories();
   let added = 0, updated = 0, skipped = 0, n = 0;
   for(const d of src.docs){
@@ -9117,6 +9169,8 @@ async function mergeBackup(src){
         let thumbBlob = null, w = p.w || 0, h = p.h || 0;
         if(d.kind === 'image'){
           try{ const r = await makeThumb(blob); thumbBlob = r.tblob; w = r.w; h = r.h; }catch(e){ console.error(e); }
+        }else if(p.getThumb){
+          thumbBlob = await p.getThumb();   /* v157: sličica PDF-a i sl. iz kopije */
         }
         pages.push({blob, thumbBlob, w, h});
       }
@@ -9126,6 +9180,7 @@ async function mergeBackup(src){
         ts: d.createdAt || Date.now(), sourceSig: d.sourceSig || null, validUntil: d.validUntil || null, validNote: d.validNote || null,
         lang: d.lang || null, derivedFrom: d.derivedFrom || null};
       if(d.ext) item.ext = d.ext;
+      if(d.sources && d.sources.length) item.sources = d.sources.slice();
       await db2AddDoc(item, pages, d.text || null, {updatedAt: d.updatedAt || 0, keepName:true});
       items.push(item);
       added++;
@@ -9146,33 +9201,83 @@ async function mergeBackup(src){
   toastHide();
   render();
   updateStorageInfo();
-  toast(updated ? t('bkRestoredUpd', {added, updated, skipped}) : t('bkRestored', {added, skipped}));
+  if(opts && opts.replace) toast(t('bkReplaced', {added, albums:categories.length}));
+  else toast(updated ? t('bkRestoredUpd', {added, updated, skipped}) : t('bkRestored', {added, skipped}));
+}
+/* v157: cela kopija se proverava PRE bilo kakvog upisa: arhiva.json, svaki fajl postoji i ispravan je (CRC).
+   Neispravna kopija → poruka, postojeći podaci ostaju netaknuti. */
+async function bkCheckZip(zip, data){
+  const docs = data.docs.filter(d=>d && !d.purged && !d.deletedAt);
+  const paths = [];
+  for(const d of docs){
+    if(!Array.isArray(d.pages)) throw new Error('NOT_BACKUP');
+    d.pages.forEach(p=>{ paths.push((p && p.path) || ''); if(p && p.thumbPath) paths.push(p.thumbPath); });
+  }
+  const bad = [];
+  let n = 0;
+  for(const path of paths){
+    n++;
+    if(n % 5 === 0 || n === paths.length) toastPersist(t('bkChecking', {n, total:paths.length}));
+    const e = path ? zip.get(path) : null;
+    if(!e){ bad.push(path || '?'); continue; }
+    if(e.method !== 0) throw new Error('PACKED');
+    try{ await e.read(); }
+    catch(err){ if(err && (err.message === 'CRC' || err.message === 'NOT_ZIP')) bad.push(path); else throw err; }
+  }
+  if(bad.length){ const err = new Error('BROKEN'); err.count = bad.length; err.fileName = bad[0]; throw err; }
+  return docs;
 }
 async function importZipBackup(file){
   const zip = await zipRead(file);
   const man = zip.get('arhiva.json');
   if(!man) throw new Error('NOT_BACKUP');
-  const data = JSON.parse(await (await man.read('application/json')).text());
+  let data;
+  try{ data = JSON.parse(await (await man.read('application/json')).text()); }
+  catch(e){ if(e && e.message === 'PACKED') throw e; throw new Error('NOT_BACKUP'); }
   if(!data || data.format !== 3 || !Array.isArray(data.docs)) throw new Error('NOT_BACKUP');
+  const liveDocs = await bkCheckZip(zip, data);
+  const liveAlbums = (data.albums || []).filter(a=>a && a.id && a.name && !a.deletedAt);
+  toastHide();
+  /* izbor samo kad u Arhivi već nešto postoji */
+  let replace = false;
+  if(items.length || trash.length || categories.length){
+    const when = data.exportedAt ? new Date(data.exportedAt) : null;
+    const ch = await askConfirm({icon:'📦', title:t('bkAskTitle'),
+      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, date: when && !isNaN(when) ? when.toLocaleDateString('sr-RS') : '—'}),
+      altIcon:'➕', altLabel:t('bkAskAdd'), okIcon:'♻️', okLabel:t('bkAskReplace')});
+    if(!ch) return;
+    if(ch === true){
+      if(!await askConfirm({icon:'⚠️', title:t('bkRepTitle'), text:t('bkRepText'), okIcon:'♻️', okLabel:t('bkAskReplace')})) return;
+      replace = true;
+    }
+  }
+  toastPersist(t('bkRestoring', {n:0, total:liveDocs.length}));
+  if(replace) await storeWipeAll();
   if(data.settings && data.settings.theme) setTheme(data.settings.theme);
   if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
   const coverOf = {};
-  const albums = (data.albums || []).filter(a=>a && a.id && a.name && !a.deletedAt).map(a=>{
+  const albums = liveAlbums.map(a=>{
     if(a.cover) coverOf[a.id] = a.cover;
-    return {key:a.id, id:a.id, name:a.name, parentKey:a.parent || null, pinned:!!a.pinned, updatedAt:a.updatedAt || 0};
+    return {key:a.id, id:a.id, name:a.name, parentKey:a.parent || null, pinned:!!a.pinned, updatedAt:a.updatedAt || 0, createdAt:a.createdAt || 0};
   });
-  const docs = data.docs.filter(d=>d && !d.purged && !d.deletedAt).map(d=>({
+  const docs = liveDocs.map(d=>({
     id:d.id, name:d.name, albumKey:d.albumId || null, kind:d.kind, ext:d.ext || null,
     createdAt:d.createdAt, updatedAt:d.updatedAt, validUntil:d.validUntil || null, validNote:d.validNote || null, lang:d.lang || null,
     derivedFrom:d.derivedFrom || null, sourceSig:d.sourceSig || null, text:d.text || null,
+    sources:Array.isArray(d.sources) ? d.sources.filter(x=>typeof x === 'string') : null,
     pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob: ()=>{
       const e = zip.get(p.path);
       if(!e) return Promise.reject(new Error('nema fajla u kopiji'));
       return e.read(p.mime);
-    }}))
+    }, getThumb: p.thumbPath ? ()=>{
+      const e = zip.get(p.thumbPath);
+      const x = (p.thumbPath.split('.').pop() || 'jpg').toLowerCase();
+      return e ? e.read('image/' + (x === 'jpg' ? 'jpeg' : x)).catch(()=>null) : Promise.resolve(null);
+    } : null}))
   }));
   try{ await tplMergeBackup(data.templates); }catch(e){ console.error(e); }
-  await mergeBackup({albums, docs, coverOf});
+  if(replace) currentFolder = null;
+  await mergeBackup({albums, docs, coverOf}, {replace});
 }
 function importJsonBackup(data){
   if(!data || !Array.isArray(data.items)) throw new Error('NOT_BACKUP');
@@ -9212,10 +9317,30 @@ importInput.addEventListener('change', async (e)=>{
   }catch(err){
     console.error(err);
     toastHide();
-    toast(err && err.message === 'PACKED' ? t('bkPacked') : t('bkBadFile'));
+    const m = err && err.message;
+    if(m === 'PACKED') toast(t('bkPacked'));
+    else if(m === 'BROKEN') showNote(t('bkBroken', {n:err.count, name:String(err.fileName || '').split('/').pop()}), 9000, {warn:true});
+    else if(m === 'NOT_BACKUP' || m === 'NOT_ZIP' || err instanceof SyntaxError) toast(t('bkBadFile'));
+    else showNote(t('bkFailedKeep'), 9000, {warn:true});
   }
 });
 
+/* Briše sve stavke, albume, korpu i šablone (jedna transakcija). Koriste je „Obriši sve“ i „Zameni sve“ (v157). */
+async function storeWipeAll(){
+  const tplKeys = (await tplAllRaw()).map(r=>r.key);
+  await db2Run(['albums','docs','files','thumbs','texts','meta'], 'readwrite', (st)=>{
+    ['albums','docs','files','thumbs','texts'].forEach(n=>st(n).clear());
+    tplKeys.forEach(k=>st('meta').delete(k));
+  });
+  _tpls = [];
+  items.concat(trash).forEach(it=>setThumbUrl(it, null));
+  items = [];
+  trash = [];
+  categories = [];
+  _albumSaved = new Map();
+  _textsLoaded = false;
+  trAlbsSave([]);
+}
 async function wipeAllData(){
   if(!await askConfirm({
     icon:'⚠️', title:'Obriši sve podatke',
@@ -9228,17 +9353,7 @@ async function wipeAllData(){
     okIcon:'🗑️', okLabel:'Da, obriši'
   })) return;
   try{
-    const tplKeys = (await tplAllRaw().catch(()=>[])).map(r=>r.key);
-    await db2Run(['albums','docs','files','thumbs','texts','meta'], 'readwrite', (st)=>{
-      ['albums','docs','files','thumbs','texts'].forEach(n=>st(n).clear());
-      tplKeys.forEach(k=>st('meta').delete(k));
-    });
-    _tpls = [];
-    items.concat(trash).forEach(it=>setThumbUrl(it, null));
-    items = [];
-    trash = [];
-    categories = [];
-    _albumSaved = new Map();
+    await storeWipeAll();
     /* i stari podaci od pre prelaska, da se ništa ne bi vratilo samo */
     await deleteOldDb().catch(e=>console.error(e));
     currentFolder = null;
