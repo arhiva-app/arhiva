@@ -3535,6 +3535,7 @@ const I18N = {
     aiSetModel: 'model',
     aiModelLite: 'najjeftiniji i brz',
     aiModelFlash: 'jači i skuplji',
+    aiJobRead: 'Pročitaj', aiJobTpl: 'Šablon', aiJobTplEdit: 'Dorada šablona', aiJobList: 'Spisak', aiJobEdit: 'Izmena', aiJobFill: 'Popuni', aiJobTask: 'Zadatak', aiJobRefine: 'Dorada',
     aiSetModelHint: 'isti dokument možeš da pročitaš sa oba modela i uporediš tačnost i trošak.',
     aiSetConsent: 'saglasnost za slanje',
     aiSetConsentYes: 'data: Arhiva više ne pita pre slanja.',
@@ -3697,6 +3698,8 @@ const I18N = {
     askSrc: 'Izvori',
     askHead: '✨ AI ODGOVOR',
     aiSetLastTime: 'vreme: Arhiva {a} · Google {g} · pokušaja: {n}',
+    aiSetLastTimeG: 'vreme: Google {g} · pokušaja: {n}',
+    aiSetLastTimeP: 'vreme: Google {g} · delova: {p} · pokušaja: {n}',
     aiAtt: 'pokušaji:',
     aiAttOk: 'uspeh {s}',
     aiAttErr: '{c} posle {s}',
@@ -3730,6 +3733,8 @@ const I18N = {
     askSrc: 'Sources',
     askHead: '✨ AI ANSWER',
     aiSetLastTime: 'time: Arhiva {a} · Google {g} · attempts: {n}',
+    aiSetLastTimeG: 'time: Google {g} · attempts: {n}',
+    aiSetLastTimeP: 'time: Google {g} · parts: {p} · attempts: {n}',
     aiAtt: 'attempts:',
     aiAttOk: 'success {s}',
     aiAttErr: '{c} after {s}',
@@ -4186,6 +4191,7 @@ const I18N = {
     aiSetModel: 'model',
     aiModelLite: 'cheapest and fast',
     aiModelFlash: 'stronger and more expensive',
+    aiJobRead: 'Read', aiJobTpl: 'Template', aiJobTplEdit: 'Template edit', aiJobList: 'List', aiJobEdit: 'Edit', aiJobFill: 'Fill in', aiJobTask: 'Task', aiJobRefine: 'Refine',
     aiSetModelHint: 'you can read the same document with both models and compare accuracy and cost.',
     aiSetConsent: 'consent to send',
     aiSetConsentYes: 'given: Arhiva no longer asks before sending.',
@@ -9029,7 +9035,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 173;
+const APP_VERSION = 174;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10770,6 +10776,14 @@ function aiUsageAdd(e){
   aiLsSet(AI_LS_USAGE, JSON.stringify(u));
 }
 /* v163: „pokušaji: 503 posle 110,2 s · uspeh 3,1 s“ */
+/* v174: posao iz više poziva (šablon po delovima) — zbir troška i vremena; model = poslednji koji je odgovorio */
+function aiUseAdd(u, r){
+  u.inp += r.usage.inp; u.out += r.usage.out; u.think += r.usage.think; u.usd += r.usage.usd;
+  if(r.model) u.model = r.model.id;
+  const a = r.tm || {ai:0, tries:1, att:[]};
+  u.tm = u.tm ? {ai:u.tm.ai + a.ai, tries:u.tm.tries + a.tries, parts:(u.tm.parts || 1) + 1, att:u.tm.att.concat(a.att).slice(-12)} : {ai:a.ai, tries:a.tries, parts:1, att:a.att.slice(-12)};
+}
+function aiJobName(job, name){ return job + ': ' + String(name || ''); }
 function aiAttText(att){
   return t('aiAtt') + ' ' + att.map(([st, ms])=>st === 'T' ? t('aiAttT', {s:fmtSec(ms)}) : (st >= 200 && st < 300) ? t('aiAttOk', {s:fmtSec(ms)}) : t('aiAttErr', {c:st, s:fmtSec(ms)})).join(' · ');
 }
@@ -10955,7 +10969,15 @@ function geminiFetch(models, body, key, signal, opt){
 /* Jedan poziv Gemini API-ja (generateContent). Sa šemom prvo ide zvanični oblik responseFormat;
    ako ga server odbije kao nepoznato polje, ponavlja se jednom sa responseMimeType (oblik koji koriste Troškovi). */
 async function aiRequest(parts, o){
-  try{ return await aiRequestOnce(parts, o); }
+  /* v174: svaki poziv vraća r.tm = {ai: ms do odgovora, tries, att: [[kod, ms]…]} za „poslednje obrade“ (sve AI radnje) */
+  o = Object.assign({}, o || {});
+  const own = !o.att, t0 = performance.now();
+  if(own) o.att = [];
+  try{
+    const r = await aiRequestOnce(parts, o);
+    r.tm = {ai:Math.round(performance.now() - t0), tries:r.tries || 1, att:o.att.map(a=>[a.st, a.ms])};
+    return r;
+  }
   catch(e){
     if(!(e && e.name === 'AbortError') && !(e && e.aiCode === 'aiErrNoKey')) logError('AI', (e && e.aiCode ? e.aiCode + ': ' : '') + aiErrText(e));
     throw e;
@@ -11160,7 +11182,7 @@ async function aiRunRead(item){
     if(req !== _aiReq) return;
     const r = await aiRequest([{text:aiReadPrompt(albums)}].concat(docParts), {schema:AI_READ_SCHEMA, signal:ctrl.signal, model});
     if(req !== _aiReq) return;
-    aiUsageAdd({model:model.id, name:item.name, inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobRead'), item.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const res = aiCleanRead(aiParseJson(r.text), albums);
     if(!res) throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse');
@@ -13307,7 +13329,7 @@ async function wsScanBlocks(src, signal, model, req, usage){
     const img = await pages[i]();
     if(!img) throw aiError('aiErrFile');
     const r = await aiRequest([{text:wsScanPrompt(i + 1, pages.length)}, {inlineData:{mimeType:img.mime, data:img.b64}}], {schema:WS_SCAN_SCHEMA, signal, model});
-    usage.inp += r.usage.inp; usage.out += r.usage.out; usage.think += r.usage.think; usage.usd += r.usage.usd;
+    aiUseAdd(usage, r);
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const bl = wsScanClean(aiParseJson(r.text));
     if(!bl || r.finish === 'MAX_TOKENS'){
@@ -13327,8 +13349,8 @@ async function wsTplMake(src, signal, model, req){
     /* v137: slika i sken — AI samo prepiše tekst (stranicu po stranicu), dalje isto kao Word: AI vraća podatke, Arhiva pravi polja */
     /* trošak prepisa ide u isti zbir (upisuje se jednom, na kraju); ako prepis padne, upisuje se odmah */
     try{ blocks = await wsScanBlocks(src, signal, model, req, usage); }
-    catch(e){ if(usage.inp || usage.out) aiUsageAdd({model:model.id, name:src.name, inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd}); throw e; }
-    if(!blocks){ if(usage.inp || usage.out) aiUsageAdd({model:model.id, name:src.name, inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd}); return null; }
+    catch(e){ if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); throw e; }
+    if(!blocks){ if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); return null; }
   }else blocks = await wsTplBlocks(src);
   const chunks = wsTplChunks(blocks);
   const found = [];
@@ -13339,7 +13361,7 @@ async function wsTplMake(src, signal, model, req){
       if(_ws && _ws.busy){ _ws.busy.prog = {i:i + 1, n:chunks.length}; wsBusyProg(); }
       const imgs = await wsTplPdfImgs(src, chunks[i]);
       const r = await aiRequest([{text:wsTplPrompt(chunks[i], i + 1, chunks.length, found) + (imgs.length ? '\n' + WS_TPL_IMG_NOTE : '')}].concat(imgs), {schema:WS_TPL_SCHEMA, signal, model});
-      usage.inp += r.usage.inp; usage.out += r.usage.out; usage.think += r.usage.think; usage.usd += r.usage.usd;
+      aiUseAdd(usage, r);
       if(r.schemaRej) schemaRej = r.schemaRej;
       if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
       const raw = aiParseJson(r.text);
@@ -13357,7 +13379,7 @@ async function wsTplMake(src, signal, model, req){
       });
     }
   }finally{
-    if(usage.inp || usage.out) aiUsageAdd({model:model.id, name:src.name, inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd});
+    if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm});
   }
   const ap = wsTplApply(blocks, found.concat(wsTplPairs(blocks)));
   /* naslov iz prvog naslova dokumenta (ime fajla često sadrži ime osobe); VELIKA SLOVA → „Ugovor o zakupu stana“ */
@@ -13409,7 +13431,7 @@ function wsTplEditPrompt(res, instr){
 async function wsTplRefine(task, base, signal, model, src){
   const cur = base.res;
   const r = await aiRequest([{text:wsTplEditPrompt(cur, task.text)}], {schema:WS_TPL_EDIT_SCHEMA, signal, model});
-  aiUsageAdd({model:model.id, name:src.name, inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+  aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobTplEdit'), src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
   if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
   const o = aiParseJson(r.text);
   if(!o || typeof o !== 'object'){ const er = aiError('aiErrParse'); er.raw = String(r.text || ''); er.finish = r.finish || ''; er.schemaRej = r.schemaRej || ''; throw er; }
@@ -13509,8 +13531,9 @@ async function wsRun(task){
     const cur = base ? {title:base.res.title, blocks:base.res.blocks, note:base.res.note} : null;
     if(cur && base.res.tpl) cur.fields = (base.res.fields || []).map(f=>({name:f.name, example:f.example, kind:f.kind}));
     const r = await aiRequest([{text:wsPrompt(task, cur)}].concat(docParts), {schema:WS_SCHEMA, signal:ctrl.signal, model});
+    const job = task.kind === 'custom' ? t('aiJobTask') : task.kind === 'refine' ? t('aiJobRefine') : String(task.label || t('aiJobTask'));
     if(req !== _wsReq) return;
-    aiUsageAdd({model:model.id, name:src.name, inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    aiUsageAdd({model:(r.model || model).id, name:aiJobName(job, src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const raw = aiParseJson(r.text);
     res = wsClean(raw);
@@ -14390,7 +14413,7 @@ async function zsRun(){
       if(req !== _zsReq) return;
       const r = await aiRequest([{text:zsPrompt(kind, cols)}].concat(parts), {schema:zsSchema(kind, cols), signal:ctrl.signal, model});
       if(req !== _zsReq) return;
-      aiUsageAdd({model:(r.model || model).id, name:it.name, inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+      aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobList'), it.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
       if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
       const o = aiParseJson(r.text);
       if(!o || typeof o !== 'object') throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse');
@@ -16803,7 +16826,7 @@ async function weAiRun(){
   let a = we.ai;
   try{
     const r = await aiRequest([{text:weAiPrompt(doc, req)}], {schema:WE_AI_SCHEMA, signal:ctrl.signal, model});
-    aiUsageAdd({model:model.id, name:we.src.name || '', inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobEdit'), we.src.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     const j = aiParseJson(r.text);
     if(!j || !Array.isArray(j.changes)){ const e = aiError('aiErrParse'); e.raw = r.text; e.finish = r.finish; e.schemaRej = r.schemaRej; throw e; }
     if(_we !== we || we.ai !== a) return;
@@ -17116,7 +17139,7 @@ async function wfAiRun(){
     const note = a.src.length >= 2 ? a.note.trim() : '';
     parts.push({text:wfAiPrompt(wf.tp, empty, filled, note, a.src.length)});
     const r = await aiRequest(parts, {schema:WF_AI_SCHEMA, signal:ctrl.signal, model});
-    aiUsageAdd({model:model.id, name:wf.tp.name || '', inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobFill'), wf.tp.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     const j = aiParseJson(r.text);
     if(!j || !Array.isArray(j.values)){ const e = aiError('aiErrParse'); e.raw = r.text; e.finish = r.finish; e.schemaRej = r.schemaRej; throw e; }
     if(_wf !== wf) return;
@@ -17195,7 +17218,7 @@ function aiSettingsHtml(){
         (x.tm && x.tm.att && x.tm.att.length ? '<small>' + escapeHtml(aiAttText(x.tm.att)) + '</small>' : '') + '</div>';
       return '<div class="ai-last">' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
         '<small>' + escapeHtml(t('aiSetLastRow', {tin:fmtInt(x.inp), tout:fmtInt(x.out), usd:fmtUsd(x.usd)})) + '</small>' +
-        (x.tm ? '<small>' + escapeHtml(t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') +
+        (x.tm ? '<small>' + escapeHtml(x.tm.loc == null ? t(x.tm.parts > 1 ? 'aiSetLastTimeP' : 'aiSetLastTimeG', {g:fmtSec(x.tm.ai), n:x.tm.tries || 1, p:x.tm.parts}) : t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') +
         (x.tm && x.tm.att && x.tm.att.length ? '<small>' + escapeHtml(aiAttText(x.tm.att)) + '</small>' : '') + '</div>';
     }).join('') : '<div class="ai-use-row"><span>' + escapeHtml(t('aiSetUsageEmpty')) + '</span></div>') +
     '</div>' +
