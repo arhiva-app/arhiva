@@ -3686,7 +3686,9 @@ const I18N = {
     askMiss: 'Nije pretraženo: {x}.',
     askMissImg: 'slike koje AI nije pročitao: {n}',
     askMissDoc: 'dokumenti bez teksta: {n}',
-    askMissBig: 'preveliko za jedan upit: {n}'
+    askMissNoWord: 'dokumenti bez reči iz pitanja: {n}',
+    askMissMore: 'manje pogodni dokumenti: {n}',
+    askMissStarts: 'reči iz pitanja nisu nađene, pa su pretraženi samo nazivi i počeci dokumenata'
   },
   en: {
     addMulti: 'Multi-page document',
@@ -3704,7 +3706,9 @@ const I18N = {
     askMiss: 'Not searched: {x}.',
     askMissImg: 'images AI has not read: {n}',
     askMissDoc: 'documents without text: {n}',
-    askMissBig: 'too large for one question: {n}',
+    askMissNoWord: 'documents without words from the question: {n}',
+    askMissMore: 'less relevant documents: {n}',
+    askMissStarts: 'no words from the question were found, so only names and beginnings of documents were searched',
     addMultiSub: 'photograph page by page or pick several images',
     pgNewTitle: 'multi-page document',
     pgEditTitle: 'document pages',
@@ -8420,7 +8424,38 @@ document.getElementById('deepSearchToggle').onclick = ()=>{
    Šta nije pretraženo broji Arhiva sama (ne AI). */
 let _ask = null;   /* {q, busy:{ctrl, i, n, phase}, res:{answer, src:[id], miss}, err} */
 let _askReq = 0;
-const ASK_DOC_MAX = 20000, ASK_TOTAL_MAX = 400000;
+const ASK_TOP = 6, ASK_EXC = 2000, ASK_WIN = 350, ASK_HEAD = 300;
+/* reči pitanja bez kratkih i upitnih reči; koren = bez poslednja 1–2 slova (padeži: osiguranje/osiguranja/osiguranju) */
+const ASK_STOP = new Set(['kad','kada','koji','koja','koje','koliko','gde','sta','sto','kako','zasto','mi','moj','moja','moje','moji','meni','je','li','da','za','na','od','do','ima','imam','imao','bio','bila','sam','sve','svi','ali','ili','kao','koga','cemu','kom','koju','tog','taj','ta','to']);
+function askStems(q){
+  const out = [];
+  srLat(q).replace(/[šž]/g, c=>c === 'š' ? 's' : 'z').replace(/[čć]/g, 'c').split(/[^a-z0-9]+/).forEach(w=>{
+    if(w.length < 3 || ASK_STOP.has(w)) return;
+    const st = /^\d+$/.test(w) ? w : w.length > 5 ? w.slice(0, w.length - 2) : w.length > 3 ? w.slice(0, w.length - 1) : w;
+    if(out.indexOf(st) < 0) out.push(st);
+  });
+  return out;
+}
+function askLat(it){
+  let m = _latCache.get(it);
+  if(!m || m.src !== it.content){ m = {src:it.content, lat:srLat(it.content)}; _latCache.set(it, m); }
+  return m.lat;
+}
+/* broj različitih korena nađenih u tekstu; pogodak u nazivu vredi duplo */
+function askScore(stems, name, lat){ let n = 0; stems.forEach(s=>{ if(name.includes(s)) n += 2; else if(lat.includes(s)) n++; }); return n; }
+/* delovi teksta oko pronađenih korena, spojeni, najviše ASK_EXC znakova */
+function askExcerpt(lat, stems){
+  if(lat.length <= ASK_EXC) return {text:lat, part:false};
+  const wins = [];
+  stems.forEach(s=>{ let p = lat.indexOf(s), k = 0; while(p >= 0 && k < 4){ wins.push([Math.max(0, p - ASK_WIN), Math.min(lat.length, p + s.length + ASK_WIN)]); p = lat.indexOf(s, p + s.length); k++; } });
+  if(!wins.length) return {text:lat.slice(0, ASK_EXC), part:true};
+  wins.sort((a, b)=>a[0] - b[0]);
+  const merged = [];
+  wins.forEach(w=>{ const l = merged[merged.length - 1]; if(l && w[0] <= l[1]) l[1] = Math.max(l[1], w[1]); else merged.push(w.slice()); });
+  let out = '', used = 0;
+  for(const w of merged){ if(used >= ASK_EXC) break; const piece = lat.slice(w[0], Math.min(w[1], w[0] + ASK_EXC - used)); out += (out ? '\n…\n' : '') + piece; used += piece.length; }
+  return {text:out, part:true};
+}
 const ASK_SCHEMA = {type:'OBJECT', properties:{
   answer:{type:'STRING', description:'kratak odgovor na pitanje, samo iz dokumenata'},
   found:{type:'BOOLEAN', description:'true ako dokumenti sadrže odgovor'},
@@ -8443,11 +8478,12 @@ function askPrompt(q, docs){
   const lang = appLang() === 'en' ? 'English' : 'the language of the question (Serbian if unclear; keep the user\u2019s script, Latin or Cyrillic)';
   return 'You answer questions about the user\u2019s personal document archive. Today is ' + todayYmd() + '.\n' +
     'Use ONLY the documents below. If they do not contain the answer, set found=false and say briefly that the documents do not answer it.\n' +
+    'Document texts are lowercase, without diacritics, and may be only excerpts (parts separated by …) or beginnings; write the answer with normal spelling.\n' +
     'Answer in ' + lang + ', short and concrete (dates as DD.MM.YYYY, amounts with currency). Mention which document an answer comes from by its name when helpful.\n' +
     'In "sources" list the numbers [N] of only the documents the answer is actually based on.\n\n' +
     'QUESTION: ' + q + '\n\nDOCUMENTS:\n' +
     docs.map((d, k)=>'[' + (k + 1) + '] name: ' + d.it.name + ' | album: ' + (catLabel(d.it.category) || '-') + ' | added: ' + askYmd(d.it.ts) +
-      (isYmd(d.it.validUntil) ? ' | valid until (user reminder): ' + d.it.validUntil : '') + (d.cut ? ' | (text shortened)' : '') + '\n' + d.text).join('\n\n');
+      (isYmd(d.it.validUntil) ? ' | valid until (user reminder): ' + d.it.validUntil : '') + (d.part ? ' | (only parts of the text)' : '') + '\n' + d.text).join('\n\n');
 }
 async function askRun(){
   const q = searchEl.value.trim();
@@ -8484,20 +8520,21 @@ async function askRun(){
     const missDoc = scope.filter(i=>i.type !== 'image' && !(i.content && i.content.trim())).length;
     if(!withText.length){
       _ask.busy = null;
-      _ask.res = {answer:t('askNoDocs'), src:[], miss:askMissText(missImg, missDoc, 0), none:true};
+      _ask.res = {answer:t('askNoDocs'), src:[], miss:askMissText(missImg, missDoc, {}), none:true};
       render(); return;
     }
-    /* prvo dokumenti u kojima se pojavljuje neka reč pitanja, pa noviji; ukupna granica veličine */
-    const words = srLat(q).split(/[^a-z0-9\u0400-\u04ff]+/).filter(w=>w.length >= 3);
-    const score = it=>{ const tx = srLat(it.name + '\n' + it.content); return words.filter(w=>tx.includes(w)).length; };
-    const ranked = withText.map(it=>({it, sc:score(it)})).sort((a, b)=>(b.sc - a.sc) || (b.it.ts - a.it.ts));
-    const docs = []; let total = 0, big = 0;
-    for(const r of ranked){
-      let text = r.it.content, cut = false;
-      if(text.length > ASK_DOC_MAX){ text = text.slice(0, ASK_DOC_MAX); cut = true; }
-      if(total + text.length > ASK_TOTAL_MAX){ big++; continue; }
-      total += text.length;
-      docs.push({it:r.it, text, cut});
+    /* v161: Arhiva prvo traži sama (koren reči, ćirilica = latinica); AI dobija najviše ASK_TOP dokumenata
+       i iz svakog samo delove oko pronađenih reči. Bez pogotka: samo nazivi i počeci svih dokumenata. */
+    const stems = askStems(q);
+    const ranked = withText.map(it=>{ const lat = askLat(it); return {it, lat, sc:askScore(stems, srLat(normalizeSr(it.name)), lat)}; })
+      .filter(r=>r.sc > 0).sort((a, b)=>(b.sc - a.sc) || (b.it.ts - a.it.ts));
+    let docs, miss;
+    if(ranked.length){
+      docs = ranked.slice(0, ASK_TOP).map(r=>{ const x = askExcerpt(r.lat, stems); return {it:r.it, text:x.text, part:x.part}; });
+      miss = {noWord:withText.length - ranked.length, more:Math.max(0, ranked.length - ASK_TOP)};
+    }else{
+      docs = withText.slice().sort((a, b)=>b.ts - a.ts).map(it=>{ const lat = askLat(it); return {it, text:lat.slice(0, ASK_HEAD), part:lat.length > ASK_HEAD}; });
+      miss = {starts:true};
     }
     _ask.busy.phase = 'ask'; _ask.busy.n = docs.length; askBusyText();
     const model = aiModel();
@@ -8513,7 +8550,7 @@ async function askRun(){
       if(d && src.indexOf(d.it.id) < 0) src.push(d.it.id);
     });
     _ask.busy = null;
-    _ask.res = {answer:(j.answer || '').trim() || t('askNone'), src, miss:askMissText(missImg, missDoc, big), none:j.found === false};
+    _ask.res = {answer:(j.answer || '').trim() || t('askNone'), src, miss:askMissText(missImg, missDoc, miss), none:j.found === false};
     render();
   }catch(e){
     if(req !== _askReq) return;
@@ -8523,11 +8560,13 @@ async function askRun(){
     render();
   }
 }
-function askMissText(img, doc, big){
+function askMissText(img, doc, m){
   const x = [];
+  if(m.starts) x.push(t('askMissStarts'));
+  if(m.noWord) x.push(t('askMissNoWord', {n:m.noWord}));
+  if(m.more) x.push(t('askMissMore', {n:m.more}));
   if(img) x.push(t('askMissImg', {n:img}));
   if(doc) x.push(t('askMissDoc', {n:doc}));
-  if(big) x.push(t('askMissBig', {n:big}));
   return x.length ? t('askMiss', {x:x.join(', ')}) : '';
 }
 function askBusyText(){
@@ -8917,7 +8956,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 160;
+const APP_VERSION = 161;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
