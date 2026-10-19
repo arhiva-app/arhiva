@@ -269,6 +269,12 @@
   .ask-busy{display:flex;align-items:center;gap:10px;font-size:15px;}
   .ask-spin{flex:none;width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--brass);border-radius:50%;animation:askSpin .9s linear infinite;}
   @keyframes askSpin{to{transform:rotate(360deg);}}
+  .emp-alt{margin:18px 0 0;padding:20px 16px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--ink);}
+  .emp-alt b{display:block;font-size:17px;margin-bottom:8px;}
+  .emp-alt p{margin:0 0 16px;font-size:14px;line-height:1.45;color:var(--ink-dim);}
+  .emp-row{display:flex;gap:10px;}
+  .emp-row button{flex:1;min-height:46px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--ink);font-family:var(--font-ui);font-size:15px;font-weight:600;}
+  .emp-row button.ai{border-color:var(--brass);color:var(--brass);background:var(--brass-glow);}
   .ask-btn{margin-top:12px;width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--ink);font-family:var(--font-ui);font-size:15px;}
 
   .section-label{
@@ -3682,6 +3688,14 @@ const I18N = {
     askNone: 'U dokumentima nema odgovora na ovo pitanje.',
     askSrc: 'Izvori',
     askHead: '✨ AI ODGOVOR',
+    empName: 'Nijedan naziv ne sadrži ove reči',
+    empNameAlb: 'U ovom albumu nijedan naziv ne sadrži ove reči',
+    empNameTx: 'Možeš da tražiš i u tekstu dokumenata ili da ovo postaviš kao pitanje.',
+    empDeep: 'Ni u tekstu dokumenata nema ovih reči',
+    empDeepAlb: 'Ni u tekstu dokumenata ovog albuma nema ovih reči',
+    empDeepTx: 'Možda AI razume pitanje drugačije, na primer „polisa“ umesto „osiguranje“.',
+    empDeepBtn: 'Traži u tekstu',
+    empAskBtn: '✨ Pitaj',
     askFoot: 'AI može da pogreši — proveri u izvoru.',
     askMiss: 'Nije pretraženo: {x}.',
     askMissImg: 'slike koje AI nije pročitao: {n}',
@@ -3702,6 +3716,14 @@ const I18N = {
     askNone: 'The documents do not answer this question.',
     askSrc: 'Sources',
     askHead: '✨ AI ANSWER',
+    empName: 'No name contains these words',
+    empNameAlb: 'No name in this album contains these words',
+    empNameTx: 'You can also search the text of documents or ask this as a question.',
+    empDeep: 'These words are not in the document text either',
+    empDeepAlb: 'These words are not in this album’s document text either',
+    empDeepTx: 'AI may understand the question differently, e.g. “policy” instead of “insurance”.',
+    empDeepBtn: 'Search text',
+    empAskBtn: '✨ Ask',
     askFoot: 'AI can make mistakes — check the source.',
     askMiss: 'Not searched: {x}.',
     askMissImg: 'images AI has not read: {n}',
@@ -6511,6 +6533,7 @@ function _renderView(){
     }
 
     if(filtered.length === 0 && shownSubs.length > 0){ currentGalleryItems = []; return; }
+    if(filtered.length === 0 && q && !selectionMode){ contentArea.appendChild(searchEmptyAlt(true)); currentGalleryItems = []; return; }   /* v161 */
     if(filtered.length === 0){
       const msg = q ? 'Nema rezultata za "'+escapeHtml(searchEl.value)+'".' : currentFolder === ALL ? t('allEmpty') : 'Ovaj album je prazan. Dodaj nešto ikonicom „Dodaj“ gore.';
       const emptyDiv = document.createElement('div');
@@ -6548,7 +6571,8 @@ function _renderView(){
     const matchedItems = items.filter(i=>matchItemQuery(i, q));
 
     if(!inboxMatches && matchedCats.length === 0 && matchedItems.length === 0){
-      contentArea.innerHTML = '<div class="empty"><b>Nema rezultata</b><span>Nema rezultata za "'+escapeHtml(searchEl.value)+'".</span></div>';
+      if(selectionMode) contentArea.innerHTML = '<div class="empty"><b>Nema rezultata</b><span>Nema rezultata za "'+escapeHtml(searchEl.value)+'".</span></div>';
+      else contentArea.appendChild(searchEmptyAlt(false));   /* v161 */
       return;
     }
 
@@ -8619,6 +8643,24 @@ function askRender(){
   }
 }
 document.getElementById('askBtn').onclick = ()=>askRun();
+/* v161: prazna pretraga nudi sledeći korak: „Traži u tekstu“ (uključi Detaljno) i „✨ Pitaj“ */
+function searchEmptyAlt(inAlbum){
+  const d = document.createElement('div');
+  d.className = 'emp-alt';
+  d.innerHTML = '<b></b><p></p><div class="emp-row"></div>';
+  d.querySelector('b').textContent = t(deepSearchMode ? (inAlbum ? 'empDeepAlb' : 'empDeep') : (inAlbum ? 'empNameAlb' : 'empName'));
+  d.querySelector('p').textContent = t(deepSearchMode ? 'empDeepTx' : 'empNameTx');
+  const row = d.querySelector('.emp-row');
+  if(!deepSearchMode){
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'emp-deep'; b.textContent = t('empDeepBtn');
+    b.onclick = ()=>document.getElementById('deepSearchToggle').onclick();
+    row.appendChild(b);
+  }
+  const a = document.createElement('button'); a.type = 'button'; a.className = 'emp-ask ai'; a.textContent = t('empAskBtn');
+  a.onclick = ()=>askRun();
+  row.appendChild(a);
+  return d;
+}
 
 loadAll().then(()=>{ refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); });
 if('serviceWorker' in navigator){
