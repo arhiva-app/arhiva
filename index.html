@@ -256,6 +256,17 @@
     padding:6px 9px;cursor:pointer;border-radius:3px;white-space:nowrap;transition:border-color .2s,color .2s;
   }
   .deep-search-toggle.active{border-color:var(--brass);color:var(--brass);background:var(--brass-glow);}
+  /* v160: Pitaj — odgovor iz dokumenata, iznad izvora */
+  .ask-toggle{color:var(--brass);border-color:var(--brass-soft);}
+  .ask-card{margin:4px 0 14px;padding:14px 15px;border:1px solid var(--brass-soft);border-radius:14px;background:var(--surface);color:var(--ink);}
+  .ask-q{font-size:13px;color:var(--ink-dim);margin-bottom:8px;word-break:break-word;}
+  .ask-a{font-size:16.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
+  .ask-miss{margin-top:10px;font-size:12.5px;line-height:1.4;color:var(--ink-dim);}
+  .ask-err{font-size:15px;line-height:1.4;color:var(--danger);}
+  .ask-busy{display:flex;align-items:center;gap:10px;font-size:15px;}
+  .ask-spin{flex:none;width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--brass);border-radius:50%;animation:askSpin .9s linear infinite;}
+  @keyframes askSpin{to{transform:rotate(360deg);}}
+  .ask-btn{margin-top:12px;width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--ink);font-family:var(--font-ui);font-size:15px;}
 
   .section-label{
     font-family:var(--font-num);font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;
@@ -2276,6 +2287,7 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
       </svg>
       <input id="search" type="text" placeholder="Pretraži po nazivu..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button id="deepSearchToggle" class="deep-search-toggle" type="button" title="Detaljna pretraga — uključi i sadržaj dokumenata">Detaljno</button>
+      <button id="askBtn" class="deep-search-toggle ask-toggle" type="button" title="Pitaj Arhivu — odgovor iz tvojih dokumenata">Pitaj</button>
       <button id="searchCloseBtn" class="search-close" type="button" title="Zatvori pretragu">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
@@ -3656,10 +3668,36 @@ const I18N = {
     expSetField: 'podseti me (dana ranije)',
     expSetHint1: 'kad do datuma ostane ovoliko dana ili manje, Arhiva te jednom obavesti, a na zvoncetu na početnom ekranu pojavi se broj. još po jednom te obavesti 7 dana pre i kad datum prođe.',
     expSetHint2: 'obaveštenje vidiš kad otvoriš Arhivu. obaveštenja dok je aplikacija zatvorena za sada ne postoje.',
-    bkHintZip: 'rezervna kopija je jedan ZIP fajl: u njemu su tvoji dokumenti kao obične slike i PDF-ovi, složeni po albumima, pa se mogu otvoriti i bez Arhive. uvoz prima i stare .json kopije. pri vraćanju biraš: dodaj postojećim (bez duplikata) ili zameni sve. oštećen fajl se ne uvozi.'
+    bkHintZip: 'rezervna kopija je jedan ZIP fajl: u njemu su tvoji dokumenti kao obične slike i PDF-ovi, složeni po albumima, pa se mogu otvoriti i bez Arhive. uvoz prima i stare .json kopije. pri vraćanju biraš: dodaj postojećim (bez duplikata) ili zameni sve. oštećen fajl se ne uvozi.',
+    askEmpty: 'upiši pitanje u polje, pa dodirni „Pitaj“.',
+    askNoDocs: 'ovde nema dokumenata sa tekstom koji AI može da pretraži.',
+    askReading: 'Čitam dokumente: {i} / {n}…',
+    askBusy: 'Tražim odgovor u dokumentima ({n})…',
+    askStart: 'Tražim odgovor…',
+    askCancel: 'Otkaži',
+    askRetry: 'Pokušaj ponovo',
+    askNone: 'U dokumentima nema odgovora na ovo pitanje.',
+    askSrc: 'Izvori',
+    askMiss: 'Nije pretraženo: {x}.',
+    askMissImg: 'slike koje AI nije pročitao: {n}',
+    askMissDoc: 'dokumenti bez teksta: {n}',
+    askMissBig: 'preveliko za jedan upit: {n}'
   },
   en: {
     addMulti: 'Multi-page document',
+    askEmpty: 'type a question in the field, then tap “Ask”.',
+    askNoDocs: 'there are no documents with text here for AI to search.',
+    askReading: 'Reading documents: {i} / {n}…',
+    askBusy: 'Searching documents ({n})…',
+    askStart: 'Searching…',
+    askCancel: 'Cancel',
+    askRetry: 'Try again',
+    askNone: 'The documents do not answer this question.',
+    askSrc: 'Sources',
+    askMiss: 'Not searched: {x}.',
+    askMissImg: 'images AI has not read: {n}',
+    askMissDoc: 'documents without text: {n}',
+    askMissBig: 'too large for one question: {n}',
     addMultiSub: 'photograph page by page or pick several images',
     pgNewTitle: 'multi-page document',
     pgEditTitle: 'document pages',
@@ -6446,6 +6484,7 @@ function _renderView(){
       albumHead.appendChild(row);
     }
     albumHeaderZone.appendChild(albumHead);
+    if(searchOpen && _ask && !selectionMode){ askRender(); return; }   /* v160 */
 
     /* Podalbumi na vrhu, ispod njih slike samog albuma */
     const shownSubs = q ? subs.filter(c=>hitWords(normalizeSr(c.name), q)) : subs;
@@ -6487,6 +6526,7 @@ function _renderView(){
 
   countEl.innerHTML = '<b>' + items.length + '</b> ukupno';
   contentArea.innerHTML = '';
+  if(searchOpen && _ask && !selectionMode){ askRender(); return; }   /* v160 */
 
   const closeAlbumViewTop = ()=>{ currentFolder = null; searchEl.value=''; render(); };
   closeAlbumViewTop.isAlbumCloser = true;
@@ -8346,9 +8386,10 @@ async function addFile(file, category, o){
     else{ toast('Greška pri dodavanju.'); }
   }
 }
-searchEl.addEventListener('input', render);
+searchEl.addEventListener('input', ()=>{ if(_ask && !_ask.busy && searchEl.value !== _ask.q) _ask = null; render(); });
 const closeSearch = ()=>{
   searchOpen = false;
+  askReset();
   searchEl.value = '';
   render();
 };
@@ -8365,6 +8406,170 @@ document.getElementById('deepSearchToggle').onclick = ()=>{
   if(deepSearchMode){ backfillContent(); }
   render();
 };
+
+/* ---------- v160: Pitaj — pitanje o arhivi u Pretrazi ----------
+   Opseg = isti kao pretraga (ceo album sa podalbumima, „Bez albuma“, „Sve“, ili cela Arhiva na početnom ekranu).
+   AI dobija samo poznat tekst (PDF/Word/Excel, slike koje je AI pročitao) i vraća odgovor + redne brojeve izvora.
+   Šta nije pretraženo broji Arhiva sama (ne AI). */
+let _ask = null;   /* {q, busy:{ctrl, i, n, phase}, res:{answer, src:[id], miss}, err} */
+let _askReq = 0;
+const ASK_DOC_MAX = 20000, ASK_TOTAL_MAX = 400000;
+const ASK_SCHEMA = {type:'OBJECT', properties:{
+  answer:{type:'STRING', description:'kratak odgovor na pitanje, samo iz dokumenata'},
+  found:{type:'BOOLEAN', description:'true ako dokumenti sadrže odgovor'},
+  sources:{type:'ARRAY', items:{type:'INTEGER'}, description:'redni brojevi dokumenata [N] iz kojih je odgovor'}
+}, required:['answer','found','sources']};
+function askScopeItems(){
+  if(currentFolder === INBOX) return items.filter(i=>!i.category);
+  if(currentFolder === ALL) return items.slice();
+  if(currentFolder && realAlbum(currentFolder)){ const ids = albumIdSet(currentFolder); return items.filter(i=>ids.has(i.category)); }
+  return items.slice();
+}
+function askReset(){
+  if(_ask && _ask.busy){ try{ _ask.busy.ctrl.abort(); }catch(e){} }
+  _askReq++;
+  _ask = null;
+}
+function askCancel(){ askReset(); render(); }
+function askYmd(ts){ const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function askPrompt(q, docs){
+  const lang = appLang() === 'en' ? 'English' : 'the language of the question (Serbian if unclear; keep the user\u2019s script, Latin or Cyrillic)';
+  return 'You answer questions about the user\u2019s personal document archive. Today is ' + todayYmd() + '.\n' +
+    'Use ONLY the documents below. If they do not contain the answer, set found=false and say briefly that the documents do not answer it.\n' +
+    'Answer in ' + lang + ', short and concrete (dates as DD.MM.YYYY, amounts with currency). Mention which document an answer comes from by its name when helpful.\n' +
+    'In "sources" list the numbers [N] of only the documents the answer is actually based on.\n\n' +
+    'QUESTION: ' + q + '\n\nDOCUMENTS:\n' +
+    docs.map((d, k)=>'[' + (k + 1) + '] name: ' + d.it.name + ' | album: ' + (catLabel(d.it.category) || '-') + ' | added: ' + askYmd(d.it.ts) +
+      (isYmd(d.it.validUntil) ? ' | valid until (user reminder): ' + d.it.validUntil : '') + (d.cut ? ' | (text shortened)' : '') + '\n' + d.text).join('\n\n');
+}
+async function askRun(){
+  const q = searchEl.value.trim();
+  if(!q){ toast(t('askEmpty')); setTimeout(()=>searchEl.focus(), 50); return; }
+  if(_ask && _ask.busy) return;
+  if(!aiGetKey()){ _ask = {q:searchEl.value, err:aiError('aiErrNoKey')}; render(); return; }
+  if(!aiHasConsent()){
+    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    if(!ok || !searchOpen) return;
+    aiLsSet(AI_LS_CONSENT, '1');
+  }
+  searchEl.blur();
+  hideNote();   /* stara poruka („upiši pitanje…“) ne ostaje iznad odgovora */
+  const req = ++_askReq, ctrl = new AbortController();
+  _ask = {q:searchEl.value, busy:{ctrl, phase:'read', i:0, n:0}};
+  render();
+  window.scrollTo(0, 0);
+  try{
+    await loadTexts();
+    if(req !== _askReq) return;
+    const scope = askScopeItems();
+    /* dokumenti čiji tekst još nije izvučen (isto kao „Detaljno“) */
+    const need = scope.filter(i=>(i.type === 'pdf' || i.type === 'doc') && !i.content && !i.noText);
+    _ask.busy.n = need.length;
+    for(const it of need){
+      _ask.busy.i++; askBusyText();
+      const c = await extractContentForItem(it);
+      if(req !== _askReq) return;
+      if(c && c.trim()) await saveDocText(it, normalizeSr(c)).catch(e=>console.error(e));
+      else it.noText = true;   /* samo u memoriji: sken bez teksta se ne čita ponovo do sledećeg otvaranja */
+    }
+    const withText = scope.filter(i=>i.content && i.content.trim());
+    const missImg = scope.filter(i=>i.type === 'image' && !(i.content && i.content.trim())).length;
+    const missDoc = scope.filter(i=>i.type !== 'image' && !(i.content && i.content.trim())).length;
+    if(!withText.length){
+      _ask.busy = null;
+      _ask.res = {answer:t('askNoDocs'), src:[], miss:askMissText(missImg, missDoc, 0), none:true};
+      render(); return;
+    }
+    /* prvo dokumenti u kojima se pojavljuje neka reč pitanja, pa noviji; ukupna granica veličine */
+    const words = srLat(q).split(/[^a-z0-9\u0400-\u04ff]+/).filter(w=>w.length >= 3);
+    const score = it=>{ const tx = srLat(it.name + '\n' + it.content); return words.filter(w=>tx.includes(w)).length; };
+    const ranked = withText.map(it=>({it, sc:score(it)})).sort((a, b)=>(b.sc - a.sc) || (b.it.ts - a.it.ts));
+    const docs = []; let total = 0, big = 0;
+    for(const r of ranked){
+      let text = r.it.content, cut = false;
+      if(text.length > ASK_DOC_MAX){ text = text.slice(0, ASK_DOC_MAX); cut = true; }
+      if(total + text.length > ASK_TOTAL_MAX){ big++; continue; }
+      total += text.length;
+      docs.push({it:r.it, text, cut});
+    }
+    _ask.busy.phase = 'ask'; _ask.busy.n = docs.length; askBusyText();
+    const model = aiModel();
+    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model});
+    if(req !== _askReq) return;
+    aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
+    const j = aiParseJson(r.text);
+    if(!j || typeof j.answer !== 'string'){ throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse'); }
+    const src = [];
+    if(j.found !== false) (Array.isArray(j.sources) ? j.sources : []).forEach(n=>{
+      const d = docs[(parseInt(n) || 0) - 1];
+      if(d && src.indexOf(d.it.id) < 0) src.push(d.it.id);
+    });
+    _ask.busy = null;
+    _ask.res = {answer:(j.answer || '').trim() || t('askNone'), src, miss:askMissText(missImg, missDoc, big), none:j.found === false};
+    render();
+  }catch(e){
+    if(req !== _askReq) return;
+    if(e && e.name === 'AbortError') return;
+    console.error(e);
+    _ask.busy = null; _ask.err = e;
+    render();
+  }
+}
+function askMissText(img, doc, big){
+  const x = [];
+  if(img) x.push(t('askMissImg', {n:img}));
+  if(doc) x.push(t('askMissDoc', {n:doc}));
+  if(big) x.push(t('askMissBig', {n:big}));
+  return x.length ? t('askMiss', {x:x.join(', ')}) : '';
+}
+function askBusyText(){
+  const el = document.getElementById('askBusyTx'), b = _ask && _ask.busy;
+  if(!el || !b) return;
+  el.textContent = b.phase === 'ask' ? t('askBusy', {n:b.n}) : (b.n ? t('askReading', {i:b.i, n:b.n}) : t('askStart'));
+}
+function askRender(){
+  contentArea.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'ask-card';
+  card.id = 'askCard';
+  const qEl = document.createElement('div'); qEl.className = 'ask-q'; qEl.textContent = '„' + _ask.q.trim() + '“';
+  card.appendChild(qEl);
+  if(_ask.busy){
+    card.insertAdjacentHTML('beforeend', '<div class="ask-busy"><span class="ask-spin"></span><span id="askBusyTx"></span></div>' +
+      '<button type="button" class="ask-btn" id="askCancelBtn"></button>');
+    contentArea.appendChild(card);
+    document.getElementById('askCancelBtn').textContent = t('askCancel');
+    document.getElementById('askCancelBtn').onclick = askCancel;
+    askBusyText();
+    return;
+  }
+  if(_ask.err){
+    const er = document.createElement('div'); er.className = 'ask-err'; er.textContent = aiErrText(_ask.err);
+    card.appendChild(er);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'ask-btn'; b.textContent = t('askRetry');
+    b.onclick = ()=>{ searchEl.value = _ask.q; askRun(); };
+    card.appendChild(b);
+    contentArea.appendChild(card);
+    return;
+  }
+  const res = _ask.res || {answer:'', src:[]};
+  const a = document.createElement('div'); a.className = 'ask-a'; a.textContent = res.answer;
+  card.appendChild(a);
+  if(res.miss){ const m = document.createElement('div'); m.className = 'ask-miss'; m.textContent = res.miss; card.appendChild(m); }
+  contentArea.appendChild(card);
+  const list = res.src.map(id=>items.find(i=>i.id === id)).filter(Boolean);
+  if(list.length){
+    const lb = document.createElement('p'); lb.className = 'section-label'; lb.textContent = t('askSrc');
+    contentArea.appendChild(lb);
+    const grid = document.createElement('div'); grid.className = 'grid photos-grid';
+    /* izvor se otvara na mestu (ne ulazi u album kao obična pretraga), pa korak nazad vraća na odgovor */
+    list.forEach((it, k)=>{ const c = buildCard(it, k + 1); c.onclick = ()=>{ if(!selectionMode) openModal(it); }; grid.appendChild(c); });
+    contentArea.appendChild(grid);
+    currentGalleryItems = list;
+  }
+}
+document.getElementById('askBtn').onclick = ()=>askRun();
 
 loadAll().then(()=>{ refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); });
 if('serviceWorker' in navigator){
@@ -8702,7 +8907,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 159;
+const APP_VERSION = 160;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
