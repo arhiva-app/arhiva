@@ -1334,6 +1334,8 @@ button.trash-name{ display:block; width:100%; text-align:left; border:none; back
 .ai-use-row span{ color:var(--ink-dim); flex:none; }
 .ai-use-row b{ font-weight:600; text-align:right; overflow-wrap:anywhere; }
 .ai-last{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:12.5px; line-height:1.45; color:var(--ink); }
+.ai-last.ai-fail{ color:var(--danger); }
+.ai-last .ai-fail-tx{ color:var(--danger); }
 .ai-last:last-child{ border-bottom:none; }
 .ai-last small{ display:block; color:var(--ink-dim); }
 .ai-key-state.ok{ color:var(--brass); font-weight:600; }
@@ -3246,7 +3248,9 @@ const I18N = {
     aiClose: 'Zatvori',
     aiErrNoKey: 'Nije upisan Gemini ključ. Upiši ga u Podešavanja → AI obrada.',
     aiErrKey: 'Google ne prihvata ključ (neispravan je ili nema dozvolu).',
-    aiErrQuota: 'Google je odbio zahtev zbog ograničenja na tvom nalogu, i posle 4 pokušaja (i sa rezervnim modelom). Pokušaj ponovo za minut; ako se ponavlja, ograničenje za danas je potrošeno.',
+    aiErrQuota: 'Google je odbio zahtev zbog ograničenja na tvom nalogu (i sa rezervnim modelom). Pokušaj ponovo za minut; ako se ponavlja, ograničenje za danas je potrošeno.',
+    aiErrQuotaWait: 'Google je odbio zahtev: previše zahteva u kratkom vremenu (i sa rezervnim modelom). Pokušaj ponovo za {s} s.',
+    aiErrQuotaDay: 'Ograničenje tvog Google ključa za danas je potrošeno (i za rezervni model). Obnavlja se sutra; tačne granice vidiš u Google AI Studio.',
     aiErrNet: 'Nema veze sa Google-om. Proveri internet i pokušaj ponovo.',
     aiErrTimeout: 'Google nije odgovorio na vreme ni posle 4 pokušaja. Pokušaj ponovo malo kasnije.',
     aiErrServer: 'Google trenutno ne odgovara (greška {code}), ni posle 4 pokušaja i rezervnog modela. Pokušaj ponovo za par minuta.',
@@ -3895,7 +3899,9 @@ const I18N = {
     aiClose: 'Close',
     aiErrNoKey: 'No Gemini key is saved. Enter it in Settings → AI processing.',
     aiErrKey: 'Google does not accept the key (it is invalid or not allowed).',
-    aiErrQuota: 'Google refused the request due to your account limit, even after 4 attempts (including the backup model). Try again in a minute; if it keeps happening, the limit for today is used up.',
+    aiErrQuota: 'Google refused the request due to your account limit (including the backup model). Try again in a minute; if it keeps happening, the limit for today is used up.',
+    aiErrQuotaWait: 'Google refused the request: too many requests in a short time (including the backup model). Try again in {s} s.',
+    aiErrQuotaDay: 'Your Google key’s limit for today is used up (including the backup model). It resets tomorrow; exact limits are in Google AI Studio.',
     aiErrNet: 'No connection to Google. Check the internet and try again.',
     aiErrTimeout: 'Google did not answer in time after 4 attempts. Try again a little later.',
     aiErrServer: 'Google is not responding right now (error {code}), even after 4 attempts and the backup model. Try again in a few minutes.',
@@ -8598,6 +8604,8 @@ async function askRun(){
     if(e && e.name === 'AbortError') return;
     console.error(e);
     if(att && att.length) logError('Pitaj', aiAttText(att.map(a=>[a.st, a.ms])));   /* v163: koji pokušaj je kako prošao */
+    if(att) aiUsageFail({model:((att[att.length - 1] || {}).m) || aiModel().id, name:'Pitaj: ' + q.slice(0, 60), err:aiErrText(e),
+      tm:{loc:0, ai:att.reduce((n, a)=>n + (a.ms || 0), 0), tries:att.length, att:att.map(a=>[a.st, a.ms])}});
     _ask.busy = null; _ask.err = e;
     render();
   }
@@ -9016,7 +9024,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 164;
+const APP_VERSION = 165;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10684,7 +10692,26 @@ function aiUsageAdd(e){
 function aiAttText(att){
   return t('aiAtt') + ' ' + att.map(([st, ms])=>st === 'T' ? t('aiAttT', {s:fmtSec(ms)}) : (st >= 200 && st < 300) ? t('aiAttOk', {s:fmtSec(ms)}) : t('aiAttErr', {c:st, s:fmtSec(ms)})).join(' · ');
 }
+function aiJsonErr(txt){ try{ const j = JSON.parse(txt); return (j && j.error) || {}; }catch(e){ return {}; } }
+/* v165: iz greške 429: day = dnevno ograničenje, wait = sekundi do ponovnog pokušaja (samo za ograničenje u minutu) */
+function aiQuotaInfo(err){
+  const det = Array.isArray(err && err.details) ? err.details : [];
+  let day = false, minute = false, wait = 0;
+  det.forEach(d=>{
+    const ty = String(d && d['@type'] || '');
+    if(/QuotaFailure/.test(ty)) (d.violations || []).forEach(v=>{ const id = String(v.quotaId || ''); if(/PerDay/i.test(id)) day = true; if(/PerMinute/i.test(id)) minute = true; });
+    if(/RetryInfo/.test(ty)){ const m = String(d.retryDelay || '').match(/^(\d+(?:\.\d+)?)s$/); if(m) wait = Math.ceil(parseFloat(m[1])); }
+  });
+  return day ? {day:true} : (wait && wait <= 300) ? {wait, minute} : {};
+}
 function fmtSec(ms){ return (Math.round((ms || 0) / 100) / 10).toFixed(1).replace('.', appLang() === 'en' ? '.' : ',') + ' s'; }
+/* v165: neuspeo zahtev ulazi u „poslednje obrade“ (bez troška i bez brojanja u zbir) */
+function aiUsageFail(e){
+  const u = aiUsageLoad();
+  u.last.unshift({ts:Date.now(), model:e.model, name:e.name || '', fail:String(e.err || '').slice(0, 200), tm:e.tm || null});
+  u.last = u.last.slice(0, 10);
+  aiLsSet(AI_LS_USAGE, JSON.stringify(u));
+}
 function aiError(code, vars){ const e = new Error(code); e.aiCode = code; e.aiVars = vars || {}; return e; }
 function aiErrText(e){
   if(e && e.aiCode) return t(e.aiCode, e.aiVars);
@@ -10731,7 +10758,7 @@ async function geminiFetch(models, body, key, signal, opt){
     }catch(e){
       if(tm) clearTimeout(tm);
       if(signal && onUser) signal.removeEventListener('abort', onUser);
-      tries = i + 1;
+      tries++;
       if(timedOut && !(signal && signal.aborted)){
         if(opt.log) opt.log.push({st:'T', ms:Math.round(performance.now() - t0), m:used.id});
         if(i === plan.length - 1){ const er = aiError('aiErrTimeout'); throw er; }
@@ -10742,9 +10769,21 @@ async function geminiFetch(models, body, key, signal, opt){
     }
     if(tm) clearTimeout(tm);
     if(signal && onUser) signal.removeEventListener('abort', onUser);
-    if(opt.log) opt.log.push({st:res.status, ms:Math.round(performance.now() - t0), m:used.id});
-    tries = i + 1;
+    const lg = {st:res.status, ms:Math.round(performance.now() - t0), m:used.id};
+    if(opt.log) opt.log.push(lg);
+    tries++;
     if(GEMINI_RETRY_STATUS.indexOf(res.status) < 0 || i === plan.length - 1) break;
+    if(res.status === 429){
+      /* v165: ograničenje naloga se ne obnavlja za sekundu — isti model se ne ponavlja; rezervni (svoje ograničenje) jednom, bez pauze */
+      const nx = plan.findIndex((p, k)=>k > i && p[0] !== used);
+      if(nx < 0 || used === models[1]) break;
+      const qt = await res.clone().text().catch(()=>'');
+      Object.assign(lg, aiQuotaInfo(aiJsonErr(qt)));
+      plan[nx] = [plan[nx][0], 0];
+      plan.splice(nx + 1);
+      i = nx - 1;
+      continue;
+    }
     await res.text().catch(()=>'');
   }
   return {res, model:used, tries};
@@ -10792,7 +10831,12 @@ async function aiRequestOnce(parts, o){
     if(res.status === 400 && i < bodies.length - 1 && /response_?format|unknown name|invalid json payload|schema/i.test(msg)){ schemaRej = msg.slice(0, 400) || String(res.status); continue; }
     if(res.status === 401 || res.status === 403) throw aiError('aiErrKey');
     if(res.status === 404) throw aiError('aiErrModel', {m:model.name});
-    if(res.status === 429) throw aiError('aiErrQuota');
+    if(res.status === 429){
+      /* v165: Google u 429 šalje QuotaFailure (quotaId …PerDay… / …PerMinute…) i RetryInfo.retryDelay („27s“) — viđeno u stvarnim odgovorima */
+      const qi = aiQuotaInfo(err);
+      if(o.att && o.att.length){ const la = o.att[o.att.length - 1]; if(la.st === 429) Object.assign(la, qi); }
+      throw aiError(qi.day ? 'aiErrQuotaDay' : qi.wait ? 'aiErrQuotaWait' : 'aiErrQuota', {s:qi.wait || 0, n:g.tries || tries});
+    }
     if(res.status >= 500) throw aiError('aiErrServer', {code:res.status});
     throw aiError('aiErrOther', {code:res.status, msg:(msg || res.statusText || '').slice(0, 160)});
   }
@@ -16977,6 +17021,9 @@ function aiSettingsHtml(){
       const d = new Date(x.ts || 0);
       const when = d.getDate() + '.' + (d.getMonth() + 1) + '. ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       const mm = aiModelById(x.model);
+      if(x.fail != null) return '<div class="ai-last ai-fail">✗ ' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
+        '<small class="ai-fail-tx">' + escapeHtml(x.fail) + '</small>' +
+        (x.tm && x.tm.att && x.tm.att.length ? '<small>' + escapeHtml(aiAttText(x.tm.att)) + '</small>' : '') + '</div>';
       return '<div class="ai-last">' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
         '<small>' + escapeHtml(t('aiSetLastRow', {tin:fmtInt(x.inp), tout:fmtInt(x.out), usd:fmtUsd(x.usd)})) + '</small>' +
         (x.tm ? '<small>' + escapeHtml(t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') +
