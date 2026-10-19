@@ -3688,6 +3688,7 @@ const I18N = {
     askNone: 'U dokumentima nema odgovora na ovo pitanje.',
     askSrc: 'Izvori',
     askHead: '✨ AI ODGOVOR',
+    aiSetLastTime: 'vreme: Arhiva {a} · Google {g} · pokušaja: {n}',
     empName: 'Nijedan naziv ne sadrži ove reči',
     empNameAlb: 'U ovom albumu nijedan naziv ne sadrži ove reči',
     empNameTx: 'Možeš da tražiš i u tekstu dokumenata ili da ovo postaviš kao pitanje.',
@@ -3716,6 +3717,7 @@ const I18N = {
     askNone: 'The documents do not answer this question.',
     askSrc: 'Sources',
     askHead: '✨ AI ANSWER',
+    aiSetLastTime: 'time: Arhiva {a} · Google {g} · attempts: {n}',
     empName: 'No name contains these words',
     empNameAlb: 'No name in this album contains these words',
     empNameTx: 'You can also search the text of documents or ask this as a question.',
@@ -8521,7 +8523,7 @@ async function askRun(){
   }
   searchEl.blur();
   hideNote();   /* stara poruka („upiši pitanje…“) ne ostaje iznad odgovora */
-  const req = ++_askReq, ctrl = new AbortController();
+  const req = ++_askReq, ctrl = new AbortController(), t0 = performance.now();
   _ask = {q:searchEl.value, busy:{ctrl, phase:'read', i:0, n:0}};
   render();
   window.scrollTo(0, 0);
@@ -8562,9 +8564,11 @@ async function askRun(){
     }
     _ask.busy.phase = 'ask'; _ask.busy.n = docs.length; askBusyText();
     const model = aiModel();
-    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model});
+    const t1 = performance.now();
+    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, thinkLow:true});
     if(req !== _askReq) return;
-    aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd});
+    const tm = {loc:Math.round(t1 - t0), ai:Math.round(performance.now() - t1), tries:r.tries || 1};
+    aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const j = aiParseJson(r.text);
     if(!j || typeof j.answer !== 'string'){ throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse'); }
@@ -8998,7 +9002,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 161;
+const APP_VERSION = 162;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10619,6 +10623,7 @@ const AI_SHARED_KEY = 'app:apiKey';
 const AI_MAX_MB = 40;
 const AI_TEXT_MAX = 60000;
 /* Cene po 1M tokena (USD), plaćeni nivo, Standard. Izvor: ai.google.dev/gemini-api/docs/pricing (provereno 29.09.2026.) */
+const AI_THINK_LOW = ['gemini-3.8-flash'];   /* v162: modeli kojima „✨ Pitaj“ šalje thinkingLevel low */
 const AI_MODELS = [
   {id:'gemini-3.1-flash-lite', name:'Gemini 3.1 Flash-Lite', sub:'aiModelLite', prices:[{to:'', inp:0.25, out:1.50}]},
   {id:'gemini-3.8-flash', name:'Gemini 3.8 Flash', sub:'aiModelFlash', prices:[{to:'2026-12-31', inp:0.75, out:3.75}, {to:'', inp:1.50, out:7.50}]}
@@ -10656,11 +10661,12 @@ function aiUsageAdd(e){
   const add = (o)=>{ o = o || {}; o.n = (o.n || 0) + 1; o.inp = (o.inp || 0) + (e.inp || 0); o.out = (o.out || 0) + out; o.usd = (o.usd || 0) + (e.usd || 0); return o; };
   u.months[mk] = add(u.months[mk]);
   u.total = add(u.total);
-  u.last.unshift({ts:Date.now(), model:e.model, name:e.name || '', inp:e.inp || 0, out, usd:e.usd || 0});
+  u.last.unshift(Object.assign({ts:Date.now(), model:e.model, name:e.name || '', inp:e.inp || 0, out, usd:e.usd || 0}, e.tm ? {tm:e.tm} : {}));
   u.last = u.last.slice(0, 10);
   Object.keys(u.months).sort().slice(0, -12).forEach(k=>{ delete u.months[k]; });
   aiLsSet(AI_LS_USAGE, JSON.stringify(u));
 }
+function fmtSec(ms){ return (Math.round((ms || 0) / 100) / 10).toFixed(1).replace('.', appLang() === 'en' ? '.' : ',') + ' s'; }
 function aiError(code, vars){ const e = new Error(code); e.aiCode = code; e.aiVars = vars || {}; return e; }
 function aiErrText(e){
   if(e && e.aiCode) return t(e.aiCode, e.aiVars);
@@ -10682,18 +10688,19 @@ function aiBackupModel(m){ return AI_MODELS.find(x=>x.id !== m.id) || null; }
 /* Jedan zahtev sa ponavljanjem: vraća poslednji odgovor (i model koji ga je dao) */
 async function geminiFetch(models, body, key, signal){
   const plan = [[models[0],0],[models[0],1000],[models[1],2000],[models[1],4000]].filter(x=>x[0]);
-  let res = null, used = models[0];
+  let res = null, used = models[0], tries = 0;
   for(let i = 0; i < plan.length; i++){
     if(plan[i][1]) await geminiPause(plan[i][1], signal);
     used = plan[i][0];
     try{
       res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + used.id + ':generateContent',
-        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(body), signal});
+        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(typeof body === 'function' ? body(used) : body), signal});   /* v162: telo može zavisiti od modela */
     }catch(e){ if(e && e.name === 'AbortError') throw e; throw aiError('aiErrNet'); }
+    tries = i + 1;
     if(GEMINI_RETRY_STATUS.indexOf(res.status) < 0 || i === plan.length - 1) break;
     await res.text().catch(()=>'');
   }
-  return {res, model:used};
+  return {res, model:used, tries};
 }
 
 /* Jedan poziv Gemini API-ja (generateContent). Sa šemom prvo ide zvanični oblik responseFormat;
@@ -10717,9 +10724,14 @@ async function aiRequestOnce(parts, o){
     ? [{contents, generationConfig:{responseFormat:{text:{mimeType:'APPLICATION_JSON', schema:o.schema}}}},
        {contents, generationConfig:{responseMimeType:'application/json'}}]
     : [{contents}];
-  let data = null, schemaRej = '';
+  let data = null, schemaRej = '', tries = 0;
   for(let i = 0; i < bodies.length; i++){
-    const g = await geminiFetch([model, aiBackupModel(model)], bodies[i], key, o.signal);
+    /* v162: o.thinkLow — Flash (ne Flash-Lite) razmišlja nisko; po Google-ovoj tabeli 3.8 Flash podržava low/medium/high */
+    const bd = bodies[i];
+    const send = o.thinkLow ? (m=>AI_THINK_LOW.indexOf(m.id) >= 0
+      ? Object.assign({}, bd, {generationConfig:Object.assign({}, bd.generationConfig || {}, {thinkingConfig:{thinkingLevel:'low'}})}) : bd) : bd;
+    const g = await geminiFetch([model, aiBackupModel(model)], send, key, o.signal);
+    tries += g.tries || 0;
     const res = g.res;
     model = g.model;   /* rezervni model ostaje i za drugi oblik zahteva i za trošak */
     let j = null;
@@ -10745,7 +10757,7 @@ async function aiRequestOnce(parts, o){
   usage.usd = aiCostUsd(model, usage);
   const cparts = (cand && cand.content && Array.isArray(cand.content.parts)) ? cand.content.parts : [];
   const text = cparts.filter(p=>typeof p.text === 'string' && !p.thought).map(p=>p.text).join('');
-  return {text, usage, model, finish:(cand && cand.finishReason) || '', schemaRej};
+  return {text, usage, model, finish:(cand && cand.finishReason) || '', schemaRej, tries};
 }
 function aiParseJson(s){
   const x = String(s || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
@@ -16919,7 +16931,8 @@ function aiSettingsHtml(){
       const when = d.getDate() + '.' + (d.getMonth() + 1) + '. ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       const mm = aiModelById(x.model);
       return '<div class="ai-last">' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
-        '<small>' + escapeHtml(t('aiSetLastRow', {tin:fmtInt(x.inp), tout:fmtInt(x.out), usd:fmtUsd(x.usd)})) + '</small></div>';
+        '<small>' + escapeHtml(t('aiSetLastRow', {tin:fmtInt(x.inp), tout:fmtInt(x.out), usd:fmtUsd(x.usd)})) + '</small>' +
+        (x.tm ? '<small>' + escapeHtml(t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') + '</div>';
     }).join('') : '<div class="ai-use-row"><span>' + escapeHtml(t('aiSetUsageEmpty')) + '</span></div>') +
     '</div>' +
     '<div class="settings-hint">' + escapeHtml(t('aiSetFreeHint')) + '</div>';
