@@ -9029,7 +9029,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 171;
+const APP_VERSION = 172;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9507,7 +9507,8 @@ async function exportBackup(){
       entries.push({name:fe.path, blob:await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
     }
     thumbEntries.forEach(e=>entries.push(e));
-    const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n, total})); });
+    /* v172: napredak u STAVKAMA (isti broj kao pri uvozu), ne u fajlovima ZIP-a (slika + sličica + spisak) */
+    const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n:Math.round(n / total * docs.length), total:docs.length})); });
     const msg = await saveBackupFile(zip, backupFileName('zip'), dirOk);
     toastHide();
     toast(msg);
