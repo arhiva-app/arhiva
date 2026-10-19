@@ -8589,7 +8589,7 @@ async function askRun(){
     const model = aiModel();
     const t1 = performance.now();
     att = [];
-    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, thinkLow:true, timeout:ASK_TIMEOUT, att});
+    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, timeout:ASK_TIMEOUT, att});
     if(req !== _askReq) return;
     const tm = {loc:Math.round(t1 - t0), ai:Math.round(performance.now() - t1), tries:r.tries || 1, att:att.map(a=>[a.st, a.ms])};
     aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm});
@@ -9029,7 +9029,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 172;
+const APP_VERSION = 173;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10723,11 +10723,13 @@ const AI_LS_USAGE = LS_PREFIX + 'aiUsage';
 const AI_SHARED_KEY = 'app:apiKey';
 const AI_MAX_MB = 40;
 const AI_TEXT_MAX = 60000;
-/* Cene po 1M tokena (USD), plaćeni nivo, Standard. Izvor: ai.google.dev/gemini-api/docs/pricing (provereno 29.09.2026.) */
-const AI_THINK_LOW = ['gemini-3.8-flash'];   /* v162: modeli kojima „✨ Pitaj“ šalje thinkingLevel low */
+/* Cene po 1M tokena (USD), plaćeni nivo, Standard. Izvor: ai.google.dev/gemini-api/docs/pricing (3.8 Flash, 29.09.2026.);
+   3.5 Flash-Lite: deepmind.google/models/gemini/flash-lite (20.10.2026.).
+   v173: think = thinkingLevel koji se šalje tom modelu (sve AI radnje). 3.5 Flash-Lite se ne šalje: podrazumevano „minimal“
+   (najbrže); 3.8 Flash „low“ (minimal ne podržava — 400). */
 const AI_MODELS = [
-  {id:'gemini-3.1-flash-lite', name:'Gemini 3.1 Flash-Lite', sub:'aiModelLite', prices:[{to:'', inp:0.25, out:1.50}]},
-  {id:'gemini-3.8-flash', name:'Gemini 3.8 Flash', sub:'aiModelFlash', prices:[{to:'2026-12-31', inp:0.75, out:3.75}, {to:'', inp:1.50, out:7.50}]}
+  {id:'gemini-3.5-flash-lite', name:'Gemini 3.5 Flash-Lite', sub:'aiModelLite', prices:[{to:'', inp:0.30, out:2.50}]},
+  {id:'gemini-3.8-flash', name:'Gemini 3.8 Flash', sub:'aiModelFlash', think:'low', prices:[{to:'2026-12-31', inp:0.75, out:3.75}, {to:'', inp:1.50, out:7.50}]}
 ];
 function aiLsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function aiLsSet(k, v){ try{ if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
@@ -10797,75 +10799,157 @@ function aiErrText(e){
   return t('aiErrOther', {code:'?', msg:String((e && e.message) || e).slice(0, 160)});
 }
 
-/* MODUL gemini v1 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida i čekanje,
-   rezervni model = drugi iz AI_MODELS, trošak po modelu koji je stvarno odgovorio.
-   408/429/5xx → ~1 s isti model → ~2 s rezervni → ~4 s rezervni. Ključ u zaglavlju x-goog-api-key (ne u adresi). */
+/* MODUL gemini v2 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida sve pokušaje,
+   rezervni model = drugi iz AI_MODELS, trošak po modelu koji je stvarno odgovorio. Ključ u zaglavlju x-goog-api-key.
+   v173 (brzina): odgovor stiže u delovima (streamGenerateContent?alt=sse), pa se zna kad model POČNE da odgovara.
+   - Glavni bez prvog dela za GEMINI_HEDGE_MS (+ vreme slanja velikog fajla) → istovremeno rezervni; važi prvi gotov,
+     drugi se prekida.
+   - 429 → odmah rezervni (isti model se više ne pokušava); 408/5xx/bez odgovora → odmah rezervni, pa glavni (~1 s),
+     pa rezervni (~2 s) — najviše 4 pokušaja. Ostale greške (400, 401, 404) se vraćaju odmah.
+   - opt.timeout (Pitaj) = granica do prvog dela; inače GEMINI_IDLE_MS bez ijednog dela (i između delova).
+   Delovi se spajaju u isti oblik koji vraća generateContent, pa ostatak koda ostaje isti. */
 const GEMINI_RETRY_STATUS = [408,429,500,502,503,504];
-function geminiPause(ms, signal){
-  return new Promise((res, rej)=>{
-    const ab = ()=>{ clearTimeout(tm); rej(new DOMException('Aborted', 'AbortError')); };
-    const tm = setTimeout(()=>{ if(signal) signal.removeEventListener('abort', ab); res(); }, ms + Math.floor(Math.random()*400));
-    if(signal){ if(signal.aborted){ ab(); return; } signal.addEventListener('abort', ab, {once:true}); }
-  });
-}
+const GEMINI_HEDGE_MS = 3000;       /* „par sekundi“ (dogovor 19.10.) */
+const GEMINI_HEDGE_PER_MB = 1500;   /* pretpostavka: slanje sa telefona ~1 MB/s */
+const GEMINI_IDLE_MS = 120000;      /* Google sam odustaje posle ~110 s (Zoranov dnevnik: „503 posle 110,2 s“) */
 function aiBackupModel(m){ return AI_MODELS.find(x=>x.id !== m.id) || null; }
-/* Jedan zahtev sa ponavljanjem: vraća poslednji odgovor (i model koji ga je dao) */
-async function geminiFetch(models, body, key, signal, opt){
-  /* v163: opt.timeout (ms) = granica po pokušaju (samo „✨ Pitaj“): pokušaj bez odgovora se prekida i ide sledeći.
-     opt.log dobija svaki pokušaj: {st: HTTP kod | 'T' (bez odgovora) , ms, m}. */
-  opt = opt || {};
-  const plan = [[models[0],0],[models[0],1000],[models[1],2000],[models[1],4000]].filter(x=>x[0]);
-  let res = null, used = models[0], tries = 0;
-  for(let i = 0; i < plan.length; i++){
-    if(plan[i][1]) await geminiPause(plan[i][1], signal);
-    used = plan[i][0];
-    const t0 = performance.now();
-    let ctl = null, tm = null, onUser = null, timedOut = false;
-    if(opt.timeout){
-      ctl = new AbortController();
-      onUser = ()=>ctl.abort();
-      if(signal){ if(signal.aborted) ctl.abort(); else signal.addEventListener('abort', onUser, {once:true}); }
-      tm = setTimeout(()=>{ timedOut = true; ctl.abort(); }, opt.timeout);
-    }
-    try{
-      res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + used.id + ':generateContent',
-        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(typeof body === 'function' ? body(used) : body), signal:ctl ? ctl.signal : signal});   /* v162: telo može zavisiti od modela */
-      if(ctl){   /* i telo odgovora mora stići u granici */
-        const txt = await res.text();
-        res = new Response(txt, {status:res.status, statusText:res.statusText, headers:res.headers});
-      }
-    }catch(e){
-      if(tm) clearTimeout(tm);
-      if(signal && onUser) signal.removeEventListener('abort', onUser);
-      tries++;
-      if(timedOut && !(signal && signal.aborted)){
-        if(opt.log) opt.log.push({st:'T', ms:Math.round(performance.now() - t0), m:used.id});
-        if(i === plan.length - 1){ const er = aiError('aiErrTimeout'); throw er; }
-        continue;
-      }
-      if(e && e.name === 'AbortError') throw e;
-      throw aiError('aiErrNet');
-    }
-    if(tm) clearTimeout(tm);
-    if(signal && onUser) signal.removeEventListener('abort', onUser);
-    const lg = {st:res.status, ms:Math.round(performance.now() - t0), m:used.id};
-    if(opt.log) opt.log.push(lg);
-    tries++;
-    if(GEMINI_RETRY_STATUS.indexOf(res.status) < 0 || i === plan.length - 1) break;
-    if(res.status === 429){
-      /* v165: ograničenje naloga se ne obnavlja za sekundu — isti model se ne ponavlja; rezervni (svoje ograničenje) jednom, bez pauze */
-      const nx = plan.findIndex((p, k)=>k > i && p[0] !== used);
-      if(nx < 0 || used === models[1]) break;
-      const qt = await res.clone().text().catch(()=>'');
-      Object.assign(lg, aiQuotaInfo(aiJsonErr(qt)));
-      plan[nx] = [plan[nx][0], 0];
-      plan.splice(nx + 1);
-      i = nx - 1;
-      continue;
-    }
-    await res.text().catch(()=>'');
+/* Spaja SSE delove (ili običan JSON) u jedan odgovor oblika generateContent; null = nečitljivo */
+function geminiCollect(txt){
+  const t = String(txt || '').trim();
+  let frames = [];
+  if(t[0] === '{' || t[0] === '['){
+    try{ const j = JSON.parse(t); frames = Array.isArray(j) ? j : [j]; }catch(e){ return null; }
+  } else {
+    t.split(/\r?\n\r?\n/).forEach(ev=>{
+      const d = ev.split(/\r?\n/).filter(l=>l.indexOf('data:') === 0).map(l=>l.slice(5).replace(/^ /, '')).join('\n');
+      if(!d.trim()) return;
+      try{ frames.push(JSON.parse(d)); }catch(e){}
+    });
   }
-  return {res, model:used, tries};
+  frames = frames.filter(f=>f && typeof f === 'object');
+  if(!frames.length) return null;
+  const er = frames.find(f=>f.error);
+  if(er) return {error:er.error};
+  let text = '', finish = '', usage = null, pf = null, cand = false;
+  frames.forEach(f=>{
+    if(f.promptFeedback) pf = f.promptFeedback;
+    if(f.usageMetadata) usage = f.usageMetadata;
+    const c = (f.candidates || [])[0];
+    if(!c) return;
+    cand = true;
+    if(c.finishReason) finish = c.finishReason;
+    ((c.content || {}).parts || []).forEach(p=>{ if(typeof p.text === 'string' && !p.thought) text += p.text; });
+  });
+  const data = {candidates:cand ? [{content:{role:'model', parts:[{text}]}, finishReason:finish}] : [], usageMetadata:usage || {}};
+  if(pf) data.promptFeedback = pf;
+  return {data};
+}
+/* Jedan pokušaj: {st: HTTP kod | 'T' (bez odgovora) | 'N' (mreža) | 'X' (prekinuli smo), res, txt, ms} */
+async function geminiAttempt(m, bodyStr, key, ctl, firstMs, onFirst){
+  const t0 = performance.now(), ms = ()=>Math.round(performance.now() - t0);
+  let timedOut = false, first = false, idle = null;
+  const cut = ()=>{ timedOut = true; ctl.abort(); };
+  const ft = firstMs ? setTimeout(cut, firstMs) : null;
+  const armIdle = ()=>{ clearTimeout(idle); idle = setTimeout(cut, GEMINI_IDLE_MS); };
+  const gotFirst = ()=>{ if(first) return; first = true; clearTimeout(ft); if(onFirst) onFirst(); };
+  armIdle();
+  try{
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m.id + ':streamGenerateContent?alt=sse',
+      {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:bodyStr, signal:ctl.signal});
+    if(!res.ok){
+      let txt = await res.text();
+      try{ const j = JSON.parse(txt); if(Array.isArray(j) && j[0]) txt = JSON.stringify(j[0]); }catch(e){}
+      return {st:res.status, txt, ms:ms(), res:new Response(txt, {status:res.status, statusText:res.statusText, headers:{'Content-Type':'application/json'}})};
+    }
+    let s = '';
+    if(res.body && res.body.getReader){
+      const rd = res.body.getReader(), dec = new TextDecoder();
+      for(;;){
+        const r = await rd.read();
+        if(r.done) break;
+        if(r.value && r.value.length){ gotFirst(); armIdle(); s += dec.decode(r.value, {stream:true}); }
+      }
+      s += dec.decode();
+    } else { s = await res.text(); gotFirst(); }
+    const g = geminiCollect(s);
+    if(!g) return {st:'N', ms:ms()};
+    if(g.error){
+      const st = Number(g.error.code) || 500, txt = JSON.stringify({error:g.error});
+      return {st, txt, ms:ms(), res:new Response(txt, {status:st, headers:{'Content-Type':'application/json'}})};
+    }
+    return {st:200, ms:ms(), res:new Response(JSON.stringify(g.data), {status:200, headers:{'Content-Type':'application/json'}})};
+  }catch(e){
+    if(timedOut) return {st:'T', ms:ms()};
+    if(ctl.signal.aborted) return {st:'X', ms:ms()};
+    return {st:'N', ms:ms()};
+  }finally{ clearTimeout(ft); clearTimeout(idle); }
+}
+/* Vraća {res (odgovor ili poslednja greška), model koji je odgovorio, tries}. opt.log dobija svaki završen pokušaj {st, ms, m}. */
+function geminiFetch(models, body, key, signal, opt){
+  opt = opt || {};
+  const queue = [[models[0],0],[models[1],0],[models[0],1000],[models[1],2000]].filter(x=>x[0]);
+  const cache = {};
+  const bodyFor = m=>cache[m.id] || (cache[m.id] = JSON.stringify(typeof body === 'function' ? body(m) : body));
+  const hedgeMs = models[1] ? GEMINI_HEDGE_MS + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
+  return new Promise((resolve, reject)=>{
+    let next = 0, pending = 0, tries = 0, done = false, lastErr = null, hardErr = null, netErr = false, pauseTm = null, hedgeTm = null;
+    const live = new Map(), dead = new Set();   /* live: ctl → {m, t0, first} */
+    const finish = fn=>{
+      if(done) return;
+      done = true; clearTimeout(pauseTm); clearTimeout(hedgeTm);
+      live.forEach((v, c)=>c.abort()); live.clear();
+      if(signal) signal.removeEventListener('abort', onUser);
+      fn();
+    };
+    const onUser = ()=>finish(()=>reject(new DOMException('Aborted', 'AbortError')));
+    const pick = ()=>{ while(next < queue.length && dead.has(queue[next][0].id)) next++; return next < queue.length ? queue[next++] : null; };
+    const start = wait=>{
+      const q = pick();
+      if(!q) return false;
+      pending++;
+      if(wait && q[1]) pauseTm = setTimeout(()=>{ pauseTm = null; if(!done) run(q[0]); }, q[1] + Math.floor(Math.random() * 400));
+      else run(q[0]);
+      return true;
+    };
+    const end = ()=>{
+      const e = hardErr || lastErr;
+      if(e && e.r.st !== 'T') finish(()=>resolve({res:e.r.res, model:e.m, tries}));
+      else if(e) finish(()=>reject(aiError('aiErrTimeout')));
+      else finish(()=>reject(netErr ? aiError('aiErrNet') : aiError('aiErrTimeout')));
+    };
+    async function run(m){
+      const idx = tries++;
+      const ctl = new AbortController(), me = {m, t0:performance.now(), first:false};
+      live.set(ctl, me);
+      if(idx === 0 && hedgeMs) hedgeTm = setTimeout(()=>{ hedgeTm = null; if(!done && next === 1) start(false); }, hedgeMs);
+      const r = await geminiAttempt(m, bodyFor(m), key, ctl, opt.timeout || 0, ()=>{ me.first = true; if(idx === 0 && hedgeTm){ clearTimeout(hedgeTm); hedgeTm = null; } });
+      live.delete(ctl); pending--;
+      if(done || r.st === 'X') return;
+      if(idx === 0 && hedgeTm){ clearTimeout(hedgeTm); hedgeTm = null; }
+      if(r.st === 'N'){ netErr = true; if(!pending) end(); return; }
+      const lg = {st:r.st, ms:r.ms, m:m.id};
+      if(opt.log) opt.log.push(lg);
+      if(r.st === 200){
+        /* pokušaj koji do pobede drugog nije ni počeo da odgovara ulazi u dnevnik kao „bez odgovora“ (vidi se zašto je čekano) */
+        if(opt.log) live.forEach(v=>{ if(!v.first) opt.log.splice(opt.log.length - 1, 0, {st:'T', ms:Math.round(performance.now() - v.t0), m:v.m.id}); });
+        finish(()=>resolve({res:r.res, model:m, tries}));
+        return;
+      }
+      if(r.st === 'T' || GEMINI_RETRY_STATUS.indexOf(r.st) >= 0){
+        if(r.st === 429){ dead.add(m.id); Object.assign(lg, aiQuotaInfo(aiJsonErr(r.txt))); }
+        lastErr = {r, m};
+        if(!pending && (hardErr || netErr || !start(true))) end();
+        return;
+      }
+      hardErr = hardErr || {r, m};
+      if(!pending) end();
+    }
+    if(signal){
+      if(signal.aborted){ reject(new DOMException('Aborted', 'AbortError')); return; }
+      signal.addEventListener('abort', onUser, {once:true});
+    }
+    start(false);
+  });
 }
 
 /* Jedan poziv Gemini API-ja (generateContent). Sa šemom prvo ide zvanični oblik responseFormat;
@@ -10891,10 +10975,9 @@ async function aiRequestOnce(parts, o){
     : [{contents}];
   let data = null, schemaRej = '', tries = 0;
   for(let i = 0; i < bodies.length; i++){
-    /* v162: o.thinkLow — Flash (ne Flash-Lite) razmišlja nisko; po Google-ovoj tabeli 3.8 Flash podržava low/medium/high */
+    /* v173: nivo razmišljanja po modelu (AI_MODELS.think), za sve AI radnje */
     const bd = bodies[i];
-    const send = o.thinkLow ? (m=>AI_THINK_LOW.indexOf(m.id) >= 0
-      ? Object.assign({}, bd, {generationConfig:Object.assign({}, bd.generationConfig || {}, {thinkingConfig:{thinkingLevel:'low'}})}) : bd) : bd;
+    const send = m=>m.think ? Object.assign({}, bd, {generationConfig:Object.assign({}, bd.generationConfig || {}, {thinkingConfig:{thinkingLevel:m.think}})}) : bd;
     const g = await geminiFetch([model, aiBackupModel(model)], send, key, o.signal, {timeout:o.timeout || 0, log:o.att});
     tries += g.tries || 0;
     const res = g.res;
