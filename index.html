@@ -257,7 +257,10 @@
   }
   .deep-search-toggle.active{border-color:var(--brass);color:var(--brass);background:var(--brass-glow);}
   /* v160: Pitaj — odgovor iz dokumenata, iznad izvora */
-  .ask-toggle{color:var(--brass);border-color:var(--brass-soft);}
+  /* v160: AI dugme u boji teme (jače od pravila tema za .deep-search-toggle) */
+  .searchbar .deep-search-toggle.ask-toggle{color:var(--brass);border-color:var(--brass);background:var(--brass-glow);}
+  .ask-head{font-size:12.5px;font-weight:600;letter-spacing:.4px;color:var(--brass);margin-bottom:6px;}
+  .ask-foot{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.4;color:var(--ink-dim);}
   .ask-card{margin:4px 0 14px;padding:14px 15px;border:1px solid var(--brass-soft);border-radius:14px;background:var(--surface);color:var(--ink);}
   .ask-q{font-size:13px;color:var(--ink-dim);margin-bottom:8px;word-break:break-word;}
   .ask-a{font-size:16.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
@@ -2287,7 +2290,7 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
       </svg>
       <input id="search" type="text" placeholder="Pretraži po nazivu..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button id="deepSearchToggle" class="deep-search-toggle" type="button" title="Detaljna pretraga — uključi i sadržaj dokumenata">Detaljno</button>
-      <button id="askBtn" class="deep-search-toggle ask-toggle" type="button" title="Pitaj Arhivu — odgovor iz tvojih dokumenata">Pitaj</button>
+      <button id="askBtn" class="deep-search-toggle ask-toggle" type="button" title="Pitaj Arhivu — odgovor iz tvojih dokumenata">✨ Pitaj</button>
       <button id="searchCloseBtn" class="search-close" type="button" title="Zatvori pretragu">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
@@ -3678,6 +3681,8 @@ const I18N = {
     askRetry: 'Pokušaj ponovo',
     askNone: 'U dokumentima nema odgovora na ovo pitanje.',
     askSrc: 'Izvori',
+    askHead: '✨ AI ODGOVOR',
+    askFoot: 'AI može da pogreši — proveri u izvoru.',
     askMiss: 'Nije pretraženo: {x}.',
     askMissImg: 'slike koje AI nije pročitao: {n}',
     askMissDoc: 'dokumenti bez teksta: {n}',
@@ -3694,6 +3699,8 @@ const I18N = {
     askRetry: 'Try again',
     askNone: 'The documents do not answer this question.',
     askSrc: 'Sources',
+    askHead: '✨ AI ANSWER',
+    askFoot: 'AI can make mistakes — check the source.',
     askMiss: 'Not searched: {x}.',
     askMissImg: 'images AI has not read: {n}',
     askMissDoc: 'documents without text: {n}',
@@ -8533,6 +8540,8 @@ function askRender(){
   const card = document.createElement('div');
   card.className = 'ask-card';
   card.id = 'askCard';
+  const hd = document.createElement('div'); hd.className = 'ask-head'; hd.textContent = t('askHead');
+  card.appendChild(hd);
   const qEl = document.createElement('div'); qEl.className = 'ask-q'; qEl.textContent = '„' + _ask.q.trim() + '“';
   card.appendChild(qEl);
   if(_ask.busy){
@@ -8557,6 +8566,7 @@ function askRender(){
   const a = document.createElement('div'); a.className = 'ask-a'; a.textContent = res.answer;
   card.appendChild(a);
   if(res.miss){ const m = document.createElement('div'); m.className = 'ask-miss'; m.textContent = res.miss; card.appendChild(m); }
+  if(!res.none){ const f = document.createElement('div'); f.className = 'ask-foot'; f.textContent = t('askFoot'); card.appendChild(f); }
   contentArea.appendChild(card);
   const list = res.src.map(id=>items.find(i=>i.id === id)).filter(Boolean);
   if(list.length){
