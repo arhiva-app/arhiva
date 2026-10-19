@@ -3248,6 +3248,7 @@ const I18N = {
     aiErrKey: 'Google ne prihvata ključ (neispravan je ili nema dozvolu).',
     aiErrQuota: 'Google je odbio zahtev zbog ograničenja na tvom nalogu, i posle 4 pokušaja (i sa rezervnim modelom). Pokušaj ponovo za minut; ako se ponavlja, ograničenje za danas je potrošeno.',
     aiErrNet: 'Nema veze sa Google-om. Proveri internet i pokušaj ponovo.',
+    aiErrTimeout: 'Google nije odgovorio na vreme ni posle 4 pokušaja. Pokušaj ponovo malo kasnije.',
     aiErrServer: 'Google trenutno ne odgovara (greška {code}), ni posle 4 pokušaja i rezervnog modela. Pokušaj ponovo za par minuta.',
     aiErrModel: 'Model {m} nije dostupan za ovaj ključ. Izaberi drugi u Podešavanja → AI obrada.',
     aiErrBlocked: 'Google je odbio da obradi ovaj dokument.',
@@ -3689,6 +3690,10 @@ const I18N = {
     askSrc: 'Izvori',
     askHead: '✨ AI ODGOVOR',
     aiSetLastTime: 'vreme: Arhiva {a} · Google {g} · pokušaja: {n}',
+    aiAtt: 'pokušaji:',
+    aiAttOk: 'uspeh {s}',
+    aiAttErr: '{c} posle {s}',
+    aiAttT: 'bez odgovora {s}',
     empName: 'Nijedan naziv ne sadrži ove reči',
     empNameAlb: 'U ovom albumu nijedan naziv ne sadrži ove reči',
     empNameTx: 'Možeš da tražiš i u tekstu dokumenata ili da ovo postaviš kao pitanje.',
@@ -3718,6 +3723,10 @@ const I18N = {
     askSrc: 'Sources',
     askHead: '✨ AI ANSWER',
     aiSetLastTime: 'time: Arhiva {a} · Google {g} · attempts: {n}',
+    aiAtt: 'attempts:',
+    aiAttOk: 'success {s}',
+    aiAttErr: '{c} after {s}',
+    aiAttT: 'no answer {s}',
     empName: 'No name contains these words',
     empNameAlb: 'No name in this album contains these words',
     empNameTx: 'You can also search the text of documents or ask this as a question.',
@@ -3888,6 +3897,7 @@ const I18N = {
     aiErrKey: 'Google does not accept the key (it is invalid or not allowed).',
     aiErrQuota: 'Google refused the request due to your account limit, even after 4 attempts (including the backup model). Try again in a minute; if it keeps happening, the limit for today is used up.',
     aiErrNet: 'No connection to Google. Check the internet and try again.',
+    aiErrTimeout: 'Google did not answer in time after 4 attempts. Try again a little later.',
     aiErrServer: 'Google is not responding right now (error {code}), even after 4 attempts and the backup model. Try again in a few minutes.',
     aiErrModel: 'Model {m} is not available for this key. Choose another in Settings → AI processing.',
     aiErrBlocked: 'Google refused to process this document.',
@@ -8450,6 +8460,7 @@ document.getElementById('deepSearchToggle').onclick = ()=>{
    Šta nije pretraženo broji Arhiva sama (ne AI). */
 let _ask = null;   /* {q, busy:{ctrl, i, n, phase}, res:{answer, src:[id], miss}, err} */
 let _askReq = 0;
+let ASK_TIMEOUT = 20000;     /* v163: granica po pokušaju (procena za mali upit, ne Google-ov broj) */
 const ASK_TOP = 6, ASK_EXC = 2000, ASK_WIN = 350, ASK_HEAD = 300;
 /* reči pitanja bez kratkih i upitnih reči; koren = bez poslednja 1–2 slova (padeži: osiguranje/osiguranja/osiguranju) */
 const ASK_STOP = new Set(['kad','kada','koji','koja','koje','koliko','gde','sta','sto','kako','zasto','mi','moj','moja','moje','moji','meni','je','li','da','za','na','od','do','ima','imam','imao','bio','bila','sam','sve','svi','ali','ili','kao','koga','cemu','kom','koju','tog','taj','ta','to']);
@@ -8524,6 +8535,7 @@ async function askRun(){
   searchEl.blur();
   hideNote();   /* stara poruka („upiši pitanje…“) ne ostaje iznad odgovora */
   const req = ++_askReq, ctrl = new AbortController(), t0 = performance.now();
+  let att = null;
   _ask = {q:searchEl.value, busy:{ctrl, phase:'read', i:0, n:0}};
   render();
   window.scrollTo(0, 0);
@@ -8565,9 +8577,10 @@ async function askRun(){
     _ask.busy.phase = 'ask'; _ask.busy.n = docs.length; askBusyText();
     const model = aiModel();
     const t1 = performance.now();
-    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, thinkLow:true});
+    att = [];
+    const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, thinkLow:true, timeout:ASK_TIMEOUT, att});
     if(req !== _askReq) return;
-    const tm = {loc:Math.round(t1 - t0), ai:Math.round(performance.now() - t1), tries:r.tries || 1};
+    const tm = {loc:Math.round(t1 - t0), ai:Math.round(performance.now() - t1), tries:r.tries || 1, att:att.map(a=>[a.st, a.ms])};
     aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const j = aiParseJson(r.text);
@@ -8584,6 +8597,7 @@ async function askRun(){
     if(req !== _askReq) return;
     if(e && e.name === 'AbortError') return;
     console.error(e);
+    if(att && att.length) logError('Pitaj', aiAttText(att.map(a=>[a.st, a.ms])));   /* v163: koji pokušaj je kako prošao */
     _ask.busy = null; _ask.err = e;
     render();
   }
@@ -9002,7 +9016,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 162;
+const APP_VERSION = 163;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10666,6 +10680,10 @@ function aiUsageAdd(e){
   Object.keys(u.months).sort().slice(0, -12).forEach(k=>{ delete u.months[k]; });
   aiLsSet(AI_LS_USAGE, JSON.stringify(u));
 }
+/* v163: „pokušaji: 503 posle 110,2 s · uspeh 3,1 s“ */
+function aiAttText(att){
+  return t('aiAtt') + ' ' + att.map(([st, ms])=>st === 'T' ? t('aiAttT', {s:fmtSec(ms)}) : (st >= 200 && st < 300) ? t('aiAttOk', {s:fmtSec(ms)}) : t('aiAttErr', {c:st, s:fmtSec(ms)})).join(' · ');
+}
 function fmtSec(ms){ return (Math.round((ms || 0) / 100) / 10).toFixed(1).replace('.', appLang() === 'en' ? '.' : ',') + ' s'; }
 function aiError(code, vars){ const e = new Error(code); e.aiCode = code; e.aiVars = vars || {}; return e; }
 function aiErrText(e){
@@ -10686,16 +10704,45 @@ function geminiPause(ms, signal){
 }
 function aiBackupModel(m){ return AI_MODELS.find(x=>x.id !== m.id) || null; }
 /* Jedan zahtev sa ponavljanjem: vraća poslednji odgovor (i model koji ga je dao) */
-async function geminiFetch(models, body, key, signal){
+async function geminiFetch(models, body, key, signal, opt){
+  /* v163: opt.timeout (ms) = granica po pokušaju (samo „✨ Pitaj“): pokušaj bez odgovora se prekida i ide sledeći.
+     opt.log dobija svaki pokušaj: {st: HTTP kod | 'T' (bez odgovora) , ms, m}. */
+  opt = opt || {};
   const plan = [[models[0],0],[models[0],1000],[models[1],2000],[models[1],4000]].filter(x=>x[0]);
   let res = null, used = models[0], tries = 0;
   for(let i = 0; i < plan.length; i++){
     if(plan[i][1]) await geminiPause(plan[i][1], signal);
     used = plan[i][0];
+    const t0 = performance.now();
+    let ctl = null, tm = null, onUser = null, timedOut = false;
+    if(opt.timeout){
+      ctl = new AbortController();
+      onUser = ()=>ctl.abort();
+      if(signal){ if(signal.aborted) ctl.abort(); else signal.addEventListener('abort', onUser, {once:true}); }
+      tm = setTimeout(()=>{ timedOut = true; ctl.abort(); }, opt.timeout);
+    }
     try{
       res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + used.id + ':generateContent',
-        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(typeof body === 'function' ? body(used) : body), signal});   /* v162: telo može zavisiti od modela */
-    }catch(e){ if(e && e.name === 'AbortError') throw e; throw aiError('aiErrNet'); }
+        {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(typeof body === 'function' ? body(used) : body), signal:ctl ? ctl.signal : signal});   /* v162: telo može zavisiti od modela */
+      if(ctl){   /* i telo odgovora mora stići u granici */
+        const txt = await res.text();
+        res = new Response(txt, {status:res.status, statusText:res.statusText, headers:res.headers});
+      }
+    }catch(e){
+      if(tm) clearTimeout(tm);
+      if(signal && onUser) signal.removeEventListener('abort', onUser);
+      tries = i + 1;
+      if(timedOut && !(signal && signal.aborted)){
+        if(opt.log) opt.log.push({st:'T', ms:Math.round(performance.now() - t0), m:used.id});
+        if(i === plan.length - 1){ const er = aiError('aiErrTimeout'); throw er; }
+        continue;
+      }
+      if(e && e.name === 'AbortError') throw e;
+      throw aiError('aiErrNet');
+    }
+    if(tm) clearTimeout(tm);
+    if(signal && onUser) signal.removeEventListener('abort', onUser);
+    if(opt.log) opt.log.push({st:res.status, ms:Math.round(performance.now() - t0), m:used.id});
     tries = i + 1;
     if(GEMINI_RETRY_STATUS.indexOf(res.status) < 0 || i === plan.length - 1) break;
     await res.text().catch(()=>'');
@@ -10730,7 +10777,7 @@ async function aiRequestOnce(parts, o){
     const bd = bodies[i];
     const send = o.thinkLow ? (m=>AI_THINK_LOW.indexOf(m.id) >= 0
       ? Object.assign({}, bd, {generationConfig:Object.assign({}, bd.generationConfig || {}, {thinkingConfig:{thinkingLevel:'low'}})}) : bd) : bd;
-    const g = await geminiFetch([model, aiBackupModel(model)], send, key, o.signal);
+    const g = await geminiFetch([model, aiBackupModel(model)], send, key, o.signal, {timeout:o.timeout || 0, log:o.att});
     tries += g.tries || 0;
     const res = g.res;
     model = g.model;   /* rezervni model ostaje i za drugi oblik zahteva i za trošak */
@@ -16932,7 +16979,8 @@ function aiSettingsHtml(){
       const mm = aiModelById(x.model);
       return '<div class="ai-last">' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
         '<small>' + escapeHtml(t('aiSetLastRow', {tin:fmtInt(x.inp), tout:fmtInt(x.out), usd:fmtUsd(x.usd)})) + '</small>' +
-        (x.tm ? '<small>' + escapeHtml(t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') + '</div>';
+        (x.tm ? '<small>' + escapeHtml(t('aiSetLastTime', {a:fmtSec(x.tm.loc), g:fmtSec(x.tm.ai), n:x.tm.tries || 1})) + '</small>' : '') +
+        (x.tm && x.tm.att && x.tm.att.length ? '<small>' + escapeHtml(aiAttText(x.tm.att)) + '</small>' : '') + '</div>';
     }).join('') : '<div class="ai-use-row"><span>' + escapeHtml(t('aiSetUsageEmpty')) + '</span></div>') +
     '</div>' +
     '<div class="settings-hint">' + escapeHtml(t('aiSetFreeHint')) + '</div>';
