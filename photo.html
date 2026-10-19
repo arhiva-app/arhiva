@@ -317,20 +317,20 @@ const content = document.getElementById('content');
   if(!item){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Stavka nije pronađena u ovom browseru.</p>' +
-      '<a class="back" href="/">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/arhiva/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   if(item.deletedAt){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Ova slika je u korpi.</p>' +
       '<p style="margin:8px 0 0;opacity:.75;font-size:14px;">Vrati je u Arhivi: Podešavanja \u2192 korpa.</p>' +
-      '<a class="back" href="/">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/arhiva/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   if(!item.blob){
     content.innerHTML =
       '<div class="missing"><p style="margin:0;">Fajl nije pronađen.</p>' +
-      '<a class="back" href="/">\u2190 Nazad u Arhivu</a></div>';
+      '<a class="back" href="/arhiva/">\u2190 Nazad u Arhivu</a></div>';
     return;
   }
   document.title = item.name;
@@ -339,7 +339,7 @@ const content = document.getElementById('content');
   const isPdf = item.type === 'pdf' || mime === 'application/pdf';
   const isImage = !isPdf && (item.type === 'image' || (item.type !== 'doc' && mime.indexOf('image/') === 0));
 
-  const backTiny = '<a class="back tiny" href="/">Arhiva</a>';
+  const backTiny = '<a class="back tiny" href="/arhiva/">Arhiva</a>';
 
   if(isImage){
     const pages = (item.pages && item.pages.length) ? item.pages : [{blob:item.blob}];
@@ -459,7 +459,7 @@ const content = document.getElementById('content');
         const result = await mammoth.convertToHtml({arrayBuffer: await item.blob.arrayBuffer()});
         content.innerHTML =
           '<div class="doc-reader"><div class="doc-reader-inner">'+result.value+'</div></div>' +
-          '<div class="doc-reader-bar"><a class="back-inline" href="/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
+          '<div class="doc-reader-bar"><a class="back-inline" href="/arhiva/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
         document.title = item.name;
         document.getElementById('openDoc').onclick = downloadFile;
       }catch(e){
@@ -483,7 +483,7 @@ const content = document.getElementById('content');
             : '';
           content.innerHTML =
             '<div class="doc-reader"><div class="doc-reader-inner">'+tabsHtml+html+'</div></div>' +
-            '<div class="doc-reader-bar"><a class="back-inline" href="/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
+            '<div class="doc-reader-bar"><a class="back-inline" href="/arhiva/">\u2190 Arhiva</a><p class="cap">'+escapeHtml(item.name)+'</p><button class="open-btn" id="openDoc">Preuzmi</button></div>';
           document.title = item.name;
           document.getElementById('openDoc').onclick = downloadFile;
           content.querySelectorAll('.sheet-tabs button').forEach(btn=>{

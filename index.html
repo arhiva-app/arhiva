@@ -8062,7 +8062,8 @@ async function saveSelectedToDevice(list){
 /* Precica: stranica za jednu sliku je u posebnom repozitorijumu (van instalirane Arhive).
    U instaliranoj Arhivi otvara se u pravom Chrome-u (Android intent, zvanicna Chrome sintaksa),
    da bi iz Chrome menija mogla da se napravi prečica. */
-/* v168: adresa prečice se uzima sa adrese na kojoj radi Arhiva (od v168 https://arhiva-app.github.io/) */
+/* v169: Arhiva je na https://arhiva-app.github.io/arhiva/ (scope /arhiva/), prečice na /arhiva-slika/ — VAN scope-a instalirane
+   Arhive, zato se otvaraju u pravom Chrome-u (zato Arhiva ne sme na koren domena; v168 greška) */
 const SHORTCUT_BASE = location.origin + '/arhiva-slika/';
 function openShortcut(item){
   if(!item) return;
@@ -9028,7 +9029,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 168;
+const APP_VERSION = 169;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
