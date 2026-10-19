@@ -8062,12 +8062,13 @@ async function saveSelectedToDevice(list){
 /* Precica: stranica za jednu sliku je u posebnom repozitorijumu (van instalirane Arhive).
    U instaliranoj Arhivi otvara se u pravom Chrome-u (Android intent, zvanicna Chrome sintaksa),
    da bi iz Chrome menija mogla da se napravi prečica. */
-const SHORTCUT_BASE = 'https://zoki02122.github.io/arhiva-slika/';
+/* v168: adresa prečice se uzima sa adrese na kojoj radi Arhiva (od v168 https://arhiva-app.github.io/) */
+const SHORTCUT_BASE = location.origin + '/arhiva-slika/';
 function openShortcut(item){
   if(!item) return;
   const url = SHORTCUT_BASE + '?p=' + encodeURIComponent(item.id);
   if(RUNS_INSTALLED){
-    location.href = 'intent://zoki02122.github.io/arhiva-slika/?p=' + encodeURIComponent(item.id)
+    location.href = 'intent://' + location.host + '/arhiva-slika/?p=' + encodeURIComponent(item.id)
       + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
   }else{
     window.open(url, '_blank');
@@ -9027,7 +9028,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 167;
+const APP_VERSION = 168;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
