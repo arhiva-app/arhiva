@@ -8460,7 +8460,7 @@ document.getElementById('deepSearchToggle').onclick = ()=>{
    Šta nije pretraženo broji Arhiva sama (ne AI). */
 let _ask = null;   /* {q, busy:{ctrl, i, n, phase}, res:{answer, src:[id], miss}, err} */
 let _askReq = 0;
-let ASK_TIMEOUT = 20000;     /* v163: granica po pokušaju (procena za mali upit, ne Google-ov broj) */
+let ASK_TIMEOUT = 8000;      /* v164: granica po pokušaju — odgovor stiže za ~2 s (Zoranov dnevnik), prvi pokušaj ponekad zaglavi */
 const ASK_TOP = 6, ASK_EXC = 2000, ASK_WIN = 350, ASK_HEAD = 300;
 /* reči pitanja bez kratkih i upitnih reči; koren = bez poslednja 1–2 slova (padeži: osiguranje/osiguranja/osiguranju) */
 const ASK_STOP = new Set(['kad','kada','koji','koja','koje','koliko','gde','sta','sto','kako','zasto','mi','moj','moja','moje','moji','meni','je','li','da','za','na','od','do','ima','imam','imao','bio','bila','sam','sve','svi','ali','ili','kao','koga','cemu','kom','koju','tog','taj','ta','to']);
@@ -9016,7 +9016,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 163;
+const APP_VERSION = 164;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
