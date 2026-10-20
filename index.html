@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="sr" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
+<!-- v184: Arhiva sama prevodi (Podešavanja → jezik); Chrome ne sme da prevodi stranicu preko toga -->
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <title>Arhiva</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%230d0e10'/%3E%3Cpath d='M50 22 L74 50 L50 78 L26 50 Z' fill='none' stroke='%23c9a355' stroke-width='5'/%3E%3C/svg%3E">
@@ -9158,7 +9160,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 183;
+const APP_VERSION = 184;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
