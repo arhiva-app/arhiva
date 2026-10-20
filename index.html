@@ -2203,6 +2203,9 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
 .mark-cnt-1, .mark-cnt-2{ overflow:hidden; text-overflow:clip; }
 .mark-cnt-2{ font-size:.82em; opacity:.8; }
 .mark-row.cnt-off .mark-cnt{ display:none; }
+/* v178: meniji i redovi izbora se ne označavaju (dugi pritisak koji otvori meni ne sme da označi reč pod prstom) */
+.sheet-row, .sheet-head, .pick-row, .settings-row, button{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+.settings-row input, .settings-row textarea, .sheet-row input, .sheet-row textarea{ -webkit-user-select:text; user-select:text; }
 /* v177: gornji red se sam prilagodi kad broj albuma i stavki ne staje (fitMarkRow) */
 body:not(.in-album) .mark-row.fit1{ gap:6px; }
 body:not(.in-album) .mark-row.fit1 .header-actions{ gap:5px !important; }
@@ -9073,7 +9076,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 177;
+const APP_VERSION = 178;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
