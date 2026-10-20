@@ -2,13 +2,22 @@
    Web Arhiva se ne menja: ovde se samo zamenjuje ono što WebView ne ume:
    1) <a download> (rezervna kopija, „Sačuvaj na telefon“) → fajl u Documents/Arhiva
    2) navigator.share sa fajlovima → Android „Podeli“
-   3) service worker se ne registruje (aplikacija je već na telefonu) */
+   3) service worker se ne registruje (aplikacija je već na telefonu)
+   4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
   var reg = (window.capacitorExports && capacitorExports.registerPlugin) || C.registerPlugin;
-  var Filesystem = reg('Filesystem'), Share = reg('Share');
+  var Filesystem = reg('Filesystem'), Share = reg('Share'), App = reg('App');
   window.ARHIVA_NATIVE = true;
+
+  /* 4) Nazad: dok Arhiva ima istoriju (otvoren list, album, potvrda izlaska) ide nazad kroz nju; na kraju izlazi */
+  try{
+    App.addListener('backButton', function(e){
+      if(e && e.canGoBack) history.back(); else App.exitApp();
+    });
+  }catch(e){ console.error('arhiva-native back', e); }
+  window.close = function(){ try{ App.exitApp(); }catch(e){} };
 
   if(navigator.serviceWorker){
     try{ Object.defineProperty(navigator.serviceWorker, 'register', { value: function(){ return Promise.resolve(); }, configurable: true }); }catch(e){}
