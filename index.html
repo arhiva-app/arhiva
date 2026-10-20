@@ -55,11 +55,23 @@
 /* v190: zaključavanje (samo Android aplikacija) */
 html.lk-boot body{ visibility:hidden; }
 #lockScr{ visibility:visible; }
-.lk-scr{ display:none; position:fixed; inset:0; z-index:2147483000; background:var(--bg); color:var(--ink); font-family:var(--font-ui); overflow-y:auto; box-sizing:border-box;
+.lk-scr{ display:none; position:fixed; inset:0; z-index:2147483000; background:radial-gradient(120% 60% at 50% 16%, color-mix(in srgb, var(--brass) 14%, var(--bg)) 0%, var(--bg) 62%) var(--bg); color:var(--ink); font-family:var(--font-ui); overflow-y:auto; box-sizing:border-box;
   padding:calc(env(safe-area-inset-top, 0px) + clamp(16px, 6vh, 56px)) 20px calc(env(safe-area-inset-bottom, 0px) + 20px); --lk-k:min(76px, 9.4vh); }
 .lk-scr.open{ display:flex; flex-direction:column; align-items:center; }
 .lk-in{ width:100%; max-width:340px; display:flex; flex-direction:column; align-items:center; text-align:center; flex:none; }
 .lk-in.lk-mid{ margin:auto 0; }
+.lk-in.lk-full{ flex:1; }
+.lk-halo{ width:min(118px, 13vh); height:min(118px, 13vh); flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center; box-sizing:border-box;
+  background:radial-gradient(circle, var(--brass-glow) 0%, transparent 70%); border:1.5px solid color-mix(in srgb, var(--brass) 45%, transparent);
+  box-shadow:0 0 40px var(--brass-glow), inset 0 0 22px var(--brass-glow); }
+.lk-halo svg{ width:49%; height:49%; }
+.lk-cards{ margin-top:34px; width:100%; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.lk-cards.one{ grid-template-columns:1fr; max-width:200px; }
+.lk-card{ height:112px; border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:0 8px; cursor:pointer;
+  font:700 15px var(--font-ui); color:var(--ink); background:var(--card-shine, none), var(--surface); border:1.5px solid var(--line); -webkit-tap-highlight-color:transparent; }
+.lk-card.main{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); box-shadow:0 8px 24px color-mix(in srgb, var(--accent) 35%, transparent); }
+.lk-card:active{ transform:scale(.97); }
+.lk-link.lk-bottom{ margin-top:auto; color:var(--ink-dim); font-size:14px; }   /* posle .lk-link po jačini */
 .lk-h{ margin:10px 0 4px; font:600 28px/1.2 var(--font-title); color:var(--title-color); }
 .lk-p{ margin:0; max-width:300px; min-height:22px; font:500 15px/1.45 var(--font-ui); color:var(--ink-dim); }
 .lk-dots{ display:flex; gap:18px; margin:clamp(12px, 3vh, 24px) 0 6px; }
@@ -3819,7 +3831,7 @@ const I18N = {
     lkHint: 'Arhiva se zaključava pri svakom pokretanju i kad se ugasi ekran telefona. Na svaka 3 dana traži PIN (ili šablon) i kad je biometrija uključena, da ga ne zaboravite.',
     lkHintForgot: 'Ako zaboravite PIN ili šablon, potvrdite otiskom ili PIN-om telefona i postavite nov.',
     lkLocked: 'Arhiva je zaključana.',
-    lkUnlock: 'Otključaj',
+    lkCardBio: 'Otisak ili lice',
     lkBioTitle: 'Otključaj Arhivu',
     lkBioSubT: 'Otisak prsta ili lice',
     lkEnterPin: 'Unesi PIN',
@@ -4514,7 +4526,7 @@ const I18N = {
     lkHint: 'Arhiva locks every time it starts and when the phone screen turns off. Every 3 days it asks for the PIN (or pattern) even with biometrics on, so you do not forget it.',
     lkHintForgot: 'If you forget the PIN or pattern, confirm with the phone fingerprint or PIN and set a new one.',
     lkLocked: 'Arhiva is locked.',
-    lkUnlock: 'Unlock',
+    lkCardBio: 'Fingerprint or face',
     lkBioTitle: 'Unlock Arhiva',
     lkBioSubT: 'Fingerprint or face',
     lkEnterPin: 'Enter PIN',
@@ -17743,8 +17755,10 @@ document.getElementById('pgGalleryLbl').textContent = t('pgGallery');
    Podešavanje (galerija:lock) se ne prenosi kopijom. Čuva se samo SHA-256 sa solju, nikad sam PIN.
    ===================================================================== */
 const LK_KEY = LS_PREFIX + 'lock', LK_72H = 72*3600*1000, LK_TRIES = 5, LK_WAIT = 30000;
-const LK_LOGO = '<svg class="lk-logo" width="64" height="64" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 14 L80 50 L50 86 L20 50 Z" fill="none" stroke="var(--brass)" stroke-width="5"/></svg>';
-const LK_PAT_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>';
+const LK_LOGO = '<div class="lk-halo"><svg width="58" height="58" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12 L82 50 L50 88 L18 50 Z" fill="none" stroke="var(--brass)" stroke-width="5"/><path d="M50 34 L64 50 L50 66 L36 50 Z" fill="var(--brass)" opacity=".35"/></svg></div>';
+const LK_FP_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 4a7 7 0 0 0-7 7v2"/><path d="M19 13v-2a7 7 0 0 0-3.5-6.06"/><path d="M12 8a3 3 0 0 0-3 3v3c0 2.5-1 4.5-2.5 6"/><path d="M15 11v3c0 3-1 5.5-3 7.5"/><path d="M12 11v3.5c0 2-.6 3.8-1.8 5.3"/><path d="M18.5 16.5c-.3 1.6-.9 3-1.7 4.3"/></svg>';
+const LK_PIN_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="7" width="19" height="10" rx="3"/><circle cx="7.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg>';
+const LK_PAT_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polyline points="5,5 12,5 19,5 12,12 5,19 12,19 19,19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" opacity=".55"/><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>';
 const LK_FORGOT = {};
 let lkState = 'open';          /* 'open' | 'locked' (ekran zaključan, čeka povratak) | 'busy' (otključavanje u toku) */
 let lkUnlockedAt = Date.now(), lkHiddenAt = 0, lkEl = null, lkPend = null, lkBackFn = null, lkBioAvail = false, lkSetBusy = false;
@@ -17785,17 +17799,27 @@ function lkBack(){
   if(lkBackFn){ lkBackFn(); return true; }
   return lkState === 'open' ? true : 'izlaz';
 }
+/* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak ili lice · PIN/Šablon; bez biometrije samo PIN/Šablon).
+   interactive=false: ispod Androidovog prozora ili posle gašenja ekrana — dodir na polje pokreće otključavanje.
+   interactive=true: posle „Odustani“ — vraća 'bio' | 'secret' | 'forgot'. */
 function lkLockedScreen(interactive){
-  const c = lkCfg();
+  const c = lkCfg(), bio = !!c.bio;
   return new Promise(res=>{
-    /* znak i natpis gore, na istom mestu kao na unosu PIN-a: vide se iznad Androidovog prozora za otisak */
-    const el = lkShow('<div class="lk-in">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1><p class="lk-p"></p>'+
-      (interactive ? '<button type="button" class="lk-btn" data-a="bio"></button><button type="button" class="lk-link" data-a="secret"></button>' : '')+'</div>');
+    const card = (a, ic, txt, main)=>'<button type="button" class="lk-card'+(main ? ' main' : '')+'" data-a="'+a+'">'+ic+'<span>'+escapeHtml(txt)+'</span></button>';
+    const el = lkShow('<div class="lk-in lk-full">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1><p class="lk-p"></p>'+
+      '<div class="lk-cards'+(bio ? '' : ' one')+'">'+
+      (bio ? card('bio', LK_FP_ICON, t('lkCardBio'), true) : '')+
+      card('secret', c.mode === 'pat' ? LK_PAT_ICON.replace(/26/g, '34') : LK_PIN_ICON, t(c.mode === 'pat' ? 'lkOptPat' : 'lkSubPin').replace(/^./, x=>x.toUpperCase()), !bio)+
+      '</div><button type="button" class="lk-link lk-bottom" data-a="forgot"></button></div>');
     el.querySelector('.lk-p').textContent = t('lkLocked');
+    el.querySelector('[data-a=forgot]').textContent = lkK(c, 'lkForgotPin', 'lkForgotPat');
+    const pick = (a)=>{
+      if(interactive){ lkPend = null; res(a); return; }
+      if(lkState === 'locked') lkUnlock(a);   /* zaključano posle gašenja ekrana, pre povratka */
+    };
+    el.querySelectorAll('[data-a]').forEach(x=>{ x.onclick = ()=>pick(x.dataset.a); });
     if(!interactive){ res(null); return; }
     lkPend = ()=>res('secret');
-    const b = el.querySelector('[data-a=bio]'); b.textContent = '🔒 ' + t('lkUnlock'); b.onclick = ()=>{ lkPend = null; res('bio'); };
-    const s = el.querySelector('[data-a=secret]'); s.textContent = lkK(c, 'lkEnterPin', 'lkDrawPat'); s.onclick = ()=>{ lkPend = null; res('secret'); };
   });
 }
 /* Pitanje sa dugmadima. btns: [[ključ, tekst, drugo?]]; back: ključ za Nazad (null = Nazad ne radi ništa) */
@@ -17955,22 +17979,26 @@ function lkLock(){
   if(!lkOn() || lkState !== 'open') return;
   lkState = 'locked'; lkLockedScreen(false);   /* otvoren unos u Podešavanjima se time otkazuje (lkPend) */
 }
-async function lkUnlock(){
+async function lkUnlock(first){
   if(lkState === 'busy') return;
   lkState = 'busy';
+  let pick = first || 'bio';
   try{
     for(;;){
       const c = lkCfg();
       if(c.mode === 'off') break;
       const need72 = !c.last || Date.now() - c.last > LK_72H;
-      if(c.bio && !need72){
+      if(pick === 'forgot'){ pick = 'bio'; if(await lkForgot()) break; continue; }
+      if(c.bio && !need72 && pick === 'bio'){
         lkLockedScreen(false);
         let r = {}; try{ r = (await lkNative().biometrija({naslov:t('lkBioTitle'), podnaslov:t('lkBioSubT'), dugme:lkK(c, 'lkEnterPin', 'lkDrawPat')})) || {}; }catch(e){ r = {razlog:'greska'}; }
         if(r.ok) break;
         if(r.razlog !== 'dugme' && r.razlog !== 'nema'){
-          if(await lkLockedScreen(true) === 'bio') continue;
+          pick = await lkLockedScreen(true);
+          if(pick !== 'secret') continue;
         }
       }
+      pick = 'bio';
       const v = await lkPrompt({kind:c.mode, title:lkK(c, 'lkPinTitle', 'lkPatTitle'),
         sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, check:lkCheckCurrent});
       if(v === LK_FORGOT){ if(await lkForgot()) break; continue; }
@@ -17991,7 +18019,7 @@ async function lkResume(){
     if(!(off > lkUnlockedAt) && !(c.away && gone > c.away*60000)) return;
     lkState = 'locked'; lkLockedScreen(false);
   }
-  setTimeout(lkUnlock, 250);
+  setTimeout(()=>lkUnlock(), 250);
 }
 async function lkFirstRun(){
   for(;;){
@@ -18013,7 +18041,7 @@ function lkBoot(){
     window.ARHIVA_LK_NAZAD = lkBack;
     lkState2().then(st=>{ lkBioAvail = !!st.biometrija; });
     const c = lkCfg();
-    if(c.mode !== 'off'){ lkState = 'locked'; lkLockedScreen(false); setTimeout(lkUnlock, 300); }
+    if(c.mode !== 'off'){ lkState = 'locked'; lkLockedScreen(false); setTimeout(()=>lkUnlock(), 300); }
     else if(!c.asked) lkFirstRun();
     else document.documentElement.classList.remove('lk-boot');
   }catch(e){ console.error('lkBoot', e); lkState = 'open'; lkHide(); }
