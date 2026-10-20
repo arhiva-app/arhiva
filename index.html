@@ -4422,6 +4422,45 @@ Object.assign(I18N.en, {
   storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', storFree: ' · Free: ~{mb} MB', buildLbl: 'version',
   viewAsList: 'Show as list', viewAsGrid: 'Show as grid', selN: '{n} selected'
 });
+/* v185: ekran albuma */
+Object.assign(I18N.sr, {
+  dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi',
+  emptyNoRes: 'Nema rezultata', emptyNoResX: 'Nema rezultata za "{q}".', albEmpty: 'Album je prazan', albEmptyX: 'Ovaj album je prazan. Dodaj nešto ikonicom „Dodaj“ gore.',
+  addTitle: 'Dodaj', addGallery: 'Iz galerije', addCamera: 'Slikaj', addDoc: 'Dokument',
+  nfAlbum: 'Novi album', nfAlbumBtn: 'Napravi album', nfSub: 'Novi podalbum', nfSubBtn: 'Napravi podalbum', nfPh: 'Naziv albuma',
+  mcMove: 'Premesti', mcCopy: 'Kopiraj', mcTitle: 'Album „{name}“',
+  acPin: 'Zakači na vrh', acUnpin: 'Otkači sa vrha', acRename: 'Preimenuj album', acCover: 'Promeni naslovnu sliku', acMove: 'Premesti u album',
+  acUnnest: 'Vrati na početni ekran', acDelete: 'Izbriši album', coverTitle: 'Izaberi naslovnu sliku',
+  srPh: 'Pretraži po nazivu...', srDeep: 'Detaljno', srDeepT: 'Detaljna pretraga — uključi i sadržaj dokumenata',
+  srAsk: '✨ Pitaj', srAskT: 'Pitaj Arhivu — odgovor iz tvojih dokumenata', srClose: 'Zatvori pretragu',
+  itemsLbl: 'Slike i dokumenti', acRenameSub: 'Preimenuj podalbum', acDeleteSub: 'Izbriši podalbum',
+  mvNoNest: 'Album koji ima podalbume ne može postati podalbum.', mvDupSub: 'U tom albumu već postoji podalbum s tim imenom.',
+  mvDupTop: 'Na početnom ekranu već postoji album s tim imenom. Prvo promeni ime.', mvDone: 'Premešteno u "{name}".', mvHome: 'Vraćeno na početni ekran.',
+  mvAlbTitle: 'Premesti „{name}“ u album', cpNone: 'Bez slike', cpEmpty: 'U albumu još nema slika za naslovnu.',
+  trMoved1: 'Premešteno u korpu.', trMovedN: 'U korpu premešteno: {n}.', addToAlb: 'Dodaj u album', newAlbRow: '+ Novi album...', rmFromAlb: 'Uklonjeno iz albuma.',
+  shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.',
+  albDup: 'Album s tim imenom već postoji.', subExists: 'Podalbum "{name}" već postoji.', albExists: 'Album "{name}" već postoji.', albMade: 'Album "{name}" napravljen.',
+  procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.'
+});
+Object.assign(I18N.en, {
+  dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
+  emptyNoRes: 'No results', emptyNoResX: 'No results for "{q}".', albEmpty: 'The album is empty', albEmptyX: 'This album is empty. Add something with the “Add” icon above.',
+  addTitle: 'Add', addGallery: 'From gallery', addCamera: 'Take a photo', addDoc: 'Document',
+  nfAlbum: 'New album', nfAlbumBtn: 'Create album', nfSub: 'New sub-album', nfSubBtn: 'Create sub-album', nfPh: 'Album name',
+  mcMove: 'Move', mcCopy: 'Copy', mcTitle: 'Album “{name}”',
+  acPin: 'Pin to top', acUnpin: 'Unpin', acRename: 'Rename album', acCover: 'Change cover image', acMove: 'Move to album',
+  acUnnest: 'Move to home screen', acDelete: 'Delete album', coverTitle: 'Choose cover image',
+  srPh: 'Search by name...', srDeep: 'Detailed', srDeepT: 'Detailed search — also include document contents',
+  srAsk: '✨ Ask', srAskT: 'Ask Arhiva — an answer from your documents', srClose: 'Close search',
+  itemsLbl: 'Images and documents', acRenameSub: 'Rename sub-album', acDeleteSub: 'Delete sub-album',
+  mvNoNest: 'An album that has sub-albums cannot become a sub-album.', mvDupSub: 'That album already has a sub-album with this name.',
+  mvDupTop: 'There is already an album with this name on the home screen. Rename it first.', mvDone: 'Moved to “{name}”.', mvHome: 'Moved back to the home screen.',
+  mvAlbTitle: 'Move “{name}” to album', cpNone: 'No image', cpEmpty: 'There are no images in this album for a cover yet.',
+  trMoved1: 'Moved to trash.', trMovedN: 'Moved to trash: {n}.', addToAlb: 'Add to album', newAlbRow: '+ New album...', rmFromAlb: 'Removed from album.',
+  shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.',
+  albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
+  procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.'
+});
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'hr', 'bs', 'sh', 'me', 'cnr'];
@@ -6645,7 +6684,7 @@ function _renderView(){
       subWrap.className = 'subalbums';
       const subLabel = document.createElement('p');
       subLabel.className = 'section-label';
-      subLabel.textContent = 'Podalbumi';
+      subLabel.textContent = t('subAlbums');
       subWrap.appendChild(subLabel);
       appendAlbumGroups(subWrap, shownSubs, cat=>openSubalbum(cat));
       contentArea.appendChild(subWrap);
@@ -6654,10 +6693,10 @@ function _renderView(){
     if(filtered.length === 0 && shownSubs.length > 0){ currentGalleryItems = []; return; }
     if(filtered.length === 0 && q && !selectionMode){ contentArea.appendChild(searchEmptyAlt(true)); currentGalleryItems = []; return; }   /* v161 */
     if(filtered.length === 0){
-      const msg = q ? 'Nema rezultata za "'+escapeHtml(searchEl.value)+'".' : currentFolder === ALL ? t('allEmpty') : 'Ovaj album je prazan. Dodaj nešto ikonicom „Dodaj“ gore.';
+      const msg = q ? escapeHtml(t('emptyNoResX', {q:searchEl.value})) : currentFolder === ALL ? t('allEmpty') : t('albEmptyX');
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty';
-      emptyDiv.innerHTML = '<b>'+(q?'Nema rezultata':'Album je prazan')+'</b><span>'+msg+'</span>';
+      emptyDiv.innerHTML = '<b>'+escapeHtml(q ? t('emptyNoRes') : t('albEmpty'))+'</b><span>'+msg+'</span>';
       contentArea.appendChild(emptyDiv);
       currentGalleryItems = [];
       return;
@@ -6686,11 +6725,11 @@ function _renderView(){
 
   if(q){
     const matchedCats = categories.filter(c=>hitWords(normalizeSr(c.name), q));
-    const inboxMatches = hitWords(normalizeSr('Bez albuma'), q);
+    const inboxMatches = hitWords(normalizeSr(t('allImages')), q);
     const matchedItems = items.filter(i=>matchItemQuery(i, q));
 
     if(!inboxMatches && matchedCats.length === 0 && matchedItems.length === 0){
-      if(selectionMode) contentArea.innerHTML = '<div class="empty"><b>Nema rezultata</b><span>Nema rezultata za "'+escapeHtml(searchEl.value)+'".</span></div>';
+      if(selectionMode) contentArea.innerHTML = '<div class="empty"><b>'+escapeHtml(t('emptyNoRes'))+'</b><span>'+escapeHtml(t('emptyNoResX', {q:searchEl.value}))+'</span></div>';
       else contentArea.appendChild(searchEmptyAlt(false));   /* v161 */
       return;
     }
@@ -6704,7 +6743,7 @@ function _renderView(){
         const inboxCount = items.filter(i=>!i.category).length;
         const inboxTile = document.createElement('div');
         inboxTile.className = 'folder-tile-wide';
-        inboxTile.innerHTML = '<div class="fw-icon">'+folderIconSvg()+'</div><div class="fw-text"><span class="fw-name">Bez albuma</span><span class="fw-count">'+stavkeTxt(inboxCount)+'</span></div>';
+        inboxTile.innerHTML = '<div class="fw-icon">'+folderIconSvg()+'</div><div class="fw-text"><span class="fw-name">'+escapeHtml(t('allImages'))+'</span><span class="fw-count">'+stavkeTxt(inboxCount)+'</span></div>';
         inboxTile.onclick = ()=>{ currentFolder = INBOX; searchEl.value=''; pushBack(closeAlbumViewTop); render(); };
         contentArea.appendChild(inboxTile);
       }
@@ -6738,7 +6777,7 @@ function _renderView(){
       if(inboxMatches || matchedCats.length > 0){
         const label2 = document.createElement('p');
         label2.className = 'section-label';
-        label2.textContent = 'Slike i dokumenti';
+        label2.textContent = t('itemsLbl');
         contentArea.appendChild(label2);
       }
       currentGalleryItems = matchedItems.slice().sort((a,b)=>b.ts-a.ts);
@@ -6814,10 +6853,10 @@ function openAlbumContext(catId){
   albumContextTarget = catId;
   const cat = catById(catId);
   document.getElementById('albumContextTitle').textContent = cat ? cat.name : '';
-  document.getElementById('acPin').querySelector('span').textContent = cat && cat.pinned ? 'Otkači sa vrha' : 'Zakači na vrh';
+  document.getElementById('acPin').querySelector('span').textContent = cat && cat.pinned ? t('acUnpin') : t('acPin');
   const isSub = !!(cat && cat.parent);
-  document.getElementById('acRename').querySelector('span').textContent = isSub ? 'Preimenuj podalbum' : 'Preimenuj album';
-  document.getElementById('acDelete').querySelector('span').textContent = isSub ? 'Izbriši podalbum' : 'Izbriši album';
+  document.getElementById('acRename').querySelector('span').textContent = isSub ? t('acRenameSub') : t('acRename');
+  document.getElementById('acDelete').querySelector('span').textContent = isSub ? t('acDeleteSub') : t('acDelete');
   /* album sa podalbumima ne moze postati podalbum */
   document.getElementById('acMove').style.display = cat && childrenOf(cat.id).length === 0 && moveTargetsFor(cat).length > 0 ? 'flex' : 'none';
   document.getElementById('acUnnest').style.display = isSub ? 'flex' : 'none';
@@ -6887,9 +6926,9 @@ function moveTargetsFor(cat){
 function moveAlbumTo(catId, parentId){
   const cat = catById(catId);
   if(!cat) return;
-  if(parentId && childrenOf(cat.id).length > 0){ toast('Album koji ima podalbume ne može postati podalbum.'); return; }
+  if(parentId && childrenOf(cat.id).length > 0){ toast(t('mvNoNest')); return; }
   if(categories.some(c=>c.id !== cat.id && (c.parent||null) === (parentId||null) && c.name === cat.name)){
-    toast(parentId ? 'U tom albumu već postoji podalbum s tim imenom.' : 'Na početnom ekranu već postoji album s tim imenom. Prvo promeni ime.');
+    toast(parentId ? t('mvDupSub') : t('mvDupTop'));
     return;
   }
   cat.parent = parentId || null;
@@ -6898,12 +6937,12 @@ function moveAlbumTo(catId, parentId){
   categories.push(cat);
   saveCategories();
   render();
-  toast(parentId ? 'Premešteno u "'+catLabel(parentId)+'".' : 'Vraćeno na početni ekran.');
+  toast(parentId ? t('mvDone', {name:catLabel(parentId)}) : t('mvHome'));
 }
 function openMoveAlbumSheet(catId){
   const cat = catById(catId);
   if(!cat) return;
-  sheetTitle.textContent = 'Premesti \u201C' + cat.name + '\u201D u album';
+  sheetTitle.textContent = t('mvAlbTitle', {name:cat.name});
   sheetList.innerHTML = '';
   moveTargetsFor(cat).forEach(t=>{
     const row = document.createElement('div');
@@ -6934,10 +6973,11 @@ function openCoverPicker(catId){
   document.getElementById('coverPickerSheet').classList.add('open');
   pushBack(closeCoverPicker);
   const curCat = catById(catId), cur = curCat ? curCat.cover : null;
+  const cpNoneLbl = t('cpNone');
   { /* v177: „Bez slike“ se uvek može izabrati (i vratiti) */
     const t = document.createElement('div');
     t.className = 'cp-tile cp-none' + (cur === NO_COVER || !coverItemFor(curCat || {}) ? ' on' : '');
-    t.innerHTML = noCoverHtml(curCat) + '<span class="cp-lbl">Bez slike</span>';
+    t.innerHTML = noCoverHtml(curCat) + '<span class="cp-lbl">'+escapeHtml(cpNoneLbl)+'</span>';
     t.onclick = ()=>{
       const cat = catById(catId);
       if(cat){ cat.cover = NO_COVER; saveCategories(); }
@@ -6949,7 +6989,7 @@ function openCoverPicker(catId){
   if(pool.length === 0){
     const p = document.createElement('p');
     p.style.cssText = 'grid-column:1/-1;color:var(--ink-dim);font-size:14.5px;margin:4px 0 0;';
-    p.textContent = 'U albumu još nema slika za naslovnu.';
+    p.textContent = t('cpEmpty');
     grid.appendChild(p);
     return;
   }
@@ -6972,13 +7012,15 @@ document.getElementById('coverPickerBack').onclick = ()=>requestClose();
 document.getElementById('coverPickerSheet').onclick = (e)=>{ if(e.target===document.getElementById('coverPickerSheet')) requestClose(); };
 
 const MESECI = ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 function formatDateLabel(ts){
   const d = new Date(ts);
   const now = new Date();
   const sameDay = (a,b)=> a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
   const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
-  if(sameDay(d, now)) return 'Danas';
-  if(sameDay(d, yesterday)) return 'Juče';
+  if(sameDay(d, now)) return t('dateToday');
+  if(sameDay(d, yesterday)) return t('dateYday');
+  if(appLang() === 'en') return MONTHS_EN[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
   const suffix = d.getFullYear() !== now.getFullYear() ? ' ' + d.getFullYear() + '.' : '';
   return d.getDate() + '. ' + MESECI[d.getMonth()] + suffix;
 }
@@ -7918,11 +7960,11 @@ function deleteModalItem(id){
   }else{
     requestClose();
   }
-  toast('Premešteno u korpu.');
+  toast(t('trMoved1'));
 }
 
 function openMoveSheet(){
-  sheetTitle.textContent = 'Dodaj u album';
+  sheetTitle.textContent = t('addToAlb');
   sheetList.innerHTML = '';
 
   /* Glavni albumi; podalbumi se otvaraju/zatvaraju strelicom. Otvoren je samo album u kome smo sada. */
@@ -7947,7 +7989,7 @@ function openMoveSheet(){
     const tog = document.createElement('button');
     tog.type = 'button';
     tog.className = 'sub-toggle';
-    tog.setAttribute('aria-label', 'Podalbumi');
+    tog.setAttribute('aria-label', t('subAlbums'));
     tog.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>';
     const setOpen = (on)=>{ group.classList.toggle('open', on); tog.classList.toggle('open', on); };
     tog.onclick = (e)=>{ e.stopPropagation(); setOpen(!group.classList.contains('open')); };
@@ -7957,7 +7999,7 @@ function openMoveSheet(){
 
   const newRow = document.createElement('div');
   newRow.className = 'sheet-row new';
-  newRow.textContent = '+ Novi album...';
+  newRow.textContent = t('newAlbRow');
   newRow.onclick = ()=>{ requestCloseThen(()=>openNewFolderSheet('bulk')); };
   sheetList.appendChild(newRow);
 
@@ -7968,7 +8010,7 @@ const closeSheetBg = ()=>sheetBg.classList.remove('open');
 
 function openMoveCopySheet(folderKey, label){
   pendingBulkFolder = folderKey;
-  moveCopyTitle.textContent = 'Album \u201C' + label + '\u201D';
+  moveCopyTitle.textContent = t('mcTitle', {name:label});
   moveCopySheet.classList.add('open');
   pushBack(closeMoveCopySheet);
 }
@@ -7996,7 +8038,7 @@ function moveSelectedToFolder(catId){
   jumpSet(catId || INBOX, prev.map(p=>p[0].id));
   exitSelection();
   /* v110: obaveštenje na vrhu sa dugmetom „Vrati“ (5 s) */
-  showNote(catId ? 'Premešteno u "'+catLabel(catId)+'".' : 'Uklonjeno iz albuma.', 5000, {action:{label:t('noteUndo'), fn:()=>{
+  showNote(catId ? t('mvDone', {name:catLabel(catId)}) : t('rmFromAlb'), 5000, {action:{label:t('noteUndo'), fn:()=>{
     prev.forEach(([item, cat])=>{ item.category = cat; idbPut(item).catch(e=>console.error(e)); });
     _jump = null;
     if(coverSet && target){ target.cover = coverBefore || null; saveCategories(); }
@@ -8050,7 +8092,7 @@ async function deleteSelected(){
   moveToTrash(removedItems);
   exitSelection();
   render();
-  toast(removedItems.length===1 ? 'Premešteno u korpu.' : 'U korpu premešteno: '+removedItems.length+'.');
+  toast(removedItems.length===1 ? t('trMoved1') : t('trMovedN', {n:removedItems.length}));
 }
 /* ---------- Korpa ---------- */
 /* Upisuje se odmah: ako se aplikacija zatvori, stavka ostaje u korpi (ne nestaje, ne vraca se sama). */
@@ -8139,10 +8181,10 @@ async function shareSelected(list){
     if(navigator.canShare && navigator.canShare({files})){
       await navigator.share({files});
     }else{
-      toast('Deljenje nije podržano u ovom browseru.');
+      toast(t('shareNo'));
     }
   }catch(e){
-    if(e && e.name !== 'AbortError'){ toast('Deljenje nije uspelo.'); }
+    if(e && e.name !== 'AbortError'){ toast(t('shareFail')); }
   }
 }
 
@@ -8169,7 +8211,7 @@ async function saveSelectedToDevice(list){
     setTimeout(()=>URL.revokeObjectURL(url), 4000);
     if(idx < jobs.length - 1) await new Promise(r=>setTimeout(r, 400));
   }
-  toast(chosen.length === 1 ? 'Sačuvano na telefon.' : chosen.length + ' stavke sačuvano na telefon.');
+  toast(chosen.length === 1 ? t('savedPhone1') : t('savedPhoneN', {n:chosen.length}));
 }
 
 /* Precica: stranica za jednu sliku je u posebnom repozitorijumu (van instalirane Arhive).
@@ -8202,8 +8244,8 @@ function openNewFolderSheet(assignToItemId){
   pendingAssignItemId = assignToItemId;
   renamingAlbum = null;
   newFolderParent = null;
-  document.getElementById('newFolderTitle').textContent = 'Novi album';
-  document.getElementById('newFolderCreate').textContent = 'Napravi album';
+  document.getElementById('newFolderTitle').textContent = t('nfAlbum');
+  document.getElementById('newFolderCreate').textContent = t('nfAlbumBtn');
   newFolderInput.value = '';
   folderUpdateState();
   newFolderSheet.classList.add('open');
@@ -8215,8 +8257,8 @@ function openNewSubalbumSheet(parentId){
   pendingAssignItemId = null;
   renamingAlbum = null;
   newFolderParent = parentId;
-  document.getElementById('newFolderTitle').textContent = 'Novi podalbum';
-  document.getElementById('newFolderCreate').textContent = 'Napravi podalbum';
+  document.getElementById('newFolderTitle').textContent = t('nfSub');
+  document.getElementById('newFolderCreate').textContent = t('nfSubBtn');
   newFolderInput.value = '';
   folderUpdateState();
   newFolderSheet.classList.add('open');
@@ -8229,8 +8271,8 @@ function openRenameSheet(catId){
   pendingAssignItemId = null;
   renamingAlbum = catId;
   newFolderParent = null;
-  document.getElementById('newFolderTitle').textContent = cat.parent ? 'Preimenuj podalbum' : 'Preimenuj album';
-  document.getElementById('newFolderCreate').textContent = 'Sačuvaj';
+  document.getElementById('newFolderTitle').textContent = cat.parent ? t('acRenameSub') : t('acRename');
+  document.getElementById('newFolderCreate').textContent = t('mbSave');
   newFolderInput.value = cat.name;
   folderUpdateState();
   newFolderSheet.classList.add('open');
@@ -8246,7 +8288,7 @@ function createFolder(){
   if(renamingAlbum){
     const cat = catById(renamingAlbum);
     if(cat && categories.some(c=>c.id!==cat.id && (c.parent||null)===(cat.parent||null) && c.name===name)){
-      toast('Album s tim imenom već postoji.');
+      toast(t('albDup'));
       return;
     }
     if(cat){
@@ -8270,7 +8312,7 @@ function createFolder(){
     }
     /* v110: nov podalbum se ne otvara; ostaje se u albumu, podalbum se vidi među podalbumima */
     requestCloseThen(()=>{
-      const note = ()=>showNote(existed ? 'Podalbum "'+name+'" već postoji.' : t('subMade', {name}), 4000);
+      const note = ()=>showNote(existed ? t('subExists', {name}) : t('subMade', {name}), 4000);
       if(currentFolder === parentId){ render(); note(); }
       else navToAlbum(parentId, note);
     });
@@ -8292,7 +8334,7 @@ function createFolder(){
     const openIt = newCat;
     requestCloseThen(()=>{
       currentFolder = openIt.id; searchEl.value=''; pushBack(parentCloser(null)); render();   /* nazad -> pocetni ekran */
-      toast(existedTop ? 'Album "'+name+'" već postoji.' : 'Album "'+name+'" napravljen.');
+      toast(existedTop ? t('albExists', {name}) : t('albMade', {name}));
     });
   }
 }
@@ -8318,7 +8360,7 @@ async function addFilesWithProgress(files, category){
   let completed = 0;
   _diag = { worker: 0, fallback: 0, errors: [] };
   const t0 = performance.now();
-  toastPersist('Obrađujem 0 / ' + total + '...');
+  toastPersist(t('procN', {a:0, b:total}));
   const CONCURRENCY = 3;
   let nextIndex = 0;
   const lane = async ()=>{
@@ -8326,7 +8368,7 @@ async function addFilesWithProgress(files, category){
       const idx = nextIndex++;
       await addFile(files[idx], category);
       completed++;
-      toastPersist('Obrađujem ' + completed + ' / ' + total + '...');
+      toastPersist(t('procN', {a:completed, b:total}));
     }
   };
   const lanes = [];
@@ -8334,7 +8376,7 @@ async function addFilesWithProgress(files, category){
   await Promise.all(lanes);
   const secs = ((performance.now() - t0) / 1000).toFixed(1);
   toastHide();
-  toast(total===1 ? 'Dodato 1 stavka.' : 'Dodato ' + total + ' stavki.');
+  toast(total===1 ? t('added1') : t('addedN', {n:total}));
   console.log('Arhiva: obrada '+total+' fajlova za '+secs+'s (brzo:'+_diag.worker+' sporo:'+_diag.fallback+')', _diag.errors);
 }
 
@@ -8850,6 +8892,19 @@ function checkBackupReminder(){
 }
 document.getElementById('backupReminderBtn').addEventListener('click', exportBackup);
 document.getElementById('backupReminderBtn').textContent = t('bkRemBtn');
+/* v185: statični tekstovi ekrana albuma (listovi, pretraga) */
+(function(){
+  const tx = (id, k)=>{ const e = document.getElementById(id); if(e) e.textContent = t(k); };
+  const sp = (id, k)=>{ const e = document.getElementById(id); if(e && e.querySelector('span')) e.querySelector('span').textContent = t(k); };
+  const at = (id, a, k)=>{ const e = document.getElementById(id); if(e) e.setAttribute(a, t(k)); };
+  const ah = document.querySelector('#addSheet .sheet-head h3'); if(ah) ah.textContent = t('addTitle');
+  sp('addFromGallery', 'addGallery'); sp('addFromCamera', 'addCamera'); sp('addFromDocs', 'addDoc');
+  at('newFolderInput', 'placeholder', 'nfPh'); tx('btnMove', 'mcMove'); tx('btnCopy', 'mcCopy');
+  sp('acRename', 'acRename'); sp('acCover', 'acCover'); sp('acMove', 'acMove'); sp('acUnnest', 'acUnnest'); sp('acDelete', 'acDelete');
+  const ch = document.querySelector('#coverPickerSheet .sheet-head h3'); if(ch) ch.textContent = t('coverTitle');
+  at('search', 'placeholder', 'srPh'); tx('deepSearchToggle', 'srDeep'); at('deepSearchToggle', 'title', 'srDeepT');
+  tx('askBtn', 'srAsk'); at('askBtn', 'title', 'srAskT'); at('searchCloseBtn', 'title', 'srClose'); at('pgBack', 'aria-label', 'backAria');
+})();
 document.getElementById('cfCancel').lastChild.textContent = t('cfCancel');
 function getTrashDays(){
   const v = parseInt(localStorage.getItem(LS_PREFIX+'trashDays'));
@@ -9160,7 +9215,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 184;
+const APP_VERSION = 185;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
