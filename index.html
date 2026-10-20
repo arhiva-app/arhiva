@@ -4461,6 +4461,13 @@ Object.assign(I18N.en, {
   albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
   procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.'
 });
+/* v186: preostali tekstovi (dugmad gore, poruke) */
+Object.assign(I18N.sr, { hdrNewAlbum: 'Novi album', hdrSearch: 'Pretraga', hdrSettings: 'Podešavanja',
+  albRec1: 'Vraćen 1 album.', albRecN: 'Vraćeno albuma: {n}.', noSpace: 'Nema više prostora za nove stavke u browseru.',
+  dupTitle: 'Već postoji', dupText: 'Izgleda da "{name}" već postoji u arhivi (isti naziv i veličina fajla). Dodati je ipak?', dupOk: 'Dodaj ipak' });
+Object.assign(I18N.en, { hdrNewAlbum: 'New album', hdrSearch: 'Search', hdrSettings: 'Settings',
+  albRec1: '1 album restored.', albRecN: 'Albums restored: {n}.', noSpace: 'There is no more space for new items in the browser.',
+  dupTitle: 'Already exists', dupText: 'It looks like “{name}” is already in the archive (same name and file size). Add it anyway?', dupOk: 'Add anyway' });
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'hr', 'bs', 'sh', 'me', 'cnr'];
@@ -5457,7 +5464,7 @@ async function loadAll(){
       try{ await idbPut(it); }catch(err){ console.error(err); }
     }
     if(recovered > 0){
-      toast(recovered === 1 ? 'Vraćen 1 album.' : 'Vraćeno albuma: '+recovered+'.');
+      toast(recovered === 1 ? t('albRec1') : t('albRecN', {n:recovered}));
     }
   }catch(e){
     console.error(e);
@@ -8552,9 +8559,9 @@ async function addFile(file, category, o){
     const dup = items.find(i => i.sourceSig === sourceSig);
     if(dup && !(o && o.noDup)){
       const again = await askConfirm({
-        icon:'🗂️', title:'Već postoji',
-        text:'Izgleda da "'+dup.name+'" već postoji u arhivi (isti naziv i veličina fajla). Dodati je ipak?',
-        okIcon:'➕', okLabel:'Dodaj ipak', danger:false
+        icon:'🗂️', title:t('dupTitle'),
+        text:t('dupText', {name:dup.name}),
+        okIcon:'➕', okLabel:t('dupOk'), danger:false
       });
       if(!again) return;
     }
@@ -8906,6 +8913,8 @@ document.getElementById('backupReminderBtn').textContent = t('bkRemBtn');
   tx('askBtn', 'srAsk'); at('askBtn', 'title', 'srAskT'); at('searchCloseBtn', 'title', 'srClose'); at('pgBack', 'aria-label', 'backAria');
 })();
 document.getElementById('cfCancel').lastChild.textContent = t('cfCancel');
+[['newAlbumBtn', 'hdrNewAlbum'], ['searchBtn', 'hdrSearch'], ['settingsBtn', 'hdrSettings']].forEach(([id, k])=>{
+  const e = document.getElementById(id); if(!e) return; e.title = t(k); if(e.hasAttribute('aria-label')) e.setAttribute('aria-label', t(k)); });
 function getTrashDays(){
   const v = parseInt(localStorage.getItem(LS_PREFIX+'trashDays'));
   return (v && v > 0) ? v : 30;
@@ -9215,7 +9224,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 185;
+const APP_VERSION = 186;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9921,7 +9930,7 @@ async function importZipBackup(file){
   if(items.length || trash.length || categories.length){
     const when = data.exportedAt ? new Date(data.exportedAt) : null;
     const ch = await askConfirm({icon:'📦', title:t('bkAskTitle'),
-      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, hint:t('bkAskAddHint'), date: when && !isNaN(when) ? when.toLocaleDateString('sr-RS') : '—'}),
+      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, hint:t('bkAskAddHint'), date: when && !isNaN(when) ? when.toLocaleDateString(appLang() === 'en' ? 'en-US' : 'sr-RS') : '—'}),
       altIcon:'➕', altLabel:t('bkAskAdd'), okIcon:'♻️', okLabel:t('bkAskReplace')});
     if(!ch) return;
     if(ch === true){
@@ -10696,7 +10705,7 @@ document.getElementById('pgSave').onclick = async ()=>{
   }catch(e){
     console.error(e);
     if(ed){ ed.busy = false; renderPageEditor(); }
-    toast(e && e.name === 'QuotaExceededError' ? 'Nema više prostora za nove stavke u browseru.' : t('saveErr'));
+    toast(e && e.name === 'QuotaExceededError' ? t('noSpace') : t('saveErr'));
   }
 };
 /* Ako je pregled otvoren na izmenjenom dokumentu: prikaži ga ponovo (isti broj stranice ako postoji) */
