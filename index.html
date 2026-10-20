@@ -3824,6 +3824,9 @@ const I18N = {
     lkBioSub: 'otisak prsta ili lice, kako je podešeno na telefonu',
     lkChangePin: 'promeni PIN',
     lkSetPin: 'postavi PIN',
+    lkOffTitle: 'Isključiti zaključavanje?',
+    lkOffText: 'PIN i šablon biće obrisani. Ako kasnije ponovo uključite zaključavanje, postavljate nove.',
+    lkOffOk: 'Isključi i obriši',
     lkSetPat: 'postavi šablon',
     lkSetDonePin: 'PIN je postavljen.',
     lkSetDonePat: 'Šablon je postavljen.',
@@ -4523,6 +4526,9 @@ const I18N = {
     lkBioSub: 'fingerprint or face, as set up on the phone',
     lkChangePin: 'change PIN',
     lkSetPin: 'set PIN',
+    lkOffTitle: 'Turn off app lock?',
+    lkOffText: 'The PIN and pattern will be deleted. If you turn the lock on again later, you will set new ones.',
+    lkOffOk: 'Turn off and delete',
     lkSetPat: 'set pattern',
     lkSetDonePin: 'PIN set.',
     lkSetDonePat: 'Pattern set.',
@@ -18102,6 +18108,7 @@ async function lkRun(fn){
 function lkPickMode(m){
   lkRun(async ()=>{
     const c = lkCfg(); if(m === c.mode) return null;
+    if(m === 'off' && !await askConfirm({icon:'🔓', title:t('lkOffTitle'), text:t('lkOffText'), okIcon:'🗑️', okLabel:t('lkOffOk')})) return null;   /* v191: brišu se i PIN i šablon */
     if(c.mode !== 'off' && !await lkVerify()) return null;
     if(m === 'off'){ const c2 = lkCfg(); c2.mode = 'off'; delete c2.pin; delete c2.pat; c2.bio = false; c2.asked = true; lkSave(c2); return t('lkOff'); }
     return await lkEnable(m) ? lkK(m, 'lkSavedPin', 'lkSavedPat') : null;
