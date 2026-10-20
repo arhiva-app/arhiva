@@ -9080,7 +9080,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 179;
+const APP_VERSION = 180;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10864,7 +10864,7 @@ function aiErrText(e){
   return t('aiErrOther', {code:'?', msg:String((e && e.message) || e).slice(0, 160)});
 }
 
-/* MODUL gemini v2 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida sve pokušaje,
+/* MODUL gemini v3 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida sve pokušaje,
    rezervni model = drugi iz AI_MODELS, trošak po modelu koji je stvarno odgovorio. Ključ u zaglavlju x-goog-api-key.
    v173 (brzina): odgovor stiže u delovima (streamGenerateContent?alt=sse), pa se zna kad model POČNE da odgovara.
    - Glavni bez prvog dela za GEMINI_HEDGE_MS (+ vreme slanja velikog fajla) → istovremeno rezervni; važi prvi gotov,
@@ -10872,6 +10872,7 @@ function aiErrText(e){
    - 429 → odmah rezervni (isti model se više ne pokušava); 408/5xx/bez odgovora → odmah rezervni, pa glavni (~1 s),
      pa rezervni (~2 s) — najviše 4 pokušaja. Ostale greške (400, 401, 404) se vraćaju odmah.
    - opt.timeout (Pitaj) = granica do prvog dela; inače GEMINI_IDLE_MS bez ijednog dela (i između delova).
+   v3 (v180): glavni koji razmišlja (think, 3.8 Flash) se čeka — rezervni samo na grešku ili posle granice bez odgovora.
    Delovi se spajaju u isti oblik koji vraća generateContent, pa ostatak koda ostaje isti. */
 const GEMINI_RETRY_STATUS = [408,429,500,502,503,504];
 const GEMINI_HEDGE_MS = 3000;       /* „par sekundi“ (dogovor 19.10.) */
@@ -10955,7 +10956,7 @@ function geminiFetch(models, body, key, signal, opt){
   const queue = [[models[0],0],[models[1],0],[models[0],1000],[models[1],2000]].filter(x=>x[0]);
   const cache = {};
   const bodyFor = m=>cache[m.id] || (cache[m.id] = JSON.stringify(typeof body === 'function' ? body(m) : body));
-  const hedgeMs = models[1] ? GEMINI_HEDGE_MS + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
+  const hedgeMs = models[1] && !models[0].think ? GEMINI_HEDGE_MS + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
   return new Promise((resolve, reject)=>{
     let next = 0, pending = 0, tries = 0, done = false, lastErr = null, hardErr = null, netErr = false, pauseTm = null, hedgeTm = null;
     const live = new Map(), dead = new Set();   /* live: ctl → {m, t0, first} */
