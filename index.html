@@ -17788,7 +17788,8 @@ function lkBack(){
 function lkLockedScreen(interactive){
   const c = lkCfg();
   return new Promise(res=>{
-    const el = lkShow('<div class="lk-in lk-mid">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1><p class="lk-p"></p>'+
+    /* znak i natpis gore, na istom mestu kao na unosu PIN-a: vide se iznad Androidovog prozora za otisak */
+    const el = lkShow('<div class="lk-in">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1><p class="lk-p"></p>'+
       (interactive ? '<button type="button" class="lk-btn" data-a="bio"></button><button type="button" class="lk-link" data-a="secret"></button>' : '')+'</div>');
     el.querySelector('.lk-p').textContent = t('lkLocked');
     if(!interactive){ res(null); return; }
