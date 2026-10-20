@@ -2197,8 +2197,8 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
 .home-inbox svg{ flex:none; color:var(--brass); width:24px; height:24px; }
 .home-inbox .hi-nm{ flex:1 1 auto; min-width:0; font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .home-inbox .hi-ct{ flex:none; font-size:14px; color:var(--ink-dim); white-space:nowrap; }
-/* v118: na uskom ekranu okrugla dugmad gore malo manja, da stane i broj albuma */
-@media (max-width:380px){ body:not(.in-album) .header-actions .icon-btn{ width:40px; height:40px; } body:not(.in-album) .header-actions{ gap:6px; } }
+/* v118: okrugla dugmad gore malo manja, da stane i broj albuma; v175: na svim telefonima (uz zvonce broj ostaje) */
+body:not(.in-album) .header-actions .icon-btn{ width:40px; height:40px; } body:not(.in-album) .header-actions{ gap:6px; }
 /* v150: isečak tabele u prozoru ćelije */
 .xe-crop{ margin:2px 0 10px; border:1px solid var(--line); border-radius:12px; overflow:auto; max-height:210px; background:var(--surface-2); }
 .xe-crop table{ border-collapse:collapse; font-size:13px; min-width:100%; }
@@ -3608,11 +3608,13 @@ const I18N = {
     bkChecking: 'Proveravam kopiju: {n} / {total}…',
     bkRestoredBad: 'Vraćeno: {added}. Već postoji: {skipped}. Oštećeno u kopiji i preskočeno: {bad}.',
     bkAskTitle: 'Vraćanje kopije',
-    bkAskText: 'Kopija od {date} (stavki: {docs}, albuma: {albums}). Kako da je vratim?',
+    bkAskText: 'Kopija od {date} (stavki: {docs}, albuma: {albums}). Kako da je vratim? {hint}',
     bkAskAdd: 'Dodaj postojećim',
     bkAskReplace: 'Zameni sve',
     bkRepTitle: 'Zameni sve?',
-    bkRepText: 'Sve što je sada u Arhivi, uključujući korpu i šablone, biće zamenjeno sadržajem kopije. Ništa se ne briše dok kopija nije uspešno vraćena.',
+    bkRepText: 'Iz kopije se vraća: {docs} i {albums}. Trajno se briše sve čega u kopiji nema: {lost}{names}, korpa ({trash}) i šabloni koji nisu u kopiji. Ništa se ne briše dok kopija nije uspešno vraćena.',
+    bkRepNone: 'Iz kopije se vraća: {docs} i {albums}. Sve što je sada u Arhivi ima i u kopiji; briše se samo korpa ({trash}) i šabloni koji nisu u kopiji. Ništa se ne briše dok kopija nije uspešno vraćena.',
+    bkAskAddHint: '„Dodaj postojećim“ ništa ne briše: vraća samo ono čega u Arhivi nema.',
     bkReplaced: 'Arhiva je vraćena iz kopije (stavki: {added}, albuma: {albums}).',
     bkBroken: 'Kopija je oštećena, ništa nije promenjeno. Neispravnih fajlova: {n} (npr. „{name}“).',
     bkFailedKeep: 'Vraćanje kopije nije uspelo. Kopija nije oštećena — pokušaj ponovo.',
@@ -4264,11 +4266,13 @@ const I18N = {
     bkChecking: 'Checking backup: {n} / {total}…',
     bkRestoredBad: 'Restored: {added}. Already here: {skipped}. Damaged in the backup and skipped: {bad}.',
     bkAskTitle: 'Restore backup',
-    bkAskText: 'Backup from {date} (items: {docs}, albums: {albums}). How should it be restored?',
+    bkAskText: 'Backup from {date} (items: {docs}, albums: {albums}). How should it be restored? {hint}',
     bkAskAdd: 'Add to existing',
     bkAskReplace: 'Replace all',
     bkRepTitle: 'Replace all?',
-    bkRepText: 'Everything now in Arhiva, including the trash and templates, will be replaced with the backup. Nothing is deleted until the backup is restored successfully.',
+    bkRepText: 'From the backup: {docs} and {albums}. Everything not in the backup is deleted permanently: {lost}{names}, the trash ({trash}) and templates not in the backup. Nothing is deleted until the backup is restored successfully.',
+    bkRepNone: 'From the backup: {docs} and {albums}. Everything now in Arhiva is also in the backup; only the trash ({trash}) and templates not in the backup are deleted. Nothing is deleted until the backup is restored successfully.',
+    bkAskAddHint: '“Add to existing” deletes nothing: it restores only what Arhiva does not have.',
     bkReplaced: 'Arhiva restored from backup: {added} items, {albums} albums.',
     bkBroken: 'The backup is damaged, nothing was changed. Bad files: {n} (e.g. “{name}”).',
     bkFailedKeep: 'Restoring the backup failed. The backup is not damaged — try again.',
@@ -6689,7 +6693,6 @@ function _renderView(){
   inboxTile.onclick = ()=>{ currentFolder = INBOX; searchEl.value=''; pushBack(closeAlbumView); render(); };
   homeHead.appendChild(inboxTile);
   albumHeaderZone.appendChild(homeHead);
-  fitMarkRow();
 
 
   const setupViewToggleBtn = ()=>{
@@ -6711,6 +6714,7 @@ function _renderView(){
     ab.title = t('allBtn'); ab.setAttribute('aria-label', t('allBtn'));
     ab.style.display = selectionMode ? 'none' : 'flex';
     ab.onclick = ()=>{ currentFolder = ALL; allKind = 'all'; searchEl.value = ''; pushBack(closeAlbumView); render(); window.scrollTo(0, 0); }; }
+  fitMarkRow();   /* v175: meri se tek kad su sva dugmad gornjeg reda prikazana (ranije pre Sve i prikaza → broj odsečen posle kopije) */
 
   /* Pocetni ekran: samo albumi prvog nivoa (podalbumi su unutar svog albuma) */
   appendAlbumGroups(contentArea, categories.filter(c=>!c.parent), cat=>{
@@ -9035,7 +9039,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 174;
+const APP_VERSION = 175;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9735,11 +9739,17 @@ async function importZipBackup(file){
   if(items.length || trash.length || categories.length){
     const when = data.exportedAt ? new Date(data.exportedAt) : null;
     const ch = await askConfirm({icon:'📦', title:t('bkAskTitle'),
-      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, date: when && !isNaN(when) ? when.toLocaleDateString('sr-RS') : '—'}),
+      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, hint:t('bkAskAddHint'), date: when && !isNaN(when) ? when.toLocaleDateString('sr-RS') : '—'}),
       altIcon:'➕', altLabel:t('bkAskAdd'), okIcon:'♻️', okLabel:t('bkAskReplace')});
     if(!ch) return;
     if(ch === true){
-      if(!await askConfirm({icon:'⚠️', title:t('bkRepTitle'), text:t('bkRepText'), okIcon:'♻️', okLabel:t('bkAskReplace')})) return;
+      /* v175: tačno šta „Zameni sve“ briše (stavke kojih nema u kopiji, sa nazivima) i šta vraća */
+      const inBk = new Set(liveDocs.map(d=>d.id).filter(Boolean));
+      const lost = items.filter(i=>!inBk.has(i.id));
+      const en = appLang() === 'en', cnt = n=>en ? n + (n === 1 ? ' item' : ' items') : stavkeTxt(n);
+      const nm = lost.slice(0, 3).map(i=>'„' + i.name + '“').join(', ') + (lost.length > 3 ? ', …' : '');
+      const rp = {docs:cnt(liveDocs.length), albums:albumiTxt(liveAlbums.length), trash:cnt(trash.length), lost:cnt(lost.length), names: lost.length ? ' (' + nm + ')' : ''};
+      if(!await askConfirm({icon:'⚠️', title:t('bkRepTitle'), text:t(lost.length ? 'bkRepText' : 'bkRepNone', rp), okIcon:'♻️', okLabel:t('bkAskReplace')})) return;
       replace = true;
     }
   }
