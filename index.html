@@ -3823,6 +3823,10 @@ const I18N = {
     lkBio: 'biometrija',
     lkBioSub: 'otisak prsta ili lice, kako je podešeno na telefonu',
     lkChangePin: 'promeni PIN',
+    lkSetPin: 'postavi PIN',
+    lkSetPat: 'postavi šablon',
+    lkSetDonePin: 'PIN je postavljen.',
+    lkSetDonePat: 'Šablon je postavljen.',
     lkChangePat: 'promeni šablon',
     lkAway: 'zaključaj i kad sam u drugoj aplikaciji duže od',
     lkNever: 'nikad',
@@ -4518,6 +4522,10 @@ const I18N = {
     lkBio: 'biometrics',
     lkBioSub: 'fingerprint or face, as set up on the phone',
     lkChangePin: 'change PIN',
+    lkSetPin: 'set PIN',
+    lkSetPat: 'set pattern',
+    lkSetDonePin: 'PIN set.',
+    lkSetDonePat: 'Pattern set.',
     lkChangePat: 'change pattern',
     lkAway: 'also lock when I am in another app for more than',
     lkNever: 'never',
@@ -9416,7 +9424,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 190;
+const APP_VERSION = 191;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -17768,6 +17776,7 @@ function lkCfg(){
   c = (c && typeof c === 'object') ? c : {};
   if(c.mode !== 'pin' && c.mode !== 'pat') c.mode = 'off';
   if(![0,5,15,60].includes(c.away)) c.away = 0;
+  if(c.hash){ if(c.mode !== 'off') c[c.mode] = {h:c.hash, s:c.salt}; delete c.hash; delete c.salt; }   /* v190 → v191: PIN i šablon se pamte odvojeno */
   return c;
 }
 function lkSave(c){ try{ localStorage.setItem(LK_KEY, JSON.stringify(c)); }catch(e){} }
@@ -17933,19 +17942,21 @@ function lkPrompt(o){
 async function lkCheckCurrent(v){
   const c = lkCfg(), now = Date.now();
   if(c.waitUntil && now < c.waitUntil) return t('lkWait', {s: Math.ceil((c.waitUntil - now)/1000)});
-  if(c.hash && await lkHash(v, c.salt) === c.hash){ c.bad = 0; c.waitUntil = 0; c.last = Date.now(); lkSave(c); return true; }
+  const k = c[c.mode];
+  if(k && k.h && await lkHash(v, k.s) === k.h){ c.bad = 0; c.waitUntil = 0; c.last = Date.now(); lkSave(c); return true; }
   c.bad = (c.bad || 0) + 1;
   if(c.bad >= LK_TRIES){ c.bad = 0; c.waitUntil = Date.now() + LK_WAIT; lkSave(c); return t('lkWait', {s: LK_WAIT/1000}); }
   lkSave(c);
   return t(c.mode === 'pat' ? 'lkWrongPat' : 'lkWrongPin', {n: LK_TRIES - c.bad});
 }
+/* Postavlja PIN ili šablon (ne menja izabrani način; lkEnable ga bira) */
 async function lkSetSecret(mode){
   const first = await lkPrompt({kind:mode, title:lkK(mode, 'lkNewPin', 'lkNewPat'), sub:lkK(mode, 'lkNewPinSub', 'lkPatSub'), cancel:true, check:async()=>true});
   if(first == null) return false;
   const second = await lkPrompt({kind:mode, title:lkK(mode, 'lkRepPin', 'lkRepPat'), sub:t('lkRepSub'), cancel:true, check:async v=> v === first ? true : t('lkMismatch')});
   if(second == null) return false;
   const c = lkCfg(), salt = lkSalt();
-  c.mode = mode; c.salt = salt; c.hash = await lkHash(second, salt); c.last = Date.now(); c.bad = 0; c.waitUntil = 0; c.asked = true;
+  c[mode] = {h: await lkHash(second, salt), s: salt}; c.last = Date.now(); c.bad = 0; c.waitUntil = 0; c.asked = true;
   lkSave(c);
   return true;
 }
@@ -17968,8 +17979,9 @@ async function lkVerify(){
 async function lkEnable(mode){
   const st = await lkState2();
   if(!st.telefon){ await lkInfo(t('lkNoPhoneLock')); return false; }
-  if(!await lkSetSecret(mode)) return false;
-  const c = lkCfg(); c.bio = !!st.biometrija; lkSave(c);
+  const had = lkCfg()[mode];
+  if(!(had && had.h) && !await lkSetSecret(mode)) return false;   /* već postavljen PIN/šablon se ne traži ponovo */
+  const c = lkCfg(), first = c.mode === 'off'; c.mode = mode; if(first) c.bio = !!st.biometrija; lkSave(c);
   lkBioAvail = !!st.biometrija; lkUnlockedAt = Date.now();
   return true;
 }
@@ -18060,7 +18072,8 @@ function lkSettingsHtml(){
   if(c.mode !== 'off'){
     h += '<div class="settings-card" style="margin-top:6px">'+
       (lkBioAvail || c.bio ? '<button type="button" class="settings-row" id="lkBioRow" role="switch" aria-checked="'+(c.bio ? 'true' : 'false')+'"><span class="row-icon">☝️</span><span class="row-label">'+escapeHtml(t('lkBio'))+'<span class="lk-row-sub">'+escapeHtml(t('lkBioSub'))+'</span></span><span class="lk-sw-t'+(c.bio ? ' on' : '')+'"></span></button>' : '')+
-      '<button type="button" class="settings-row" id="lkChangeRow"><span class="row-icon">'+(c.mode === 'pat' ? LK_PAT_ICON : '🔢')+'</span><span class="row-label">'+escapeHtml(lkK(c, 'lkChangePin', 'lkChangePat'))+'</span><span class="chevron">›</span></button></div>'+
+      '<button type="button" class="settings-row lk-chg" data-m="pin"><span class="row-icon">🔢</span><span class="row-label">'+escapeHtml(t(c.pin ? 'lkChangePin' : 'lkSetPin'))+'</span><span class="chevron">›</span></button>'+
+      '<button type="button" class="settings-row lk-chg" data-m="pat"><span class="row-icon">'+LK_PAT_ICON+'</span><span class="row-label">'+escapeHtml(t(c.pat ? 'lkChangePat' : 'lkSetPat'))+'</span><span class="chevron">›</span></button></div>'+
       '<div class="settings-card" style="margin-top:14px"><div class="lk-lbl">'+escapeHtml(t('lkAway'))+'</div><div class="lk-chips">'+
       [0,5,15,60].map(m=>'<button type="button" class="lk-chip'+(c.away === m ? ' on' : '')+'" data-away="'+m+'">'+escapeHtml(m === 0 ? t('lkNever') : m === 60 ? t('lkHour') : t('lkMin', {n:m}))+'</button>').join('')+'</div></div>';
   }
@@ -18072,7 +18085,7 @@ function lkWire(){
   const b = document.getElementById('lkSet'); if(!b) return;
   b.querySelectorAll('.lk-opt').forEach(x=>{ x.onclick = ()=>lkPickMode(x.dataset.m); });
   const br = document.getElementById('lkBioRow'); if(br) br.onclick = lkToggleBio;
-  const cr = document.getElementById('lkChangeRow'); if(cr) cr.onclick = lkChange;
+  b.querySelectorAll('.lk-chg').forEach(x=>{ x.onclick = ()=>lkChange(x.dataset.m); });
   b.querySelectorAll('.lk-chip').forEach(x=>{ x.onclick = ()=>{ const c = lkCfg(); const m = +x.dataset.away; if(c.away === m) return; c.away = m; lkSave(c); lkRefresh(); toast(t('setSaved')); }; });
 }
 function lkOpenSettings(){ lkWire(); lkState2().then(st=>{ const was = lkBioAvail; lkBioAvail = !!st.biometrija; if(was !== lkBioAvail) lkRefresh(); }); }
@@ -18090,7 +18103,7 @@ function lkPickMode(m){
   lkRun(async ()=>{
     const c = lkCfg(); if(m === c.mode) return null;
     if(c.mode !== 'off' && !await lkVerify()) return null;
-    if(m === 'off'){ const c2 = lkCfg(); c2.mode = 'off'; delete c2.hash; delete c2.salt; c2.bio = false; c2.asked = true; lkSave(c2); return t('lkOff'); }
+    if(m === 'off'){ const c2 = lkCfg(); c2.mode = 'off'; delete c2.pin; delete c2.pat; c2.bio = false; c2.asked = true; lkSave(c2); return t('lkOff'); }
     return await lkEnable(m) ? lkK(m, 'lkSavedPin', 'lkSavedPat') : null;
   });
 }
@@ -18103,11 +18116,13 @@ function lkToggleBio(){
     const c2 = lkCfg(); c2.bio = true; lkSave(c2); return t('lkBioOn');
   });
 }
-function lkChange(){
+/* promena (ili prvo postavljanje) PIN-a ili šablona: potvrda trenutnog, pa nov; izabrani način ostaje */
+function lkChange(which){
   lkRun(async ()=>{
     const c = lkCfg(); if(c.mode === 'off') return null;
     if(!await lkVerify()) return null;
-    return await lkSetSecret(c.mode) ? lkK(c, 'lkChangedPin', 'lkChangedPat') : null;
+    const had = !!lkCfg()[which];
+    return await lkSetSecret(which) ? t(which === 'pat' ? (had ? 'lkChangedPat' : 'lkSetDonePat') : (had ? 'lkChangedPin' : 'lkSetDonePin')) : null;
   });
 }
 lkBoot();
