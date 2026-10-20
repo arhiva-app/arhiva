@@ -9189,6 +9189,7 @@ function applyTheme(id){
   document.documentElement.setAttribute('data-theme', th.id);
   const meta = document.getElementById('themeColor');
   if(meta) meta.setAttribute('content', th.bar);
+  if(window.ARHIVA_TRAKE) window.ARHIVA_TRAKE(th.bg);   /* Android: trake telefona u boji pozadine (cap/arhiva-native.js) */
 }
 function setTheme(id){
   if(!THEMES.some(x=>x.id===id)) return;

@@ -4,7 +4,8 @@
       u novom APK-u); stariji APK bez dodatka → fajl u Documents/Arhiva
    2) navigator.share sa fajlovima → Android „Podeli“
    3) service worker se ne registruje (aplikacija je već na telefonu)
-   4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju */
+   4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju
+   5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -12,6 +13,12 @@
   var Filesystem = reg('Filesystem'), Share = reg('Share'), App = reg('App'), SacuvajKao = reg('SacuvajKao');
   var imaSacuvajKao = !!(C.isPluginAvailable && C.isPluginAvailable('SacuvajKao'));
   window.ARHIVA_NATIVE = true;
+
+  /* 5) Arhiva zove ARHIVA_TRAKE(boja pozadine) iz applyTheme — pri pokretanju i pri promeni teme */
+  if(C.isPluginAvailable && C.isPluginAvailable('Trake')){
+    var Trake = reg('Trake');
+    window.ARHIVA_TRAKE = function(boja){ try{ Trake.boja({ boja: boja }).catch(function(){}); }catch(e){} };
+  }
 
   /* 4) Nazad: dok Arhiva ima istoriju (otvoren list, album, potvrda izlaska) ide nazad kroz nju; na kraju izlazi */
   try{
