@@ -3873,8 +3873,8 @@ const I18N = {
     lkSavedPin: 'Arhiva je zaključana PIN-om.',
     lkSavedPat: 'Arhiva je zaključana šablonom.',
     lkOff: 'Zaključavanje je isključeno.',
-    lkChangedPin: 'PIN je promenjen.',
-    lkChangedPat: 'Šablon je promenjen.',
+    lkRenewPin: 'PIN je promenjen.',
+    lkRenewPat: 'Šablon je promenjen.',
     lkBioOn: 'Biometrija je uključena.',
     lkBioOff: 'Biometrija je isključena.',
     lkBioNone: 'Na telefonu nije podešen otisak prsta ni lice.',
@@ -4575,8 +4575,8 @@ const I18N = {
     lkSavedPin: 'Arhiva is now locked with a PIN.',
     lkSavedPat: 'Arhiva is now locked with a pattern.',
     lkOff: 'App lock is off.',
-    lkChangedPin: 'PIN changed.',
-    lkChangedPat: 'Pattern changed.',
+    lkRenewPin: 'PIN changed.',
+    lkRenewPat: 'Pattern changed.',
     lkBioOn: 'Biometrics on.',
     lkBioOff: 'Biometrics off.',
     lkBioNone: 'No fingerprint or face is set up on this phone.',
@@ -18129,7 +18129,7 @@ function lkChange(which){
     const c = lkCfg(); if(c.mode === 'off') return null;
     if(!await lkVerify()) return null;
     const had = !!lkCfg()[which];
-    return await lkSetSecret(which) ? t(which === 'pat' ? (had ? 'lkChangedPat' : 'lkSetDonePat') : (had ? 'lkChangedPin' : 'lkSetDonePin')) : null;
+    return await lkSetSecret(which) ? t(which === 'pat' ? (had ? 'lkRenewPat' : 'lkSetDonePat') : (had ? 'lkRenewPin' : 'lkSetDonePin')) : null;
   });
 }
 lkBoot();
