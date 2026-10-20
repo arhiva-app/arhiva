@@ -3821,7 +3821,7 @@ const I18N = {
     lkOptPin: 'PIN (4 cifre)',
     lkOptPat: 'šablon',
     lkBio: 'biometrija',
-    lkBioSub: 'otisak prsta ili lice, kako je podešeno na telefonu',
+    lkBioSub: 'otisak prsta (lice samo na telefonima koji ga dozvoljavaju aplikacijama)',
     lkChangePin: 'promeni PIN',
     lkSetPin: 'postavi PIN',
     lkOffTitle: 'Isključiti zaključavanje?',
@@ -3837,11 +3837,11 @@ const I18N = {
     lkMin: '{n} min',
     lkHour: '1 sat',
     lkHint: 'Arhiva se zaključava pri svakom pokretanju i kad se ugasi ekran telefona. Na svaka 3 dana traži PIN (ili šablon) i kad je biometrija uključena, da ga ne zaboravite.',
-    lkHintForgot: 'Ako zaboravite PIN ili šablon, potvrdite otiskom ili PIN-om telefona i postavite nov.',
+    lkHintForgot: 'Ako zaboravite PIN ili šablon, potvrdite otiskom prsta ili PIN-om telefona i postavite nov.',
     lkLocked: 'Arhiva je zaključana.',
-    lkCardBio: 'Otisak ili lice',
+    lkCardBio: 'Otisak prsta',
     lkBioTitle: 'Otključaj Arhivu',
-    lkBioSubT: 'Otisak prsta ili lice',
+    lkBioSubT: 'Otisak prsta',
     lkEnterPin: 'Unesi PIN',
     lkDrawPat: 'Nacrtaj šablon',
     lkPinTitle: 'Unesite PIN',
@@ -3878,13 +3878,13 @@ const I18N = {
     lkRenewPat: 'Šablon je promenjen.',
     lkBioOn: 'Biometrija je uključena.',
     lkBioOff: 'Biometrija je isključena.',
-    lkBioNone: 'Na telefonu nije podešen otisak prsta ni lice.',
+    lkBioNone: 'Na telefonu nije podešen otisak prsta.',
     lkFirstTitle: 'Zaključati Arhivu?',
-    lkFirstText: 'Arhivu otvarate otiskom prsta, licem, PIN-om ili šablonom. Ovo se kasnije menja u Podešavanjima.',
+    lkFirstText: 'Arhivu otvarate otiskom prsta, PIN-om ili šablonom. Ovo se kasnije menja u Podešavanjima.',
     lkFirstYes: 'Zaključaj',
     lkFirstNo: 'Bez zaključavanja',
     lkChooseTitle: 'Čime otključavate?',
-    lkChooseText: 'Uz PIN ili šablon možete koristiti i otisak prsta ili lice.'
+    lkChooseText: 'Uz PIN ili šablon možete koristiti i otisak prsta.'
   },
   en: {
     addMulti: 'Multi-page document',
@@ -4524,7 +4524,7 @@ const I18N = {
     lkOptPin: 'PIN (4 digits)',
     lkOptPat: 'pattern',
     lkBio: 'biometrics',
-    lkBioSub: 'fingerprint or face, as set up on the phone',
+    lkBioSub: 'fingerprint (face only on phones that allow it for apps)',
     lkChangePin: 'change PIN',
     lkSetPin: 'set PIN',
     lkOffTitle: 'Turn off app lock?',
@@ -4542,9 +4542,9 @@ const I18N = {
     lkHint: 'Arhiva locks every time it starts and when the phone screen turns off. Every 3 days it asks for the PIN (or pattern) even with biometrics on, so you do not forget it.',
     lkHintForgot: 'If you forget the PIN or pattern, confirm with the phone fingerprint or PIN and set a new one.',
     lkLocked: 'Arhiva is locked.',
-    lkCardBio: 'Fingerprint or face',
+    lkCardBio: 'Fingerprint',
     lkBioTitle: 'Unlock Arhiva',
-    lkBioSubT: 'Fingerprint or face',
+    lkBioSubT: 'Fingerprint',
     lkEnterPin: 'Enter PIN',
     lkDrawPat: 'Draw pattern',
     lkPinTitle: 'Enter PIN',
@@ -4581,13 +4581,13 @@ const I18N = {
     lkRenewPat: 'Pattern changed.',
     lkBioOn: 'Biometrics on.',
     lkBioOff: 'Biometrics off.',
-    lkBioNone: 'No fingerprint or face is set up on this phone.',
+    lkBioNone: 'No fingerprint is set up on this phone.',
     lkFirstTitle: 'Lock Arhiva?',
-    lkFirstText: 'Open Arhiva with your fingerprint, face, PIN or pattern. You can change this later in Settings.',
+    lkFirstText: 'Open Arhiva with your fingerprint, PIN or pattern. You can change this later in Settings.',
     lkFirstYes: 'Lock',
     lkFirstNo: 'No lock',
     lkChooseTitle: 'Unlock with',
-    lkChooseText: 'Along with the PIN or pattern you can also use your fingerprint or face.'
+    lkChooseText: 'Along with the PIN or pattern you can also use your fingerprint.'
   }
 };
 /* v183: izbor jezika, početni ekran i Podešavanja */
@@ -17816,7 +17816,7 @@ function lkBack(){
   if(lkBackFn){ lkBackFn(); return true; }
   return lkState === 'open' ? true : 'izlaz';
 }
-/* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak ili lice · PIN/Šablon; bez biometrije samo PIN/Šablon).
+/* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak prsta · PIN/Šablon; bez biometrije samo PIN/Šablon).
    interactive=false: ispod Androidovog prozora ili posle gašenja ekrana — dodir na polje pokreće otključavanje.
    interactive=true: posle „Odustani“ — vraća 'bio' | 'secret' | 'forgot'. */
 function lkLockedScreen(interactive){
