@@ -3658,6 +3658,8 @@ const I18N = {
     bkRestoredUpd: 'Vraćeno: {added}. Osveženo: {updated}. Već postoji: {skipped}.',
     bkBadFile: 'Fajl nije prepoznat kao rezervna kopija.',
     bkPacked: 'Ova kopija je prepakovana drugim programom. Uvezi originalni ZIP iz Arhive.',
+    bkSavedAs: 'Rezervna kopija sačuvana: „{name}“.',
+    bkNotSaved: 'Rezervna kopija nije sačuvana.',
     bkTooBig: 'Kopija bi bila veća od 4 GB. Obriši nešto ili javi da delimo kopiju na delove.',
     bkFailed: 'Rezervna kopija nije uspela.',
     fileMissing: 'Fajl nije pronađen.',
@@ -4317,6 +4319,8 @@ const I18N = {
     bkRestoredUpd: 'Restored: {added}. Updated: {updated}. Already here: {skipped}.',
     bkBadFile: 'This file is not a recognized backup.',
     bkPacked: 'This backup was repacked by another program. Import the original ZIP from Arhiva.',
+    bkSavedAs: 'Backup saved: “{name}”.',
+    bkNotSaved: 'Backup not saved.',
     bkTooBig: 'The backup would be larger than 4 GB.',
     bkFailed: 'The backup failed.',
     fileMissing: 'File not found.',
@@ -9226,7 +9230,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 188;
+const APP_VERSION = 189;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9527,7 +9531,12 @@ function backupFileName(ext){
 /* Upis u izabranu fasciklu (ako je dozvoljeno), inače preuzimanje. Vraća poruku za korisnika. */
 async function saveBackupFile(blob, fileName, dirOk){
   let msg = 'Rezervna kopija sačuvana.';
-  if(backupDirHandle && dirOk){
+  if(window.ARHIVA_SACUVAJ_KAO){
+    /* v189: Android aplikacija — telefon pita gde i pod kojim imenom (otkazano = kopija nije napravljena) */
+    const r = await window.ARHIVA_SACUVAJ_KAO(blob, fileName, 'application/zip');
+    if(r && r.otkazano) return t('bkNotSaved');
+    msg = t('bkSavedAs', {name: (r && r.ime) || fileName});
+  }else if(backupDirHandle && dirOk){
     try{
       await writeBackupToDir(backupDirHandle, blob, fileName);
       msg = 'Rezervna kopija upisana u \u201E' + backupDirHandle.name + '\u201C.';
@@ -9605,7 +9614,36 @@ async function zipBuild(entries, onProgress){
   end.setUint32(12, cdSize, true); end.setUint32(16, offset, true); end.setUint16(20, 0, true);
   return new Blob(parts.concat(central, [end.buffer]), {type:'application/zip'});
 }
-/* Čitanje ZIP-a: vraća Map(ime -> {size, crc, read()}); read() daje Blob posle provere CRC-a. */
+/* v189: čitanje fajla REDOM, jednim prolazom (file.stream()). Kopija izabrana u Android aplikaciji čita se sporo kad se
+   skače po fajlu (svaki komad = novo otvaranje); uvoz traži stavke istim redom kojim ih izvoz piše, pa se fajl čita samo
+   jednom. Zahtev unazad (van reda) čita se zasebno (file.slice). */
+function zipSeqReader(file){
+  let rd = null, pos = 0, chunk = null, cStart = 0;
+  const direct = async (start, len)=>new Uint8Array(await file.slice(start, start + len).arrayBuffer());
+  return async (start, len)=>{
+    if(start < (chunk ? cStart : pos)) return direct(start, len);
+    if(!rd) rd = file.stream().getReader();
+    const out = new Uint8Array(len);
+    let got = 0;
+    while(got < len){
+      if(!chunk){
+        const r = await rd.read();
+        if(r.done) return direct(start, len);
+        chunk = r.value; cStart = pos; pos += chunk.length;
+      }
+      const want = start + got, cEnd = cStart + chunk.length;
+      if(want >= cEnd){ chunk = null; continue; }
+      const n = Math.min(len - got, cEnd - want);
+      out.set(chunk.subarray(want - cStart, want - cStart + n), got);
+      got += n;
+      if(want + n >= cEnd) chunk = null;
+    }
+    return out;
+  };
+}
+/* Čitanje ZIP-a: vraća Map(ime -> {size, crc, read()}); read() daje Blob posle provere CRC-a.
+   v189: sadržaj se čita redom (zipSeqReader); zip.preload(imena) — ti fajlovi (sličice su zajedno na kraju kopije)
+   učitaju se jednim čitanjem kad zatreba prvi od njih, da ne prekidaju čitanje redom. */
 async function zipRead(file){
   const tailLen = Math.min(file.size, 65557);
   const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
@@ -9618,6 +9656,15 @@ async function zipRead(file){
   const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
   const dec = new TextDecoder();
   const out = new Map();
+  const seq = zipSeqReader(file);
+  let plan = null, pre = null;
+  const readRange = async (start, len)=>{
+    if(plan && !pre && start >= plan.start && start < plan.end){
+      pre = {start:plan.start, bytes:new Uint8Array(await file.slice(plan.start, plan.end).arrayBuffer())};
+    }
+    if(pre && start >= pre.start && start + len <= pre.start + pre.bytes.length) return pre.bytes.subarray(start - pre.start, start - pre.start + len);
+    return seq(start, len);
+  };
   let p = 0;
   for(let i=0;i<count;i++){
     if(cd.getUint32(p, true) !== 0x02014b50) throw new Error('NOT_ZIP');
@@ -9632,15 +9679,24 @@ async function zipRead(file){
       name, method, crc, size: csize, lho,
       read: async (mime)=>{
         if(method !== 0) throw new Error('PACKED');
-        const lh = new DataView(await file.slice(lho, lho + 30).arrayBuffer());
+        const lhb = await readRange(lho, 30);
+        const lh = new DataView(lhb.buffer, lhb.byteOffset, 30);
         if(lh.getUint32(0, true) !== 0x04034b50) throw new Error('NOT_ZIP');
         const start = lho + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
-        const bytes = new Uint8Array(await file.slice(start, start + csize).arrayBuffer());
+        const bytes = await readRange(start, csize);
         if(crc32(bytes) !== crc){ const err = new Error('CRC'); err.fileName = name; throw err; }
         return new Blob([bytes], {type: mime || ''});
       }
     });
   }
+  const starts = Array.from(out.values(), e=>e.lho).concat([cdOff]).sort((a, b)=>a - b);
+  out.preload = (names)=>{
+    const ls = names.map(n=>out.get(n)).filter(Boolean).map(e=>e.lho);
+    if(!ls.length) return;
+    const lo = Math.min(...ls), hi = Math.max(...ls);
+    const end = starts.find(x=>x > hi) || cdOff;
+    if(end - lo <= 64 * 1024 * 1024) plan = {start:lo, end};   /* veće od 64 MB: svaka sličica zasebno */
+  };
   return out;
 }
 
@@ -9925,6 +9981,9 @@ async function importZipBackup(file){
   catch(e){ if(e && e.message === 'PACKED') throw e; throw new Error('NOT_BACKUP'); }
   if(!data || data.format !== 3 || !Array.isArray(data.docs)) throw new Error('NOT_BACKUP');
   const liveDocs = await bkCheckZip(zip, data, false, file.size);
+  const thumbNames = [];
+  liveDocs.forEach(d=>d.pages.forEach(p=>{ if(p && p.thumbPath) thumbNames.push(p.thumbPath); }));
+  zip.preload(thumbNames);
   const liveAlbums = (data.albums || []).filter(a=>a && a.id && a.name && !a.deletedAt);
   toastHide();
   /* izbor samo kad u Arhivi već nešto postoji */

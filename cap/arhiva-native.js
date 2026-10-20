@@ -1,6 +1,7 @@
 /* Arhiva — Android omotač (Capacitor). Učitava se SAMO u Android aplikaciji, posle capacitor.js.
    Web Arhiva se ne menja: ovde se samo zamenjuje ono što WebView ne ume:
-   1) <a download> (rezervna kopija, „Sačuvaj na telefon“) → fajl u Documents/Arhiva
+   1) <a download> (rezervna kopija, „Sačuvaj na telefon“) → Android „Sačuvaj kao“ (bira mesto i ime; dodatak SacuvajKao
+      u novom APK-u); stariji APK bez dodatka → fajl u Documents/Arhiva
    2) navigator.share sa fajlovima → Android „Podeli“
    3) service worker se ne registruje (aplikacija je već na telefonu)
    4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju */
@@ -8,7 +9,8 @@
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
   var reg = (window.capacitorExports && capacitorExports.registerPlugin) || C.registerPlugin;
-  var Filesystem = reg('Filesystem'), Share = reg('Share'), App = reg('App');
+  var Filesystem = reg('Filesystem'), Share = reg('Share'), App = reg('App'), SacuvajKao = reg('SacuvajKao');
+  var imaSacuvajKao = !!(C.isPluginAvailable && C.isPluginAvailable('SacuvajKao'));
   window.ARHIVA_NATIVE = true;
 
   /* 4) Nazad: dok Arhiva ima istoriju (otvoren list, album, potvrda izlaska) ide nazad kroz nju; na kraju izlazi */
@@ -35,10 +37,30 @@
   function en(){ try{ return localStorage.getItem('galerija:lang') === 'en'; }catch(e){ return false; } }
   function say(sr, eng){ var m = en() ? eng : sr; if(typeof window.toast === 'function') window.toast(m); }
 
-  /* 1) preuzimanje → Documents/Arhiva/<ime> */
+  /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.
+     Vraća {ime} ili {otkazano:true}. Arhiva ga zove za rezervnu kopiju (window.ARHIVA_SACUVAJ_KAO). */
+  var DEO = 3 * 1024 * 1024;   /* deljivo sa 3: svaki deo je ceo base64 */
+  async function sacuvajKao(blob, name, mime){
+    var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
+    for(var off = 0; off === 0 || off < blob.size; off += DEO){
+      var data = await b64(blob.slice(off, off + DEO));
+      if(off === 0) await Filesystem.writeFile({ path: putanja, data: data, directory: 'CACHE', recursive: true });
+      else await Filesystem.appendFile({ path: putanja, data: data, directory: 'CACHE' });
+    }
+    return await SacuvajKao.sacuvaj({ putanja: putanja, ime: fn, mime: mime || blob.type || 'application/octet-stream' });
+  }
+  if(imaSacuvajKao) window.ARHIVA_SACUVAJ_KAO = sacuvajKao;
+
+  /* 1) preuzimanje → „Sačuvaj kao“ (ili Documents/Arhiva/<ime> u starijem APK-u) */
   async function saveDownload(href, name){
     try{
       var blob = await (await fetch(href)).blob();
+      if(imaSacuvajKao){
+        var r = await sacuvajKao(blob, name);
+        if(r && r.otkazano) say('Nije sačuvano.', 'Not saved.');
+        else say('Sačuvano: ' + (r && r.ime || safe(name)), 'Saved: ' + (r && r.ime || safe(name)));
+        return;
+      }
       var fn = safe(name);
       await Filesystem.writeFile({ path: 'Arhiva/' + fn, data: await b64(blob), directory: 'DOCUMENTS', recursive: true });
       say('Sačuvano: Documents/Arhiva/' + fn, 'Saved: Documents/Arhiva/' + fn);
