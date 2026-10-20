@@ -671,6 +671,8 @@
 .theme-opt .sw{ width:74px; height:48px; border-radius:10px; flex:none; position:relative; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
 .theme-opt .sw i{ position:absolute; left:7px; right:7px; bottom:7px; height:15px; border-radius:5px; }
 .theme-opt .sw b{ position:absolute; right:10px; top:8px; font:700 11px Georgia,serif; }
+/* v183: izbor jezika — oznaka jezika umesto uzorka teme */
+.theme-opt .sw.lang-sw{ display:flex; align-items:center; justify-content:center; background:var(--surface-2); color:var(--ink); font:700 16px var(--font-ui); letter-spacing:1px; }
 .theme-opt .t-name{ flex:1; font-size:15.5px; font-weight:700; }
 .theme-opt .t-check{ width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line); flex:none; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--on-brass); }
 .theme-opt.on .t-check{ background:var(--brass); border-color:var(--brass); }
@@ -2882,7 +2884,7 @@ function askConfirm(o){
     document.getElementById('cfSub').textContent = o.text || '';
     document.getElementById('cfOkIc').textContent = o.okIcon || '';
     document.getElementById('cfOkIc').style.display = o.okIcon ? '' : 'none';
-    document.getElementById('cfOkLabel').textContent = o.okLabel || 'U redu';
+    document.getElementById('cfOkLabel').textContent = o.okLabel || t('cfOkDef');
     const okBtn = document.getElementById('cfOk');
     /* v157: treće dugme (izbor između dve radnje) — rezultat 'alt' */
     const altBtn = document.getElementById('cfAlt');
@@ -3604,6 +3606,7 @@ const I18N = {
       ['Prečica na početnom ekranu', 'Označi jednu stavku (dugi pritisak), pa „Prečica“ u donjem redu (preimenovanje je sada u „Više“ i olovkom u pregledu). Stavka se otvara u Chrome-u, a iz Chrome menija biraš „Dodaj na početni ekran“. Prečica dokumenta od više stranica lista sve stranice.'],
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Arhiva ga pri vraćanju napravi ponovo sa istim imenom.'],,
       ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Pri vraćanju biraš „Dodaj postojećim“ (samo ono što nedostaje, bez duplikata) ili „Zameni sve“. Oštećen fajl iz kopije se nikad ne uvozi, a kod „Zameni sve“ ništa se ne briše dok kopija nije uspešno vraćena. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
+      ['Jezik', 'Podešavanja → jezik bira srpski ili engleski (English). Promena se vidi odmah. Pri prvom pokretanju Arhiva sama izabere jezik telefona.'],
       ['Teme', 'Podešavanja → tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
@@ -4262,6 +4265,7 @@ const I18N = {
       ['Home screen shortcut', 'Select one item (long-press), then “Shortcut” in the bottom row (renaming is now in “More” and with the pencil in the viewer). The item opens in Chrome; choose “Add to home screen” from the Chrome menu. The shortcut of a multi-page document shows all pages.'],
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Arhiva creates it again with the same name when restoring.'],,
       ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'When restoring, choose “Add to existing” (only what is missing, no duplicates) or “Replace all”. A damaged file is never imported, and with “Replace all” nothing is deleted until the backup is restored successfully. A bar at the top reminds you when the set number of days has passed since the last backup.'],
+      ['Language', 'Settings → language switches between Serbian (Srpski) and English. The change is visible right away. On first start Arhiva picks the language of your phone.'],
       ['Themes', 'Settings → theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
@@ -4377,11 +4381,62 @@ const I18N = {
     bkHintZip: 'the backup is one ZIP file: your documents are inside as ordinary images and PDFs, sorted by album, so they open even without Arhiva. import also accepts old .json backups. when restoring choose: add to existing (no duplicates) or replace all. a damaged file is not imported.'
   }
 };
+/* v183: izbor jezika, početni ekran i Podešavanja */
+Object.assign(I18N.sr, {
+  trTile: 'korpa', langTile: 'jezik · language', langHint: 'promena se vidi odmah. pri prvom pokretanju Arhiva sama izabere jezik telefona.',
+  setTitle: 'podešavanja', backAria: 'nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
+  themeTile: 'tema', themeHint: 'promena se vidi odmah. izbor se pamti i čuva u rezervnoj kopiji.',
+  th_banka: 'Privatno bankarstvo', th_crna: 'Crna kartica', th_ponoc: 'Ponoć', th_koza: 'Kožni rokovnik', th_klasicna: 'Klasična',
+  bkTile: 'rezervna kopija', bkLast: 'poslednja rezervna kopija: {d}', bkNever: 'nikad',
+  bkExport: 'rezervna kopija - izvezi', bkImport: 'rezervna kopija - uvezi',
+  bkHint1: 'rezervna kopija čuva sve slike, dokumente i albume odjednom - sačuvaj je povremeno (npr. u Google Drive) da ne izgubiš podatke.',
+  bkDir: 'fascikla za kopiju', bkDirNone: 'nije izabrana (preuzimanje)', bkDirForget: 'ne koristi fasciklu (preuzimanje)',
+  bkDirHint: 'kad je fascikla izabrana, izvoz ide pravo u nju (Chrome jednom pita „Dozvoli“). čuvaju se poslednje {n} kopije, starije se same brišu.',
+  bkEvery: 'podseti me na svakih (dana)', bkEveryHint: 'kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.',
+  bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
+  wipeTile: 'obriši sve podatke', wipeSub: 'trajno briše sve slike, dokumente i albume',
+  wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
+  wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
+  wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
+  storUsed: 'Iskorišćeno: ~{mb} MB', storTrash: ' (u korpi {n})', storFree: ' · Slobodno još ~{mb} MB', buildLbl: 'verzija',
+  viewAsList: 'Prikaži kao listu', viewAsGrid: 'Prikaži kao mrežu', selN: '{n} odabrano'
+});
+Object.assign(I18N.en, {
+  trTile: 'trash', langTile: 'language', langHint: 'the change is visible right away. on first start Arhiva picks the language of your phone.',
+  setTitle: 'settings', backAria: 'back', cfOkDef: 'OK', cfCancel: 'Cancel',
+  themeTile: 'theme', themeHint: 'the change is visible right away. your choice is remembered and saved in the backup.',
+  th_banka: 'Private banking', th_crna: 'Black card', th_ponoc: 'Midnight', th_koza: 'Leather notebook', th_klasicna: 'Classic',
+  bkTile: 'backup', bkLast: 'last backup: {d}', bkNever: 'never',
+  bkExport: 'export backup', bkImport: 'import backup',
+  bkHint1: 'the backup keeps all images, documents and albums at once - save it now and then (e.g. to Google Drive) so you don’t lose your data.',
+  bkDir: 'backup folder', bkDirNone: 'not chosen (download)', bkDirForget: 'don’t use a folder (download)',
+  bkDirHint: 'when a folder is chosen, the export goes straight into it (Chrome asks “Allow” once). the last {n} backups are kept, older ones are deleted automatically.',
+  bkEvery: 'remind me every (days)', bkEveryHint: 'when this many days have passed since the last backup, a reminder appears at the top.',
+  bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
+  wipeTile: 'delete all data', wipeSub: 'permanently deletes all images, documents and albums',
+  wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
+  wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
+  wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
+  storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', storFree: ' · Free: ~{mb} MB', buildLbl: 'version',
+  viewAsList: 'Show as list', viewAsGrid: 'Show as grid', selN: '{n} selected'
+});
+/* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
+   a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
+const SR_LANGS = ['sr', 'hr', 'bs', 'sh', 'me', 'cnr'];
+function detectLang(){
+  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.indexOf('galerija:') === 0 && k !== 'galerija:lang') return 'sr'; } }catch(e){}
+  const ls = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+  return SR_LANGS.includes(String(ls[0] || '').toLowerCase().split(/[-_]/)[0]) ? 'sr' : 'en';
+}
 function appLang(){
   let v = null;
   try{ v = localStorage.getItem('galerija:lang'); }catch(e){}
-  return (v && I18N[v]) ? v : 'sr';
+  if(v && I18N[v]) return v;
+  v = detectLang();
+  try{ localStorage.setItem('galerija:lang', v); }catch(e){}
+  return v;
 }
+document.documentElement.lang = appLang();
 function t(key, vars){
   const L = I18N[appLang()] || I18N.sr;
   let s = (key in L) ? L[key] : (I18N.sr[key] || key);
@@ -5567,7 +5622,7 @@ async function legacyExportBackup(){
       }
       if(n % 5 === 0) toastPersist(t('bkBuilding', {n, total:keys.length}));
     }
-    parts.push('],"settings":'+JSON.stringify({theme:getTheme()})+'}');
+    parts.push('],"settings":'+JSON.stringify({theme:getTheme(), lang:appLang()})+'}');
     const blob = new Blob(parts, {type:'application/json'});
     const msg = await saveBackupFile(blob, backupFileName('json'), dirOk);
     toastHide();
@@ -5580,7 +5635,8 @@ async function legacyExportBackup(){
 }
 function newCatId(){ return 'alb_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 function catById(id){ return categories.find(c=>c.id===id) || null; }
-function stavkeTxt(n){ const d=n%10, h=n%100;
+function stavkeTxt(n){ if(appLang() === 'en') return n + (n === 1 ? ' item' : ' items');
+  const d=n%10, h=n%100;
   return n+' '+((d===1&&h!==11)?'stavka':(d>=2&&d<=4&&(h<12||h>14))?'stavke':'stavki'); }
 function catLabel(id){ const c = catById(id); return c ? c.name : ''; }
 function maybeAutoCover(catId, item){
@@ -6519,14 +6575,14 @@ function _renderView(){
   { /* v146: ispod broja albuma i ukupan broj stavki (sve slike i dokumenti u Arhivi, bez korpe) */
     const tops = categories.filter(c=>!c.parent).length, n = items.length, el = document.getElementById('markCnt');
     el.innerHTML = '';
-    [tops ? albumiTxt(tops) : '', n ? (appLang() === 'en' ? n + (n === 1 ? ' item' : ' items') : stavkeTxt(n)) : ''].forEach((tx, k)=>{
+    [tops ? albumiTxt(tops) : '', n ? stavkeTxt(n) : ''].forEach((tx, k)=>{
       if(!tx) return;
       const sp = document.createElement('span'); sp.className = k ? 'mark-cnt-2' : 'mark-cnt-1'; sp.textContent = '\u00b7 ' + tx; el.appendChild(sp);
     }); }
   document.getElementById('viewToggleBtn').style.display = 'none';
   document.getElementById('allBtn').style.display = 'none';
   if(selectionMode){
-    selCount.textContent = mergeMode ? t('mergeTitle') : actMode ? t('act_' + actMode + '_title') : (selectedIds.size ? selectedIds.size + ' odabrano' : t('selPick'));
+    selCount.textContent = mergeMode ? t('mergeTitle') : actMode ? t('act_' + actMode + '_title') : (selectedIds.size ? t('selN', {n:selectedIds.size}) : t('selPick'));
   }
 
   if(_jump && currentFolder !== _jump.from) _jump = null;   /* v112: prečica važi samo dok si u albumu odakle je poslato */
@@ -6718,7 +6774,7 @@ function _renderView(){
   inboxTile.type = 'button';
   inboxTile.className = 'home-inbox';
   inboxTile.innerHTML = INBOX_SVG_HOME + '<span class="hi-nm"></span><span class="hi-ct"></span>';
-  inboxTile.querySelector('.hi-nm').textContent = 'Bez albuma';
+  inboxTile.querySelector('.hi-nm').textContent = t('allImages');
   inboxTile.querySelector('.hi-ct').textContent = stavkeTxt(inboxCount) + ' \u203a';
   inboxTile.onclick = ()=>{ currentFolder = INBOX; searchEl.value=''; pushBack(closeAlbumView); render(); };
   homeHead.appendChild(inboxTile);
@@ -6727,7 +6783,7 @@ function _renderView(){
 
   const setupViewToggleBtn = ()=>{
     const btn = document.getElementById('viewToggleBtn');
-    btn.title = albumViewMode === 'grid' ? 'Prikaži kao listu' : 'Prikaži kao mrežu';
+    btn.title = albumViewMode === 'grid' ? t('viewAsList') : t('viewAsGrid');
     btn.innerHTML = albumViewMode === 'grid'
       ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>'
       : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>';
@@ -8748,7 +8804,10 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); });
+loadAll().then(()=>{ refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
+  /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
+  let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
+  if(ol){ openSettings(); openSettingsSub('lang'); } });
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
@@ -8767,10 +8826,10 @@ function markBackupDone(){ localStorage.setItem(LS_PREFIX+'lastBackup', new Date
 function daysSinceBackup(date){ return Math.floor((Date.now() - date.getTime()) / 86400000); }
 function lastBackupShort(){
   const last = getLastBackupDate();
-  if(!last) return 'nikad';
+  if(!last) return t('bkNever');
   return String(last.getDate()).padStart(2,'0')+'.'+String(last.getMonth()+1).padStart(2,'0')+'.'+last.getFullYear();
 }
-function lastBackupDisplay(){ return 'poslednja rezervna kopija: ' + lastBackupShort(); }
+function lastBackupDisplay(){ return t('bkLast', {d:lastBackupShort()}); }
 function checkBackupReminder(){
   const row = document.getElementById('backupReminderRow');
   const textEl = document.getElementById('backupReminderText');
@@ -8779,15 +8838,17 @@ function checkBackupReminder(){
   const interval = getBackupIntervalDays();
   let msg = null;
   if(!last){
-    msg = 'Nikad nisi napravio bekap podataka.';
+    msg = t('bkRemNever');
   } else {
     const d = daysSinceBackup(last);
-    if(d >= interval) msg = 'Prošlo je '+d+' dana od poslednjeg bekapa.';
+    if(d >= interval) msg = t('bkRemDays', {n:d});
   }
   if(msg){ textEl.textContent = msg; row.style.display = 'flex'; }
   else { row.style.display = 'none'; }
 }
 document.getElementById('backupReminderBtn').addEventListener('click', exportBackup);
+document.getElementById('backupReminderBtn').textContent = t('bkRemBtn');
+document.getElementById('cfCancel').lastChild.textContent = t('cfCancel');
 function getTrashDays(){
   const v = parseInt(localStorage.getItem(LS_PREFIX+'trashDays'));
   return (v && v > 0) ? v : 30;
@@ -9050,7 +9111,7 @@ function getTheme(){
   try{ v = localStorage.getItem(LS_PREFIX+'theme'); }catch(e){}
   return (v && THEMES.some(x=>x.id===v)) ? v : 'klasicna';
 }
-function themeName(id){ return (THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id==='klasicna')).name; }
+function themeName(id){ const x = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id==='klasicna'); return t('th_' + x.id); }
 function applyTheme(id){
   const th = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id==='klasicna');
   document.documentElement.setAttribute('data-theme', th.id);
@@ -9072,9 +9133,22 @@ function themeOptionsHtml(){
   const cur = getTheme();
   return THEMES.map(x=>'<button type="button" class="theme-opt'+(x.id===cur?' on':'')+'" onclick="pickTheme(\''+x.id+'\')">'+
     '<span class="sw" style="background:'+x.bg+'"><i style="background:'+x.card+'"></i><b style="color:'+x.num+'">2.840</b></span>'+
-    '<span class="t-name">'+escapeHtml(x.name)+'</span><span class="t-check">'+(x.id===cur?'✓':'')+'</span></button>').join('');
+    '<span class="t-name">'+escapeHtml(themeName(x.id))+'</span><span class="t-check">'+(x.id===cur?'✓':'')+'</span></button>').join('');
 }
 applyTheme(getTheme());
+/* v183: izbor jezika (isti oblik kao izbor teme); posle izbora Arhiva se ponovo učita na tom jeziku i vrati na ovaj ekran */
+const LANG_NAMES = { sr:'Srpski', en:'English' };
+function langOptionsHtml(){
+  const cur = appLang();
+  return Object.keys(LANG_NAMES).map(id=>'<button type="button" class="theme-opt lang-opt'+(id===cur?' on':'')+'" onclick="pickLang(\''+id+'\')">'+
+    '<span class="sw lang-sw">'+id.toUpperCase()+'</span>'+
+    '<span class="t-name">'+LANG_NAMES[id]+'</span><span class="t-check">'+(id===cur?'✓':'')+'</span></button>').join('');
+}
+function pickLang(id){
+  if(!I18N[id] || id === appLang()) return;
+  try{ localStorage.setItem('galerija:lang', id); sessionStorage.setItem('galerija:openLang', '1'); }catch(e){}
+  location.reload();
+}
 
 /* ---------- Podešavanja: ceo ekran sa pločicama i pod-ekranima (kao u Troškovima) ---------- */
 const settingsScreen = document.getElementById('settingsScreen');
@@ -9084,7 +9158,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 182;
+const APP_VERSION = 183;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9141,7 +9215,7 @@ async function clearErrLog(){
 }
 
 function settingsHeader(title){
-  return '<div class="set-header"><button type="button" class="set-back" onclick="requestClose()" aria-label="nazad">'+SETTINGS_BACK_SVG+'</button><h2 class="set-title">'+escapeHtml(title)+'</h2></div>';
+  return '<div class="set-header"><button type="button" class="set-back" onclick="requestClose()" aria-label="'+escapeHtml(t('backAria'))+'">'+SETTINGS_BACK_SVG+'</button><h2 class="set-title">'+escapeHtml(title)+'</h2></div>';
 }
 /* v167: „Sačuvaj“ stoji u kartici, odmah desno od broja koji čuva (v166 je bio gore desno — zbunjivalo uz izvoz/uvoz kopije).
    Čuva se samo dugmetom ili Enter-om (bledo dok nema ispravne izmene); korak nazad bez čuvanja ostavlja staru vrednost */
@@ -9172,19 +9246,21 @@ function settingsTile(icon, title, sub, onclick, extraClass){
     '<span class="tile-chev">›</span></button>';
 }
 function renderSettingsTiles(){
-  settingsPanel.innerHTML = settingsHeader('podešavanja')+
+  /* v183 (Zoran): jezik · uputstvo · tema · podsetnik · rezervna kopija · AI obrada · korpa · obriši sve */
+  settingsPanel.innerHTML = settingsHeader(t('setTitle'))+
     '<div class="set-body">'+
-    settingsTile('🎨', 'tema', themeName(getTheme()), "openSettingsSub('theme')")+
-    settingsTile('💾', 'rezervna kopija', lastBackupDisplay(), "openSettingsSub('backup')")+
-    settingsTile('♻️', 'korpa', trashTileSub(), "openSettingsSub('trash')")+
-    settingsTile('🔔', t('expSetTile'), t('expSetSub', {n:getExpiryDays(), d:dayWord(getExpiryDays())}), "openSettingsSub('expiry')")+
-    settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
+    settingsTile('🌐', t('langTile'), LANG_NAMES[appLang()], "openSettingsSub('lang')")+
     settingsTile('📖', t('guideTile'), t('guideTileSub'), "openSettingsSub('guide')")+
+    settingsTile('🎨', t('themeTile'), themeName(getTheme()), "openSettingsSub('theme')")+
+    settingsTile('🔔', t('expSetTile'), t('expSetSub', {n:getExpiryDays(), d:dayWord(getExpiryDays())}), "openSettingsSub('expiry')")+
+    settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
+    settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
+    settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
     (_oldDbPresent ? settingsTile('🗄️', t('oldTile'), t('oldTileSub'), "openSettingsSub('old')") : '')+
-    settingsTile('🗑', 'obriši sve podatke', 'trajno briše sve slike, dokumente i albume', 'wipeAllData()', 'danger')+
+    settingsTile('🗑', t('wipeTile'), t('wipeSub'), 'wipeAllData()', 'danger')+
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
-    '<div class="settings-hint set-build">verzija '+APP_VERSION+errBadgeHtml()+'</div>'+
+    '<div class="settings-hint set-build">'+t('buildLbl')+' '+APP_VERSION+errBadgeHtml()+'</div>'+
     '</div>';
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
@@ -9201,30 +9277,34 @@ function openSettings(){
 const closeSettings = ()=>{ settingsSubOpen = false; settingsScreen.classList.remove('open'); };
 function openSettingsSub(which){
   let title = '', body = '';
-  if(which === 'theme'){
-    title = 'tema';
+  if(which === 'lang'){
+    title = t('langTile');
+    body = '<div id="langOptList">'+langOptionsHtml()+'</div>'+
+      '<div class="settings-hint">'+escapeHtml(t('langHint'))+'</div>';
+  }else if(which === 'theme'){
+    title = t('themeTile');
     body = '<div id="themeOptList">'+themeOptionsHtml()+'</div>'+
-      '<div class="settings-hint">promena se vidi odmah. izbor se pamti i čuva u rezervnoj kopiji.</div>';
+      '<div class="settings-hint">'+escapeHtml(t('themeHint'))+'</div>';
   }else if(which === 'backup'){
-    title = 'rezervna kopija';
+    title = t('bkTile');
     body =
       '<div class="settings-card">'+
-      '<button type="button" class="settings-row" onclick="exportBackup()"><span class="row-icon">💾</span><span class="row-label">rezervna kopija - izvezi</span><span class="chevron">›</span></button>'+
-      '<button type="button" class="settings-row" onclick="triggerImportBackup()"><span class="row-icon">📂</span><span class="row-label">rezervna kopija - uvezi</span><span class="chevron">›</span></button>'+
+      '<button type="button" class="settings-row" onclick="exportBackup()"><span class="row-icon">💾</span><span class="row-label">'+escapeHtml(t('bkExport'))+'</span><span class="chevron">›</span></button>'+
+      '<button type="button" class="settings-row" onclick="triggerImportBackup()"><span class="row-icon">📂</span><span class="row-label">'+escapeHtml(t('bkImport'))+'</span><span class="chevron">›</span></button>'+
       '</div>'+
-      '<div class="settings-hint">rezervna kopija čuva sve slike, dokumente i albume odjednom - sačuvaj je povremeno (npr. u Google Drive) da ne izgubiš podatke.</div>'+
+      '<div class="settings-hint">'+escapeHtml(t('bkHint1'))+'</div>'+
       '<div class="settings-hint">'+escapeHtml(t('bkHintZip'))+'</div>'+
       (backupDirSupported() ?
         '<div class="settings-card" style="margin-top:14px;">'+
-        '<button type="button" class="settings-row" onclick="chooseBackupDir()"><span class="row-icon">📁</span><span class="row-label">fascikla za kopiju<span id="backupDirName" style="display:block;font-size:12px;font-weight:500;color:var(--ink-dim);margin-top:2px;"></span></span><span class="chevron">›</span></button>'+
-        '<button type="button" class="settings-row" id="backupDirForget" onclick="forgetBackupDir()"><span class="row-icon">↩️</span><span class="row-label">ne koristi fasciklu (preuzimanje)</span><span class="chevron">›</span></button>'+
+        '<button type="button" class="settings-row" onclick="chooseBackupDir()"><span class="row-icon">📁</span><span class="row-label">'+escapeHtml(t('bkDir'))+'<span id="backupDirName" style="display:block;font-size:12px;font-weight:500;color:var(--ink-dim);margin-top:2px;"></span></span><span class="chevron">›</span></button>'+
+        '<button type="button" class="settings-row" id="backupDirForget" onclick="forgetBackupDir()"><span class="row-icon">↩️</span><span class="row-label">'+escapeHtml(t('bkDirForget'))+'</span><span class="chevron">›</span></button>'+
         '</div>'+
-        '<div class="settings-hint">kad je fascikla izabrana, izvoz ide pravo u nju (Chrome jednom pita „Dozvoli“). čuvaju se poslednje '+BACKUP_KEEP+' kopije, starije se same brišu.</div>'
+        '<div class="settings-hint">'+escapeHtml(t('bkDirHint', {n:BACKUP_KEEP}))+'</div>'
       : '')+
       '<div class="settings-card set-num-card" style="margin-top:14px;">'+
-      '<div class="settings-field"><label for="backupIntervalInput">podseti me na svakih (dana)</label><input type="number" inputmode="numeric" min="1" id="backupIntervalInput" value="'+getBackupIntervalDays()+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>'+
+      '<div class="settings-field"><label for="backupIntervalInput">'+escapeHtml(t('bkEvery'))+'</label><input type="number" inputmode="numeric" min="1" id="backupIntervalInput" value="'+getBackupIntervalDays()+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>'+
       setSaveBtnHtml()+'</div>'+
-      '<div class="settings-hint">kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.</div>'+
+      '<div class="settings-hint">'+escapeHtml(t('bkEveryHint'))+'</div>'+
       '<div class="settings-hint" id="lastBackupHint">'+lastBackupDisplay()+'</div>';
   }else if(which === 'old'){
     title = t('oldTitle');
@@ -9283,15 +9363,15 @@ function updateStorageInfo(){
   if(!infoEl) return;
   const pEl = document.getElementById('persistInfo');
   if(pEl) Skladiste.jeTrajno().then(p=>{ if(p !== null) pEl.textContent = p ? t('persistOn') : t('persistOff'); });
-  const trashPart = trash.length ? ' (u korpi ' + trash.length + ')' : '';
-  infoEl.textContent = 'Iskorišćeno: ~' + mb.toFixed(1) + ' MB \u00B7 ' + stavkeTxt(items.length) + trashPart;
+  const trashPart = trash.length ? t('storTrash', {n:trash.length}) : '';
+  infoEl.textContent = t('storUsed', {mb:mb.toFixed(1)}) + ' \u00B7 ' + stavkeTxt(items.length) + trashPart;
   {
     Skladiste.zauzece().then(est=>{
       if(est && est.quota){
         const usedMb = (est.usage || 0) / 1024 / 1024;
         const quotaMb = est.quota / 1024 / 1024;
         const freeMb = Math.max(0, quotaMb - usedMb);
-        infoEl.textContent = 'Iskorišćeno: ~' + mb.toFixed(1) + ' MB \u00B7 ' + stavkeTxt(items.length) + trashPart + ' \u00B7 Slobodno još ~' + freeMb.toFixed(0) + ' MB';
+        infoEl.textContent = t('storUsed', {mb:mb.toFixed(1)}) + ' \u00B7 ' + stavkeTxt(items.length) + trashPart + t('storFree', {mb:freeMb.toFixed(0)});
       }
     }).catch(()=>{});
   }
@@ -9331,7 +9411,7 @@ async function forgetBackupDir(){
 }
 function refreshBackupDirRow(){
   const el = document.getElementById('backupDirName');
-  if(el) el.textContent = backupDirHandle ? backupDirHandle.name : 'nije izabrana (preuzimanje)';
+  if(el) el.textContent = backupDirHandle ? backupDirHandle.name : t('bkDirNone');
   const f = document.getElementById('backupDirForget');
   if(f) f.style.display = backupDirHandle ? 'flex' : 'none';
 }
@@ -9556,7 +9636,7 @@ async function exportBackup(){
     }
     const albums = categories.map((c, i)=>Object.assign(albumRecord(c, i), {createdAt:c.createdAt || 0, updatedAt:c.updatedAt || 0}));
     const templates = await tplLoad().catch(e=>{ console.error(e); return []; });
-    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:getExpiryDays()}, albums, docs:docOut, templates};
+    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:getExpiryDays(), lang:appLang()}, albums, docs:docOut, templates};
     const entries = [{name:'arhiva.json', blob:new Blob([JSON.stringify(manifest)], {type:'application/json'}), ts:Date.now()}];
     for(const fe of fileEntries){
       entries.push({name:fe.path, blob:await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
@@ -9801,6 +9881,7 @@ async function importZipBackup(file){
   toastPersist(t('bkRestoring', {n:0, total:liveDocs.length}));
   /* v171: „Zameni sve“ ne briše unapred — upisuje samo ono čega nema, pa na kraju briše višak (mergeBackup) */
   if(data.settings && data.settings.theme) setTheme(data.settings.theme);
+  if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
   if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
   const coverOf = {};
   const albums = liveAlbums.map(a=>{
@@ -9830,6 +9911,7 @@ async function importZipBackup(file){
 function importJsonBackup(data){
   if(!data || !Array.isArray(data.items)) throw new Error('NOT_BACKUP');
   if(data.settings && data.settings.theme) setTheme(data.settings.theme);
+  if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
   const isV2 = data.version >= 2;
   const coverOf = {};
   const albums = (data.categories || []).map(c=> typeof c === 'string' ? {name:c} : c).filter(c=>c && c.name).map(c=>{
@@ -9887,15 +9969,16 @@ async function storeWipeAll(){
   trAlbsSave([]);
 }
 async function wipeAllData(){
+  /* v183: prvi prozor nudi i „Prvo napravi kopiju“ — napravi kopiju i ništa ne briše */
+  const a1 = await askConfirm({
+    icon:'⚠️', title:t('wipeT1'), text:t('wipeX1'),
+    okIcon:'🗑️', okLabel:t('wipeOk1'), altIcon:'💾', altLabel:t('wipeBk')
+  });
+  if(a1 === 'alt'){ exportBackup(); return; }
+  if(!a1) return;
   if(!await askConfirm({
-    icon:'⚠️', title:'Obriši sve podatke',
-    text:'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
-    okIcon:'🗑️', okLabel:'Obriši sve'
-  })) return;
-  if(!await askConfirm({
-    icon:'🛑', title:'Poslednja potvrda',
-    text:'Stvarno obrisati baš sve?',
-    okIcon:'🗑️', okLabel:'Da, obriši'
+    icon:'🛑', title:t('wipeT2'), text:t('wipeX2'),
+    okIcon:'🗑️', okLabel:t('wipeOk2')
   })) return;
   try{
     await storeWipeAll();
@@ -9904,11 +9987,11 @@ async function wipeAllData(){
     currentFolder = null;
     render();
     updateStorageInfo();
-    toast('Sve je obrisano.');
+    toast(t('wipeDone'));
     requestClose();
   }catch(e){
     console.error(e);
-    toast('Greška pri brisanju.');
+    toast(t('wipeErr'));
   }
 }
 
