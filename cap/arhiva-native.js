@@ -5,7 +5,8 @@
    2) navigator.share sa fajlovima → Android „Podeli“
    3) service worker se ne registruje (aplikacija je već na telefonu)
    4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju
-   5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene) */
+   5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene)
+   6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -20,9 +21,29 @@
     window.ARHIVA_TRAKE = function(boja){ try{ Trake.boja({ boja: boja }).catch(function(){}); }catch(e){} };
   }
 
-  /* 4) Nazad: dok Arhiva ima istoriju (otvoren list, album, potvrda izlaska) ide nazad kroz nju; na kraju izlazi */
+  /* 6) zaključavanje: dok Arhiva ne nacrta svoj ekran, ništa se ne vidi (klasa lk-boot) */
+  if(C.isPluginAvailable && C.isPluginAvailable('Zakljucavanje')){
+    var Zak = reg('Zakljucavanje');
+    try{ var lc = JSON.parse(localStorage.getItem('galerija:lock') || 'null'); if(lc && (lc.mode === 'pin' || lc.mode === 'pat')) document.documentElement.classList.add('lk-boot'); }catch(e){}
+    var vis = function(stanje, fn){ document.addEventListener('visibilitychange', function(){ if(document.visibilityState === stanje) fn(); }); };
+    window.ARHIVA_ZAKLJ = {
+      stanje: function(){ return Zak.stanje(); },
+      biometrija: function(o){ return Zak.biometrija(o); },
+      potvrdiTelefonom: function(o){ return Zak.potvrdiTelefonom(o); },
+      ekran: function(){ return Zak.ekran(); },
+      naGasenje: function(fn){ try{ Zak.addListener('ekranUgasen', fn); }catch(e){ console.error('arhiva-native lock', e); } },
+      naPovratak: function(fn){ try{ App.addListener('resume', fn); }catch(e){} vis('visible', fn); },
+      naOdlasku: function(fn){ try{ App.addListener('pause', fn); }catch(e){} vis('hidden', fn); }
+    };
+  }
+
+  /* 4) Nazad: dok Arhiva ima istoriju (otvoren list, album, potvrda izlaska) ide nazad kroz nju; na kraju izlazi.
+     Ekran zaključavanja ima prednost: Otkaži / ništa / izlaz kad je Arhiva zaključana */
   try{
     App.addListener('backButton', function(e){
+      var lk = window.ARHIVA_LK_NAZAD ? window.ARHIVA_LK_NAZAD() : false;
+      if(lk === 'izlaz'){ App.exitApp(); return; }
+      if(lk) return;
       if(e && e.canGoBack) history.back(); else App.exitApp();
     });
   }catch(e){ console.error('arhiva-native back', e); }
