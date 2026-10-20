@@ -334,6 +334,19 @@
   }
   .folder-tile-row .ftile-cover img{width:100%;height:100%;object-fit:cover;}
   .folder-tile-row .ftile-cover svg{stroke:var(--brass);width:18px;height:18px;}
+  /* v177: album bez slike — blag prelaz boje teme, velika fascikla sa prvim slovom albuma */
+  .nocover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--brass) 22%, var(--surface-2)) 0%, var(--surface-2) 70%);}
+  .nocover svg{width:58%;height:58%;stroke:var(--brass) !important;opacity:.9;}
+  .nocover span{position:absolute;left:0;right:0;top:50%;transform:translateY(-38%);text-align:center;
+    font-family:var(--font-name);font-style:var(--name-style);font-weight:600;color:var(--brass);font-size:26px;line-height:1;}
+  .folder-tile .nocover span{font-size:30px;}
+  .folder-tile-row .ftile-cover .nocover svg{width:58%;height:58%;}
+  .cp-tile{position:relative;aspect-ratio:1/1;cursor:pointer;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .cp-tile.on{outline:2.5px solid var(--brass);outline-offset:-2.5px;}
+  .cp-tile .cp-lbl{position:absolute;left:0;right:0;bottom:4px;text-align:center;font:600 11px/1.1 var(--font-ui);color:var(--ink);}
+  .cp-none .nocover svg{width:52%;height:52%;transform:translateY(-10%);}
+  .cp-none .nocover span{font-size:18px;transform:translateY(-75%);}
   .folder-tile-row .fr-text{display:flex;flex-direction:column;min-width:0;flex:1;}
   .folder-tile-row .fname{
     font-family:var(--font-name);font-style:var(--name-style);font-size:17px;color:var(--ink);
@@ -3569,7 +3582,7 @@ const I18N = {
     guideTileSub: 'kako se koristi Arhiva',
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
-      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili po datumu) i AI (radionica). Desno gore su Sve (slika: sve slike i dokumenti iz cele Arhive po danima, najnovije prvo, sa izborom Sve · Slike · Dokumenti; desno gore lupa za pretragu i Sortiraj: po datumu ili po abecedi), prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (po datumu, najnovije ili najstarije prvo, ili po abecedi; krug pokazuje koji je uključen) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika, premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
+      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili po datumu) i AI (radionica). Desno gore su Sve (slika: sve slike i dokumenti iz cele Arhive po danima, najnovije prvo, sa izborom Sve · Slike · Dokumenti; desno gore lupa za pretragu i Sortiraj: po datumu ili po abecedi), prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (po datumu, najnovije ili najstarije prvo, ili po abecedi; krug pokazuje koji je uključen) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
       ['Donji red u albumu', 'U albumu je dole uvek red: Pošalji · U album · Prečica · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije izabrano otvara izbor (isti kao dugi pritisak na stavku): putanja gore i donji red ostaju, dugmad su bleda dok ne izabereš bar jednu stavku. Dodiruješ stavke, pa radnju koju hoćeš. ✕ ili korak nazad prekida izbor. Kod dugog pritiska na stavku gore je „Izaberi sve“; kad je sve izabrano, isto dugme piše „Poništi sve“ i jednim dodirom poništava izbor.', 'Pošalji nudi „Podeli“ ili „Sačuvaj na telefon“; za slike i dokumente od više stranica i „kao jedan PDF“ ili „svaku posebno“. „Više“ radi sa jednom stavkom: Preimenuj, Podsetnik i AI radionica; kad je izabrano više stavki, bledo je.', 'Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu ide odmah na označeno.', 'Premeštanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premesti ovde“. Jedan dodir na podalbum premešta označeno i ostaješ u albumu. Na vrhu se pojavi obaveštenje sa dugmetom „Vrati“, koje za par sekundi vraća stavke na staro mesto. Za premeštanje u bilo koji drugi album služi „U album“. Posle premeštanja ili kopiranja u drugi album, desno u redu putanje stoji dugme sa nazivom tog albuma (npr. „Stoja ›“): dodir vodi pravo tamo, a prebačeni dokumenti su nakratko uokvireni. Dugme stoji dok si u albumu odakle si slao.', 'Nov podalbum se ne otvara sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.', 'Obaveštenja (šta je sačuvano, premešteno ili šta nije uspelo) uvek izlaze na vrhu ekrana, na mestu putanje. Kvačica znači da je urađeno, znak „!“ da nešto treba proveriti. Obaveštenje posle par sekundi samo nestane, a za to vreme možeš normalno da radiš.'],
       ['Dodavanje', 'Ikonica slike sa plusom dodaje sa telefona: iz galerije (više slika odjednom), slikanjem ili kao dokument (PDF, Word, Excel…). Svaka izabrana slika postaje posebna stavka.', 'Ono što dodaš dok si u albumu (iz galerije, slikanjem ili kao dokument) ide pravo u taj album. Kad slika ima samo automatsko ime iz telefona (niz brojeva, IMG_…), Arhiva ga ne prikazuje, nego piše „Slika“. Pored rednog broja na kartici je datum kad je stavka dodata. Dodir na naziv otvara prozor sa tri polja: naziv, datum i vreme; datum i vreme se retko menjaju (npr. račun iz marta slikan danas), a po njima se stavke ređaju.'],
       ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
@@ -5568,6 +5581,12 @@ function maybeAutoCover(catId, item){
   if(cat && !cat.cover){ cat.cover = item.id; saveCategories(); }
 }
 
+/* v177: naslovna „Bez slike“ — izbor korisnika; nova slika u albumu je ne zamenjuje (maybeAutoCover) */
+const NO_COVER = 'none';
+function noCoverHtml(cat){
+  const ch = (String(cat && cat.name || '').trim().charAt(0) || '').toUpperCase();
+  return '<div class="nocover"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2.5h8a2 2 0 012 2V17a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg><span>' + escapeHtml(ch) + '</span></div>';
+}
 function folderIconSvg(){
   return '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2.5h8a2 2 0 012 2V17a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>';
 }
@@ -5863,6 +5882,7 @@ function countDeep(id){ const ids = albumIdSet(id); return items.filter(i=>ids.h
 function lastTsDeep(id){ const ids = albumIdSet(id); let m = 0; items.forEach(i=>{ if(ids.has(i.category) && i.ts > m) m = i.ts; }); return m; }
 /* Naslovna: izabrana slika; ako je nema, prva slika iz podalbuma */
 function coverItemFor(cat){
+  if(cat.cover === NO_COVER) return null;   /* v177: korisnik izabrao „Bez slike“ */
   const own = cat.cover ? items.find(i=>i.id===cat.cover) : null;
   if(own) return own;
   for(const ch of childrenOf(cat.id)){
@@ -6214,7 +6234,7 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
   const coverItem = coverItemFor(cat);
   const isList = albumViewMode === 'list';
   tile.className = isList ? 'folder-tile-row' : 'folder-tile';
-  const coverInner = (coverItem && coverItem.thumb) ? '<img src="'+coverItem.thumb+'">' : folderIconSvg();
+  const coverInner = (coverItem && coverItem.thumb) ? '<img src="'+coverItem.thumb+'">' : noCoverHtml(cat);
   if(isList){
     tile.innerHTML = '<div class="ftile-cover">'+coverInner+'</div><div class="fr-text"><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+(subN ? ' \u00B7 '+podalbumiTxt(subN) : '')+'</span></div>';
   }else{
@@ -6630,9 +6650,9 @@ function _renderView(){
           const coverItem = coverItemFor(cat);
           tile.className = 'folder-tile';
           if(coverItem){
-            tile.innerHTML = '<div class="ftile-cover">'+(coverItem.thumb ? '<img src="'+coverItem.thumb+'">' : folderIconSvg())+'</div><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+'</span>';
+            tile.innerHTML = '<div class="ftile-cover">'+(coverItem.thumb ? '<img src="'+coverItem.thumb+'">' : noCoverHtml(cat))+'</div><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+'</span>';
           }else{
-            tile.innerHTML = '<div class="ftile-cover">'+folderIconSvg()+'</div><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+'</span>';
+            tile.innerHTML = '<div class="ftile-cover">'+noCoverHtml(cat)+'</div><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+'</span>';
           }
           tile.onclick = ()=>{
             if(parentCat){ pushBack(closeAlbumViewTop); openSubalbum(cat); return; }
@@ -6844,15 +6864,30 @@ function openCoverPicker(catId){
   grid.innerHTML = '';
   document.getElementById('coverPickerSheet').classList.add('open');
   pushBack(closeCoverPicker);
+  const curCat = catById(catId), cur = curCat ? curCat.cover : null;
+  { /* v177: „Bez slike“ se uvek može izabrati (i vratiti) */
+    const t = document.createElement('div');
+    t.className = 'cp-tile cp-none' + (cur === NO_COVER || !coverItemFor(curCat || {}) ? ' on' : '');
+    t.innerHTML = noCoverHtml(curCat) + '<span class="cp-lbl">Bez slike</span>';
+    t.onclick = ()=>{
+      const cat = catById(catId);
+      if(cat){ cat.cover = NO_COVER; saveCategories(); }
+      render();
+      requestClose();
+    };
+    grid.appendChild(t);
+  }
   if(pool.length === 0){
-    grid.innerHTML = '<p style="grid-column:1/-1;color:var(--ink-dim);font-size:14.5px;">Album je prazan, nema slika za naslovnu.</p>';
+    const p = document.createElement('p');
+    p.style.cssText = 'grid-column:1/-1;color:var(--ink-dim);font-size:14.5px;margin:4px 0 0;';
+    p.textContent = 'U albumu još nema slika za naslovnu.';
+    grid.appendChild(p);
     return;
   }
+  const curItem = curCat ? coverItemFor(curCat) : null;
   pool.forEach(it=>{
     const t = document.createElement('div');
-    t.style.aspectRatio = '1/1';
-    t.style.cursor = 'pointer';
-    t.style.border = '1px solid var(--line)';
+    t.className = 'cp-tile' + (curItem && curItem.id === it.id ? ' on' : '');
     t.innerHTML = it.thumb ? '<img src="'+it.thumb+'" style="width:100%;height:100%;object-fit:cover;display:block;">' : '';
     t.onclick = ()=>{
       const cat = catById(catId);
@@ -9678,14 +9713,14 @@ async function mergeBackup(src, opts){
     categories.forEach(c=>{
       if(c.parent && !liveCats.has(c.parent)) c.parent = null;
       const want = Object.keys(src.coverOf || {}).find(k=>idMap[k] === c.id);
-      c.cover = (want && items.some(i=>i.id === src.coverOf[want])) ? src.coverOf[want] : null;
+      c.cover = (want && (src.coverOf[want] === NO_COVER || items.some(i=>i.id === src.coverOf[want]))) ? src.coverOf[want] : null;
     });
   }
   /* naslovne: samo gde album još nema svoju */
   Object.keys(src.coverOf || {}).forEach(key=>{
     const cat = catById(idMap[key]);
     const docId = src.coverOf[key];
-    if(cat && !cat.cover && items.some(i=>i.id === docId)) cat.cover = docId;
+    if(cat && !cat.cover && (docId === NO_COVER || items.some(i=>i.id === docId))) cat.cover = docId;
   });
   await saveCategories();
   items.sort((a,b)=>a.ts-b.ts);
