@@ -336,10 +336,10 @@
   .folder-tile-row .ftile-cover svg{stroke:var(--brass);width:18px;height:18px;}
   /* v177: album bez slike — blag prelaz boje teme, velika fascikla sa prvim slovom albuma */
   .nocover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--brass) 22%, var(--surface-2)) 0%, var(--surface-2) 70%);}
-  .nocover svg{width:58%;height:58%;stroke:var(--brass) !important;opacity:.9;}
+    background:radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--brass) 12%, var(--surface-2)) 0%, var(--surface-2) 70%);}
+  .nocover svg{width:58%;height:58%;stroke:var(--brass) !important;opacity:.5;}   /* v179: blaže (Zoran) */
   .nocover span{position:absolute;left:0;right:0;top:50%;transform:translateY(-38%);text-align:center;
-    font-family:var(--font-name);font-style:var(--name-style);font-weight:600;color:var(--brass);font-size:26px;line-height:1;}
+    font-family:var(--font-name);font-style:var(--name-style);font-weight:500;color:var(--brass);opacity:.6;font-size:26px;line-height:1;}
   .folder-tile .nocover span{font-size:30px;}
   .folder-tile-row .ftile-cover .nocover svg{width:58%;height:58%;}
   .cp-tile{position:relative;aspect-ratio:1/1;cursor:pointer;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
@@ -9080,7 +9080,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 178;
+const APP_VERSION = 179;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
