@@ -2261,6 +2261,10 @@ body:not(.in-album) .mark-row.fit3 .mark-cnt{ font-size:12px; }
 .exit-modal-backdrop{ align-items:flex-start;
   background:linear-gradient(to bottom, transparent 0, transparent var(--pop-top,0px), var(--scrim) var(--pop-top,0px)); }
 .exit-modal-backdrop .exit-modal{ margin-top:calc(var(--pop-top,0px) + 12px); max-height:calc(100dvh - var(--pop-top,0px) - 24px); overflow-y:auto; box-sizing:border-box; }
+/* v178 (Zoran, opcija A): „Bez albuma“ diskretno istaknut — blago zlatna podloga sleva i tanka zlatna ivica, u svim temama */
+html .home-inbox.home-inbox{ background:linear-gradient(90deg, color-mix(in srgb, var(--brass) 14%, var(--surface-2)), var(--surface-2) 70%);
+  border:1px solid color-mix(in srgb, var(--brass) 45%, var(--line)); }
+html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 /* v148: ukupan broj stavki iste veličine kao broj albuma */
 .mark-cnt-2{ font-size:1em; }
 </style>
