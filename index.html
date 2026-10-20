@@ -2197,8 +2197,8 @@ body:not(.in-album) .mark-row{ height:46px; box-sizing:border-box; border-top:1p
 .home-inbox svg{ flex:none; color:var(--brass); width:24px; height:24px; }
 .home-inbox .hi-nm{ flex:1 1 auto; min-width:0; font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .home-inbox .hi-ct{ flex:none; font-size:14px; color:var(--ink-dim); white-space:nowrap; }
-/* v118: okrugla dugmad gore malo manja, da stane i broj albuma; v175: na svim telefonima (uz zvonce broj ostaje) */
-body:not(.in-album) .header-actions .icon-btn{ width:40px; height:40px; } body:not(.in-album) .header-actions{ gap:6px; }
+/* v118: na uskom ekranu okrugla dugmad gore malo manja, da stane i broj albuma */
+@media (max-width:380px){ body:not(.in-album) .header-actions .icon-btn{ width:40px; height:40px; } body:not(.in-album) .header-actions{ gap:6px; } }
 /* v150: isečak tabele u prozoru ćelije */
 .xe-crop{ margin:2px 0 10px; border:1px solid var(--line); border-radius:12px; overflow:auto; max-height:210px; background:var(--surface-2); }
 .xe-crop table{ border-collapse:collapse; font-size:13px; min-width:100%; }
@@ -5831,24 +5831,10 @@ function openAlbumSortChoice(){
 /* v118: broj albuma gramatički tačno (1 album, 2–4 albuma, 5+ albuma) */
 function albumiTxt(n){ if(appLang() === 'en') return n + (n === 1 ? ' album' : ' albums');
   const d=n%10, h=n%100; return n + ((d===1&&h!==11) ? ' album' : ' albuma'); }
-/* v118: broj albuma u gornjem redu se sklanja ako red ne staje (to je samo informacija) */
+/* v118 → v176: broj albuma u gornjem redu stoji uvek */
 function fitMarkRow(){
-  const r = document.querySelector('.mark-row'), c = document.getElementById('markCnt'); if(!r || !c) return;
-  r.classList.remove('cnt-off');
-  if(!c.textContent || r.offsetParent === null) return;
-  c.style.flexShrink = '0';   /* meri se pun natpis: ako ne staje ceo, skloni se (to je samo informacija) */
-  const tt = c.parentElement;
-  const over = tt.scrollWidth > tt.clientWidth + 1 || r.scrollWidth > r.clientWidth + 1;
-  c.style.flexShrink = '';
-  if(over) r.classList.add('cnt-off');
-  /* fontovi naslova i broja se učitavaju tek kad zatrebaju i menjaju širinu: posle učitavanja izmeri još jednom */
-  if(!fitMarkRow._f && document.fonts && document.fonts.load){
-    fitMarkRow._f = true;
-    const fs = el=>{ const cs = getComputedStyle(el); return cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; };
-    const h = r.querySelector('h1');
-    Promise.all([document.fonts.load(fs(c), c.textContent), h ? document.fonts.load(fs(h), h.textContent) : null])
-      .then(()=>requestAnimationFrame(()=>{ if(!currentFolder) fitMarkRow(); })).catch(()=>{});
-  }
+  /* v176 (Zoran): broj albuma i stavki se nikad ne sakriva; kad je red tesan, kraj teksta se samo odseče */
+  const r = document.querySelector('.mark-row'); if(r) r.classList.remove('cnt-off');
 }
 /* v126: „Bez albuma“ — ladica (stavke koje još nisu u albumu) */
 const INBOX_SVG_HOME = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>';
@@ -9039,7 +9025,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 175;
+const APP_VERSION = 176;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
