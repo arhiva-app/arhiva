@@ -19,7 +19,8 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;      // CDN i ostalo — bez mesanja
   e.respondWith((async () => {
     try {
-      const res = await fetch(req);
+      /* v192: cache 'no-cache' = uvek pitaj server (ETag); GitHub inače dozvoljava 10 min stare kopije (max-age=600) */
+      const res = await fetch(req, { cache: 'no-cache' });
       if (res && res.ok) {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
