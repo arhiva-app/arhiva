@@ -674,12 +674,12 @@ html.sc-peek #modalUnlock{ display:flex; }
 .set-back:active{ background:var(--surface); }
 .set-title{ margin:0; padding:0; flex:1; min-width:0; font-family:var(--font-ui); font-size:20px; font-weight:700; color:var(--title-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .set-body{ padding:16px 14px; max-width:560px; margin:0 auto; box-sizing:border-box; }
-.set-tile{ display:flex; align-items:center; gap:14px; width:100%; padding:18px 16px; margin:0 0 12px; background:var(--surface); border:1px solid var(--line); border-radius:16px; cursor:pointer; text-align:left; font-family:inherit; color:var(--ink); box-sizing:border-box; }
+.set-tile{ display:flex; align-items:center; gap:14px; width:100%; padding:8px 16px; min-height:52px; margin:0 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:16px; cursor:pointer; text-align:left; font-family:inherit; color:var(--ink); box-sizing:border-box; }
 .set-tile:active{ background:var(--surface-2); }
 .set-tile .tile-icon{ font-size:26px; flex:none; width:36px; text-align:center; line-height:1; }
 .set-tile .tile-text{ flex:1; min-width:0; }
-.set-tile .tile-title{ display:block; font-size:16px; font-weight:700; color:var(--ink); }
-.set-tile .tile-sub{ display:block; font-size:12px; color:var(--ink-dim); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.set-tile .tile-title{ display:block; font-size:16px; font-weight:700; color:var(--ink); line-height:1.25; }   /* v210 (Zoran): niže pločice — razmak samo koliko tekst traži, dodir ≥ 52 px */
+.set-tile .tile-sub{ display:block; font-size:12px; color:var(--ink-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .set-tile .tile-chev{ color:var(--ink-dim); font-size:22px; flex:none; line-height:1; }
 .set-tile.danger{ margin-top:24px; }
 .set-tile.danger .tile-title{ color:var(--danger); }
@@ -9762,7 +9762,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 209;
+const APP_VERSION = 210;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
