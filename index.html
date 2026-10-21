@@ -3392,7 +3392,7 @@ const I18N = {
     barShortcut: 'Prečica', scOnlyOne: 'Prečica se pravi za jednu stavku: izaberi samo jednu.',
     scNoName: 'Bez naziva', scSent: 'Prečica je poslata na početni ekran.', scFail: 'Prečica nije napravljena.',
     scNoSupport: 'Ovaj telefon ne dozvoljava prečice na početnom ekranu.', scInTrash: 'Stavka sa ove prečice je u korpi (Podešavanja → korpa).',
-    scGone: 'Stavka sa ove prečice je obrisana iz Arhive.', scMade: 'Prečica je napravljena.', scNoTitle: 'Prečica nije napravljena',
+    scGone: 'Stavka sa ove prečice je obrisana iz Arhive.', scMade: 'Prečica je napravljena.', scChecking: 'Pravim prečicu…', scNoTitle: 'Prečica nije napravljena',
     scNoXi: 'Telefon nije dodao prečicu. Xiaomi traži da Arhivi dozvoliš prečice: dodirni „Otvori dozvole“, pa u podešavanjima Arhive uključi „Prečice na početnom ekranu“ (obično pod „Ostale dozvole“). Zatim ponovo dodirni „Prečica“.',
     scNoOther: 'Telefon nije dodao prečicu. Dodirni „Otvori dozvole“ i proveri dozvole Arhive, pa ponovo dodirni „Prečica“.',
     scOpenPerm: 'Otvori dozvole', mbUnlock: 'Otključaj', renMoreHint: 'novi naziv stavke',
@@ -4134,7 +4134,7 @@ const I18N = {
     barShortcut: 'Shortcut', scOnlyOne: 'A shortcut is made for one item: select just one.',
     scNoName: 'Untitled', scSent: 'The shortcut was sent to the home screen.', scFail: 'The shortcut was not created.',
     scNoSupport: 'This phone does not allow home screen shortcuts.', scInTrash: 'The item of this shortcut is in the trash (Settings → trash).',
-    scGone: 'The item of this shortcut was deleted from Arhiva.', scMade: 'The shortcut was created.', scNoTitle: 'The shortcut was not created',
+    scGone: 'The item of this shortcut was deleted from Arhiva.', scMade: 'The shortcut was created.', scChecking: 'Creating the shortcut…', scNoTitle: 'The shortcut was not created',
     scNoXi: 'The phone did not add the shortcut. Xiaomi requires you to allow shortcuts for Arhiva: tap “Open permissions”, then in Arhiva’s settings turn on “Home screen shortcuts” (usually under “Other permissions”). Then tap “Shortcut” again.',
     scNoOther: 'The phone did not add the shortcut. Tap “Open permissions” and check Arhiva’s permissions, then tap “Shortcut” again.',
     scOpenPerm: 'Open permissions', mbUnlock: 'Unlock', renMoreHint: 'a new name for the item',
@@ -9499,7 +9499,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 197;
+const APP_VERSION = 198;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18257,9 +18257,10 @@ async function scIcon(item){
   }catch(e){ return null; }
 }
 /* v197: posle zahteva Arhiva proverava da li je prečica zaista na početnom ekranu (Xiaomi bez dozvole tiho odbije);
-   uvek jasan odgovor: „napravljena“ ili prozor sa „Otvori dozvole“. Vreme sa Arhivom u pozadini (Androidov prozor potvrde) se ne broji. */
+   uvek jasan odgovor: „napravljena“ ili prozor sa „Otvori dozvole“. Vreme sa Arhivom u pozadini (Androidov prozor potvrde) se ne broji.
+   v198: čeka najviše 2,5 s, a dok čeka gore piše „Pravim prečicu…“. */
 async function scWaitPinned(n, id){
-  let left = 6000;
+  let left = 2500;   /* v198: Xiaomi sa dozvolom doda odmah; 6 s je delovalo kao da se ništa ne dešava */
   while(left > 0){
     let r = null;
     try{ r = await n.prikvacena(id); }catch(e){ return null; }   /* stariji APK: ne zna da proveri */
@@ -18280,7 +18281,9 @@ async function scPin(item){
     try{ r = (await n.napravi({id:item.id, naziv:item.name || t('scNoName'), slika:await scIcon(item)})) || {}; }
     catch(e){ console.error('precica', e); r = {ok:false}; }
   }
+  toastPersist(t('scChecking'));   /* v198: odmah se vidi da se nešto dešava */
   const ok = (info.podrzano === false || r.podrzano === false || r.ok === false) ? false : await scWaitPinned(n, item.id);
+  toastHide();
   if(ok === true){ toast(t('scMade')); return; }
   if(ok === null){ toast(t('scSent')); return; }   /* stariji APK */
   const go = await askConfirm({icon:'📌', title:t('scNoTitle'), text:t(xi ? 'scNoXi' : 'scNoOther'), okIcon:'⚙️', okLabel:t('scOpenPerm'), danger:false});
