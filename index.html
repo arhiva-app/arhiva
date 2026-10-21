@@ -700,6 +700,9 @@ html.sc-peek #modalUnlock{ display:flex; }
 .exp-pods .lk-chips{ margin-top:6px; }
 .exp-rem{ display:block; font-size:12.5px; color:var(--ink-dim); margin-top:2px; }
 .exp-new{ margin-top:6px; }
+.settings-card.ob-warn{ border:1.5px solid var(--danger); }
+#expBody #obSet{ margin-bottom:14px; }
+.settings-card.ob-warn .lk-row-sub{ color:var(--danger); }
 html.exp-open #expSheet, html.exp-open #wsPickSheet{ z-index:72; }
 #expOpenDoc{ margin-top:8px; }
 .settings-field label{ font-size:11.5px; color:var(--ink-dim); display:block; margin-bottom:5px; }
@@ -3835,7 +3838,8 @@ const I18N = {
     expSetHint1: 'tri podsetnika: kvačicom uključuješ svaki, a broj kaže koliko dana pre datuma (0 = na sam dan). za svaki uključen podsetnik Arhiva te obavesti po jednom, i još jednom kad datum prođe. od najranijeg podsetnika na zvoncetu na početnom ekranu stoji broj.',
     podUnit: 'dana pre', podOnAria: 'podsetnik {i}', podSameDay: 'na sam dan', podDaysBefore: '{n} {d} pre', podAnd: ' i ', podNone: 'podsetnici isključeni', podDay0: 'na dan',
     expSetHint2: 'obaveštenje vidiš kad otvoriš Arhivu. obaveštenja dok je aplikacija zatvorena za sada ne postoje.',
-    obRow: 'podsetnici na telefonu', obOn: 'uključeni', obOff: 'isključeni', obDenied: 'telefon ih nije dozvolio',
+    obRow: 'podsetnici na telefonu', obOn: 'uključeni', obOff: 'isključeni', obDenied: 'telefon ih nije dozvolio', obOffWarn: 'isključeni: podsetnici stižu samo kad otvoriš Arhivu', obDeniedWarn: 'telefon ih nije dozvolio: podsetnici stižu samo kad otvoriš Arhivu',
+    obSaveTitle: 'Obaveštenja na telefonu su isključena', obSaveText: 'Ovaj podsetnik ćeš videti samo kad otvoriš Arhivu.', obSaveDenied: 'Telefon ne dozvoljava obaveštenja Arhive, pa ovaj podsetnik vidiš samo kad otvoriš Arhivu. Dodirni „Otvori dozvole“ i uključi obaveštenja.', obSaveNo: 'Ne treba',
     obHourLbl: 'podsetnik stiže u', obPerm: 'Otvori dozvole',
     obHint: 'podsetnik stiže kao obaveštenje i kad je Arhiva zatvorena, i na zaključanom ekranu, u dane i sat izabrane za taj dokument. dodir na obaveštenje otvara dokument (kad je Arhiva zaključana, posle otključavanja).',
     obAskTitle: 'Podsetnici na telefonu', obAskText: 'Arhiva može da te podseti obaveštenjem na telefonu, i kad je zatvorena, u dane i sat koje izabereš za svaki podsetnik. Ovo menjaš na zvoncetu na početnom ekranu.',
@@ -4585,7 +4589,8 @@ const I18N = {
     expSetHint1: 'three reminders: the checkbox turns each one on, and the number says how many days before the date (0 = on the day itself). For each reminder that is on, Arhiva notifies you once, and also when the date has passed. From the earliest reminder on, a number shows on the bell on the home screen.',
     podUnit: 'days before', podOnAria: 'reminder {i}', podSameDay: 'on the day itself', podDaysBefore: '{n} {d} before', podAnd: ' and ', podNone: 'reminders off', podDay0: 'on the day',
     expSetHint2: 'you see the notification when you open Arhiva. Notifications while the app is closed are not available yet.',
-    obRow: 'reminders on the phone', obOn: 'on', obOff: 'off', obDenied: 'not allowed by the phone',
+    obRow: 'reminders on the phone', obOn: 'on', obOff: 'off', obDenied: 'not allowed by the phone', obOffWarn: 'off: reminders arrive only when you open Arhiva', obDeniedWarn: 'not allowed by the phone: reminders arrive only when you open Arhiva',
+    obSaveTitle: 'Phone notifications are off', obSaveText: 'You will see this reminder only when you open Arhiva.', obSaveDenied: 'The phone does not allow Arhiva’s notifications, so you see this reminder only when you open Arhiva. Tap “Open permissions” and turn notifications on.', obSaveNo: 'Not needed',
     obHourLbl: 'reminder arrives at', obPerm: 'Open permissions',
     obHint: 'the reminder arrives as a notification even when Arhiva is closed, also on the lock screen, on the days and at the time chosen for that document. Tapping it opens the document (when Arhiva is locked, after unlocking).',
     obAskTitle: 'Reminders on the phone', obAskText: 'Arhiva can remind you with a phone notification, even when it is closed, on the days and at the time you choose for each reminder. Change this on the bell on the home screen.',
@@ -5001,6 +5006,7 @@ async function setItemExpiry(item, v, note, rem){
   catch(e){ item.validUntil = old; item.validNote = oldN; item.remind = oldR; console.error(e); toast(t('saveErr')); return false; }
   toast(v ? t('expSaved', {date:fmtExpDate(v, true)}) : t('expRemoved'));
   markExpSeen(item);
+  if(v) obAfterSave();   /* v201: ako obaveštenja na telefonu ne rade, odmah reci */
   return true;
 }
 
@@ -18640,6 +18646,21 @@ async function obAsk(){
     await obTurn(yes);
   }finally{ _obAsking = false; }
 }
+/* v201: posle čuvanja podsetnika — obaveštenja isključena ili ih telefon ne dozvoljava → prozor (dok korisnik ne kaže „Ne treba“).
+   Prvo pitanje (c.on još nije odlučeno) postavlja obAsk. */
+async function obAfterSave(){
+  const n = obNative();
+  if(!n || !itemsReady || scPeekOn) return;
+  const c = obCfg();
+  if(c.on === undefined || c.noAsk) return;
+  const denied = c.on === true && (await obCheckPerm()) !== 'granted';
+  if(c.on === true && !denied) return;
+  const yes = await askConfirm({icon:'🔕', title:t('obSaveTitle'), text:t(denied ? 'obSaveDenied' : 'obSaveText'), okIcon:denied ? '⚙️' : '🔔',
+    okLabel:t(denied ? 'obPerm' : 'obAskOk'), cancelLabel:t('obSaveNo'), danger:false});
+  if(!yes){ const c2 = obCfg(); c2.noAsk = true; obSave(c2); return; }
+  if(denied){ const p = scNative(); if(p && p.dozvole) p.dozvole().catch(()=>{}); }
+  else await obTurn(true);
+}
 async function obTurn(on){
   const n = obNative(), c = obCfg();
   c.on = !!on; obSave(c);
@@ -18653,8 +18674,9 @@ async function obTurn(on){
 /* Podešavanja → podsetnik */
 function obSettingsHtml(){
   const c = obCfg(), on = c.on === true, denied = on && obPerm && obPerm !== 'granted';
-  const sub = !on ? t('obOff') : denied ? t('obDenied') : t('obOn');
-  return '<div class="settings-card" style="margin-top:14px"><button type="button" class="settings-row" id="obRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'"><span class="row-icon">📲</span><span class="row-label">'+escapeHtml(t('obRow'))+'<span class="lk-row-sub">'+escapeHtml(sub)+'</span></span><span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button>'+
+  const sub = !on ? t('obOffWarn') : denied ? t('obDeniedWarn') : t('obOn');
+  /* v201: dok podsetnici ne stižu na telefon, red je istaknut kao upozorenje */
+  return '<div class="settings-card'+(!on || denied ? ' ob-warn' : '')+'" style="margin-top:14px"><button type="button" class="settings-row" id="obRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'"><span class="row-icon">📲</span><span class="row-label">'+escapeHtml(t('obRow'))+'<span class="lk-row-sub">'+escapeHtml(sub)+'</span></span><span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button>'+
     (denied ? '<button type="button" class="settings-row" id="obPermRow"><span class="row-icon">⚙️</span><span class="row-label">'+escapeHtml(t('obPerm'))+'</span><span class="chevron">›</span></button>' : '')+'</div>'+
     '';   /* v201: objašnjenje je u uputstvu; ekran podsetnika ostaje pregledan */
 }
