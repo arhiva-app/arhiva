@@ -715,6 +715,22 @@ html.exp-open #expSheet, html.exp-open #wsPickSheet{ z-index:72; }
 .settings-row .chevron{ color:var(--ink-dim); font-size:13px; flex:none; }
 .settings-hint{ font-size:11px; color:var(--ink-dim); padding:8px 4px 0; line-height:1.5; }
 .set-build{ text-align:center; padding-top:18px; }
+/* v203 Google Drive */
+.dr-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:6px 14px; margin:6px 0 14px; }
+.dr-step{ display:flex; gap:12px; align-items:flex-start; padding:11px 2px; border-bottom:1px solid var(--line); font:500 14.5px/1.4 var(--font-ui); color:var(--ink); }
+.dr-step:last-child{ border-bottom:0; }
+.dr-step .ic{ flex:none; width:34px; height:34px; border-radius:10px; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:18px; }
+.dr-btn{ width:100%; min-height:54px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font:700 16.5px var(--font-ui); display:flex; align-items:center; justify-content:center; gap:10px; margin:4px 0 10px; cursor:pointer; }
+.dr-btn:disabled{ opacity:.55; }
+.dr-btn.dr-btn2{ background:transparent; color:var(--ink); border:1.5px solid var(--line); }
+.dr-row{ display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font:500 14px var(--font-ui); color:var(--ink-dim); }
+.dr-row b{ color:var(--ink); font-weight:700; text-align:right; overflow-wrap:anywhere; }
+.dr-row:last-child{ border-bottom:0; }
+.dr-ok{ font:700 15px/1.4 var(--font-ui); color:var(--ink); padding:12px 0 6px; }
+.dr-ok.warn{ color:var(--danger); }
+.dr-bar{ height:8px; border-radius:5px; background:var(--line); overflow:hidden; margin:4px 0 12px; }
+.dr-bar i{ display:block; height:100%; background:var(--accent); transition:width .3s; }
+.dr-run-hint{ padding:0 0 12px; font:500 13px/1.45 var(--font-ui); color:var(--ink-dim); }
 /* MODUL dnevnik-gresaka v1 — CSS: značka uz broj verzije i redovi dnevnika */
 .err-count{ display:inline-flex; align-items:center; margin-left:8px; padding:3px 10px; border-radius:999px; font:600 12px var(--font-ui); cursor:pointer;
   color:var(--danger); background:var(--danger-soft); border:1px solid var(--danger-line); vertical-align:middle; }
@@ -3880,6 +3896,27 @@ const I18N = {
     askMissMore: 'manje pogodni dokumenti: {n}',
     askMissStarts: 'reči iz pitanja nisu nađene, pa su pretraženi samo nazivi i počeci dokumenata',
     /* v190 zaključavanje */
+    /* v203 Google Drive */
+    drTile: 'Google Drive', drSubOff: 'isključeno · podaci samo na telefonu', drSubOnNew: 'uključeno', drSubOn: 'uključeno · poslato {d}',
+    drSubRun: 'šaljem {n} / {total}', drSubErr: 'poslednje slanje nije uspelo', drSubNeed: 'potrebna ponovna dozvola',
+    drStep1: 'Sada su tvoji podaci samo na ovom telefonu. Ako se telefon izgubi ili pokvari, nestaju.',
+    drStep2: 'Kad povežeš, Arhiva ih čuva i na tvom Google Drive-u, u fascikli „Arhiva“. Ostale tvoje fajlove ne vidi.',
+    drStep3: 'Prvi put prenese sve, a posle sama šalje samo novo i izmenjeno.',
+    drStep4: 'Na novom telefonu ili računaru: isti Google nalog, isti podaci.',
+    drConnect: 'Poveži Google Drive', drWaiting: 'Čekam Google…',
+    drHintAsk: 'Google će tražiti da izabereš nalog i dozvoliš pristup. Arhiva zauzima oko {mb} tvog prostora na Drive-u.',
+    drHintSafe: 'Podatke na Drive-u štiti tvoj Google nalog, ne PIN Arhive.',
+    drRun: 'Prenosim na Drive: {n} / {total}', drRunHint: 'Arhivu možeš da koristiš i dok traje. Ako se veza prekine, nastavlja gde je stala.',
+    drOk: '✓ Povezano', drAcc: 'nalog', drLast: 'poslednje slanje', drOnDrive: 'dokumenata na Drive-u', drNever: 'još nije',
+    drOff: 'Prekini vezu', drOffHint: 'Prekid veze ne briše ništa: podaci ostaju i na telefonu i na Drive-u. Dok je Drive povezan, traka-podsetnik za rezervnu kopiju se ne pojavljuje.',
+    drDone: 'Sve je na Drive-u.', drOffDone: 'Veza sa Google Drive-om je prekinuta. Podaci su ostali na telefonu i na Drive-u.',
+    drConnFail: 'Povezivanje nije uspelo. Proveri internet i pokušaj ponovo.',
+    drErrNet: 'Poslednje slanje nije uspelo: nema interneta. Arhiva pokušava ponovo sama.',
+    drErrFull: 'Google Drive je pun. Oslobodi prostor na Drive-u; Arhiva posle nastavlja sama.',
+    drErr: 'Poslednje slanje nije uspelo. Arhiva pokušava ponovo sama.',
+    drNeedTxt: 'Google traži da ponovo dozvoliš pristup Drive-u. Dok to ne uradiš, ništa se ne šalje.', drAgain: 'Ponovo poveži',
+    drOther: 'Na ovom Google nalogu već postoji Arhiva sa dokumentima kojih nema na ovom telefonu. Prenos sa Drive-a na telefon stiže u sledećoj verziji; do tada ništa nije promenjeno.',
+    drAgoNow: 'upravo', drAgoMin: 'pre {n} min', drAgoH: 'pre {n} h',
     lkTile: 'zaključavanje',
     lkSubOff: 'isključeno',
     lkSubPin: 'PIN',
@@ -4599,6 +4636,27 @@ const I18N = {
     obChan: 'Reminders', obChanDesc: 'Reminders for documents in Arhiva', obGone: 'The document from the reminder is no longer in Arhiva.',
     bkHintZip: 'the backup is one ZIP file: your documents are inside as ordinary images and PDFs, sorted by album, so they open even without Arhiva. import also accepts old .json backups. when restoring choose: add to existing (no duplicates) or replace all. a damaged file is not imported.',
     /* v190 zaključavanje */
+    /* v203 Google Drive */
+    drTile: 'Google Drive', drSubOff: 'off · data only on this phone', drSubOnNew: 'on', drSubOn: 'on · sent {d}',
+    drSubRun: 'uploading {n} / {total}', drSubErr: 'last upload failed', drSubNeed: 'permission needed again',
+    drStep1: 'Right now your data is only on this phone. If the phone is lost or breaks, it is gone.',
+    drStep2: 'Once connected, Arhiva also keeps it on your Google Drive, in the folder “Arhiva”. It cannot see your other files.',
+    drStep3: 'The first time it uploads everything; after that it sends only what is new or changed, on its own.',
+    drStep4: 'On a new phone or a computer: same Google account, same data.',
+    drConnect: 'Connect Google Drive', drWaiting: 'Waiting for Google…',
+    drHintAsk: 'Google will ask you to choose an account and allow access. Arhiva takes about {mb} of your Drive space.',
+    drHintSafe: 'Your data on Drive is protected by your Google account, not by the Arhiva PIN.',
+    drRun: 'Uploading to Drive: {n} / {total}', drRunHint: 'You can keep using Arhiva meanwhile. If the connection drops, it continues where it stopped.',
+    drOk: '✓ Connected', drAcc: 'account', drLast: 'last upload', drOnDrive: 'documents on Drive', drNever: 'not yet',
+    drOff: 'Disconnect', drOffHint: 'Disconnecting deletes nothing: your data stays on the phone and on Drive. While Drive is connected, the backup reminder bar does not appear.',
+    drDone: 'Everything is on Drive.', drOffDone: 'Google Drive disconnected. Your data stayed on the phone and on Drive.',
+    drConnFail: 'Connecting failed. Check the internet and try again.',
+    drErrNet: 'The last upload failed: no internet. Arhiva will retry on its own.',
+    drErrFull: 'Google Drive is full. Free up space on Drive; Arhiva then continues on its own.',
+    drErr: 'The last upload failed. Arhiva will retry on its own.',
+    drNeedTxt: 'Google asks you to allow Drive access again. Nothing is uploaded until you do.', drAgain: 'Connect again',
+    drOther: 'This Google account already has an Arhiva with documents that are not on this phone. Moving data from Drive to the phone comes in the next version; until then nothing was changed.',
+    drAgoNow: 'just now', drAgoMin: '{n} min ago', drAgoH: '{n} h ago',
     lkTile: 'app lock',
     lkSubOff: 'off',
     lkSubPin: 'PIN',
@@ -5433,7 +5491,7 @@ const Skladiste = (()=>{
       try{ tx = db.transaction(stores, mode); }catch(e){ _dbP = null; reject(e); return; }
       const out = {};
       try{ work(n=>tx.objectStore(n), out); }catch(e){ try{ tx.abort(); }catch(_){} reject(e); return; }
-      tx.oncomplete = ()=>resolve(out.v);
+      tx.oncomplete = ()=>{ resolve(out.v); if(mode === 'readwrite' && api.kadIzmena){ try{ api.kadIzmena(); }catch(_){} } };
       tx.onerror = ()=>reject(tx.error);
       tx.onabort = ()=>reject(tx.error || new Error('abort'));
     })).catch(e=>{ if(mode === 'readwrite' && api.kadNeuspeh){ try{ api.kadNeuspeh(e); }catch(_){} } throw e; });
@@ -5481,6 +5539,8 @@ const Skladiste = (()=>{
   const api = {
     /* app postavlja: šta da se uradi kad upis ne uspe (poruka „NIJE SAČUVANO!“) */
     kadNeuspeh: null,
+    /* v203: app postavlja — poziva se posle svakog uspešnog upisa (Google Drive šalje izmene) */
+    kadIzmena: null,
 
     /* ---------- čitanje ---------- */
     /* sve što treba pri otvaranju: zapisi albuma, zapisi dokumenata (i oznake obrisanih), sličice {id, blob} */
@@ -9280,7 +9340,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); obBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
+loadAll().then(()=>{ itemsReady = true; scBoot(); obBoot(); drBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -9319,6 +9379,7 @@ function checkBackupReminder(){
     const d = daysSinceBackup(last);
     if(d >= interval) msg = t('bkRemDays', {n:d});
   }
+  if(msg && drFresh()) msg = null;   /* v203: Drive povezan i nedavno poslato — kopija već postoji */
   if(msg){ textEl.textContent = msg; row.style.display = 'flex'; }
   else { row.style.display = 'none'; }
 }
@@ -9650,7 +9711,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 202;
+const APP_VERSION = 203;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9771,6 +9832,7 @@ function renderSettingsTiles(){
     settingsTile('📖', t('guideTile'), t('guideTileSub'), "openSettingsSub('guide')")+
     settingsTile('🎨', t('themeTile'), themeName(getTheme()), "openSettingsSub('theme')")+
     (lkNative() ? settingsTile('🔒', t('lkTile'), lkTileSub(), "openSettingsSub('lock')") : '')+   /* v190: samo Android aplikacija */
+    (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
@@ -9856,6 +9918,10 @@ function openSettingsSub(which){
     if(!lkNative()) return;
     title = t('lkTile');
     body = '<div id="lkSet">'+lkSettingsHtml()+'</div>';
+  }else if(which === 'drive'){
+    if(!drNative()) return;
+    title = t('drTile');
+    body = '<div id="drSet">'+drSettingsHtml()+'</div>';
   }else if(which === 'errlog'){
     title = t('errTitle');
     body = errLogBodyHtml();
@@ -9867,6 +9933,7 @@ function openSettingsSub(which){
   if(which === 'expiry'){ podWire(); obWireSettings(); }
   if(which === 'ai') aiWireSettings();
   if(which === 'lock') lkOpenSettings();
+  if(which === 'drive') drWire();
   if(which === 'old') oldDataCount().then(n=>{ const el = document.getElementById('oldCountHint'); if(el) el.textContent = t('oldCount', {n}); });
   settingsScreen.scrollTop = 0;
   if(!settingsSubOpen){
@@ -10174,12 +10241,9 @@ function albumPath(catId){
 }
 
 let _backupBusy = false;
-async function exportBackup(){
-  if(_backupBusy) return;
-  _backupBusy = true;
-  const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
-  try{
-    toastPersist(t('bkBuilding', {n:0, total:items.length}));
+/* v203: sadržaj kopije — arhiva.json i putanje fajlova (Dokumenti/<album>/…, Sličice/). Isti raspored ima i fascikla na
+   Google Drive-u. bezSlicica: sličice se ne čitaju (Drive ih čita tek kad ih šalje; ime je uvek .jpg kao kod makeThumb) */
+async function backupManifest(bezSlicica){
     await loadTexts().catch(e=>console.error(e));
     const docs = items.slice().sort((a,b)=>a.ts-b.ts);
     const used = new Set(['arhiva.json']);
@@ -10193,7 +10257,7 @@ async function exportBackup(){
         let path = base + '.' + ext, k = 2;
         while(used.has(path.toLowerCase())){ path = base + ' (' + k + ').' + ext; k++; }
         used.add(path.toLowerCase());
-        fileEntries.push({it, i, path});
+        fileEntries.push({it, i, path, file:p.file});
         const out = Object.assign({}, p, {path});
         /* v157: sličica dokumenta koji nije slika ide u kopiju (ne može se ponovo napraviti);
            v170: i sličica slike — uvoz je samo preuzme umesto da je pravi ponovo (najsporiji deo uvoza) */
@@ -10205,21 +10269,31 @@ async function exportBackup(){
     });
     const thumbEntries = [];
     for(const pg of thumbTodo){
+      if(bezSlicica){ pg.thumbPath = 'Sličice/' + pg.file + '.jpg'; thumbEntries.push({name:pg.thumbPath, file:pg.file}); continue; }
       const tb = await Skladiste.slicica(pg.file).catch(()=>null);
       if(!tb){ pg.thumb = false; continue; }
       const tr = {blob:tb};
       const m = /^image\/([a-z0-9]+)/i.exec(tr.blob.type || '');
       pg.thumbPath = 'Sličice/' + pg.file + '.' + (m ? (m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase()) : 'jpg');
-      thumbEntries.push({name:pg.thumbPath, blob:tr.blob, ts:Date.now()});
+      thumbEntries.push({name:pg.thumbPath, file:pg.file, blob:tr.blob, ts:Date.now()});
     }
     const albums = categories.map((c, i)=>Object.assign(albumRecord(c, i), {createdAt:c.createdAt || 0, updatedAt:c.updatedAt || 0}));
     const templates = await tplLoad().catch(e=>{ console.error(e); return []; });
     const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:Math.max(1, getExpiryDays()), podsetnici:getPods(), lang:appLang()}, albums, docs:docOut, templates};
+    return {manifest, docs, fileEntries, thumbEntries};
+}
+async function exportBackup(){
+  if(_backupBusy) return;
+  _backupBusy = true;
+  const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
+  try{
+    toastPersist(t('bkBuilding', {n:0, total:items.length}));
+    const {manifest, docs, fileEntries, thumbEntries} = await backupManifest(false);
     const entries = [{name:'arhiva.json', blob:new Blob([JSON.stringify(manifest)], {type:'application/json'}), ts:Date.now()}];
     for(const fe of fileEntries){
       entries.push({name:fe.path, blob:await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
     }
-    thumbEntries.forEach(e=>entries.push(e));
+    thumbEntries.forEach(e=>entries.push({name:e.name, blob:e.blob, ts:e.ts}));
     /* v172: napredak u STAVKAMA (isti broj kao pri uvozu), ne u fajlovima ZIP-a (slika + sličica + spisak) */
     const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n:Math.round(n / total * docs.length), total:docs.length})); });
     const msg = await saveBackupFile(zip, backupFileName('zip'), dirOk);
@@ -18750,6 +18824,338 @@ function obBoot(){
   obAskSoon();
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') obSync(); else if(obCfg().on === true) obCheckPerm().then(()=>{ obRefreshSettings(); _obLast = null; obSync(); }); });
 }
+
+/* =====================================================================
+   GOOGLE DRIVE (v203) — samo u Android aplikaciji sa dodatkom GoogleDrive (cap/arhiva-native.js → window.ARHIVA_DRIVE).
+   1. korak (Zoran 21.10.): telefon → Drive. Korisnik sam uključi (Podešavanja → Google Drive); dozvola = Google-ov prozor
+   (izbor naloga, „Dozvoli“), pristup drive.file: Arhiva vidi samo fajlove koje je sama napravila.
+   Fascikla „Arhiva“ ima ISTI raspored kao ZIP kopija (arhiva.json, Dokumenti/<album>/…, Sličice/ — backupManifest), da 2. korak
+   (Drive → nov telefon/računar) bude isto čitanje kao uvoz kopije. Svaki fajl na Drive-u nosi appProperties {arhiva:'f', k:ključ}.
+   Mapa (galerija:drive, samo ovaj uređaj, ne ide u kopiju): ključ (id fajla; 't:'+id za sličicu) → {id na Drive-u, putanja, roditelj, veličina}.
+   Fajl Arhive se nikad ne menja (izmena = nov dokument), pa se šalje jednom; posle: premeštanje (naziv/album), arhiva.json kad se
+   promeni, a u Drive korpu (30 dana) tek kad fajla nema ni u korpi Arhive. Slanje: 4 s posle upisa (Skladiste.kadIzmena), pri
+   pokretanju, povratku u aplikaciju i povratku interneta — dok je Arhiva otvorena. Greška → ponovo za minut.
+   Bezbednost: postojeća Arhiva na Drive-u sa dokumentima kojih nema na telefonu se ne dira (to je 2. korak).
+   ===================================================================== */
+const DR_KEY = 'galerija:drive', DR_API = 'https://www.googleapis.com/drive/v3/files', DR_UP = 'https://www.googleapis.com/upload/drive/v3/files';
+const DR_ABOUT = 'https://www.googleapis.com/drive/v3/about', DR_FOLDER = 'application/vnd.google-apps.folder', DR_JSON = {'Content-Type':'application/json; charset=UTF-8'};
+let _dr = {files:{}, dirs:{}}, _drTok = null, _drTokExp = 0, _drBusy = false, _drAgain = false, _drProg = null, _drTimer = null, _drRetry = null;
+let _drConnecting = false, _drNoteOn = false;
+function drNative(){ return window.ARHIVA_DRIVE || null; }
+function drCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(DR_KEY) || 'null'); }catch(e){} c = (c && typeof c === 'object') ? c : {}; c.files = c.files || {}; c.dirs = c.dirs || {}; return c; }
+function drSave(c){ try{ localStorage.setItem(DR_KEY, JSON.stringify(c || _dr)); }catch(e){ console.error('drive mapa', e); } }
+function drOn(){ return !!(drNative() && _dr.on); }
+/* traka-podsetnik za kopiju se ne pokazuje dok Drive redovno prima (try: zove se i pre ovog bloka) */
+function drFresh(){ try{ if(!drNative()) return false; const c = drCfg(); return !!(c.on && !c.need && c.last && Date.now() - c.last < getBackupIntervalDays() * 86400000); }catch(e){ return false; } }
+const drWait = (ms)=>new Promise(r=>setTimeout(r, ms));
+function drHash(s){ let h = 0x811c9dc5; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16) + ':' + s.length; }
+function drMb(b){
+  b = b || 0;
+  if(b < 1048576) return Math.max(1, Math.round(b / 1024)) + ' KB';
+  if(b < 1073741824) return Math.round(b / 1048576) + ' MB';
+  const g = (b / 1073741824).toFixed(1); return (appLang() === 'en' ? g : g.replace('.', ',')) + ' GB';
+}
+function drAgo(ts){
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if(m < 1) return t('drAgoNow');
+  if(m < 60) return t('drAgoMin', {n:m});
+  if(m < 1440) return t('drAgoH', {n:Math.floor(m / 60)});
+  const d = new Date(ts); return String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+}
+function drLocalBytes(){ let b = 0; items.forEach(it=>(it.pages || []).forEach(p=>{ b += p.size || 0; })); return b; }
+function drDriveBytes(){ let b = 0; Object.values(_dr.files).forEach(f=>{ b += f.s || 0; }); return b; }
+/* fajlovi koji još postoje u Arhivi (i u njenoj korpi) — samo oni koji nisu tu idu u Drive korpu */
+function drKeepSet(){
+  const s = new Set();
+  [items, trash].forEach(a=>(a || []).forEach(it=>(it.pages || []).forEach(p=>{ if(p.file){ s.add(p.file); s.add('t:' + p.file); } })));
+  return s;
+}
+
+/* ---- dozvola i pozivi Drive-a ---- */
+async function drToken(interaktivno){
+  if(!interaktivno && _drTok && Date.now() < _drTokExp) return _drTok;
+  let r = {};
+  try{ r = (await drNative().dozvola({interaktivno:!!interaktivno})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
+  if(!r.ok || !r.token){ const e = new Error('dozvola: ' + (r.razlog || 'greska') + (r.poruka ? ' ' + r.poruka : '')); e.drAuth = r.razlog || 'greska'; throw e; }
+  _drTok = r.token; _drTokExp = Date.now() + 45 * 60000;   /* Google-ov token važi sat vremena */
+  return _drTok;
+}
+async function drFetch(url, opt){
+  opt = opt || {};
+  for(let a = 0; ; a++){
+    const tok = await drToken(false);
+    let r;
+    try{ r = await fetch(url, Object.assign({}, opt, {headers:Object.assign({}, opt.headers || {}, {Authorization:'Bearer ' + tok})})); }
+    catch(e){ if(a < 2){ await drWait(1500 * (a + 1)); continue; } const er = new Error('drive: nema veze'); er.drNet = true; throw er; }
+    if(r.status === 401 && a === 0){ _drTok = null; continue; }   /* istekao token: jednom nov */
+    if(r.ok) return r;
+    const txt = await r.text().catch(()=>'');
+    const limit = r.status === 429 || r.status >= 500 || (r.status === 403 && /rateLimitExceeded|userRateLimitExceeded/.test(txt));
+    if(limit && a < 4){ await drWait(1000 * Math.pow(2, a) + Math.random() * 500); continue; }
+    const er = new Error('drive ' + r.status + ' ' + txt.slice(0, 200)); er.status = r.status; er.body = txt; throw er;
+  }
+}
+async function drJson(url, opt){ return (await drFetch(url, opt)).json(); }
+async function drMkdir(name, parent, kind){
+  const meta = {name, mimeType:DR_FOLDER, appProperties:{arhiva:kind}};
+  if(parent) meta.parents = [parent];
+  return (await drJson(DR_API + '?fields=id', {method:'POST', headers:DR_JSON, body:JSON.stringify(meta)})).id;
+}
+/* do 5 MB jednim pozivom (multipart), veće u dva (resumable) — zvanična uputstva Drive API v3 */
+async function drUpload(name, parent, blob, props){
+  const meta = {name, parents:[parent], appProperties:props}, mime = blob.type || 'application/octet-stream';
+  if(blob.size <= 5 * 1048576){
+    const b = 'arhiva' + Math.random().toString(36).slice(2);
+    const body = new Blob(['--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: ' + mime + '\r\n\r\n', blob, '\r\n--' + b + '--'], {type:'multipart/related; boundary=' + b});
+    return (await drJson(DR_UP + '?uploadType=multipart&fields=id,size', {method:'POST', headers:{'Content-Type':'multipart/related; boundary=' + b}, body})).id;
+  }
+  const s = await drFetch(DR_UP + '?uploadType=resumable&fields=id,size', {method:'POST', headers:Object.assign({'X-Upload-Content-Type':mime, 'X-Upload-Content-Length':String(blob.size)}, DR_JSON), body:JSON.stringify(meta)});
+  const loc = s.headers.get('Location');
+  if(!loc) throw new Error('drive: nema adrese za slanje');
+  return (await drJson(loc, {method:'PUT', headers:{'Content-Type':mime}, body:blob})).id;
+}
+async function drMove(f, name, par){
+  let u = DR_API + '/' + f.id + '?fields=id';
+  if(f.par && f.par !== par) u += '&addParents=' + par + '&removeParents=' + f.par;
+  await drFetch(u, {method:'PATCH', headers:DR_JSON, body:JSON.stringify({name})});
+}
+async function drTrash(id){
+  try{ await drFetch(DR_API + '/' + id + '?fields=id', {method:'PATCH', headers:DR_JSON, body:JSON.stringify({trashed:true})}); }
+  catch(e){ if(e.status !== 404) throw e; }
+}
+async function drList(q, fields){
+  const all = []; let pt = '';
+  do{
+    const r = await drJson(DR_API + '?q=' + encodeURIComponent(q) + '&spaces=drive&pageSize=1000&fields=' + encodeURIComponent('nextPageToken,files(' + fields + ')') + (pt ? '&pageToken=' + encodeURIComponent(pt) : ''));
+    (r.files || []).forEach(f=>all.push(f)); pt = r.nextPageToken || '';
+  }while(pt);
+  return all;
+}
+/* fascikla po putanji (npr. Dokumenti/Kuća/Struja) — pravi se ono što nedostaje */
+async function drDir(path){
+  if(!path) return _dr.root;
+  const k = path.toLowerCase();
+  if(_dr.dirs[k]) return _dr.dirs[k];
+  const i = path.lastIndexOf('/');
+  const parent = await drDir(i < 0 ? '' : path.slice(0, i));
+  const id = await drMkdir(path.slice(i + 1), parent, 'dir');
+  _dr.dirs[k] = id; drSave(); return id;
+}
+async function drRoot(){
+  if(_dr.root){
+    try{ const r = await drJson(DR_API + '/' + _dr.root + '?fields=id,trashed'); if(!r.trashed) return; }
+    catch(e){ if(e.status !== 404) throw e; }
+    _dr.files = {}; _dr.dirs = {}; _dr.json = null; _dr.jsonSig = null;   /* korisnik je obrisao fasciklu na Drive-u: sve ponovo */
+  }
+  _dr.root = await drMkdir('Arhiva', null, 'root'); _dr.check = false; drSave();
+}
+/* mapa iz onoga što je stvarno na Drive-u (posle 404 ili pri ponovnom povezivanju) */
+async function drRebuild(){
+  const all = await drList('trashed=false', 'id,name,parents,mimeType,size,appProperties');
+  const by = new Map(all.map(f=>[f.id, f]));
+  const pathOf = (id, d)=>{
+    if(id === _dr.root) return '';
+    const f = by.get(id); if(!f || d > 12 || !f.parents) return null;
+    const pp = pathOf(f.parents[0], d + 1); return pp == null ? null : (pp ? pp + '/' : '') + f.name;
+  };
+  const files = {}, dirs = {}; let json = null;
+  all.forEach(f=>{
+    const ap = f.appProperties || {}, par = f.parents && f.parents[0];
+    if(f.mimeType === DR_FOLDER){ if(f.id !== _dr.root){ const p = pathOf(f.id, 0); if(p) dirs[p.toLowerCase()] = f.id; } return; }
+    if(ap.arhiva === 'json' && par === _dr.root){ json = f.id; return; }
+    if(ap.arhiva === 'f' && ap.k){ const pp = pathOf(par, 0); if(pp != null) files[ap.k] = {id:f.id, p:(pp ? pp + '/' : '') + f.name, par, s:+f.size || 0}; }
+  });
+  _dr.files = files; _dr.dirs = dirs; _dr.json = json; _dr.jsonSig = null; _dr.check = false; drSave();
+}
+
+/* ---- slanje ---- */
+function drSoon(ms){
+  if(!drOn() || _dr.need) return;
+  clearTimeout(_drTimer); _drTimer = setTimeout(drSync, ms == null ? 4000 : ms);
+}
+async function drPlan(){
+  const b = await backupManifest(true);
+  const entries = b.fileEntries.map(fe=>({k:fe.file, path:fe.path, blob:()=>getFileBlob(fe.it, fe.i).catch(()=>null)}))
+    .concat(b.thumbEntries.map(te=>({k:'t:' + te.file, path:te.name, blob:()=>Skladiste.slicica(te.file).catch(()=>null)})));
+  return {manifest:b.manifest, entries};
+}
+async function drSync(){
+  if(!drOn() || _dr.need || !itemsReady) return;
+  if(_drBusy){ _drAgain = true; return; }
+  if(navigator.onLine === false){ _dr.err = 'net'; drSave(); drRefresh(); return; }
+  _drBusy = true; _drAgain = false; clearTimeout(_drRetry);
+  const first = !_dr.full;
+  try{
+    await drRoot();
+    if(_dr.check) await drRebuild();
+    const {manifest, entries} = await drPlan();
+    const want = new Set(entries.map(e=>e.k));
+    const todo = entries.filter(e=>!_dr.files[e.k] || _dr.files[e.k].p !== e.path);
+    _drProg = {n:0, total:todo.length}; drProgress();
+    let moved = false;
+    for(const e of todo){
+      if(!drOn()) return;
+      const i = e.path.lastIndexOf('/'), name = e.path.slice(i + 1);
+      const par = await drDir(i < 0 ? '' : e.path.slice(0, i));
+      const f = _dr.files[e.k];
+      if(f){
+        try{ await drMove(f, name, par); f.p = e.path; f.par = par; moved = true; }
+        catch(er){ if(er.status !== 404) throw er; delete _dr.files[e.k]; _dr.check = true; }   /* nestao na Drive-u: šalje se ponovo sledeći put */
+      }else{
+        const blob = await e.blob();
+        if(blob){ const id = await drUpload(name, par, blob, {arhiva:'f', k:e.k}); _dr.files[e.k] = {id, p:e.path, par, s:blob.size}; }
+      }
+      drSave(); _drProg.n++; drProgress();
+    }
+    const sig = drHash(JSON.stringify(Object.assign({}, manifest, {exportedAt:''})));
+    if(sig !== _dr.jsonSig || !_dr.json){
+      const jb = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+      let ok = false;
+      if(_dr.json){
+        try{ await drFetch(DR_UP + '/' + _dr.json + '?uploadType=media&fields=id', {method:'PATCH', headers:{'Content-Type':'application/json'}, body:jb}); ok = true; }
+        catch(er){ if(er.status !== 404) throw er; }
+      }
+      if(!ok) _dr.json = await drUpload('arhiva.json', _dr.root, jb, {arhiva:'json'});
+      _dr.jsonSig = sig; _dr.docs = manifest.docs.length; drSave();
+    }
+    const keep = drKeepSet();
+    for(const k of Object.keys(_dr.files)){
+      if(!drOn()) return;
+      if(want.has(k) || keep.has(k)) continue;
+      await drTrash(_dr.files[k].id); delete _dr.files[k]; drSave(); moved = true;
+    }
+    if(moved) await drCleanDirs();
+    _dr.last = Date.now(); _dr.err = null; _dr.full = true; drSave();
+    if(first && drOn()) toast(t('drDone'));
+    checkBackupReminder();
+  }catch(e){
+    console.error('drive', e);
+    if(e.drAuth === 'potrebna') _dr.need = true;
+    else if(e.drNet || navigator.onLine === false) _dr.err = 'net';
+    else if(e.status === 403 && /storageQuotaExceeded/.test(e.body || '')) _dr.err = 'full';
+    else{ _dr.err = 'other'; if(e.status === 404) _dr.check = true; try{ logError('Google Drive', String(e && e.message || e).slice(0, 300)); }catch(_){} }
+    drSave();
+    if(!_dr.need) _drRetry = setTimeout(()=>drSoon(0), 60000);
+  }finally{
+    _drBusy = false; _drProg = null;
+    if(_drNoteOn){ _drNoteOn = false; toastHide(); }
+    drRefresh();
+    if(_drAgain) drSoon();
+  }
+}
+/* prazne fascikle posle premeštanja (preimenovan album) idu u Drive korpu; Arhiva vidi samo svoje fajlove */
+async function drCleanDirs(){
+  const used = new Set();
+  Object.values(_dr.files).forEach(f=>{ let p = f.p, i; while((i = p.lastIndexOf('/')) > 0){ p = p.slice(0, i); used.add(p.toLowerCase()); } });
+  for(const k of Object.keys(_dr.dirs)){
+    if(used.has(k)) continue;
+    const id = _dr.dirs[k];
+    const r = await drJson(DR_API + '?q=' + encodeURIComponent("'" + id + "' in parents and trashed=false") + '&fields=files(id)&pageSize=1');
+    if(!(r.files || []).length) await drTrash(id);
+    delete _dr.dirs[k]; drSave();
+  }
+}
+
+/* ---- povezivanje i prekid ---- */
+async function drConnect(){
+  if(_drConnecting || !drNative()) return;
+  _drConnecting = true; drRefresh();
+  let msg = null;
+  try{
+    _drTok = null;
+    await drToken(true);
+    const ab = await drJson(DR_ABOUT + '?fields=' + encodeURIComponent('user(emailAddress)'));
+    const email = (ab.user && ab.user.emailAddress) || '';
+    const c = (_dr.email && _dr.email === email) ? _dr : {files:{}, dirs:{}};
+    c.email = email; c.need = false; c.err = null;
+    /* Arhiva koju je ova aplikacija već napravila na ovom nalogu (ponovno povezivanje, nova instalacija) */
+    const roots = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id');
+    if(roots.length){
+      const keep = drKeepSet();
+      _dr = Object.assign(c, {root:roots[0].id});
+      await drRebuild();
+      if(Object.keys(_dr.files).some(k=>!keep.has(k))){   /* dokumenti sa drugog uređaja: ne dira se (2. korak) */
+        _dr = drCfg(); _dr.on = false; drSave();
+        await infoBox(t('drOther'));
+        return;
+      }
+    }else _dr = c;
+    _dr.on = true; drSave();
+    drSoon(0);
+  }catch(e){
+    console.error('drive povezivanje', e);
+    _dr = drCfg();
+    if(e.drAuth !== 'otkazano'){ msg = t('drConnFail'); try{ logError('Google Drive', String(e && e.message || e).slice(0, 300)); }catch(_){} }
+  }finally{
+    _drConnecting = false; drRefresh();
+    if(msg) toast(msg);
+  }
+}
+async function drDisconnect(){
+  const email = _dr.email;
+  _dr.on = false; _dr.need = false; drSave();
+  clearTimeout(_drTimer); clearTimeout(_drRetry); _drTok = null;
+  drRefresh(); checkBackupReminder();
+  toast(t('drOffDone'));
+  try{ await drNative().prekini({nalog:email || ''}); }catch(e){}   /* Google zaboravi dozvolu: sledeće povezivanje opet nudi izbor naloga */
+}
+async function infoBox(text){ await lkChoice(t('drTile'), text, [['ok', t('lkOk')]], 'ok'); if(lkState === 'open') lkHide(); }   /* prozor sa jednim dugmetom (isti kao kod zaključavanja) */
+
+/* ---- Podešavanja → Google Drive ---- */
+function drTileSub(){
+  if(!_dr.on) return t('drSubOff');
+  if(_dr.need) return t('drSubNeed');
+  if(_drProg && _drProg.total) return t('drSubRun', {n:_drProg.n, total:_drProg.total});
+  if(_dr.err) return t('drSubErr');
+  return _dr.last ? t('drSubOn', {d:drAgo(_dr.last)}) : t('drSubOnNew');
+}
+function drSettingsHtml(){
+  const btn = (id, txt, two, dis)=>'<button type="button" class="dr-btn' + (two ? ' dr-btn2' : '') + '" id="' + id + '"' + (dis ? ' disabled' : '') + '>' + escapeHtml(txt) + '</button>';
+  const hint = (k, v)=>'<div class="settings-hint">' + escapeHtml(t(k, v)) + '</div>';
+  if(!_dr.on){
+    const step = (ic, k)=>'<div class="dr-step"><span class="ic">' + ic + '</span><span>' + escapeHtml(t(k)) + '</span></div>';
+    return '<div class="dr-card">' + step('📱', 'drStep1') + step('☁️', 'drStep2') + step('🔄', 'drStep3') + step('💻', 'drStep4') + '</div>' +
+      btn('drConnBtn', _drConnecting ? t('drWaiting') : '☁️ ' + t('drConnect'), false, _drConnecting) +
+      hint('drHintAsk', {mb:drMb(drLocalBytes())}) + hint('drHintSafe');
+  }
+  if(_dr.need){
+    return '<div class="dr-card"><div class="dr-ok warn">' + escapeHtml(t('drNeedTxt')) + '</div></div>' +
+      btn('drConnBtn', _drConnecting ? t('drWaiting') : t('drAgain'), false, _drConnecting) + btn('drOffBtn', t('drOff'), true) + hint('drOffHint');
+  }
+  if(_drProg && _drProg.total > 3){
+    const pc = Math.round(_drProg.n / _drProg.total * 100);
+    return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drRun', {n:_drProg.n, total:_drProg.total})) + '</div>' +
+      '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drRunHint')) + '</div></div>' + hint('drHintSafe');
+  }
+  const row = (k, v)=>'<div class="dr-row"><span>' + escapeHtml(t(k)) + '</span><b>' + escapeHtml(v) + '</b></div>';
+  const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErr' : null;
+  return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drOk')) + '</div>' +
+    row('drAcc', _dr.email || '—') + row('drLast', _dr.last ? drAgo(_dr.last) : t('drNever')) +
+    row('drOnDrive', (_dr.docs || 0) + ' · ' + drMb(drDriveBytes())) + '</div>' +
+    (err ? '<div class="dr-card"><div class="dr-ok warn">' + escapeHtml(t(err)) + '</div></div>' : '') +
+    btn('drOffBtn', t('drOff'), true) + hint('drOffHint') + hint('drHintSafe');
+}
+function drWire(){
+  const a = document.getElementById('drConnBtn'); if(a) a.onclick = drConnect;
+  const b = document.getElementById('drOffBtn'); if(b) b.onclick = drDisconnect;
+}
+function drRefresh(){ const b = document.getElementById('drSet'); if(b){ b.innerHTML = drSettingsHtml(); drWire(); } }
+/* tok prvog prenosa: kartica, a dok je ekran Drive-a otvoren i obaveštenje gore */
+function drProgress(){
+  drRefresh();
+  const show = !!(document.getElementById('drSet') && _drProg && _drProg.total > 3);
+  if(show){ _drNoteOn = true; toastPersist(t('drRun', {n:_drProg.n, total:_drProg.total})); }
+  else if(_drNoteOn){ _drNoteOn = false; toastHide(); }
+}
+function drBoot(){
+  if(!drNative()) return;
+  _dr = drCfg();
+  Skladiste.kadIzmena = ()=>drSoon();
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') drSoon(1500); });
+  window.addEventListener('online', ()=>drSoon(1000));
+  if(_dr.on) drSoon(3000);
+}
+/* ================= kraj GOOGLE DRIVE ================= */
 
 function checkDeepLink(){
   const hashMatch = location.hash.match(/^#p=(.+)$/);

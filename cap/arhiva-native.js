@@ -9,7 +9,8 @@
    6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE)
    v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim)
    7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA)
-   8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA) */
+   8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA)
+   9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -65,6 +66,15 @@
       zakazi: function(list){ return LN.schedule({ notifications: list }); },
       otkazi: function(ids){ return ids && ids.length ? LN.cancel({ notifications: ids.map(function(i){ return { id: i }; }) }) : Promise.resolve(); },
       naDodir: function(fn){ try{ LN.addListener('localNotificationActionPerformed', function(e){ fn((e && e.notification && e.notification.extra) || {}); }); }catch(e){ console.error('arhiva-native obav', e); } }
+    };
+  }
+
+  /* 9) v203 Google Drive: dozvola({interaktivno}) → {ok, token} | {ok:false, razlog:'potrebna'|'otkazano'|'greska'}; prekini({nalog}) */
+  if(C.isPluginAvailable && C.isPluginAvailable('GoogleDrive')){
+    var GD = reg('GoogleDrive');
+    window.ARHIVA_DRIVE = {
+      dozvola: function(o){ return GD.dozvola(o || {}); },
+      prekini: function(o){ return GD.prekini(o || {}); }
     };
   }
 
