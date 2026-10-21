@@ -4673,7 +4673,6 @@ Object.assign(I18N.sr, {
   mvAlbTitle: 'Premesti „{name}“ u album', cpNone: 'Bez slike', cpEmpty: 'U albumu još nema slika za naslovnu.',
   trMoved1: 'Premešteno u korpu.', trMovedN: 'U korpu premešteno: {n}.', addToAlb: 'Dodaj u album', newAlbRow: '+ Novi album...', rmFromAlb: 'Uklonjeno iz albuma.',
   shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.', savedPhonePart: 'Sačuvano na telefon: {a} od {b}.', savedPhoneNone: 'Nije sačuvano.', saveFailed: 'Čuvanje nije uspelo:',
-  addTimed: 'Dodato: {n} · prenos {a} s · upis {b} s',
   albDup: 'Album s tim imenom već postoji.', subExists: 'Podalbum "{name}" već postoji.', albExists: 'Album "{name}" već postoji.', albMade: 'Album "{name}" napravljen.',
   procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.'
 });
@@ -4693,7 +4692,6 @@ Object.assign(I18N.en, {
   mvAlbTitle: 'Move “{name}” to album', cpNone: 'No image', cpEmpty: 'There are no images in this album for a cover yet.',
   trMoved1: 'Moved to trash.', trMovedN: 'Moved to trash: {n}.', addToAlb: 'Add to album', newAlbRow: '+ New album...', rmFromAlb: 'Removed from album.',
   shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.', savedPhonePart: 'Saved to phone: {a} of {b}.', savedPhoneNone: 'Not saved.', saveFailed: 'Saving failed:',
-  addTimed: 'Added: {n} · transfer {a} s · saving {b} s',
   albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
   procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.'
 });
@@ -6616,7 +6614,7 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
     if(tile.classList.contains('move-target')) return;
     pressTimer = setTimeout(()=>{
       menuArmed = true;
-      if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+      if(navigator.vibrate){ try{ navigator.vibrate(40); }catch(err){} }
       openAlbumContext(cat.id);
     }, 480);
   });
@@ -6655,7 +6653,7 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
     placeholder.style.width = startRect.width + 'px';
     placeholder.style.height = startRect.height + 'px';
     tile.parentNode.insertBefore(placeholder, tile.nextSibling);
-    if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+    if(navigator.vibrate){ try{ navigator.vibrate(40); }catch(err){} }
   };
 
   handle.addEventListener('pointerdown', (e)=>{
@@ -8639,21 +8637,10 @@ async function addFilesWithProgress(files, category){
   console.log('Arhiva: obrada '+total+' fajlova za '+secs+'s (brzo:'+_diag.worker+' sporo:'+_diag.fallback+')', _diag.errors);
 }
 
-/* v194 PRIVREMENO (merenje Chrome / aplikacija; ukloniti posle merenja): prenos = od povratka iz birača do fajlova u Arhivi,
-   upis = od fajlova do kraja dodavanja */
-let _galBack = 0;
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') _galBack = performance.now(); });
-window.addEventListener('focus', ()=>{ _galBack = performance.now(); });
 fileInput.addEventListener('change', async (e)=>{
-  const tCh = performance.now();
   const files = Array.from(e.target.files || []);
   fileInput.value = '';
   await addFilesWithProgress(files, realAlbum(currentFolder));
-  if(files.length){
-    const sec = ms=>(ms / 1000).toFixed(1).replace('.', appLang() === 'en' ? '.' : ',');
-    const pren = _galBack && tCh >= _galBack && tCh - _galBack < 300000 ? sec(tCh - _galBack) : '?';
-    showNote(t('addTimed', {n:files.length, a:pren, b:sec(performance.now() - tCh)}), 8000);
-  }
 });
 const cameraInput = document.getElementById('cameraInput');
 cameraInput.addEventListener('change', async (e)=>{
@@ -9488,7 +9475,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 194;
+const APP_VERSION = 195;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10900,7 +10887,7 @@ function attachPageDrag(tile, pg){
     tile.parentNode.insertBefore(ph, tile.nextSibling);
     tile.classList.add('tile-dragging');
     Object.assign(tile.style, {position:'fixed', left:rect.left+'px', top:rect.top+'px', width:rect.width+'px', height:rect.height+'px', zIndex:'200', pointerEvents:'none'});
-    if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+    if(navigator.vibrate){ try{ navigator.vibrate(40); }catch(err){} }
   });
   handle.addEventListener('pointermove', (e)=>{
     if(!dragging) return;
@@ -17935,7 +17922,7 @@ function lkPrompt(o){
     const fail = (msg, after)=>{
       errEl.textContent = msg || '';
       inner.classList.remove('lk-shake'); void inner.offsetWidth; inner.classList.add('lk-shake');
-      if(navigator.vibrate) try{ navigator.vibrate(60); }catch(e){}
+      if(navigator.vibrate) try{ navigator.vibrate([60, 80, 60]); }catch(e){}
       after();
     };
     const submit = async (v)=>{
@@ -17983,7 +17970,7 @@ function lkPrompt(o){
         if((ra+ri) % 2 === 0 && (ca+ci) % 2 === 0){ const m = ((ra+ri)/2)*3 + (ca+ci)/2; if(m !== a && m !== i && !path.includes(m)) path.push(m); }
       }
       path.push(i);
-      if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){}
+      if(navigator.vibrate) try{ navigator.vibrate(20); }catch(e){}
     };
     box.addEventListener('pointerdown', (e)=>{
       if(busy || done) return;
