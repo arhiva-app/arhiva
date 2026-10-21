@@ -6,7 +6,8 @@
    3) service worker se ne registruje (aplikacija je već na telefonu)
    4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju
    5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene)
-   6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE) */
+   6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE)
+   v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -68,7 +69,14 @@
   /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.
      Vraća {ime} ili {otkazano:true}. Arhiva ga zove za rezervnu kopiju (window.ARHIVA_SACUVAJ_KAO). */
   var DEO = 3 * 1024 * 1024;   /* deljivo sa 3: svaki deo je ceo base64 */
-  async function sacuvajKao(blob, name, mime){
+  /* v194: Android otvara samo jedan „Sačuvaj kao“ odjednom — zahtevi idu u red, sledeći kad se prethodni završi */
+  var red = Promise.resolve();
+  function sacuvajKao(blob, name, mime){
+    var p = red.then(function(){ return sacuvajKaoJedan(blob, name, mime); });
+    red = p.catch(function(){});
+    return p;
+  }
+  async function sacuvajKaoJedan(blob, name, mime){
     var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
     for(var off = 0; off === 0 || off < blob.size; off += DEO){
       var data = await b64(blob.slice(off, off + DEO));

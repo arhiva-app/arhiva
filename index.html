@@ -3744,6 +3744,7 @@ const I18N = {
     saveErr: 'Greška pri čuvanju.',
     persistOn: 'zaštita od automatskog brisanja: uključena',
     persistOff: 'zaštita od automatskog brisanja: Chrome je nije odobrio (rezervna kopija je zato još važnija)',
+    persistApp: 'podaci su u aplikaciji na ovom telefonu; brišu se ako obrišeš podatke aplikacije ili je deinstaliraš (zato rezervna kopija)',
     oldTile: 'stari podaci (pre prelaska)',
     oldTileSub: 'obriši kad sve proveriš',
     oldTitle: 'stari podaci',
@@ -4479,6 +4480,7 @@ const I18N = {
     saveErr: 'Error while saving.',
     persistOn: 'protection from automatic deletion: on',
     persistOff: 'protection from automatic deletion: not granted by Chrome (backups matter even more)',
+    persistApp: 'data is kept in the app on this phone; it is deleted if you clear the app’s data or uninstall it (hence backups)',
     oldTile: 'old data (before the move)',
     oldTileSub: 'delete once you have checked',
     oldTitle: 'old data',
@@ -4670,7 +4672,8 @@ Object.assign(I18N.sr, {
   mvDupTop: 'Na početnom ekranu već postoji album s tim imenom. Prvo promeni ime.', mvDone: 'Premešteno u "{name}".', mvHome: 'Vraćeno na početni ekran.',
   mvAlbTitle: 'Premesti „{name}“ u album', cpNone: 'Bez slike', cpEmpty: 'U albumu još nema slika za naslovnu.',
   trMoved1: 'Premešteno u korpu.', trMovedN: 'U korpu premešteno: {n}.', addToAlb: 'Dodaj u album', newAlbRow: '+ Novi album...', rmFromAlb: 'Uklonjeno iz albuma.',
-  shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.',
+  shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.', savedPhonePart: 'Sačuvano na telefon: {a} od {b}.', savedPhoneNone: 'Nije sačuvano.', saveFailed: 'Čuvanje nije uspelo:',
+  addTimed: 'Dodato: {n} · prenos {a} s · upis {b} s',
   albDup: 'Album s tim imenom već postoji.', subExists: 'Podalbum "{name}" već postoji.', albExists: 'Album "{name}" već postoji.', albMade: 'Album "{name}" napravljen.',
   procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.'
 });
@@ -4689,7 +4692,8 @@ Object.assign(I18N.en, {
   mvDupTop: 'There is already an album with this name on the home screen. Rename it first.', mvDone: 'Moved to “{name}”.', mvHome: 'Moved back to the home screen.',
   mvAlbTitle: 'Move “{name}” to album', cpNone: 'No image', cpEmpty: 'There are no images in this album for a cover yet.',
   trMoved1: 'Moved to trash.', trMovedN: 'Moved to trash: {n}.', addToAlb: 'Add to album', newAlbRow: '+ New album...', rmFromAlb: 'Removed from album.',
-  shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.',
+  shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.', savedPhonePart: 'Saved to phone: {a} of {b}.', savedPhoneNone: 'Not saved.', saveFailed: 'Saving failed:',
+  addTimed: 'Added: {n} · transfer {a} s · saving {b} s',
   albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
   procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.'
 });
@@ -7451,7 +7455,7 @@ let fsBusy = false;
 function fsWant(){
   // instalirana aplikacija nikad ne ukljucuje ceo ekran preko browsera:
   // vec je bez Chrome trake, a tako nema ni Chrome poruke (ni u albumu ni na slici)
-  if(RUNS_INSTALLED) return null;
+  if(RUNS_INSTALLED || window.ARHIVA_NATIVE) return null;   /* v194: ni u Android aplikaciji */
   if(modalBg.classList.contains('open') || currentFolder) return 'hide';
   return null;
 }
@@ -8436,6 +8440,22 @@ async function saveSelectedToDevice(list){
   if(chosen.length === 0) return;
   const jobs = [];
   chosen.forEach(it=>{ const n = Math.max(1, pageCount(it)); for(let i=0;i<n;i++) jobs.push([it, i, n]); });
+  const fname = (it, pi, n)=>(it.name || (it.type==='image' ? 'slika' : 'fajl')) + (n > 1 ? ' - ' + (pi+1) : '') + '.' + pageExt(it, it.pages[pi]);
+  /* v194: Android aplikacija — „Sačuvaj kao“ za jedan po jedan fajl; sledeći tek kad je prethodni sačuvan; „Otkaži“ prekida ostale */
+  if(window.ARHIVA_SACUVAJ_KAO){
+    let ok = 0;
+    for(const [it, pi, n] of jobs){
+      let blob;
+      try{ blob = await getFileBlob(it, pi); }catch(e){ console.error(e); toast(t('fileMissing')); continue; }
+      let r;
+      try{ r = await window.ARHIVA_SACUVAJ_KAO(blob, fname(it, pi, n)); }
+      catch(e){ console.error('sacuvaj', e); toast(t('saveFailed') + ' ' + (e && e.message || e)); return; }
+      if(r && r.otkazano) break;
+      ok++;
+    }
+    toast(ok === 0 ? t('savedPhoneNone') : ok === jobs.length ? (ok === 1 ? t('savedPhone1') : t('savedPhoneN', {n:ok})) : t('savedPhonePart', {a:ok, b:jobs.length}));
+    return;
+  }
   for(let idx=0; idx<jobs.length; idx++){
     const [it, pi, n] = jobs[idx];
     const ext = pageExt(it, it.pages[pi]);
@@ -8619,10 +8639,21 @@ async function addFilesWithProgress(files, category){
   console.log('Arhiva: obrada '+total+' fajlova za '+secs+'s (brzo:'+_diag.worker+' sporo:'+_diag.fallback+')', _diag.errors);
 }
 
+/* v194 PRIVREMENO (merenje Chrome / aplikacija; ukloniti posle merenja): prenos = od povratka iz birača do fajlova u Arhivi,
+   upis = od fajlova do kraja dodavanja */
+let _galBack = 0;
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') _galBack = performance.now(); });
+window.addEventListener('focus', ()=>{ _galBack = performance.now(); });
 fileInput.addEventListener('change', async (e)=>{
+  const tCh = performance.now();
   const files = Array.from(e.target.files || []);
   fileInput.value = '';
   await addFilesWithProgress(files, realAlbum(currentFolder));
+  if(files.length){
+    const sec = ms=>(ms / 1000).toFixed(1).replace('.', appLang() === 'en' ? '.' : ',');
+    const pren = _galBack && tCh >= _galBack && tCh - _galBack < 300000 ? sec(tCh - _galBack) : '?';
+    showNote(t('addTimed', {n:files.length, a:pren, b:sec(performance.now() - tCh)}), 8000);
+  }
 });
 const cameraInput = document.getElementById('cameraInput');
 cameraInput.addEventListener('change', async (e)=>{
@@ -9457,7 +9488,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 193;
+const APP_VERSION = 194;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9667,7 +9698,8 @@ function updateStorageInfo(){
   const infoEl = document.getElementById('storageInfo');
   if(!infoEl) return;
   const pEl = document.getElementById('persistInfo');
-  if(pEl) Skladiste.jeTrajno().then(p=>{ if(p !== null) pEl.textContent = p ? t('persistOn') : t('persistOff'); });
+  if(pEl && window.ARHIVA_NATIVE) pEl.textContent = t('persistApp');   /* v194: u aplikaciji Chrome ne odlučuje */
+  else if(pEl) Skladiste.jeTrajno().then(p=>{ if(p !== null) pEl.textContent = p ? t('persistOn') : t('persistOff'); });
   const trashPart = trash.length ? t('storTrash', {n:trash.length}) : '';
   infoEl.textContent = t('storUsed', {mb:mb.toFixed(1)}) + ' \u00B7 ' + stavkeTxt(items.length) + trashPart;
   {
