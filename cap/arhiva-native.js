@@ -8,7 +8,8 @@
    5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene)
    6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE)
    v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim)
-   7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA) */
+   7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA)
+   8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -50,6 +51,20 @@
       poslednji: function(lista){ try{ return Pr.poslednji({ lista: lista }).catch(function(e){ console.error('arhiva-native poslednji', e); }); }catch(e){ return Promise.resolve(); } },
       cekaj: function(){ return Pr.cekaj(); },
       naStavku: function(fn){ try{ Pr.addListener('stavka', fn); }catch(e){ console.error('arhiva-native stavka', e); } }
+    };
+  }
+
+  /* 8) v199 obaveštenja za rokove (dodatak LocalNotifications u novom APK-u; logika je u Arhivi, blok OBAVEŠTENJA) */
+  if(C.isPluginAvailable && C.isPluginAvailable('LocalNotifications')){
+    var LN = reg('LocalNotifications');
+    var disp = function(r){ return (r && r.display) || 'denied'; };
+    window.ARHIVA_OBAV = {
+      dozvola: function(){ return LN.checkPermissions().then(disp); },
+      trazi: function(){ return LN.requestPermissions().then(disp); },
+      kanal: function(o){ return LN.createChannel(o); },
+      zakazi: function(list){ return LN.schedule({ notifications: list }); },
+      otkazi: function(ids){ return ids && ids.length ? LN.cancel({ notifications: ids.map(function(i){ return { id: i }; }) }) : Promise.resolve(); },
+      naDodir: function(fn){ try{ LN.addListener('localNotificationActionPerformed', function(e){ fn((e && e.notification && e.notification.extra) || {}); }); }catch(e){ console.error('arhiva-native obav', e); } }
     };
   }
 

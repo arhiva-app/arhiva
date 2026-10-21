@@ -2850,7 +2850,7 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
     <h2 id="cfTitle"></h2>
     <div class="sub" id="cfSub"></div>
     <div class="exit-actions">
-      <button type="button" class="exit-btn stay" id="cfCancel"><span class="ic">↩️</span>Otkaži</button>
+      <button type="button" class="exit-btn stay" id="cfCancel"><span class="ic">↩️</span><span id="cfCancelLbl">Otkaži</span></button>
       <button type="button" class="exit-btn go" id="cfAlt" style="display:none"><span class="ic" id="cfAltIc"></span><span id="cfAltLabel"></span></button>
       <button type="button" class="exit-btn leave" id="cfOk"><span class="ic" id="cfOkIc"></span><span id="cfOkLabel"></span></button>
     </div>
@@ -2951,6 +2951,7 @@ function askConfirm(o){
     document.getElementById('cfOkIc').textContent = o.okIcon || '';
     document.getElementById('cfOkIc').style.display = o.okIcon ? '' : 'none';
     document.getElementById('cfOkLabel').textContent = o.okLabel || t('cfOkDef');
+    document.getElementById('cfCancelLbl').textContent = o.cancelLabel || t('cfCancel');   /* v199: drugi natpis (npr. „Ne sada“) */
     const okBtn = document.getElementById('cfOk');
     /* v157: treće dugme (izbor između dve radnje) — rezultat 'alt' */
     const altBtn = document.getElementById('cfAlt');
@@ -3816,6 +3817,13 @@ const I18N = {
     expSetField: 'podseti me (dana ranije)',
     expSetHint1: 'kad do datuma ostane ovoliko dana ili manje, Arhiva te jednom obavesti, a na zvoncetu na početnom ekranu pojavi se broj. još po jednom te obavesti 7 dana pre i kad datum prođe.',
     expSetHint2: 'obaveštenje vidiš kad otvoriš Arhivu. obaveštenja dok je aplikacija zatvorena za sada ne postoje.',
+    obRow: 'obaveštenja na telefonu', obOnAt: 'uključena · u {h}', obOff: 'isključena', obDenied: 'telefon ih nije dozvolio',
+    obHourLbl: 'obaveštenje stiže u', obPerm: 'Otvori dozvole',
+    obHint: 'obaveštenje stiže i kad je Arhiva zatvorena, i na zaključanom ekranu: {n} {d} pre roka, 7 dana pre i na sam dan isteka. dodir na obaveštenje otvara dokument (kad je Arhiva zaključana, posle otključavanja).',
+    obAskTitle: 'Obaveštenja za rokove', obAskText: 'Arhiva može da te obavesti na telefonu kad nekom dokumentu ističe rok, i kad je zatvorena: {n} {d} pre roka, 7 dana pre i na sam dan, u {h}. Vreme menjaš u Podešavanja → podsetnik.',
+    obAskOk: 'Uključi', obAskNo: 'Ne sada', obOnToast: 'Obaveštenja za rokove su uključena.', obDeniedToast: 'Telefon nije dozvolio obaveštenja: Podešavanja → podsetnik → Otvori dozvole.',
+    obTitle: 'Rok dokumenta', obBodyIn: '{name}: ističe za {n} {d} ({date})', obBodyToday: '{name}: rok ističe danas ({date})',
+    obChan: 'Rokovi dokumenata', obChanDesc: 'Podsetnici kad dokumentu ističe rok', obGone: 'Dokument iz obaveštenja više nije u Arhivi.',
     bkHintZip: 'rezervna kopija je jedan ZIP fajl: u njemu su tvoji dokumenti kao obične slike i PDF-ovi, složeni po albumima, pa se mogu otvoriti i bez Arhive. uvoz prima i stare .json kopije. pri vraćanju biraš: dodaj postojećim (bez duplikata) ili zameni sve. oštećen fajl se ne uvozi.',
     askEmpty: 'upiši pitanje u polje, pa dodirni „Pitaj“.',
     askNoDocs: 'ovde nema dokumenata sa tekstom koji AI može da pretraži.',
@@ -4558,6 +4566,13 @@ const I18N = {
     expSetField: 'remind me (days earlier)',
     expSetHint1: 'when this many days or fewer are left until the date, Arhiva notifies you once and a number appears on the bell on the home screen. You are notified once more 7 days before and when the date has passed.',
     expSetHint2: 'you see the notification when you open Arhiva. Notifications while the app is closed are not available yet.',
+    obRow: 'phone notifications', obOnAt: 'on · at {h}', obOff: 'off', obDenied: 'not allowed by the phone',
+    obHourLbl: 'notification arrives at', obPerm: 'Open permissions',
+    obHint: 'the notification arrives even when Arhiva is closed, also on the lock screen: {n} {d} before the date, 7 days before and on the day itself. Tapping it opens the document (when Arhiva is locked, after unlocking).',
+    obAskTitle: 'Deadline notifications', obAskText: 'Arhiva can notify you on the phone when a document’s date is coming up, even when it is closed: {n} {d} before, 7 days before and on the day itself, at {h}. Change the time in Settings → reminder.',
+    obAskOk: 'Turn on', obAskNo: 'Not now', obOnToast: 'Deadline notifications are on.', obDeniedToast: 'The phone did not allow notifications: Settings → reminder → Open permissions.',
+    obTitle: 'Document date', obBodyIn: '{name}: expires in {n} {d} ({date})', obBodyToday: '{name}: expires today ({date})',
+    obChan: 'Document deadlines', obChanDesc: 'Reminders when a document’s date is coming up', obGone: 'The document from the notification is no longer in Arhiva.',
     bkHintZip: 'the backup is one ZIP file: your documents are inside as ordinary images and PDFs, sorted by album, so they open even without Arhiva. import also accepts old .json backups. when restoring choose: add to existing (no duplicates) or replace all. a damaged file is not imported.',
     /* v190 zaključavanje */
     lkTile: 'app lock',
@@ -4761,6 +4776,7 @@ function saveExpiryDays(v){
   if(!(n > 0 && n <= 3650)) return;
   try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(n)); }catch(e){}
   render();
+  obSyncSoon();   /* v199: obaveštenja na telefonu prate broj dana */
 }
 function isYmd(s){ return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
 function ymdParts(s){ return s.split('-').map(Number); }
@@ -4995,6 +5011,7 @@ async function saveExpNotified(){
 }
 /* korisnik je sam upisao rok: za trenutni nivo nema obaveštenja (već zna) */
 async function markExpSeen(item){
+  obSyncSoon(); obAskSoon();   /* v199 */
   await loadExpNotified();
   if(isYmd(item.validUntil)) _expNotified[item.id] = {vu:item.validUntil, lvl:expRank(expDaysLeft(item.validUntil))};
   else delete _expNotified[item.id];
@@ -9129,7 +9146,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
+loadAll().then(()=>{ itemsReady = true; scBoot(); obBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -9499,7 +9516,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 198;
+const APP_VERSION = 199;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -9667,7 +9684,7 @@ function openSettingsSub(which){
       '<div class="settings-field"><label for="expiryDaysInput">'+escapeHtml(t('expSetField'))+'</label><input type="number" inputmode="numeric" min="1" max="3650" id="expiryDaysInput" value="'+getExpiryDays()+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>'+
       setSaveBtnHtml()+'</div>'+
       '<div class="settings-hint">'+escapeHtml(t('expSetHint1'))+'</div>'+
-      '<div class="settings-hint">'+escapeHtml(t('expSetHint2'))+'</div>';
+      (obNative() ? '<div id="obSet">'+obSettingsHtml()+'</div>' : '<div class="settings-hint">'+escapeHtml(t('expSetHint2'))+'</div>');
   }else if(which === 'ai'){
     title = t('aiTile');
     body = aiSettingsHtml();
@@ -9686,7 +9703,7 @@ function openSettingsSub(which){
     (which === 'trash' ? '<div class="trash-bar" id="trashBar"><button type="button" class="trash-btn tr-info-ok" id="trashRestoreBtn" onclick="trashRestoreSelected()"></button><button type="button" class="trash-btn danger" id="trashPurgeBtn" onclick="trashPurgeSelected()"></button></div>' : '');
   if(which === 'trash') renderTrashList();
   if(which === 'backup'){ refreshBackupDirRow(); setSaveWire(document.getElementById('backupIntervalInput'), 1, 3650, saveBackupInterval); }
-  if(which === 'expiry') setSaveWire(document.getElementById('expiryDaysInput'), 1, 3650, saveExpiryDays);
+  if(which === 'expiry'){ setSaveWire(document.getElementById('expiryDaysInput'), 1, 3650, saveExpiryDays); obWireSettings(); }
   if(which === 'ai') aiWireSettings();
   if(which === 'lock') lkOpenSettings();
   if(which === 'old') oldDataCount().then(n=>{ const el = document.getElementById('oldCountHint'); if(el) el.textContent = t('oldCount', {n}); });
@@ -18400,6 +18417,125 @@ function scBoot(){
   scRecentPush();
   /* odlazak iz Arhive (npr. na početni ekran): spisak na ikonici usklađen (brisanja, zaključavanje) */
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') scRecentPush(); });
+}
+
+/* =====================================================================
+   OBAVEŠTENJA (v199) — samo u Android aplikaciji sa dodatkom LocalNotifications (cap/arhiva-native.js → window.ARHIVA_OBAV).
+   Za svaki dokument sa rokom: obaveštenje N dana pre (Podešavanja → podsetnik), 7 dana pre i na dan isteka, u izabrano vreme
+   (Zoran: podesivo, podrazumevano 7:00). Raspored se pravi ponovo pri pokretanju, promeni roka/podešavanja i odlasku iz Arhive.
+   Neprecizni alarmi (isExactNotification:false — bez posebne dozvole „Alarmi“; može kasniti par minuta).
+   Dodir → dokument u albumu, posle otključavanja ako je Arhiva zaključana. Pristanak: jednom, kad postoji bar jedan rok.
+   ===================================================================== */
+const OB_KEY = 'galerija:obav', OB_IDS = 'galerija:obavIds', OB_HOURS = [5, 6, 7, 8, 9, 10, 12, 18];
+function obNative(){ return window.ARHIVA_OBAV || null; }
+function obCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(OB_KEY) || 'null'); }catch(e){} c = (c && typeof c === 'object') ? c : {}; if(!(c.h >= 0 && c.h <= 23)) c.h = 7; return c; }
+function obSave(c){ try{ localStorage.setItem(OB_KEY, JSON.stringify(c)); }catch(e){} }
+function obHourTxt(h){ return h + ':00'; }
+let obPerm = null;   /* 'granted' | 'denied' | 'prompt' … (poslednja provera) */
+async function obCheckPerm(){ try{ obPerm = await obNative().dozvola(); }catch(e){ obPerm = 'denied'; } return obPerm; }
+/* stabilan broj obaveštenja (dodatak traži ceo broj) */
+function obNum(s){ let h = 0; for(let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h & 0x3fffffff) + 1; }
+function obPlan(){
+  const c = obCfg(), N = getExpiryDays(), now = Date.now(), out = [];
+  const offs = [...new Set([N, EXP_SOON, 0])].filter(x=>x >= 0);
+  items.forEach(it=>{
+    if(!isYmd(it.validUntil)) return;
+    const [y, m, d] = ymdParts(it.validUntil);
+    offs.forEach(off=>{
+      const at = new Date(y, m-1, d - off, c.h, 0, 0, 0);
+      if(at.getTime() <= now + 60000) return;
+      const name = it.name || t('scNoName'), date = fmtExpDate(it.validUntil, true);
+      out.push({id:obNum(it.id + '|' + it.validUntil + '|' + off), title:t('obTitle'),
+        body: off === 0 ? t('obBodyToday', {name, date}) : t('obBodyIn', {name, n:off, d:dayWord(off), date}),
+        schedule:{at:at.toISOString(), allowWhileIdle:true}, isExactNotification:false, channelId:'rokovi', extra:{id:it.id}});
+    });
+  });
+  out.sort((a,b)=>a.schedule.at < b.schedule.at ? -1 : 1);
+  return out.slice(0, 60);   /* Android ograničava broj alarma po aplikaciji; sledeći se zakažu pri narednom otvaranju */
+}
+let _obChan = false, _obLast = null, _obBusy = false, _obAgain = false, _obTimer = 0;
+function obSyncSoon(){ clearTimeout(_obTimer); _obTimer = setTimeout(obSync, 800); }
+async function obSync(){
+  const n = obNative();
+  if(!n || !itemsReady) return;
+  if(_obBusy){ _obAgain = true; return; }
+  _obBusy = true;
+  try{
+    const c = obCfg();
+    const on = c.on === true && (await obCheckPerm()) === 'granted';
+    const plan = on ? obPlan() : [];
+    const key = JSON.stringify(plan.map(x=>[x.id, x.schedule.at, x.body]));
+    if(key === _obLast) return;
+    let old = []; try{ old = JSON.parse(localStorage.getItem(OB_IDS) || '[]'); }catch(e){}
+    if(old.length) await n.otkazi(old);
+    if(plan.length){
+      if(!_obChan){ try{ await n.kanal({id:'rokovi', name:t('obChan'), description:t('obChanDesc'), importance:4, visibility:1, vibration:true}); }catch(e){} _obChan = true; }
+      await n.zakazi(plan);
+    }
+    try{ localStorage.setItem(OB_IDS, JSON.stringify(plan.map(x=>x.id))); }catch(e){}
+    _obLast = key;
+  }catch(e){ console.error('obavestenja', e); }
+  finally{ _obBusy = false; if(_obAgain){ _obAgain = false; obSync(); } }
+}
+/* pristanak: jednom, kad postoji rok, na otključanoj Arhivi */
+let _obAsking = false;
+function obAskSoon(){ setTimeout(obAsk, 1200); }
+async function obAsk(){
+  const n = obNative();
+  if(!n || _obAsking || !itemsReady || lkState !== 'open' || scPeekOn) return;
+  const c = obCfg();
+  if(c.on !== undefined || !items.some(i=>isYmd(i.validUntil))) return;
+  _obAsking = true;
+  try{
+    const N = getExpiryDays();
+    const yes = await askConfirm({icon:'🔔', title:t('obAskTitle'), text:t('obAskText', {n:N, d:dayWord(N), h:obHourTxt(c.h)}), okIcon:'🔔', okLabel:t('obAskOk'), cancelLabel:t('obAskNo'), danger:false});
+    await obTurn(yes);
+  }finally{ _obAsking = false; }
+}
+async function obTurn(on){
+  const n = obNative(), c = obCfg();
+  c.on = !!on; obSave(c);
+  if(on){
+    let p = await obCheckPerm();
+    if(p !== 'granted'){ try{ p = obPerm = await n.trazi(); }catch(e){ p = obPerm = 'denied'; } }
+    toast(p === 'granted' ? t('obOnToast') : t('obDeniedToast'));
+  }
+  _obLast = null; await obSync(); obRefreshSettings();
+}
+/* Podešavanja → podsetnik */
+function obSettingsHtml(){
+  const c = obCfg(), on = c.on === true, denied = on && obPerm && obPerm !== 'granted';
+  const sub = !on ? t('obOff') : denied ? t('obDenied') : t('obOnAt', {h:obHourTxt(c.h)});
+  const N = getExpiryDays();
+  return '<div class="settings-card" style="margin-top:14px"><button type="button" class="settings-row" id="obRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'"><span class="row-icon">📲</span><span class="row-label">'+escapeHtml(t('obRow'))+'<span class="lk-row-sub">'+escapeHtml(sub)+'</span></span><span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button>'+
+    (denied ? '<button type="button" class="settings-row" id="obPermRow"><span class="row-icon">⚙️</span><span class="row-label">'+escapeHtml(t('obPerm'))+'</span><span class="chevron">›</span></button>' : '')+'</div>'+
+    (on ? '<div class="settings-card" style="margin-top:14px"><div class="lk-lbl">'+escapeHtml(t('obHourLbl'))+'</div><div class="lk-chips">'+
+      OB_HOURS.map(h=>'<button type="button" class="lk-chip ob-h'+(c.h === h ? ' on' : '')+'" data-h="'+h+'">'+obHourTxt(h)+'</button>').join('')+'</div></div>' : '')+
+    '<div class="settings-hint">'+escapeHtml(t('obHint', {n:N, d:dayWord(N)}))+'</div>';
+}
+function obWireSettings(){
+  const b = document.getElementById('obSet'); if(!b) return;
+  const r = document.getElementById('obRow'); if(r) r.onclick = ()=>obTurn(obCfg().on !== true);
+  const pr = document.getElementById('obPermRow'); if(pr) pr.onclick = ()=>{ const p = scNative(); if(p && p.dozvole) p.dozvole().catch(()=>{}); };
+  b.querySelectorAll('.ob-h').forEach(x=>{ x.onclick = ()=>{ const c = obCfg(), h = +x.dataset.h; if(c.h === h) return; c.h = h; obSave(c); obRefreshSettings(); obSyncSoon(); toast(t('setSaved')); }; });
+  if(obPerm === null) obCheckPerm().then(()=>obRefreshSettings());
+}
+function obRefreshSettings(){ const b = document.getElementById('obSet'); if(b){ b.innerHTML = obSettingsHtml(); obWireSettings(); } }
+/* dodir na obaveštenje: dokument u albumu (posle otključavanja) */
+async function obOpen(extra){
+  const id = extra && extra.id;
+  if(!id) return;
+  await scWaitOpen();
+  const item = items.find(i=>i.id === id);
+  if(item) openFromSearch(item); else showNote(t('obGone'), 6000);
+}
+function obBoot(){
+  const n = obNative();
+  if(!n) return;
+  n.naDodir(obOpen);
+  obSync();
+  obAskSoon();
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') obSync(); else if(obCfg().on === true) obCheckPerm().then(()=>{ obRefreshSettings(); _obLast = null; obSync(); }); });
 }
 
 function checkDeepLink(){
