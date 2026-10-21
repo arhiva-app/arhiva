@@ -45,6 +45,8 @@
     window.ARHIVA_PRECICA = {
       podrzano: function(){ return Pr.podrzano(); },
       napravi: function(o){ return Pr.napravi(o); },
+      prikvacena: function(id){ return Pr.prikvacena({ id: id }); },   /* v197; stariji APK: greška → Arhiva ne proverava */
+      dozvole: function(){ return Pr.dozvole(); },
       poslednji: function(lista){ try{ return Pr.poslednji({ lista: lista }).catch(function(e){ console.error('arhiva-native poslednji', e); }); }catch(e){ return Promise.resolve(); } },
       cekaj: function(){ return Pr.cekaj(); },
       naStavku: function(fn){ try{ Pr.addListener('stavka', fn); }catch(e){ console.error('arhiva-native stavka', e); } }
