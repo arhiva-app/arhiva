@@ -9711,7 +9711,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 203;
+const APP_VERSION = 204;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18993,8 +18993,11 @@ async function drSync(){
     const todo = entries.filter(e=>!_dr.files[e.k] || _dr.files[e.k].p !== e.path);
     _drProg = {n:0, total:todo.length}; drProgress();
     let moved = false;
-    for(const e of todo){
-      if(!drOn()) return;
+    /* v204: fascikle prvo (redom), pa 4 fajla istovremeno — jedan po jedan je bio spor (svaki poziv čeka odgovor Google-a) */
+    const dirs = [...new Set(todo.map(e=>{ const i = e.path.lastIndexOf('/'); return i < 0 ? '' : e.path.slice(0, i); }))];
+    for(const d of dirs){ if(!drOn()) return; await drDir(d); }
+    let next = 0, fail = null;
+    const one = async (e)=>{
       const i = e.path.lastIndexOf('/'), name = e.path.slice(i + 1);
       const par = await drDir(i < 0 ? '' : e.path.slice(0, i));
       const f = _dr.files[e.k];
@@ -19006,7 +19009,16 @@ async function drSync(){
         if(blob){ const id = await drUpload(name, par, blob, {arhiva:'f', k:e.k}); _dr.files[e.k] = {id, p:e.path, par, s:blob.size}; }
       }
       drSave(); _drProg.n++; drProgress();
-    }
+    };
+    const worker = async ()=>{
+      while(!fail && drOn() && next < todo.length){
+        const e = todo[next++];
+        try{ await one(e); }catch(er){ fail = fail || er; }
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    if(fail) throw fail;
+    if(!drOn()) return;
     const sig = drHash(JSON.stringify(Object.assign({}, manifest, {exportedAt:''})));
     if(sig !== _dr.jsonSig || !_dr.json){
       const jb = new Blob([JSON.stringify(manifest)], {type:'application/json'});
