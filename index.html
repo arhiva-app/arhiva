@@ -99,6 +99,7 @@ html.sc-peek #modalUnlock{ display:flex; }
 .lk-in .lk-btn:first-of-type{ margin-top:28px; }
 .lk-btn.lk-btn2{ background:var(--surface); color:var(--ink); border:1.5px solid var(--line); }
 .lk-link{ margin-top:14px; min-height:44px; padding:0 12px; background:none; border:0; font:600 15px var(--font-ui); color:var(--brass); cursor:pointer; }
+.lk-links{ display:flex; justify-content:center; align-items:center; gap:18px; flex-wrap:wrap; }   /* v205: „Otisak prsta“ uz „Zaboravio sam PIN“ */
 .lk-shake{ animation:lkShake .35s; }
 @keyframes lkShake{ 20%, 60%{ transform:translateX(-8px); } 40%, 80%{ transform:translateX(8px); } }
 .theme-opt .lk-sw{ font-size:24px; }
@@ -3942,19 +3943,23 @@ const I18N = {
     lkMin: '{n} min',
     lkHour: '1 sat',
     lkHint: 'Arhiva se zaključava pri svakom pokretanju i kad se ugasi ekran telefona. Na svaka 3 dana traži PIN (ili šablon) i kad je biometrija uključena, da ga ne zaboravite.',
-    lkHintForgot: 'Ako zaboravite PIN ili šablon, potvrdite otiskom prsta ili PIN-om telefona i postavite nov.',
+    lkHintForgot: 'Ako zaboravite PIN, otključajte šablonom Arhive (i obrnuto) ili otiskom prsta, odnosno PIN-om telefona, pa postavite nov.',
     lkLocked: 'Arhiva je zaključana.',
     lkCardBio: 'Otisak prsta',
-    lkBioTitle: 'Otključaj Arhivu',
-    lkBioSubT: 'Otisak prsta',
+    lkBioTitle: 'Otključaj',
+    lkBioSubT: '',
     lkEnterPin: 'Unesi PIN',
     lkDrawPat: 'Nacrtaj šablon',
     lkPinTitle: 'Unesite PIN',
-    lkPinSub: 'PIN Arhive, 4 cifre',
+    lkPinSub: 'PIN Arhive (ne telefona)',
     lkPatTitle: 'Nacrtajte šablon',
     lkPatSub: 'Spojite najmanje 4 tačke',
-    lk72Pin: 'Prošla su 3 dana od poslednjeg unosa PIN-a. Unesite ga sada, da ga ne zaboravite.',
-    lk72Pat: 'Prošla su 3 dana od poslednjeg crtanja šablona. Nacrtajte ga sada, da ga ne zaboravite.',
+    lk72Pin: 'Prošla su 3 dana. Unesite PIN, da ga ne zaboravite.',
+    lk72Pat: 'Prošla su 3 dana. Nacrtajte šablon, da ga ne zaboravite.',
+    /* v205 zaboravljen PIN/šablon */
+    lkFpLink: 'Otisak prsta', lkFgTitlePin: 'Zaboravili ste PIN?', lkFgTitlePat: 'Zaboravili ste šablon?',
+    lkFgTxtPin: 'Otključajte drugim načinom, pa postavite nov PIN Arhive.', lkFgTxtPat: 'Otključajte drugim načinom, pa postavite nov šablon Arhive.',
+    lkAltPat: 'Nacrtaj šablon Arhive', lkAltPin: 'Unesi PIN Arhive', lkByPhone: 'Otisak prsta ili PIN telefona',
     lkNewPin: 'Novi PIN',
     lkNewPinSub: 'Izaberite 4 cifre',
     lkRepPin: 'Ponovite PIN',
@@ -4682,19 +4687,22 @@ const I18N = {
     lkMin: '{n} min',
     lkHour: '1 hour',
     lkHint: 'Arhiva locks every time it starts and when the phone screen turns off. Every 3 days it asks for the PIN (or pattern) even with biometrics on, so you do not forget it.',
-    lkHintForgot: 'If you forget the PIN or pattern, confirm with the phone fingerprint or PIN and set a new one.',
+    lkHintForgot: 'If you forget the PIN, unlock with the Arhiva pattern (or the other way round) or with the phone fingerprint or PIN, then set a new one.',
     lkLocked: 'Arhiva is locked.',
     lkCardBio: 'Fingerprint',
-    lkBioTitle: 'Unlock Arhiva',
-    lkBioSubT: 'Fingerprint',
+    lkBioTitle: 'Unlock',
+    lkBioSubT: '',
     lkEnterPin: 'Enter PIN',
     lkDrawPat: 'Draw pattern',
     lkPinTitle: 'Enter PIN',
-    lkPinSub: 'Arhiva PIN, 4 digits',
+    lkPinSub: 'Arhiva PIN (not the phone’s)',
     lkPatTitle: 'Draw your pattern',
     lkPatSub: 'Connect at least 4 dots',
-    lk72Pin: 'It has been 3 days since you last entered the PIN. Enter it now so you do not forget it.',
-    lk72Pat: 'It has been 3 days since you last drew the pattern. Draw it now so you do not forget it.',
+    lk72Pin: 'It has been 3 days. Enter the PIN so you do not forget it.',
+    lk72Pat: 'It has been 3 days. Draw the pattern so you do not forget it.',
+    lkFpLink: 'Fingerprint', lkFgTitlePin: 'Forgot the PIN?', lkFgTitlePat: 'Forgot the pattern?',
+    lkFgTxtPin: 'Unlock another way, then set a new Arhiva PIN.', lkFgTxtPat: 'Unlock another way, then set a new Arhiva pattern.',
+    lkAltPat: 'Draw the Arhiva pattern', lkAltPin: 'Enter the Arhiva PIN', lkByPhone: 'Phone fingerprint or PIN',
     lkNewPin: 'New PIN',
     lkNewPinSub: 'Choose 4 digits',
     lkRepPin: 'Repeat PIN',
@@ -9711,7 +9719,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 204;
+const APP_VERSION = 205;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18146,7 +18154,7 @@ function lkShow(html){
   if(lkPend){ const f = lkPend; lkPend = null; f(); }
   lkBackFn = null;
   if(!lkEl){ lkEl = document.createElement('div'); lkEl.id = 'lockScr'; lkEl.className = 'lk-scr'; document.body.appendChild(lkEl); }
-  lkEl.innerHTML = html; lkEl.classList.add('open'); lkEl.scrollTop = 0;
+  lkEl.onclick = null; lkEl.innerHTML = html; lkEl.classList.add('open'); lkEl.scrollTop = 0;
   document.documentElement.classList.remove('lk-boot');
   return lkEl;
 }
@@ -18165,25 +18173,12 @@ function lkBack(){
 /* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak prsta · PIN/Šablon; bez biometrije samo PIN/Šablon).
    interactive=false: ispod Androidovog prozora ili posle gašenja ekrana — dodir na polje pokreće otključavanje.
    interactive=true: posle „Odustani“ — vraća 'bio' | 'secret' | 'forgot'. */
-function lkLockedScreen(interactive){
-  const c = lkCfg(), bio = !!c.bio;
-  return new Promise(res=>{
-    const card = (a, ic, txt, main)=>'<button type="button" class="lk-card'+(main ? ' main' : '')+'" data-a="'+a+'">'+ic+'<span>'+escapeHtml(txt)+'</span></button>';
-    const el = lkShow('<div class="lk-in lk-full">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1><p class="lk-p"></p>'+
-      '<div class="lk-cards'+(bio ? '' : ' one')+'">'+
-      (bio ? card('bio', LK_FP_ICON, t('lkCardBio'), true) : '')+
-      card('secret', c.mode === 'pat' ? LK_PAT_ICON.replace(/26/g, '34') : LK_PIN_ICON, t(c.mode === 'pat' ? 'lkOptPat' : 'lkSubPin').replace(/^./, x=>x.toUpperCase()), !bio)+
-      '</div><button type="button" class="lk-link lk-bottom" data-a="forgot"></button></div>');
-    el.querySelector('.lk-p').textContent = t('lkLocked');
-    el.querySelector('[data-a=forgot]').textContent = lkK(c, 'lkForgotPin', 'lkForgotPat');
-    const pick = (a)=>{
-      if(interactive){ lkPend = null; res(a); return; }
-      if(lkState === 'locked') lkUnlock(a);   /* zaključano posle gašenja ekrana, pre povratka */
-    };
-    el.querySelectorAll('[data-a]').forEach(x=>{ x.onclick = ()=>pick(x.dataset.a); });
-    if(!interactive){ res(null); return; }
-    lkPend = ()=>res('secret');
-  });
+/* v205 (Zoran): zaključan ekran = samo ikonica i „Arhiva“ (bez kartica i teksta); otključavanje odmah otvara ekran za PIN/šablon,
+   a preko njega Androidov prozor za otisak. Dodir na ovaj ekran pokreće otključavanje (ako još nije krenulo). */
+function lkLockedScreen(){
+  const el = lkShow('<div class="lk-in lk-full">'+LK_LOGO+'<h1 class="lk-h">Arhiva</h1></div>');
+  el.onclick = ()=>{ if(lkState === 'locked') lkUnlock(); };
+  return Promise.resolve(null);
 }
 /* Pitanje sa dugmadima. btns: [[ključ, tekst, drugo?]]; back: ključ za Nazad (null = Nazad ne radi ništa) */
 function lkChoice(title, text, btns, back){
@@ -18210,7 +18205,7 @@ function lkPrompt(o){
              '<span></span><button type="button" data-k="0">0</button><button type="button" class="lk-del" data-k="del" aria-label="⌫">⌫</button></div>'
            : '<div class="lk-err" role="status"></div><div class="lk-pat"><svg><polyline points=""></polyline><line x1="0" y1="0" x2="0" y2="0" style="display:none"></line></svg>'+
              [0,1,2,3,4,5,6,7,8].map(i=>'<i data-i="'+i+'" style="left:'+(16.667+33.333*(i%3))+'%;top:'+(16.667+33.333*Math.floor(i/3))+'%"></i>').join('')+'</div>')+
-      (o.forgot ? '<button type="button" class="lk-link" data-a="forgot"></button>' : '')+
+      ((o.forgot || o.onBio) ? '<div class="lk-links">'+(o.onBio ? '<button type="button" class="lk-link" data-a="bio"></button>' : '')+(o.forgot ? '<button type="button" class="lk-link" data-a="forgot"></button>' : '')+'</div>' : '')+
       (o.cancel ? '<button type="button" class="lk-link" data-a="cancel"></button>' : '')+'</div>');
     el.querySelector('.lk-h').textContent = o.title;
     el.querySelector('.lk-p').textContent = o.sub || '';
@@ -18221,6 +18216,7 @@ function lkPrompt(o){
     lkBackFn = o.cancel ? ()=>finish(null) : ()=>{};
     const fl = el.querySelector('[data-a=forgot]'); if(fl){ fl.textContent = t(pin ? 'lkForgotPin' : 'lkForgotPat'); fl.onclick = ()=>{ if(!busy) finish(LK_FORGOT); }; }
     const cl = el.querySelector('[data-a=cancel]'); if(cl){ cl.textContent = t('lkCancel'); cl.onclick = ()=>finish(null); }
+    const bl = el.querySelector('[data-a=bio]'); if(bl){ bl.textContent = t('lkFpLink'); bl.onclick = ()=>{ if(!busy && !done) o.onBio(); }; }   /* v205: ponovo Androidov prozor za otisak */
     const fail = (msg, after)=>{
       errEl.textContent = msg || '';
       inner.classList.remove('lk-shake'); void inner.offsetWidth; inner.classList.add('lk-shake');
@@ -18315,12 +18311,25 @@ async function lkSetSecret(mode){
   lkSave(c);
   return true;
 }
+/* v205 (Zoran): zaboravljen PIN → „Nacrtaj šablon Arhive“ (ako postoji) ili otisak/PIN TELEFONA; obrnuto za šablon. Pa nov. */
 async function lkForgot(kind){
-  const c = lkCfg(), st = await lkState2();
-  if(!st.telefon){ await lkInfo(t('lkNoPhoneLock')); return false; }
-  let r = {}; try{ r = (await lkNative().potvrdiTelefonom({naslov: t('lkPhoneTitle')})) || {}; }catch(e){}
-  if(!r.ok) return false;
-  return await lkSetSecret(kind || c.mode);
+  const k = kind || lkCfg().mode, other = k === 'pat' ? 'pin' : 'pat';
+  for(;;){
+    const c = lkCfg(), alt = !!(c[other] && c[other].h);
+    const btns = (alt ? [['alt', t(other === 'pat' ? 'lkAltPat' : 'lkAltPin')]] : []).concat([['tel', t('lkByPhone'), alt], ['x', t('lkCancel'), true]]);
+    const a = await lkChoice(lkK(k, 'lkFgTitlePin', 'lkFgTitlePat'), lkK(k, 'lkFgTxtPin', 'lkFgTxtPat'), btns, 'x');
+    if(a !== 'alt' && a !== 'tel') return false;
+    if(a === 'alt'){
+      const v = await lkPrompt({kind:other, title:lkK(other, 'lkPinTitle', 'lkPatTitle'), sub:lkK(other, 'lkPinSub', 'lkPatSub'), cancel:true, check:(x)=>lkCheckCurrent(x, other)});
+      if(v == null) continue;
+      return await lkSetSecret(k);
+    }
+    const st = await lkState2();
+    if(!st.telefon){ await lkInfo(t('lkNoPhoneLock')); continue; }
+    let r = {}; try{ r = (await lkNative().potvrdiTelefonom({naslov:t('lkPhoneTitle')})) || {}; }catch(e){}
+    if(!r.ok) continue;
+    return await lkSetSecret(k);
+  }
 }
 /* potvrda PIN-a ili šablona pre izmene (v192, Zoran): kind = onaj koji se potvrđuje (podrazumevano izabrani način).
    Prelazak na postojeći drugi način potvrđuje se TIM načinom; izmena PIN-a starim PIN-om, šablona starim šablonom. */
@@ -18359,25 +18368,28 @@ async function lkUnlock(first, fromPeek){
     if(await scPeekGate() || scPeekOn || lkState === 'busy') return;
   }
   lkState = 'busy';
-  let pick = first || 'bio';
+  let autoBio = first !== 'secret';
   try{
+    if(first === 'forgot') await lkForgot();
     for(;;){
       const c = lkCfg();
       if(c.mode === 'off') break;
       const need72 = !c.last || Date.now() - c.last > LK_72H;
-      if(pick === 'forgot'){ pick = 'bio'; if(await lkForgot()) break; continue; }
-      if(c.bio && !need72 && pick === 'bio'){
-        lkLockedScreen(false);
+      const bioOk = !!c.bio && !need72;
+      /* v205: ekran za PIN/šablon je odmah iza Androidovog prozora za otisak; „Unesi PIN“ u prozoru samo ga zatvori */
+      let bioDone = false, bioBusy = false;
+      const runBio = async ()=>{
+        if(bioBusy) return; bioBusy = true;
         let r = {}; try{ r = (await lkNative().biometrija({naslov:t('lkBioTitle'), podnaslov:t('lkBioSubT'), dugme:lkK(c, 'lkEnterPin', 'lkDrawPat')})) || {}; }catch(e){ r = {razlog:'greska'}; }
-        if(r.ok) break;
-        if(r.razlog !== 'dugme' && r.razlog !== 'nema'){
-          pick = await lkLockedScreen(true);
-          if(pick !== 'secret') continue;
-        }
-      }
-      pick = 'bio';
-      const v = await lkPrompt({kind:c.mode, title:lkK(c, 'lkPinTitle', 'lkPatTitle'),
-        sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, check:lkCheckCurrent});
+        bioBusy = false;
+        if(r.ok){ bioDone = true; if(lkPend){ const f = lkPend; lkPend = null; f(); } }
+      };
+      const pp = lkPrompt({kind:c.mode, title:lkK(c, 'lkPinTitle', 'lkPatTitle'),
+        sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, onBio: bioOk ? runBio : null, check:lkCheckCurrent});
+      if(bioOk && autoBio) runBio();
+      autoBio = false;
+      const v = await pp;
+      if(bioDone) break;
       if(v === LK_FORGOT){ if(await lkForgot()) break; continue; }
       if(v == null) continue;
       break;
