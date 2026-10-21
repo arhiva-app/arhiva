@@ -9550,7 +9550,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 199;
+const APP_VERSION = 200;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18187,6 +18187,7 @@ async function lkUnlock(first, fromPeek){
   }catch(e){ console.error('lkUnlock', e); }
   if(lkHomeP){ try{ await lkHomeP; }catch(e){} lkHomeP = null; }
   lkState = 'open'; lkUnlockedAt = Date.now(); lkHiddenAt = 0; lkHide();
+  obAskSoon();   /* v200: pitanje za podsetnike na telefonu tek posle otključavanja (ranije se preskakalo dok je zaključano) */
 }
 function lkPause(){ if(lkState === 'open' && lkOn() && !lkHiddenAt) lkHiddenAt = Date.now(); }
 async function lkResume(){
@@ -18542,7 +18543,7 @@ async function obSync(){
 }
 /* pristanak: jednom, kad postoji rok, na otključanoj Arhivi */
 let _obAsking = false;
-function obAskSoon(){ setTimeout(obAsk, 1200); }
+function obAskSoon(){ setTimeout(obAsk, 1200); }   /* zove se i posle otključavanja (lkUnlock) */
 async function obAsk(){
   const n = obNative();
   if(!n || _obAsking || !itemsReady || lkState !== 'open' || scPeekOn) return;
