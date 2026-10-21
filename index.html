@@ -697,7 +697,7 @@ html.sc-peek #modalUnlock{ display:flex; }
 .pod-row .pod-unit{ font-size:14px; color:var(--ink-dim); }
 .exp-pods{ margin:14px 0 6px; }
 .exp-pods .exp-h-lbl{ margin-top:10px; }
-.exp-pods .lk-chips{ margin-top:6px; }
+.exp-pods .exp-time-field{ margin-top:6px; }
 .exp-rem{ display:block; font-size:12.5px; color:var(--ink-dim); margin-top:2px; }
 .exp-new{ margin-top:6px; }
 .settings-card.ob-warn{ border:1.5px solid var(--danger); }
@@ -3792,7 +3792,7 @@ const I18N = {
     expLbl: 'datum podsetnika',
     expSave: 'Sačuvaj',
     expOk: 'U redu',
-    expClear: 'Obriši podsetnik', expOpenDoc: 'Otvori dokument', remHourLbl: 'u koliko sati', remAt: 'u {h}', remOffShort: 'ne podseća', remNew: 'Nov podsetnik', remPickTitle: 'Dokument za podsetnik',
+    expClear: 'Obriši podsetnik', expOpenDoc: 'Otvori dokument', remHourLbl: 'u koliko sati (dodirni za izbor)', remAt: 'u {h}', remOffShort: 'ne podseća', remNew: 'Nov podsetnik', remPickTitle: 'Dokument za podsetnik',
     expNone: 'nije upisan',
     expNoneTap: 'nije upisan, dodirni da upišeš',
     expSaved: 'Podsetnik je sačuvan: {date}',
@@ -4543,7 +4543,7 @@ const I18N = {
     expLbl: 'reminder date',
     expSave: 'Save',
     expOk: 'OK',
-    expClear: 'Delete reminder', expOpenDoc: 'Open document', remHourLbl: 'at what time', remAt: 'at {h}', remOffShort: 'no reminders', remNew: 'New reminder', remPickTitle: 'Document for the reminder',
+    expClear: 'Delete reminder', expOpenDoc: 'Open document', remHourLbl: 'at what time (tap to choose)', remAt: 'at {h}', remOffShort: 'no reminders', remNew: 'New reminder', remPickTitle: 'Document for the reminder',
     expNone: 'not set',
     expNoneTap: 'not set, tap to add',
     expSaved: 'Reminder saved: {date}',
@@ -4810,18 +4810,20 @@ function podDays(){ return [...new Set(getPods().filter(x=>x.on).map(x=>x.d))].s
    Nov podsetnik počinje od 30 · 7 · na dan, u 7:00. Stari podsetnici bez item.remind prate ono što je bilo u Podešavanjima
    (getPods + obCfg().h), dok ih korisnik ne sačuva ponovo. */
 const REM_HOURS = [5, 6, 7, 8, 9, 10, 12, 15, 18, 20];
-function remDefault(){ return {p:PODS_DEF.map(x=>({...x})), h:7}; }
-function remLegacy(){ return {p:getPods(), h:obCfg().h}; }
+function remDefault(){ return {p:PODS_DEF.map(x=>({...x})), h:7, m:0}; }
+function remLegacy(){ return {p:getPods(), h:obCfg().h, m:0}; }
 function remClean(r){
   if(!r || !Array.isArray(r.p) || r.p.length !== 3) return null;
-  const h = parseInt(r.h);
-  return {p:r.p.map(x=>({on:!!(x && x.on), d:Math.max(0, Math.min(3650, parseInt(x && x.d) || 0))})), h:(h >= 0 && h <= 23) ? h : 7};
+  const h = parseInt(r.h), m = parseInt(r.m);
+  return {p:r.p.map(x=>({on:!!(x && x.on), d:Math.max(0, Math.min(3650, parseInt(x && x.d) || 0))})), h:(h >= 0 && h <= 23) ? h : 7, m:(m >= 0 && m <= 59) ? m : 0};
 }
+/* v202: vreme podsetnika „7:00“ / „16:30“ (bilo koji sat i minut) */
+function remTime(r){ return r.h + ':' + String(r.m || 0).padStart(2, '0'); }
 function remOf(it){ return remClean(it && it.remind) || remLegacy(); }
 function remDays(r){ return [...new Set(r.p.filter(x=>x.on).map(x=>x.d))].sort((a,b)=>b-a); }
 function itemWarnDays(it){ const d = remDays(remOf(it)); return d.length ? d[0] : -1; }
 /* kratko: „30 · 7 · na dan · u 7:00“ */
-function remSummary(r){ const d = remDays(r); return d.length ? d.map(x=>x === 0 ? t('podDay0') : x).join(' · ') + ' · ' + t('remAt', {h:r.h + ':00'}) : t('remOffShort'); }
+function remSummary(r){ const d = remDays(r); return d.length ? d.map(x=>x === 0 ? t('podDay0') : x).join(' · ') + ' · ' + t('remAt', {h:remTime(r)}) : t('remOffShort'); }
 /* najveći uključen broj dana: od tada dokument „ističe“ (boja, zvonce) */
 function getExpiryDays(){ const d = podDays(); return d.length ? d[0] : -1; }
 /* „30 dana pre, 7 dana pre i na sam dan“ */
@@ -4928,24 +4930,31 @@ function openExpirySheet(o){
 }
 const closeExpSheet = ()=>{ expSheet.classList.remove('open'); try{ expInput.blur(); expNote.blur(); }catch(e){} };
 wireBackspace(expNote);
-expNote.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); expNote.blur(); } });
 /* v201: tri podsećanja i sat u prozoru podsetnika */
 let _expRem = null;
 function expRenderPods(){
   const box = document.getElementById('expPods');
   box.innerHTML = '<div class="exp-lbl">'+escapeHtml(t('expSetField'))+'</div>'+
     _expRem.p.map((x, i)=>'<div class="pod-row"><input type="checkbox" class="pod-on" id="expOn'+i+'"'+(x.on ? ' checked' : '')+' aria-label="'+escapeHtml(t('podOnAria', {i:i+1}))+'">'+
-      '<input type="number" inputmode="numeric" min="0" max="3650" class="pod-d'+(x.on ? '' : ' off')+'" id="expD'+i+'" value="'+x.d+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">'+
+      '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pod-d'+(x.on ? '' : ' off')+'" id="expD'+i+'" value="'+x.d+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">'+
       '<label for="expD'+i+'" class="pod-unit">'+escapeHtml(t('podUnit'))+'</label></div>').join('')+
-    '<div class="exp-lbl exp-h-lbl">'+escapeHtml(t('remHourLbl'))+'</div><div class="lk-chips">'+
-    REM_HOURS.concat(REM_HOURS.includes(_expRem.h) ? [] : [_expRem.h]).sort((a,b)=>a-b).map(h=>'<button type="button" class="lk-chip exp-hh'+(_expRem.h === h ? ' on' : '')+'" data-h="'+h+'">'+h+':00</button>').join('')+'</div>';
+    '<label class="exp-lbl exp-h-lbl" for="expTime">'+escapeHtml(t('remHourLbl'))+'</label>'+
+    '<div class="exp-field exp-time-field"><input id="expTime" type="time" class="sheet-input exp-input" value="'+String(_expRem.h).padStart(2, '0')+':'+String(_expRem.m || 0).padStart(2, '0')+'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span class="exp-field-txt" id="expTimeTxt"></span>'+
+    '<svg class="exp-field-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><polyline points="12 7.5 12 12 15 14"></polyline></svg></div>';
   [0,1,2].forEach(i=>{
     const on = document.getElementById('expOn'+i), d = document.getElementById('expD'+i);
     on.onchange = ()=>{ d.classList.toggle('off', !on.checked); expUpdateState(); };
-    d.addEventListener('input', expUpdateState);
-    d.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); d.blur(); } });
+    /* v202: tekstualno polje sa brojčanom tastaturom — označavanje celog broja radi pouzdano (kod type=number ne) */
+    d.addEventListener('input', ()=>{ const v = d.value.replace(/\D+/g, '').slice(0, 4); if(v !== d.value) d.value = v; expUpdateState(); });
+    wireBackspace(d, expUpdateState);   /* dodir označi broj (senčenje), novo kucanje ga zameni */
   });
-  box.querySelectorAll('.exp-hh').forEach(b=>{ b.onclick = ()=>{ _expRem.h = +b.dataset.h; box.querySelectorAll('.exp-hh').forEach(x=>x.classList.toggle('on', x === b)); }; });
+  const tm = document.getElementById('expTime');
+  const tmTxt = ()=>{ const v = tm.value; document.getElementById('expTimeTxt').textContent = /^\d{2}:\d{2}/.test(v) ? (+v.slice(0, 2)) + ':' + v.slice(3, 5) : remTime(_expRem); };
+  const tmSet = ()=>{ const v = tm.value; if(/^\d{2}:\d{2}/.test(v)){ _expRem.h = +v.slice(0, 2); _expRem.m = +v.slice(3, 5); } tmTxt(); };
+  tm.addEventListener('input', tmSet); tm.addEventListener('change', tmSet);
+  tmTxt();
+  /* v202 (Zoran, kao Stanje guma): Enter = sledeće polje, brisanje u praznom polju = prethodno polje */
+  fieldChain([expNote, document.getElementById('expD0'), document.getElementById('expD1'), document.getElementById('expD2')]);
 }
 /* pročitano iz prozora; null = neispravan broj */
 function expReadRem(){
@@ -4957,7 +4966,7 @@ function expReadRem(){
     if(!/^\d+$/.test(v) || +v > 3650) return null;
     p.push({on:on.checked, d:parseInt(v, 10)});
   }
-  return {p, h:_expRem.h};
+  return {p, h:_expRem.h, m:_expRem.m || 0};
 }
 function expUpdateState(){
   const v = expInput.value;
@@ -9641,7 +9650,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 201;
+const APP_VERSION = 202;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10628,6 +10637,30 @@ function wireBackspace(el, onRestore){
     if(typeof original !== 'string') original = '';
     const trimmed = el.value.length < original.length && original.indexOf(el.value) === 0 && el.value !== '';
     if(trimmed){ el.value = ''; if(onRestore) onRestore(); }
+  });
+}
+
+/* v202: niz polja u prozoru (kao Stanje guma) — Enter / „sledeće“ na tastaturi prelazi u sledeće polje (poslednje zatvara
+   tastaturu); brisanje u praznom polju vraća u prethodno. Veze se postavljaju ponovo pri svakom otvaranju (polja se prave iznova). */
+const _chain = new WeakMap();
+function fieldChain(list){
+  list = list.filter(Boolean);
+  list.forEach((el, i)=>{
+    el.setAttribute('enterkeyhint', i < list.length - 1 ? 'next' : 'done');
+    const first = !_chain.has(el);
+    _chain.set(el, {prev:list[i-1] || null, next:list[i+1] || null});
+    if(!first) return;
+    const go = (to)=>{ if(to){ to.focus(); } else el.blur(); };
+    el.addEventListener('keydown', (e)=>{
+      const c = _chain.get(el); if(!c) return;
+      if(e.key === 'Enter'){ e.preventDefault(); go(c.next); }
+      else if(e.key === 'Backspace' && el.value === '' && c.prev){ e.preventDefault(); c.prev.focus(); }
+    });
+    el.addEventListener('beforeinput', (e)=>{
+      const c = _chain.get(el); if(!c) return;
+      if(e.inputType === 'insertLineBreak'){ e.preventDefault(); go(c.next); }
+      else if(e.inputType === 'deleteContentBackward' && el.value === '' && c.prev){ e.preventDefault(); c.prev.focus(); }
+    });
   });
 }
 
@@ -18589,6 +18622,9 @@ function obHourTxt(h){ return h + ':00'; }
 let obPerm = null;   /* 'granted' | 'denied' | 'prompt' … (poslednja provera) */
 async function obCheckPerm(){ try{ obPerm = await obNative().dozvola(); }catch(e){ obPerm = 'denied'; } return obPerm; }
 /* stabilan broj obaveštenja (dodatak traži ceo broj) */
+/* v202: podsećanja koja su stigla „odmah“ (danas, posle sata) — da ne stignu ponovo pri sledećem otvaranju */
+function obFired(){ let f = {}; try{ f = JSON.parse(localStorage.getItem('galerija:obavFired') || '{}') || {}; }catch(e){} return f; }
+function obFiredSave(f){ const lim = Date.now() - 3 * 86400000; Object.keys(f).forEach(k=>{ if(f[k] < lim) delete f[k]; }); try{ localStorage.setItem('galerija:obavFired', JSON.stringify(f)); }catch(e){} }
 function obNum(s){ let h = 0; for(let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h & 0x3fffffff) + 1; }
 function obPlan(){
   const now = Date.now(), out = [];
@@ -18597,16 +18633,26 @@ function obPlan(){
     const [y, m, d] = ymdParts(it.validUntil);
     const r = remOf(it);   /* v201: dani i sat ovog dokumenta */
     remDays(r).forEach(off=>{
-      const at = new Date(y, m-1, d - off, r.h, 0, 0, 0);
-      if(at.getTime() <= now + 60000) return;
+      let at = new Date(y, m-1, d - off, r.h, r.m || 0, 0, 0);
+      const key = it.id + '|' + it.validUntil + '|' + off;
+      if(at.getTime() <= now + 60000){
+        /* v202: podsećanje je DANAS, a vreme je već prošlo (npr. podsetnik napravljen posle tog sata) → stiže odmah, jednom */
+        const today = new Date(now); today.setHours(0, 0, 0, 0);
+        const day = new Date(at); day.setHours(0, 0, 0, 0);
+        if(day.getTime() !== today.getTime() || obFired()[key]) return;
+        at = new Date(now + 20000);
+        out._fire = (out._fire || []).concat(key);
+      }
       const name = it.name || t('scNoName'), date = fmtExpDate(it.validUntil, true);
-      out.push({id:obNum(it.id + '|' + it.validUntil + '|' + off), title:t('obTitle'),
+      out.push({id:obNum(key), title:t('obTitle'),
         body: off === 0 ? t('obBodyToday', {name, date}) : t('obBodyIn', {name, n:off, d:dayWord(off), date}),
         schedule:{at:at.toISOString(), allowWhileIdle:true}, isExactNotification:false, channelId:'rokovi', extra:{id:it.id}});
     });
   });
+  const fire = out._fire || [];
   out.sort((a,b)=>a.schedule.at < b.schedule.at ? -1 : 1);
-  return out.slice(0, 60);   /* Android ograničava broj alarma po aplikaciji; sledeći se zakažu pri narednom otvaranju */
+  const res = out.slice(0, 60); res._fire = fire;
+  return res;   /* Android ograničava broj alarma po aplikaciji; sledeći se zakažu pri narednom otvaranju */
 }
 let _obChan = false, _obLast = null, _obBusy = false, _obAgain = false, _obTimer = 0;
 function obSyncSoon(){ clearTimeout(_obTimer); _obTimer = setTimeout(obSync, 800); }
@@ -18623,6 +18669,7 @@ async function obSync(){
     if(key === _obLast) return;
     let old = []; try{ old = JSON.parse(localStorage.getItem(OB_IDS) || '[]'); }catch(e){}
     if(old.length) await n.otkazi(old);
+    if(plan._fire && plan._fire.length){ const f = obFired(); plan._fire.forEach(k=>{ f[k] = Date.now(); }); obFiredSave(f); }
     if(plan.length){
       if(!_obChan){ try{ await n.kanal({id:'rokovi', name:t('obChan'), description:t('obChanDesc'), importance:4, visibility:1, vibration:true}); }catch(e){} _obChan = true; }
       await n.zakazi(plan);
