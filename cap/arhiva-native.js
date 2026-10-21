@@ -7,7 +7,8 @@
    4) dugme Nazad na telefonu → isto kao u Chrome-u (istorija Arhive); „Izađi“ zatvara aplikaciju
    5) trake telefona (gore i dole) u boji pozadine teme (dodatak Trake u novom APK-u; stariji APK: bez promene)
    6) zaključavanje (dodatak Zakljucavanje u novom APK-u; logika je u Arhivi, blok ZAKLJUČAVANJE)
-   v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim) */
+   v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim)
+   7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -35,6 +36,18 @@
       naGasenje: function(fn){ try{ Zak.addListener('ekranUgasen', fn); }catch(e){ console.error('arhiva-native lock', e); } },
       naPovratak: function(fn){ try{ App.addListener('resume', fn); }catch(e){} vis('visible', fn); },
       naOdlasku: function(fn){ try{ App.addListener('pause', fn); }catch(e){} vis('hidden', fn); }
+    };
+  }
+
+  /* 7) prečice: prava prečica sa sličicom, poslednji dokumenti na ikonici, otvaranje stavke iz prečice */
+  if(C.isPluginAvailable && C.isPluginAvailable('Precica')){
+    var Pr = reg('Precica');
+    window.ARHIVA_PRECICA = {
+      podrzano: function(){ return Pr.podrzano(); },
+      napravi: function(o){ return Pr.napravi(o); },
+      poslednji: function(lista){ try{ return Pr.poslednji({ lista: lista }).catch(function(e){ console.error('arhiva-native poslednji', e); }); }catch(e){ return Promise.resolve(); } },
+      cekaj: function(){ return Pr.cekaj(); },
+      naStavku: function(fn){ try{ Pr.addListener('stavka', fn); }catch(e){ console.error('arhiva-native stavka', e); } }
     };
   }
 
