@@ -7060,6 +7060,7 @@ function appendAlbumGroups(container, cats, onOpen){
    a merenje putanje natera Chrome da izračuna stranicu, pa ekran skoči na vrh. Posle osvežavanja ekran se vraća gde je bio. */
 let _rView = null;
 function render(){
+  if(_bkLoaded) bkSinceTouch();   /* v207: dan prve stavke (za traku-podsetnik), tek kad su podaci učitani */
   const y = window.scrollY, view = String(currentFolder) + '|' + (searchOpen ? 1 : 0);
   _renderView();
   const now = String(currentFolder) + '|' + (searchOpen ? 1 : 0);
@@ -9386,15 +9387,31 @@ function lastBackupShort(){
   return String(last.getDate()).padStart(2,'0')+'.'+String(last.getMonth()+1).padStart(2,'0')+'.'+last.getFullYear();
 }
 function lastBackupDisplay(){ return t('bkLast', {d:lastBackupShort()}); }
+var _bkLoaded = false;   /* var: render() se može pozvati pre ovog reda */
+/* v207: kad je u Arhivi prvi put nešto (bez ijedne kopije) — od tada se broje dani za traku; prazna Arhiva briše oznaku */
+function bkSinceTouch(){
+  const K = LS_PREFIX + 'bkSince';
+  try{
+    if(!items.length){ localStorage.removeItem(K); return 0; }
+    let v = parseInt(localStorage.getItem(K)) || 0;
+    if(!v && !getLastBackupDate()){ v = Date.now(); localStorage.setItem(K, String(v)); }
+    return v;
+  }catch(e){ return 0; }
+}
 function checkBackupReminder(){
+  _bkLoaded = true;
   const row = document.getElementById('backupReminderRow');
   const textEl = document.getElementById('backupReminderText');
   if(!row || !textEl) return;
   const last = getLastBackupDate();
   const interval = getBackupIntervalDays();
   let msg = null;
-  if(!last){
-    msg = t('bkRemNever');
+  const since = bkSinceTouch();
+  if(!items.length){
+    /* v207: prazna Arhiva (tek instalirana ili sve obrisano) — nema šta da se sačuva, traka se ne pojavljuje */
+  } else if(!last){
+    /* v207: bez ijedne kopije, traka tek kad od prve stavke na ovom telefonu prođe zadati broj dana */
+    if(since && Date.now() - since >= interval * 86400000) msg = t('bkRemNever');
   } else {
     const d = daysSinceBackup(last);
     if(d >= interval) msg = t('bkRemDays', {n:d});
@@ -9731,7 +9748,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 206;
+const APP_VERSION = 207;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
