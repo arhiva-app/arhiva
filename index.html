@@ -1819,6 +1819,7 @@ button.trash-name{ display:block; width:100%; text-align:left; border:none; back
 .ws-res-scr .set-header{ flex-wrap:wrap; }
 .wr-saved-bar{ flex:0 0 100%; order:-1; box-sizing:border-box; margin:0 0 8px 6px; }
 .wr-saved-bar[hidden]{ display:none; }
+#settingsPanel .set-header.has-tr-bar{ flex-wrap:wrap; }   /* v211: traka „Vraćeno“ u korpi */
 .wr-saved-bar .wrs-ok{ flex:none; display:inline-flex; align-items:center; gap:4px; color:var(--brass); font-weight:600; }
 .wr-saved-bar .wrs-alb{ flex:0 1 auto; min-width:0; max-width:38%; overflow:hidden; text-overflow:ellipsis; color:var(--ink-dim); }
 #wrStatus[hidden]{ display:none; }
@@ -3307,7 +3308,7 @@ const I18N = {
     trRestoreN: 'Vrati ({n})', trPurgeN: 'Obriši trajno ({n})', trSortNew: 'Po datumu brisanja, najnovije prvo', trSortOld: 'Po datumu brisanja, najstarije prvo',
     trToday: 'briše se danas', trLeft1: 'još 1 dan', trLeftN: 'još {n} dana', trFrom: 'Obrisano iz', trBackTo: 'Vraća se u', trRemade: ' (napraviće se ponovo)',
     trAdded: 'Dodato u Arhivu', trDeleted: 'Obrisano', trKind: 'Vrsta', trKindImg: 'Slika', trKindDoc: 'Dokument', trPage1: '1 strana', trPages: '{n} strana',
-    trSrc: 'Nastalo od', trSrcGone: 'dokument koji više ne postoji', trValid: 'Rok važenja', trRestore1: 'Vrati', trClose: 'Zatvori', trRestored1: 'Vraćeno u „{to}“.', trRestoredNIn: 'Vraćeno u „{to}“: {n}.', trGoAlb: 'Otvori',
+    trSrc: 'Nastalo od', trSrcGone: 'dokument koji više ne postoji', trValid: 'Rok važenja', trRestore1: 'Vrati', trClose: 'Zatvori', trRestored1: 'Vraćeno u „{to}“.', trRestoredNIn: 'Vraćeno u „{to}“: {n}.', trBarDone: 'Vraćeno',
     trRestoredN: 'Vraćeno: {n}.', trPurgeTitle: 'Trajno brisanje', trPurgeText: 'Trajno obrisati izabrano ({n})? Nema vraćanja.', trPurgeOk: 'Obriši trajno',
     trPurged: 'Trajno obrisano: {n}.', trTileSub: '{n} · čuva {d} dana', trTileEmpty: 'prazna', delAlbumOk: 'Obriši',
     mergeConfirmText: 'Stranice idu redom kojim si označavao, ukupno {p}. Naziv, album i podsetnik uzimaju se od „{name}“ (podsetnik prelazi na nov dokument). Originali ostaju u albumu; ako ti ne trebaju, označi ih i obriši.',
@@ -4089,7 +4090,7 @@ const I18N = {
     trRestoreN: 'Restore ({n})', trPurgeN: 'Delete forever ({n})', trSortNew: 'By deletion date, newest first', trSortOld: 'By deletion date, oldest first',
     trToday: 'deleted today', trLeft1: '1 day left', trLeftN: '{n} days left', trFrom: 'Deleted from', trBackTo: 'Returns to', trRemade: ' (will be created again)',
     trAdded: 'Added to Arhiva', trDeleted: 'Deleted', trKind: 'Type', trKindImg: 'Image', trKindDoc: 'Document', trPage1: '1 page', trPages: '{n} pages',
-    trSrc: 'Made from', trSrcGone: 'a document that no longer exists', trValid: 'Valid until', trRestore1: 'Restore', trClose: 'Close', trRestored1: 'Restored to “{to}”.', trRestoredNIn: 'Restored to “{to}”: {n}.', trGoAlb: 'Open',
+    trSrc: 'Made from', trSrcGone: 'a document that no longer exists', trValid: 'Valid until', trRestore1: 'Restore', trClose: 'Close', trRestored1: 'Restored to “{to}”.', trRestoredNIn: 'Restored to “{to}”: {n}.', trBarDone: 'Restored',
     trRestoredN: 'Restored: {n}.', trPurgeTitle: 'Permanent deletion', trPurgeText: 'Permanently delete the selection ({n})? This cannot be undone.', trPurgeOk: 'Delete forever',
     trPurged: 'Permanently deleted: {n}.', trTileSub: '{n} · keeps {d} days', trTileEmpty: 'empty', delAlbumOk: 'Delete',
     mergeConfirmText: 'Pages follow the order you selected them in, {p} in total. The name, album and reminder come from “{name}” (the reminder moves to the new document). The originals stay in the album; if you do not need them, select and delete them.',
@@ -9578,7 +9579,7 @@ function trRenderBody(){
       c.querySelector('b').textContent = (g.path && g.path.length ? g.path[0].name + ' › ' : '') + g.name;
       c.querySelector('small').textContent = t('trAlbSub', {n:stavkeTxtL(n), d:trDate(g.at), left:trLeftTxt(left)});
       const btn = c.querySelector('.tr-alb-btn'); btn.textContent = t('trRestoreAlb');
-      btn.onclick = e=>{ e.stopPropagation(); const r = trRestoreGroup(g.gid); render(); renderTrashList(); trRestoredNote(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(r.n)}), [], r.to); };
+      btn.onclick = e=>{ e.stopPropagation(); const r = trRestoreGroup(g.gid); render(); renderTrashList(); trRestoredNote(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(r.n)}), [], r.to, stavkeTxtL(r.n)); };
       c.onclick = ()=>{ trView = g.gid; trashSel = new Set(); renderTrashList(); pushBack(()=>{ trView = null; trashSel = new Set(); renderTrashList(); }); };
       body.appendChild(c);
     });
@@ -9603,7 +9604,7 @@ function trRenderGroup(list, g){
   const allSel = its.every(it=>trashSel.has(it.id));
   acts.innerHTML = '<button type="button" class="trash-btn tr-gall"></button><button type="button" class="trash-btn tr-gsel"></button>';
   acts.querySelector('.tr-gall').textContent = t('trRestoreAllN', {n:its.length});
-  acts.querySelector('.tr-gall').onclick = ()=>{ const r = trRestoreGroup(g.gid); render(); requestClose(); trRestoredNote(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(r.n)}), [], r.to); };
+  acts.querySelector('.tr-gall').onclick = ()=>{ const r = trRestoreGroup(g.gid); render(); requestClose(); trRestoredNote(t('trRestoredAlb', {name:g.name, n:stavkeTxtL(r.n)}), [], r.to, stavkeTxtL(r.n)); };
   acts.querySelector('.tr-gsel').textContent = t(allSel ? 'trUnsel' : 'trSelAll');
   acts.querySelector('.tr-gsel').onclick = ()=>{ if(allSel) its.forEach(it=>trashSel.delete(it.id)); else its.forEach(it=>trashSel.add(it.id)); renderTrashList(); };
   list.appendChild(acts);
@@ -9653,19 +9654,36 @@ function trInfo(it){
   const acts = document.createElement('div'); acts.className = 'tr-info-acts';
   acts.innerHTML = '<button type="button" class="trash-btn tr-info-ok"></button><button type="button" class="trash-btn"></button>';
   acts.firstChild.textContent = t('trRestore1'); acts.lastChild.textContent = t('trClose');
-  acts.firstChild.onclick = ()=>{ requestClose(); restoreFromTrash([it]); trashSel.delete(it.id); render(); renderTrashList(); trRestoredNote(t('trRestored1', {to:trPathTxt(it.category ? trPathOf(it.category) : null)}), [it]); };
+  acts.firstChild.onclick = ()=>{ requestClose(); restoreFromTrash([it]); trashSel.delete(it.id); render(); renderTrashList(); trRestoredNote(t('trRestored1', {to:trPathTxt(it.category ? trPathOf(it.category) : null)}), [it], null, itemLabel(it)); };
   acts.lastChild.onclick = ()=>requestClose();
   box.appendChild(acts);
   lst.appendChild(box);
   bg.classList.add('open');
   pushBack(()=>bg.classList.remove('open'));
 }
-/* v209 (Zoran): posle vraćanja iz korpe obaveštenje ima prečicu do albuma (kad je sve vraćeno u jedan album) */
-function trRestoredNote(msg, list, to){
+/* v209 → v211 (Zoran): posle vraćanja iz korpe traka sa prečicom do albuma ostaje u zaglavlju korpe dok se korpa ne napusti
+   (kao „Sačuvano“ u radionici) — obaveštenje traje par sekundi. Stavke iz različitih albuma: samo obaveštenje. */
+const TR_FOLDER_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
+function trRestoredNote(msg, list, to, what){
   if(to == null && list.length){ const c = new Set(list.map(i=>i.category || INBOX)); if(c.size === 1) to = [...c][0]; }
-  if(to == null || (to !== INBOX && !catById(to))){ toast(msg); return; }
+  const hd = document.querySelector('#settingsPanel .set-header');
+  if(to == null || (to !== INBOX && !catById(to)) || !hd){ toast(msg); return; }
+  hideNote();
   const ids = list.map(i=>i.id);
-  showNote(msg, 6000, {action:{label:t('trGoAlb'), fn:()=>albumFlashGo(to, ids)}});
+  let bar = document.getElementById('trRestBar');
+  if(!bar){ bar = document.createElement('div'); bar.id = 'trRestBar'; bar.className = 'path-bar wr-saved-bar'; hd.prepend(bar); hd.classList.add('has-tr-bar'); }
+  bar.innerHTML = '<span class="wrs-ok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' +
+    '<span class="path-sep">\u203A</span><span class="wrs-alb"></span>';
+  bar.querySelector('.wrs-ok').append(t('trBarDone'));
+  bar.querySelector('.wrs-alb').textContent = what || stavkeTxtL(list.length);
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'ws-jump';
+  b.innerHTML = TR_FOLDER_SVG + '<span class="pj-nm"></span><span aria-hidden="true">\u203A</span>';
+  const nm = to === INBOX ? t('pathInbox') : catLabel(to);
+  b.querySelector('.pj-nm').textContent = nm;
+  b.setAttribute('aria-label', t('jumpTo', {name:nm}));
+  b.onclick = (e)=>{ e.stopPropagation(); albumFlashGo(to, ids); };
+  bar.appendChild(b);
 }
 function trashRestoreSelected(){
   const list = trash.filter(x=>trashSel.has(x.id));
@@ -9762,7 +9780,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 210;
+const APP_VERSION = 211;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
