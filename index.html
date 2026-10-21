@@ -381,6 +381,7 @@ html.lk-boot body{ visibility:hidden; }
     background:var(--surface);border:1px solid var(--line);
     padding:31px 14px;cursor:pointer;position:relative;transition:border-color .2s;
     touch-action:pan-y;
+    -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
   }
   .folder-tile-row:active{border-color:var(--brass-soft);}
   .folder-tile-row .ftile-cover{
@@ -597,6 +598,7 @@ html.lk-boot body{ visibility:hidden; }
 
   .sheet-bg{display:none;position:fixed;inset:0;background:var(--scrim);z-index:55;align-items:flex-end;justify-content:center;}
   .sheet-bg.open{display:flex;}
+  .sheet-bg:not(.sheet-full) > .sheet{width:calc(100% - 36px);box-sizing:border-box;}   /* v193: širina kao albumi */
   .sheet{background:var(--surface);border-top:1px solid var(--brass-soft);width:100%;max-width:500px;padding:18px 16px 26px;}
   .sheet h3{font-family:var(--font-name);font-style:var(--name-style);font-weight:500;font-size:16.5px;color:var(--ink-dim);margin:0 0 12px;}
   .sheet-row{
@@ -2934,6 +2936,7 @@ document.getElementById('pickSheet').addEventListener('click', (e)=>{ if(e.targe
    jer se pri dodavanju vise fajlova odjednom moze javiti vise pitanja. */
 let _confirmChain = Promise.resolve();
 function askConfirm(o){
+  if(homeUnwind) return Promise.resolve(DISCARD_OK_KEYS.some(k=>t(k) === o.okLabel));
   const run = ()=>new Promise(resolve=>{
     const bg = document.getElementById('confirmBackdrop');
     document.getElementById('cfIcon').textContent = o.icon || '⚠️';
@@ -2963,6 +2966,28 @@ function askConfirm(o){
   const p = _confirmChain.then(run);
   _confirmChain = p.catch(()=>{});
   return p;
+}
+/* v193: posle zaključavanja Arhiva se otključava na početnom ekranu. Zatvara sve korake redom (kao uzastopno
+   „nazad“); pitanje „odbaci izmene“ se tada prihvata bez prikaza, a svako drugo pitanje odbija. */
+let homeUnwind = false;
+const DISCARD_OK_KEYS = ['pgDiscardOk', 'wsDiscardOk', 'zsDiscardOk', 'wfDiscardOk'];
+function unwindHome(){
+  return new Promise(done=>{
+    homeUnwind = true;
+    let n = 0, timer = 0;
+    const onPop = ()=>{ clearTimeout(timer); timer = setTimeout(next, 60); };
+    const finish = ()=>{
+      window.removeEventListener('popstate', onPop); homeUnwind = false;
+      if(currentFolder !== null || searchEl.value){ currentFolder = null; searchEl.value = ''; render(); }
+      window.scrollTo(0, 0); done();
+    };
+    function next(){
+      if(!backStack.length || ++n > 150){ finish(); return; }
+      history.back(); onPop();
+    }
+    window.addEventListener('popstate', onPop);
+    next();
+  });
 }
 function requestCloseThen(fn){
   pendingAfterClose = fn;
@@ -9432,7 +9457,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 192;
+const APP_VERSION = 193;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -17999,9 +18024,11 @@ async function lkEnable(mode){
 }
 
 /* ---- zaključavanje i otključavanje ---- */
+let lkHomeP = null;
 function lkLock(){
   if(!lkOn() || lkState !== 'open') return;
   lkState = 'locked'; lkLockedScreen(false);   /* otvoren unos u Podešavanjima se time otkazuje (lkPend) */
+  lkHomeP = unwindHome();
 }
 async function lkUnlock(first){
   if(lkState === 'busy') return;
@@ -18030,6 +18057,7 @@ async function lkUnlock(first){
       break;
     }
   }catch(e){ console.error('lkUnlock', e); }
+  if(lkHomeP){ try{ await lkHomeP; }catch(e){} lkHomeP = null; }
   lkState = 'open'; lkUnlockedAt = Date.now(); lkHiddenAt = 0; lkHide();
 }
 function lkPause(){ if(lkState === 'open' && lkOn() && !lkHiddenAt) lkHiddenAt = Date.now(); }
@@ -18041,7 +18069,7 @@ async function lkResume(){
     const c = lkCfg(), gone = lkHiddenAt ? Date.now() - lkHiddenAt : 0;
     lkHiddenAt = 0;
     if(!(off > lkUnlockedAt) && !(c.away && gone > c.away*60000)) return;
-    lkState = 'locked'; lkLockedScreen(false);
+    lkState = 'locked'; lkLockedScreen(false); lkHomeP = unwindHome();
   }
   setTimeout(()=>lkUnlock(), 250);
 }
