@@ -3916,7 +3916,13 @@ const I18N = {
     drErrFull: 'Google Drive je pun. Oslobodi prostor na Drive-u; Arhiva posle nastavlja sama.',
     drErr: 'Poslednje slanje nije uspelo. Arhiva pokušava ponovo sama.',
     drNeedTxt: 'Google traži da ponovo dozvoliš pristup Drive-u. Dok to ne uradiš, ništa se ne šalje.', drAgain: 'Ponovo poveži',
-    drOther: 'Na ovom Google nalogu već postoji Arhiva sa dokumentima kojih nema na ovom telefonu. Prenos sa Drive-a na telefon stiže u sledećoj verziji; do tada ništa nije promenjeno.',
+    drOther: 'Na ovom Google nalogu postoji Arhiva koja nije do kraja poslata, pa ne može da se preuzme. Ništa nije promenjeno.',
+    drPullT: 'Na Drive-u je tvoja Arhiva', drPullAsk: 'Nalog {email}: {docs}, {albums} ({mb}), poslednje slanje {d}. Preuzmi ih na ovaj telefon? Ono što je već na telefonu ostaje, a ništa se ne duplira.',
+    drPullGet: '⬇️ Preuzmi', drPullNo: 'Otkaži', drPullRun: 'Preuzimam sa Drive-a: {n} / {total}',
+    drPullHint: 'Drži Arhivu otvorenu dok traje. Ako se veza prekine, dodirni ponovo „Poveži Google Drive“ — nastavlja gde je stala, ništa se ne preuzima dvaput.',
+    drPullSafe: 'Dok preuzimanje nije gotovo, Arhiva ništa ne šalje na Drive i ništa tamo ne briše.',
+    drPullDone: 'Preuzeto sa Drive-a: {n}. Drive je uključen.',
+    drPullPart: 'Nije sve preuzeto (nedostaje: {n}). Drive je ostao isključen — dodirni ponovo „Poveži Google Drive“ i nastaviće gde je stalo.',
     drAgoNow: 'upravo', drAgoMin: 'pre {n} min', drAgoH: 'pre {n} h',
     lkTile: 'zaključavanje',
     lkSubOff: 'isključeno',
@@ -4660,7 +4666,13 @@ const I18N = {
     drErrFull: 'Google Drive is full. Free up space on Drive; Arhiva then continues on its own.',
     drErr: 'The last upload failed. Arhiva will retry on its own.',
     drNeedTxt: 'Google asks you to allow Drive access again. Nothing is uploaded until you do.', drAgain: 'Connect again',
-    drOther: 'This Google account already has an Arhiva with documents that are not on this phone. Moving data from Drive to the phone comes in the next version; until then nothing was changed.',
+    drOther: 'This Google account has an Arhiva that was not fully uploaded, so it cannot be downloaded. Nothing was changed.',
+    drPullT: 'Your Arhiva is on Drive', drPullAsk: 'Account {email}: {docs}, {albums} ({mb}), last upload {d}. Download them to this phone? What is already on the phone stays, and nothing is duplicated.',
+    drPullGet: '⬇️ Download', drPullNo: 'Cancel', drPullRun: 'Downloading from Drive: {n} / {total}',
+    drPullHint: 'Keep Arhiva open while it runs. If the connection drops, tap “Connect Google Drive” again — it continues where it stopped, nothing is downloaded twice.',
+    drPullSafe: 'Until the download is finished, Arhiva sends nothing to Drive and deletes nothing there.',
+    drPullDone: 'Downloaded from Drive: {n}. Drive is on.',
+    drPullPart: 'Not everything was downloaded (missing: {n}). Drive stayed off — tap “Connect Google Drive” again and it continues where it stopped.',
     drAgoNow: 'just now', drAgoMin: '{n} min ago', drAgoH: '{n} h ago',
     lkTile: 'app lock',
     lkSubOff: 'off',
@@ -5754,7 +5766,7 @@ async function idbPut(item){
 /* Nov dokument: podaci, fajlovi, sličice i tekst u JEDNOJ transakciji (sve ili ništa). */
 async function db2AddDoc(item, pages, text, opts){
   if(!(opts && opts.keepName)) item.name = uniqueItemName(item.name, item.id);   /* v120 */
-  item.pages = pages.map(p=>({file:newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}));
+  item.pages = pages.map(p=>({file:p.file || newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}));
   /* vraćanje kopije zadržava vreme izmene iz kopije (inače bi novija kopija izgledala starije) */
   item.updatedAt = (opts && opts.updatedAt > 0) ? opts.updatedAt : Date.now();
   if(text){ item.content = text; item.hasText = true; }
@@ -9719,7 +9731,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 205;
+const APP_VERSION = 206;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10343,14 +10355,16 @@ async function mergeBackup(src, opts){
   /* v171: stranice se čitaju iz kopije samo kad ih Arhiva nema; svaka jednom (čitanje = provera CRC + upis) */
   const readPages = async (d)=>{
     const pages = [];
-    for(const p of d.pages){
+    for(let pi = 0; pi < d.pages.length; pi++){
+      const p = d.pages[pi];
+      const fid = Array.isArray(d.files) && typeof d.files[pi] === 'string' ? d.files[pi] : null;   /* v206: isti ID fajla */
       const blob = await p.getBlob();
       let thumbBlob = null, w = p.w || 0, h = p.h || 0;
       if(p.getThumb) thumbBlob = await p.getThumb();   /* v157 PDF, v170 i slike: sličica iz kopije */
       if(!thumbBlob && d.kind === 'image'){
         try{ const r = await makeThumb(blob); thumbBlob = r.tblob; w = r.w; h = r.h; }catch(e){ console.error(e); }
       }
-      pages.push({blob, thumbBlob, w, h});
+      pages.push({blob, thumbBlob, w, h, file:fid});
     }
     return pages;
   };
@@ -10392,7 +10406,7 @@ async function mergeBackup(src, opts){
   let added = 0, updated = 0, skipped = 0, n = 0, bad = 0;
   for(const d of src.docs){
     n++;
-    if(n % 3 === 0 || n === src.docs.length) toastPersist(t('bkRestoring', {n, total:src.docs.length}));
+    if(n % 3 === 0 || n === src.docs.length){ if(opts && opts.prog) opts.prog(n, src.docs.length); else toastPersist(t('bkRestoring', {n, total:src.docs.length})); }
     const catId = (d.albumKey && idMap[d.albumKey]) || null;
     const active = d.id ? items.find(i=>i.id === d.id) : null;
     const newer = (d.updatedAt || 0) > ((active && active.updatedAt) || 0);
@@ -10478,6 +10492,7 @@ async function mergeBackup(src, opts){
   toastHide();
   render();
   updateStorageInfo();
+  if(opts && opts.quiet) return {added, updated, skipped, bad};   /* v206: Drive daje svoju poruku */
   if(bad && replace) showNote(t('bkReplaceBad', {bad}), 9000, {warn:true});
   else if(bad) showNote(t('bkRestoredBad', {added, skipped, bad}), 9000, {warn:true});
   else if(replace) toast(t('bkReplaced', {added:items.length, albums:categories.length}));
@@ -10507,6 +10522,29 @@ async function bkCheckZip(zip, data, full, fileSize){
   }
   if(bad.length){ const err = new Error('BROKEN'); err.count = bad.length; err.fileName = bad[0]; throw err; }
   return docs;
+}
+/* v206: podešavanja i dokumenti iz arhiva.json — isto za ZIP kopiju i za Google Drive (čitanje fajla je jedina razlika) */
+function bkSettings(data){
+  if(data.settings && data.settings.theme) setTheme(data.settings.theme);
+  if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
+  if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
+  if(data.settings && Array.isArray(data.settings.podsetnici) && data.settings.podsetnici.length === 3) setPods(data.settings.podsetnici);   /* v199 */
+}
+function bkSource(liveAlbums, liveDocs, readFile, readThumb){
+  const coverOf = {};
+  const albums = liveAlbums.map(a=>{
+    if(a.cover) coverOf[a.id] = a.cover;
+    return {key:a.id, id:a.id, name:a.name, parentKey:a.parent || null, pinned:!!a.pinned, updatedAt:a.updatedAt || 0, createdAt:a.createdAt || 0};
+  });
+  const docs = liveDocs.map(d=>({
+    id:d.id, name:d.name, albumKey:d.albumId || null, kind:d.kind, ext:d.ext || null,
+    createdAt:d.createdAt, updatedAt:d.updatedAt, validUntil:d.validUntil || null, validNote:d.validNote || null, remind:remClean(d.remind), lang:d.lang || null,
+    derivedFrom:d.derivedFrom || null, sourceSig:d.sourceSig || null, text:d.text || null,
+    sources:Array.isArray(d.sources) ? d.sources.filter(x=>typeof x === 'string') : null,
+    files:(d.pages || []).map(p=>p && p.file || null),
+    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob:()=>readFile(p), getThumb: p.thumbPath ? ()=>readThumb(p) : null}))
+  }));
+  return {albums, docs, coverOf};
 }
 async function importZipBackup(file){
   const zip = await zipRead(file);
@@ -10543,34 +10581,19 @@ async function importZipBackup(file){
   }
   toastPersist(t('bkRestoring', {n:0, total:liveDocs.length}));
   /* v171: „Zameni sve“ ne briše unapred — upisuje samo ono čega nema, pa na kraju briše višak (mergeBackup) */
-  if(data.settings && data.settings.theme) setTheme(data.settings.theme);
-  if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
-  if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
-  if(data.settings && Array.isArray(data.settings.podsetnici) && data.settings.podsetnici.length === 3) setPods(data.settings.podsetnici);   /* v199 */
-  const coverOf = {};
-  const albums = liveAlbums.map(a=>{
-    if(a.cover) coverOf[a.id] = a.cover;
-    return {key:a.id, id:a.id, name:a.name, parentKey:a.parent || null, pinned:!!a.pinned, updatedAt:a.updatedAt || 0, createdAt:a.createdAt || 0};
+  bkSettings(data);
+  const src = bkSource(liveAlbums, liveDocs, (p)=>{
+    const e = zip.get(p.path);
+    if(!e) return Promise.reject(new Error('nema fajla u kopiji'));
+    return e.read(p.mime);
+  }, (p)=>{
+    const e = zip.get(p.thumbPath);
+    const x = (p.thumbPath.split('.').pop() || 'jpg').toLowerCase();
+    return e ? e.read('image/' + (x === 'jpg' ? 'jpeg' : x)).catch(()=>null) : Promise.resolve(null);
   });
-  const docs = liveDocs.map(d=>({
-    id:d.id, name:d.name, albumKey:d.albumId || null, kind:d.kind, ext:d.ext || null,
-    createdAt:d.createdAt, updatedAt:d.updatedAt, validUntil:d.validUntil || null, validNote:d.validNote || null, remind:remClean(d.remind), lang:d.lang || null,
-    derivedFrom:d.derivedFrom || null, sourceSig:d.sourceSig || null, text:d.text || null,
-    sources:Array.isArray(d.sources) ? d.sources.filter(x=>typeof x === 'string') : null,
-    files:(d.pages || []).map(p=>p && p.file || null),
-    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob: ()=>{
-      const e = zip.get(p.path);
-      if(!e) return Promise.reject(new Error('nema fajla u kopiji'));
-      return e.read(p.mime);
-    }, getThumb: p.thumbPath ? ()=>{
-      const e = zip.get(p.thumbPath);
-      const x = (p.thumbPath.split('.').pop() || 'jpg').toLowerCase();
-      return e ? e.read('image/' + (x === 'jpg' ? 'jpeg' : x)).catch(()=>null) : Promise.resolve(null);
-    } : null}))
-  }));
   try{ await tplMergeBackup(data.templates, replace); }catch(e){ console.error(e); }
   if(replace) currentFolder = null;
-  await mergeBackup({albums, docs, coverOf}, {replace});
+  await mergeBackup(src, {replace});
 }
 function importJsonBackup(data){
   if(!data || !Array.isArray(data.items)) throw new Error('NOT_BACKUP');
@@ -18847,12 +18870,14 @@ function obBoot(){
    Fajl Arhive se nikad ne menja (izmena = nov dokument), pa se šalje jednom; posle: premeštanje (naziv/album), arhiva.json kad se
    promeni, a u Drive korpu (30 dana) tek kad fajla nema ni u korpi Arhive. Slanje: 4 s posle upisa (Skladiste.kadIzmena), pri
    pokretanju, povratku u aplikaciju i povratku interneta — dok je Arhiva otvorena. Greška → ponovo za minut.
-   Bezbednost: postojeća Arhiva na Drive-u sa dokumentima kojih nema na telefonu se ne dira (to je 2. korak).
+   2. korak (v206): Arhiva na Drive-u sa dokumentima kojih nema na telefonu → pitanje „Preuzmi“ → isto vraćanje kao ZIP kopija
+   (mergeBackup: spajanje bez duplikata, isti ID-jevi fajlova, pa se ništa ne šalje ponovo). Dok preuzimanje nije gotovo Drive je
+   isključen (slanje bi brisalo ono što još nije stiglo). Fajlovi na Drive-u kojih nema ni u arhiva.json (_dr.skip) se ne diraju.
    ===================================================================== */
 const DR_KEY = 'galerija:drive', DR_API = 'https://www.googleapis.com/drive/v3/files', DR_UP = 'https://www.googleapis.com/upload/drive/v3/files';
 const DR_ABOUT = 'https://www.googleapis.com/drive/v3/about', DR_FOLDER = 'application/vnd.google-apps.folder', DR_JSON = {'Content-Type':'application/json; charset=UTF-8'};
 let _dr = {files:{}, dirs:{}}, _drTok = null, _drTokExp = 0, _drBusy = false, _drAgain = false, _drProg = null, _drTimer = null, _drRetry = null;
-let _drConnecting = false, _drNoteOn = false;
+let _drConnecting = false, _drNoteOn = false, _drPull = null;
 function drNative(){ return window.ARHIVA_DRIVE || null; }
 function drCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(DR_KEY) || 'null'); }catch(e){} c = (c && typeof c === 'object') ? c : {}; c.files = c.files || {}; c.dirs = c.dirs || {}; return c; }
 function drSave(c){ try{ localStorage.setItem(DR_KEY, JSON.stringify(c || _dr)); }catch(e){ console.error('drive mapa', e); } }
@@ -19045,7 +19070,7 @@ async function drSync(){
     const keep = drKeepSet();
     for(const k of Object.keys(_dr.files)){
       if(!drOn()) return;
-      if(want.has(k) || keep.has(k)) continue;
+      if(want.has(k) || keep.has(k) || (_dr.skip && _dr.skip[k])) continue;
       await drTrash(_dr.files[k].id); delete _dr.files[k]; drSave(); moved = true;
     }
     if(moved) await drCleanDirs();
@@ -19080,6 +19105,63 @@ async function drCleanDirs(){
   }
 }
 
+/* ---- 2. korak: Drive → ovaj telefon (v206) ---- */
+async function drReadJson(){
+  if(!_dr.json) return null;
+  try{ const d = await (await drFetch(DR_API + '/' + _dr.json + '?alt=media')).json(); return (d && d.format === 3 && Array.isArray(d.docs)) ? d : null; }
+  catch(e){ if(e.status === 404 || e instanceof SyntaxError) return null; throw e; }
+}
+/* Preuzimanje unapred: 6 fajlova istovremeno, najviše 24 ispred onoga što se upisuje (memorija telefona).
+   Upis ide redom (mergeBackup), a mreža ne čeka upis. Prekid veze → ostali odmah odustaju (bez čekanja po fajlu). */
+function drPrefetch(keys){
+  const pos = new Map(); keys.forEach((k, i)=>{ if(!pos.has(k)) pos.set(k, i); });
+  const got = new Map(), asked = new Set();
+  let next = 0, upTo = 0, run = 0, dead = null;
+  const load = (k)=>{
+    const f = _dr.files[k];
+    if(!f) return Promise.reject(new Error('CRC'));   /* nema ga na Drive-u: broji se kao oštećen */
+    return drFetch(DR_API + '/' + f.id + '?alt=media').then(r=>r.blob()).then(b=>{ if(f.s && b.size !== f.s) throw new Error('CRC'); return b; });
+  };
+  const start = (k)=>{
+    asked.add(k); run++;
+    const p = load(k);
+    p.catch(e=>{ if(e && (e.drNet || e.drAuth)) dead = e; }).finally(()=>{ run--; pump(); });
+    return p;
+  };
+  const pump = ()=>{
+    while(!dead && run < 6 && next < keys.length && next < upTo + 24){
+      const k = keys[next++];
+      if(!asked.has(k)) got.set(k, start(k));
+    }
+  };
+  pump();
+  return {get(k){
+    const i = pos.get(k); if(i != null) upTo = Math.max(upTo, i + 1);
+    let p = got.get(k); got.delete(k);
+    if(!p) p = dead ? Promise.reject(dead) : start(k);
+    pump(); return p;
+  }};
+}
+async function drPull(data, live, albums){
+  requestPersistOnce();
+  const need = [];
+  live.forEach(d=>{
+    if(items.some(i=>i.id === d.id) || trash.some(i=>i.id === d.id && i.pages && i.pages.length)) return;   /* već je tu: ne preuzima se */
+    d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); } });
+  });
+  const pf = drPrefetch(need);
+  const prog = (n, total)=>{ _drPull = {n, total}; toastPersist(t('drPullRun', {n, total})); drRefresh(); };
+  prog(0, live.length);
+  try{
+    bkSettings(data);
+    try{ await tplMergeBackup(data.templates, false); }catch(e){ console.error(e); }
+    const src = bkSource(albums, live,
+      (p)=>pf.get(p.file).then(b=>b.type === p.mime || !p.mime ? b : b.slice(0, b.size, p.mime)),
+      (p)=>pf.get('t:' + p.file).then(b=>b.type ? b : b.slice(0, b.size, 'image/jpeg')).catch(()=>null));
+    return await mergeBackup(src, {quiet:true, prog});
+  }finally{ _drPull = null; toastHide(); drRefresh(); }
+}
+
 /* ---- povezivanje i prekid ---- */
 async function drConnect(){
   if(_drConnecting || !drNative()) return;
@@ -19094,18 +19176,40 @@ async function drConnect(){
     c.email = email; c.need = false; c.err = null;
     /* Arhiva koju je ova aplikacija već napravila na ovom nalogu (ponovno povezivanje, nova instalacija) */
     const roots = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id');
+    let pulled = null;
     if(roots.length){
-      const keep = drKeepSet();
       _dr = Object.assign(c, {root:roots[0].id});
       await drRebuild();
-      if(Object.keys(_dr.files).some(k=>!keep.has(k))){   /* dokumenti sa drugog uređaja: ne dira se (2. korak) */
-        _dr = drCfg(); _dr.on = false; drSave();
-        await infoBox(t('drOther'));
-        return;
+      const data = await drReadJson();
+      const live = data ? data.docs.filter(d=>d && !d.purged && !d.deletedAt && Array.isArray(d.pages) && d.pages.length) : [];
+      const missing = ()=>{ const keep = drKeepSet(); return live.filter(d=>d.pages.some(p=>!p || !keep.has(p.file))); };
+      if(!data){
+        const keep = drKeepSet();
+        if(Object.keys(_dr.files).some(k=>!keep.has(k))){   /* fajlovi bez arhiva.json (slanje prekinuto pre kraja): ne dira se */
+          _dr.on = false; drSave();
+          await infoBox(t('drOther'));
+          return;
+        }
+      }else if(missing().length){
+        const albums = (data.albums || []).filter(a=>a && a.id && a.name && !a.deletedAt);
+        const when = data.exportedAt ? Date.parse(data.exportedAt) : NaN;
+        const ch = await lkChoice(t('drPullT'), t('drPullAsk', {email, docs:stavkeTxtL(live.length), albums:albumiTxt(albums.length), mb:drMb(drDriveBytes()), d:isNaN(when) ? '—' : drAgo(when)}),
+          [['get', t('drPullGet')], ['no', t('drPullNo'), true]], 'no');
+        if(lkState === 'open') lkHide();
+        _dr.on = false; drSave();
+        if(ch !== 'get') return;
+        const r = await drPull(data, live, albums);
+        const still = missing().length;
+        if(still){ showNote(t('drPullPart', {n:stavkeTxtL(still)}), 9000, {warn:true}); return; }
+        pulled = r.added + r.updated;
+        _dr.full = true;   /* prvo slanje posle preuzimanja nije „prvi prenos“ (poruka o preuzimanju ostaje) */
       }
+      const keep = drKeepSet(); _dr.skip = {};
+      Object.keys(_dr.files).forEach(k=>{ if(!keep.has(k)) _dr.skip[k] = 1; });
     }else _dr = c;
     _dr.on = true; drSave();
     drSoon(0);
+    if(pulled != null) showNote(t('drPullDone', {n:stavkeTxtL(pulled)}), 6000);
   }catch(e){
     console.error('drive povezivanje', e);
     _dr = drCfg();
@@ -19127,6 +19231,7 @@ async function infoBox(text){ await lkChoice(t('drTile'), text, [['ok', t('lkOk'
 
 /* ---- Podešavanja → Google Drive ---- */
 function drTileSub(){
+  if(_drPull) return t('drPullRun', {n:_drPull.n, total:_drPull.total});
   if(!_dr.on) return t('drSubOff');
   if(_dr.need) return t('drSubNeed');
   if(_drProg && _drProg.total) return t('drSubRun', {n:_drProg.n, total:_drProg.total});
@@ -19136,6 +19241,11 @@ function drTileSub(){
 function drSettingsHtml(){
   const btn = (id, txt, two, dis)=>'<button type="button" class="dr-btn' + (two ? ' dr-btn2' : '') + '" id="' + id + '"' + (dis ? ' disabled' : '') + '>' + escapeHtml(txt) + '</button>';
   const hint = (k, v)=>'<div class="settings-hint">' + escapeHtml(t(k, v)) + '</div>';
+  if(_drPull){
+    const pc = _drPull.total ? Math.round(_drPull.n / _drPull.total * 100) : 0;
+    return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drPullRun', {n:_drPull.n, total:_drPull.total})) + '</div>' +
+      '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drPullHint')) + '</div></div>' + hint('drPullSafe');
+  }
   if(!_dr.on){
     const step = (ic, k)=>'<div class="dr-step"><span class="ic">' + ic + '</span><span>' + escapeHtml(t(k)) + '</span></div>';
     return '<div class="dr-card">' + step('📱', 'drStep1') + step('☁️', 'drStep2') + step('🔄', 'drStep3') + step('💻', 'drStep4') + '</div>' +
