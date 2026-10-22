@@ -707,9 +707,6 @@ html.sc-peek #modalUnlock{ display:flex; }
 html.exp-open #expSheet, html.exp-open #wsPickSheet{ z-index:72; }
 /* v214 ekran vidžeta „Na početnom ekranu“ */
 html.vz-open #wsPickSheet{ z-index:72; }
-#vzScreen .set-header{ display:flex; align-items:center; }
-#vzScreen .set-title{ flex:1; min-width:0; }
-.vz-arh{ flex:none; margin-left:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:12px; padding:8px 12px; font:inherit; font-size:14px; white-space:nowrap; cursor:pointer; }
 .vz-docs{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:22px; }
 .vz-doc{ display:flex; flex-direction:column; align-items:stretch; gap:6px; background:none; border:0; padding:0; color:var(--ink); font:inherit; text-align:center; cursor:pointer; min-width:0; }
 .vz-doc .ws-src-th{ width:100%; height:110px; border-radius:12px; border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; overflow:hidden; box-sizing:border-box; }
@@ -3771,7 +3768,7 @@ const I18N = {
       ['Zbirni spisak', 'U albumu dodirni ikonicu „Spisak“ (pored „Spoji“), dodiruj dokumente koje hoćeš, pa dole „Napravi spisak“. Izaberi šta AI da izvuče: Troškovi (datum, prodavac, iznos), Rokovi (naziv, ističe) ili Svoje… (sam upišeš kolone), pa „Napravi spisak“.', 'AI čita dokument po dokument i pravi jednu tabelu; kod troškova je dole zbir. Ono što AI nije pronašao piše crveno. Dodir na bilo koju vrednost otvara prozor sa slikom tog dokumenta: uporediš, ispraviš ili upišeš, a „Otvori ceo dokument“ otvara ceo dokument. Upisano ili ispravljeno rukom ima znak olovke. „Sačuvaj kao Excel“ ili „PDF“ čuva spisak kao nov dokument u istom albumu; izabrani dokumenti se ne menjaju.'],
       ['Pretraga', 'Lupa pretražuje nazive albuma, slika i dokumenata. „Detaljno“ traži i reči unutar PDF, Word i Excel dokumenata.', 'U albumu dodirni ikonicu „Pretraži“: na mestu reda ikonica otvara se polje za pretragu, a pretraga obuhvata i podalbume. Možeš upisati i delove više reči, bilo kojim redom: „info ori“ nalazi „Informatika račun original“. Ćirilica i latinica su isto: „info“ nalazi i „Информатика“, a „инфо“ i „Informatika“. ✕ ili korak nazad zatvara pretragu i vraća ikonice.'],
       ['Prečica na početnom ekranu', 'Označi jednu stavku (dugi pritisak), pa „Prečica“ u donjem redu (preimenovanje je sada u „Više“ i olovkom u pregledu). U aplikaciji Arhiva odmah pravi pravu prečicu sa sličicom i nazivom stavke; dodir na nju otvara stavku u njenom albumu (kad je Arhiva zaključana, posle otključavanja). Ako telefon ne doda prečicu (Xiaomi traži dozvolu), Arhiva to kaže, a dugme „Otvori dozvole“ vodi u podešavanja Arhive. Ako je stavka obrisana, Arhiva to kaže. Kad je Arhiva zaključana, prečica sa početnog ekrana ipak odmah otvara svoju stavku, bez PIN-a: možeš da je gledaš i pošalješ, ali ne i da pređeš na druge stavke, menjaš ili brišeš; „Otključaj“ vodi u celu Arhivu, a korak nazad zatvara aplikaciju. Dugi pritisak na ikonicu Arhive pokazuje poslednje otvorene stavke; one se, kad je Arhiva zaključana, otvaraju tek posle otključavanja. U Chrome-u se stavka otvara u Chrome-u, a iz Chrome menija biraš „Dodaj na početni ekran“. Prečica dokumenta od više stranica lista sve stranice.'],
-      ['Vidžet na početnom ekranu', 'U Android aplikaciji Arhiva ima vidžet za početni ekran telefona. Postavljaš ga kao i ostale vidžete: dug pritisak na prazno mesto ekrana → Vidžeti → Arhiva. Podrazumevano je veličine ikonice: znak Arhive i broj podsetnika koji traže pažnju (isti broj kao na zvoncetu; crven ako je neki datum prošao). Dugim pritiskom na vidžet i povlačenjem ivica ga povećavaš: tada pokazuje tri najbliža podsetnika, a još veći i do 4 izabrana dokumenta.', 'Dokument staviš na vidžet ovako: označi ga u albumu, pa Prečica → Na vidžetu (isti red ga i skida). Dodir na vidžet otvara ekran „Na početnom ekranu“ sa podsetnicima i izabranim dokumentima. Gore biraš koji podsetnici su na vidžetu: Svi, Izabrani (kvačica pored svakog podsetnika) ili Nijedan (vidžet tada pokazuje samo dokumente, bez broja). ✕ na sličici skida dokument sa vidžeta (dokument ostaje u Arhivi), a „Dodaj dokument“ dodaje nov. Taj ekran i izabrani dokumenti vide se i kad je Arhiva zaključana, bez PIN-a (zaključan telefon je zaštita); izbor podsetnika, kvačice, ✕, dodavanje i ostatak Arhive (dugme „Arhiva 🔒“) traže PIN.'],
+      ['Vidžet na početnom ekranu', 'U Android aplikaciji Arhiva ima vidžet za početni ekran telefona. Postavljaš ga kao i ostale vidžete: dug pritisak na prazno mesto ekrana → Vidžeti → Arhiva. Podrazumevano je veličine ikonice: znak Arhive i broj podsetnika koji traže pažnju (isti broj kao na zvoncetu; crven ako je neki datum prošao). Dugim pritiskom na vidžet i povlačenjem ivica ga povećavaš: tada pokazuje tri najbliža podsetnika, a još veći i do 4 izabrana dokumenta.', 'Dokument staviš na vidžet ovako: označi ga u albumu, pa Prečica → Na vidžetu. Dodir na vidžet otvara prozor preko celog ekrana sa izabranim podsetnicima i dokumentima — samo za gledanje, i bez PIN-a kad je Arhiva zaključana (zaključan telefon je zaštita); dodir na dokument ga otvara. Menja se u Arhivi: „Uredi ›“ gore desno (PIN ako je zaključana) otvara ekran „Vidžet“. Tu biraš koji podsetnici su na vidžetu: Svi, Izabrani (kvačica pored svakog) ili Nijedan (tada samo dokumenti, bez broja); ✕ skida dokument sa vidžeta (uz potvrdu; dokument ostaje u Arhivi), a „Dodaj dokument“ dodaje nov.'],
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Arhiva ga pri vraćanju napravi ponovo sa istim imenom.'],,
       ['Rezervna kopija', 'Podešavanja → rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Pri vraćanju biraš „Dodaj postojećim“ (samo ono što nedostaje, bez duplikata) ili „Zameni sve“. Oštećen fajl iz kopije se nikad ne uvozi, a kod „Zameni sve“ ništa se ne briše dok kopija nije uspešno vraćena. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.'],
       ['Jezik', 'Podešavanja → jezik bira srpski ili engleski (English). Promena se vidi odmah. Pri prvom pokretanju Arhiva sama izabere jezik telefona.'],
@@ -3964,15 +3961,14 @@ const I18N = {
     drSync2: 'Kad dva uređaja izmene istu stavku, važi kasnija izmena. Izbrisano na jednom uređaju ide u korpu i na ostalima.',
     drInRun: 'Preuzimam sa drugog uređaja: {n} / {total}',
     /* v213: spisak izmena sa drugog uređaja */
-    vzTitle: 'Na početnom ekranu', vzSheetTitle: 'Na početni ekran', vzRowSc: 'Prečica', vzRowScHint: 'posebna ikonica ove stavke',
+    vzTitle: 'Vidžet', vzEdit: 'Uredi ›', vzXTitle: 'Skinuti „{n}“ sa vidžeta?', vzXText: 'Dokument ostaje u Arhivi; samo se više ne vidi na vidžetu.', vzXOk: 'Skini', vzSheetTitle: 'Na početni ekran', vzRowSc: 'Prečica', vzRowScHint: 'posebna ikonica ove stavke',
     vzRowOn: 'Na vidžetu', vzHintOff: 'nije na vidžetu · dodir dodaje (najviše 4)', vzHintOn: 'na vidžetu · dodir skida',
     vzAdded: 'Dodato na vidžet.', vzRemoved: 'Skinuto sa vidžeta.', vzAlready: 'Ovaj dokument je već na vidžetu.',
-    vzFull: 'Na vidžetu su već 4 dokumenta. Skini jedan (✕ na ekranu vidžeta), pa dodaj ovaj.',
+    vzFull: 'Na vidžetu su već 4 dokumenta. Skini jedan (vidžet → Uredi › → ✕), pa dodaj ovaj.',
     vzRok: 'Podsetnici', vzRokTitle: 'Podsetnici na vidžetu', vzModeAll: 'Svi', vzModeSel: 'Izabrani', vzModeNone: 'Nijedan',
     vzNoneHint: 'Vidžet ne pokazuje podsetnike, samo dokumente.', vzSelHint: 'Kvačica bira koji podsetnik je na vidžetu.', vzX: 'Skini sa vidžeta',
     vzDocs: 'Izabrani dokumenti', vzNoRok: 'Nema podsetnika.', vzNoDocs: 'Još nema izabranih dokumenata.',
-    vzAdd: 'Dodaj dokument', vzArh: 'Arhiva', vzPickTitle: 'Dokument za vidžet', vzGone: 'Ovaj dokument više nije u Arhivi.',
-    vzPeekHint: 'Ovo se vidi bez PIN-a. Izbor podsetnika, kvačice, ✕, „Dodaj dokument“ i ostatak Arhive (dugme „Arhiva 🔒“) traže PIN.',
+    vzAdd: 'Dodaj dokument', vzPickTitle: 'Dokument za vidžet', vzGone: 'Ovaj dokument više nije u Arhivi.',
     vzHint: '✕ skida dokument sa vidžeta; dokument ostaje u Arhivi.',
     vzPinTitle: 'Vidžet još nije na početnom ekranu', vzPinOk: 'Postavi',
     vzPinText: 'Dokument je dodat. Da bi se video na početnom ekranu, dodirni „Postavi“, ili sam: dug pritisak na prazno mesto ekrana → Vidžeti → Arhiva.',
@@ -4579,7 +4575,7 @@ const I18N = {
       ['Combined list', 'In an album tap the “List” icon (next to “Merge”), tap the documents you want, then “Make list” at the bottom. Choose what the AI should extract: Expenses (date, seller, amount), Deadlines (name, expires) or Custom… (you type the columns), then “Make list”.', 'The AI reads the documents one by one and makes one table; for expenses there is a total at the bottom. Anything the AI did not find is shown in red. Tapping any value opens a window with a picture of that document: compare, correct or type it in; “Open whole document” opens it whole. Values entered or corrected by hand have a pencil mark. “Save as Excel” or “PDF” saves the list as a new document in the same album; the selected documents are not changed.'],
       ['Search', 'The magnifier searches the names of albums, images and documents. “Detailed” also searches words inside PDF, Word and Excel documents.', 'Inside an album, tap the “Search” icon: a search field opens in place of the icon row, and search also covers sub-albums. You can type parts of several words, in any order: “info ori” finds “Informatika račun original”. Cyrillic and Latin letters count as the same: “info” also finds “Информатика”, and “инфо” finds “Informatika”. ✕ or Back closes the search and brings the icons back.'],
       ['Home screen shortcut', 'Select one item (long-press), then “Shortcut” in the bottom row (renaming is now in “More” and with the pencil in the viewer). In the app, Arhiva creates a real shortcut with the item’s thumbnail and name right away; tapping it opens the item in its album (when Arhiva is locked, after unlocking). If the phone does not add the shortcut (Xiaomi requires permission), Arhiva says so, and “Open permissions” leads to Arhiva’s settings. If the item was deleted, Arhiva says so. When Arhiva is locked, a home screen shortcut still opens its item right away, without the PIN: you can view and send it, but not move to other items, edit or delete; “Unlock” leads into the whole Arhiva, and the back step closes the app. Long-pressing the Arhiva icon shows recently opened items; when Arhiva is locked, they open only after unlocking. In Chrome the item opens in Chrome; choose “Add to home screen” from the Chrome menu. The shortcut of a multi-page document shows all pages.'],
-      ['Home screen widget', 'In the Android app, Arhiva has a widget for the phone’s home screen. Place it like any other widget: long-press an empty spot → Widgets → Arhiva. By default it is the size of an icon: the Arhiva sign and the number of reminders that need attention (the same number as on the bell; red if a date has passed). Long-press the widget and drag its edges to make it bigger: then it shows the three nearest reminders, and when even bigger, up to 4 chosen documents.', 'To put a document on the widget, select it in its album, then Shortcut → On the widget (the same row removes it). Tapping the widget opens the “On the home screen” screen with reminders and chosen documents. At the top you choose which reminders are on the widget: All, Chosen (a checkbox next to each reminder) or None (the widget then shows only documents, without a number). ✕ on a thumbnail removes the document from the widget (it stays in Arhiva), and “Add a document” adds one. That screen and the chosen documents are shown even when Arhiva is locked, without the PIN (a locked phone is the protection); choosing reminders, checkboxes, ✕, adding and the rest of Arhiva (the “Arhiva 🔒” button) need the PIN.'],
+      ['Home screen widget', 'In the Android app, Arhiva has a widget for the phone’s home screen. Place it like any other widget: long-press an empty spot → Widgets → Arhiva. By default it is the size of an icon: the Arhiva sign and the number of reminders that need attention (the same number as on the bell; red if a date has passed). Long-press the widget and drag its edges to make it bigger: then it shows the three nearest reminders, and when even bigger, up to 4 chosen documents.', 'To put a document on the widget, select it in its album, then Shortcut → On the widget. Tapping the widget opens a full-screen window with the chosen reminders and documents — for viewing only, and without the PIN when Arhiva is locked (a locked phone is the protection); tapping a document opens it. Changes are made in Arhiva: “Edit ›” at the top right (PIN if locked) opens the “Widget” screen. There you choose which reminders are on the widget: All, Chosen (a checkbox next to each) or None (then only documents, without a number); ✕ removes a document from the widget (after confirming; it stays in Arhiva), and “Add a document” adds one.'],
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Arhiva creates it again with the same name when restoring.'],,
       ['Backup', 'Settings → backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'When restoring, choose “Add to existing” (only what is missing, no duplicates) or “Replace all”. A damaged file is never imported, and with “Replace all” nothing is deleted until the backup is restored successfully. A bar at the top reminds you when the set number of days has passed since the last backup.'],
       ['Language', 'Settings → language switches between Serbian (Srpski) and English. The change is visible right away. On first start Arhiva picks the language of your phone.'],
@@ -4738,15 +4734,14 @@ const I18N = {
     drSync1: 'All devices on this account have the same data: what you add, change or delete on one reaches the others — when you open Arhiva and while it is open.',
     drSync2: 'When two devices change the same item, the later change wins. What you delete on one device goes to the trash on the others too.',
     drInRun: 'Downloading from your other device: {n} / {total}',
-    vzTitle: 'On the home screen', vzSheetTitle: 'To the home screen', vzRowSc: 'Shortcut', vzRowScHint: 'a separate icon for this item',
+    vzTitle: 'Widget', vzEdit: 'Edit ›', vzXTitle: 'Remove “{n}” from the widget?', vzXText: 'The document stays in Arhiva; it is just no longer shown on the widget.', vzXOk: 'Remove', vzSheetTitle: 'To the home screen', vzRowSc: 'Shortcut', vzRowScHint: 'a separate icon for this item',
     vzRowOn: 'On the widget', vzHintOff: 'not on the widget · tap to add (up to 4)', vzHintOn: 'on the widget · tap to remove',
     vzAdded: 'Added to the widget.', vzRemoved: 'Removed from the widget.', vzAlready: 'This document is already on the widget.',
-    vzFull: 'The widget already has 4 documents. Remove one (✕ on the widget screen), then add this one.',
+    vzFull: 'The widget already has 4 documents. Remove one (widget → Edit › → ✕), then add this one.',
     vzRok: 'Reminders', vzRokTitle: 'Reminders on the widget', vzModeAll: 'All', vzModeSel: 'Chosen', vzModeNone: 'None',
     vzNoneHint: 'The widget shows no reminders, only documents.', vzSelHint: 'The checkbox chooses which reminders are on the widget.', vzX: 'Remove from the widget',
     vzDocs: 'Chosen documents', vzNoRok: 'No reminders.', vzNoDocs: 'No chosen documents yet.',
-    vzAdd: 'Add a document', vzArh: 'Arhiva', vzPickTitle: 'Document for the widget', vzGone: 'This document is no longer in Arhiva.',
-    vzPeekHint: 'This is shown without the PIN. Choosing reminders, checkboxes, ✕, “Add a document” and the rest of Arhiva (the “Arhiva 🔒” button) need the PIN.',
+    vzAdd: 'Add a document', vzPickTitle: 'Document for the widget', vzGone: 'This document is no longer in Arhiva.',
     vzHint: '✕ removes a document from the widget; the document stays in Arhiva.',
     vzPinTitle: 'The widget is not on the home screen yet', vzPinOk: 'Place it',
     vzPinText: 'The document was added. To see it on the home screen, tap “Place it”, or do it yourself: long-press an empty spot → Widgets → Arhiva.',
@@ -9873,7 +9868,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 215;
+const APP_VERSION = 216;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18697,14 +18692,14 @@ lkBoot();
 let itemsReady = false;
 function scNative(){ return window.ARHIVA_PRECICA || null; }
 /* sličica prečice: kvadrat 192 px iz sličice prve stranice (PNG, base64); bez sličice → ikonica Arhive */
-async function scIcon(item){
+async function scIcon(item, S = 192){   /* v216: vidžet traži veću (prozor preko celog ekrana) */
   try{
     const p = item.pages && item.pages[0];
     if(!p || !p.thumb) return null;
     const blob = await Skladiste.slicica(p.file);
     if(!blob) return null;
     const bmp = await createImageBitmap(blob);
-    const S = 192, k = Math.min(bmp.width, bmp.height), c = document.createElement('canvas');
+    const k = Math.min(bmp.width, bmp.height), c = document.createElement('canvas');
     c.width = c.height = S;
     c.getContext('2d').drawImage(bmp, (bmp.width - k) / 2, (bmp.height - k) / 2, k, k, 0, 0, S, S);
     if(bmp.close) bmp.close();
@@ -18797,10 +18792,10 @@ function scItemsReady(){ return new Promise(res=>{ const tick = ()=>{ if(itemsRe
 async function scPeekGate(){
   if(!scNative()) return false;
   const r = await scTake();
-  if(!r || r.handled || (r.vrsta !== 'precica' && r.vrsta !== 'vidzet') || !scClaim(r)) return false;
+  /* v216: dokument sa vidžeta se gleda bez PIN-a kao sa prečice; „Uredi“ (vidzet-uredi) ide kroz PIN */
+  if(!r || r.handled || (r.vrsta !== 'precica' && !(r.vrsta === 'vidzet' && r.id !== '-')) || !scClaim(r)) return false;
   scPeekOn = true;   /* odmah: drugi poziv otključavanja (npr. dodir) ne pokreće PIN */
   await scItemsReady();
-  if(r.vrsta === 'vidzet'){ vzPeekShow(r.id); return true; }   /* v214: ekran vidžeta bez PIN-a */
   const item = items.find(i=>i.id === r.id);
   if(!item){   /* obrisana ili u korpi: obično otključavanje, pa poruka */
     scPeekOn = false;
@@ -18830,7 +18825,6 @@ function scPeekClosed(){
 document.getElementById('modalUnlock').onclick = (e)=>{
   e.stopPropagation();
   const id = modalItemId;
-  _vzBack = false; _vzPeek = false;   /* v214: iz pregleda otvorenog sa ekrana vidžeta → otključavanje, pa stavka */
   scPeekExit = false;
   requestCloseThen(()=>{
     lkUnlock(null, true).then(()=>{
@@ -18846,7 +18840,7 @@ async function scFromShortcut(){
   await new Promise(res=>setTimeout(res, 700));   /* povratak: zaključavanje prvo odluči (i preuzme prečicu sa početnog ekrana) */
   if(!scClaim(r)) return;
   await scWaitOpen();
-  if(r.vrsta === 'vidzet'){ vzFromWidget(r.id); return; }   /* v214 */
+  if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')){ vzOpenEdit(); return; }   /* v216: „Uredi ›“ sa prozora vidžeta */
   const item = items.find(i=>i.id === r.id);
   if(item){ openFromSearch(item); return; }
   showNote(trash.some(x=>x.id === r.id) ? t('scInTrash') : t('scGone'), 6000);
@@ -18870,8 +18864,11 @@ function scBoot(){
    izabrani dokumenti, „Dodaj dokument“). Zoran 22.10.: kad je Arhiva zaključana, taj ekran i izabrani dokumenti se vide
    BEZ PIN-a (kao Google Novčanik — zaključan telefon je zaštita); izmene, dodavanje i ostatak Arhive traže PIN.
    Pregled dokumenta sa ovog ekrana: nazad vraća na ekran (_vzBack); u zaključanom režimu važe pravila prečice (html.sc-peek).
-   v215: izbor podsetnika na vidžetu (Svi · Izabrani · Nijedan; galerija:vidzetPod, galerija:vidzetPodIds), ✕ skida dokument;
-   sve izmene sa ovog ekrana idu kroz vzGuard (zaključano → PIN). Reč „rok“ se na vidžetu ne koristi — „Podsetnici“.
+   v215: izbor podsetnika na vidžetu (Svi · Izabrani · Nijedan; galerija:vidzetPod, galerija:vidzetPodIds), ✕ skida dokument.
+   Reč „rok“ se na vidžetu ne koristi — „Podsetnici“.
+   v216 (Zoran): dodir na vidžet otvara Androidov prozor preko celog ekrana (VidzetEkran, samo gledanje: izabrani podsetnici i
+   dokumenti, bez PIN-a). Menja se SAMO u Arhivi: „Uredi ›“ → PIN ako je zaključana → ovaj ekran „Vidžet“ (vzOpenEdit).
+   Dokument sa vidžeta/prozora se gleda bez PIN-a kao sa prečice (scPeekGate). ✕ traži potvrdu.
    ===================================================================== */
 const VZ_KEY = LS_PREFIX + 'vidzet', VZ_MAX = 4;
 function vzNative(){ return window.ARHIVA_VIDZET || null; }
@@ -18894,12 +18891,6 @@ function vzRokItems(){
   const sel = new Set(vzSel());
   return all.filter(x=>sel.has(x.it.id));
 }
-/* izmena sa ekrana vidžeta: kad je Arhiva zaključana, prvo PIN, pa izmena (ekran se ponovo otvara otključan) */
-function vzGuard(fn){
-  if(!_vzPeek){ fn(); return; }
-  scPeekExit = false;
-  requestCloseThen(()=>lkUnlock(null, true).then(()=>{ if(lkState === 'open'){ vzOpenScreen(); fn(); } }));
-}
 /* ---- slanje podataka vidžetu (var: zaglavlje zove vzSoon pre ovog dela skripte) ---- */
 var _vzTimer = 0, _vzLast = null;
 function vzSoon(ms){ if(!vzNative()) return; clearTimeout(_vzTimer); _vzTimer = setTimeout(vzPush, ms == null ? 1500 : ms); }
@@ -18911,14 +18902,14 @@ async function vzPush(){
   const sel = vzSel(), selKeep = sel.filter(id=>items.some(i=>i.id === id) || trash.some(i=>i.id === id));
   if(selKeep.length !== sel.length) vzSaveSel(selKeep);
   const mode = vzMode();
-  const rokovi = vzRokItems().slice(0, 60).map(x=>({id:x.it.id, n:x.it.name || t('scNoName'), d:x.it.validUntil, f:fmtExpDate(x.it.validUntil, false), w:itemWarnDays(x.it)}));
+  const rokovi = vzRokItems().slice(0, 60).map(x=>({id:x.it.id, n:x.it.name || t('scNoName'), d:x.it.validUntil, f:fmtExpDate(x.it.validUntil, false), w:itemWarnDays(x.it), nt:x.it.validNote || ''}));
   const docs = vzDocs();
-  const key = JSON.stringify([appLang(), todayYmd(), mode, rokovi, docs.map(d=>[d.id, d.name, d.pages && d.pages[0] && d.pages[0].file])]);
+  const key = JSON.stringify(['v216', appLang(), todayYmd(), mode, rokovi, docs.map(d=>[d.id, d.name, d.pages && d.pages[0] && d.pages[0].file])]);
   if(key === _vzLast) return;   /* ništa novo — telefon se ne dira */
   const L = {title:'Arhiva', rokovi:t('vzRok'), dokumenti:t('vzDocs'), none:t('vzNoRok'), open:t('vzWOpen'), noDocs:t('vzWNoDocs'),
-    gone:t('expGone'), today:t('expToday'), tomorrow:t('expTomorrow'), inN:t('expInShort')};
+    gone:t('expGone'), today:t('expToday'), tomorrow:t('expTomorrow'), inN:t('expInShort'), edit:t('vzEdit')};
   const out = {lang:appLang(), mode, L, rokovi, docs:[]};
-  for(const d of docs) out.docs.push({id:d.id, n:d.name || t('scNoName'), s:await scIcon(d)});
+  for(const d of docs) out.docs.push({id:d.id, n:d.name || t('scNoName'), s:await scIcon(d, 420)});
   try{ await n.postavi(JSON.stringify(out)); _vzLast = key; }catch(e){ console.error('vidzet', e); }
 }
 /* ---- Prečica → izbor: Prečica ili Na vidžetu ---- */
@@ -18944,20 +18935,17 @@ async function vzToggle(it){
 }
 /* ---- ekran „Na početnom ekranu“ ---- */
 const vzEl = document.getElementById('vzScreen');
-let _vzPeek = false, _vzToDoc = false, _vzBack = false;
+let _vzToDoc = false, _vzBack = false;
 function vzOpenScreen(){ vzRender(); vzEl.classList.add('open'); document.documentElement.classList.add('vz-open'); vzEl.scrollTop = 0; pushBack(closeVzScreen); }
 const closeVzScreen = ()=>{
   vzEl.classList.remove('open'); document.documentElement.classList.remove('vz-open');
   if(_vzToDoc){ _vzToDoc = false; return; }   /* ide se u pregled dokumenta; nazad vraća ovde */
-  if(_vzPeek){ _vzPeek = false; if(scPeekOn) scPeekClosed(); }   /* zaključano: kraj gledanja bez PIN-a */
 };
+function vzOpenEdit(){ if(vzEl.classList.contains('open')) vzRender(); else vzOpenScreen(); }
 function vzRefresh(){ if(vzEl.classList.contains('open')) vzRender(); }
 function vzRender(){
   const panel = document.getElementById('vzPanel');
   panel.innerHTML = settingsHeader(t('vzTitle')) + '<div class="set-body" id="vzBody"></div>';
-  const ab = document.createElement('button'); ab.type = 'button'; ab.className = 'vz-arh'; ab.id = 'vzArh';
-  ab.textContent = t('vzArh') + (_vzPeek ? ' 🔒' : ''); ab.onclick = vzToArhiva;
-  panel.querySelector('.set-header').appendChild(ab);
   const body = document.getElementById('vzBody');
   const lab = (key)=>{ const l = document.createElement('div'); l.className = 'exp-grp-label'; l.textContent = t(key); body.appendChild(l); };
   const empty = (key)=>{ const e = document.createElement('div'); e.className = 'vz-empty'; e.textContent = t(key); body.appendChild(e); };
@@ -18967,7 +18955,7 @@ function vzRender(){
   [['svi', 'vzModeAll'], ['izabrani', 'vzModeSel'], ['nijedan', 'vzModeNone']].forEach(([m, key])=>{
     const b = document.createElement('button'); b.type = 'button'; b.dataset.m = m; b.textContent = t(key);
     if(m === mode) b.className = 'on';
-    b.onclick = ()=>{ if(m !== vzMode()) vzGuard(()=>{ vzSetMode(m); vzSoon(0); vzRefresh(); }); };
+    b.onclick = ()=>{ if(m !== vzMode()){ vzSetMode(m); vzSoon(0); vzRefresh(); } };
     seg.appendChild(b);
   });
   body.appendChild(seg);
@@ -18983,7 +18971,7 @@ function vzRender(){
         const on = sel.has(x.it.id), ck = document.createElement('span');
         ck.className = 'vz-ck' + (on ? ' on' : ''); ck.setAttribute('role', 'checkbox'); ck.setAttribute('aria-checked', on ? 'true' : 'false');
         ck.textContent = on ? '✓' : '';
-        ck.onclick = (e)=>{ e.stopPropagation(); vzGuard(()=>{ const a = vzSel(); vzSaveSel(a.includes(x.it.id) ? a.filter(y=>y !== x.it.id) : a.concat(x.it.id)); vzSoon(0); vzRefresh(); }); };
+        ck.onclick = (e)=>{ e.stopPropagation(); const a = vzSel(); vzSaveSel(a.includes(x.it.id) ? a.filter(y=>y !== x.it.id) : a.concat(x.it.id)); vzSoon(0); vzRefresh(); };
         row.querySelector('.exp-dot').replaceWith(ck);
       }
       box.appendChild(row);
@@ -19001,7 +18989,12 @@ function vzRender(){
       b.querySelector('.vz-dn').textContent = it.name || t('scNoName');
       b.onclick = ()=>vzOpenDoc(it);
       const x = b.querySelector('.vz-x'); x.setAttribute('aria-label', t('vzX'));
-      x.onclick = (e)=>{ e.stopPropagation(); vzGuard(()=>{ vzSaveIds(vzIds().filter(y=>y !== it.id)); toast(t('vzRemoved')); vzSoon(0); vzRefresh(); }); };   /* v215 */
+      x.onclick = async (e)=>{   /* v215; v216: uz potvrdu */
+        e.stopPropagation();
+        const go = await askConfirm({icon:'📌', title:t('vzXTitle').replace('{n}', it.name || t('scNoName')), text:t('vzXText'), okIcon:'✕', okLabel:t('vzXOk'), danger:false});
+        if(!go) return;
+        vzSaveIds(vzIds().filter(y=>y !== it.id)); toast(t('vzRemoved')); vzSoon(0); vzRefresh();
+      };
       g.appendChild(b);
     });
     body.appendChild(g);
@@ -19009,7 +19002,7 @@ function vzRender(){
   const add = document.createElement('button'); add.type = 'button'; add.className = 'sheet-cta exp-new'; add.id = 'vzAdd';
   add.textContent = '+ ' + t('vzAdd'); add.onclick = vzAddDoc;
   body.appendChild(add);
-  body.insertAdjacentHTML('beforeend', '<div class="settings-hint">' + escapeHtml(t(_vzPeek ? 'vzPeekHint' : 'vzHint')) + '</div>');
+  body.insertAdjacentHTML('beforeend', '<div class="settings-hint">' + escapeHtml(t('vzHint')) + '</div>');
 }
 function vzOpenDoc(it){
   _vzToDoc = true; _vzBack = true;
@@ -19017,34 +19010,11 @@ function vzOpenDoc(it){
 }
 /* pregled zatvoren → nazad na ekran vidžeta (osim kad se sve zatvara, npr. gašenje ekrana) */
 function vzReturn(){
-  if(homeUnwind){ if(_vzPeek){ _vzPeek = false; if(scPeekOn) scPeekClosed(); } return; }
+  if(homeUnwind) return;
   vzOpenScreen();
 }
-function vzToArhiva(){
-  if(_vzPeek){ scPeekExit = false; requestCloseThen(()=>lkUnlock(null, true)); return; }   /* zaključano → PIN, pa Arhiva */
-  requestClose();
-}
-function vzAddDoc(){ vzGuard(vzPick); }
+function vzAddDoc(){ vzPick(); }
 function vzPick(){ wsOpenPick((it)=>{ if(vzHas(it)) toast(t('vzAlready')); else vzToggle(it); }, t('vzPickTitle')); }
-/* dodir na vidžet dok je Arhiva zaključana: ekran bez PIN-a (zove ga scPeekGate) */
-function vzPeekShow(id){
-  scPeekOn = true; scPeekExit = true; _vzPeek = true;
-  if(lkState === 'busy') lkState = 'locked';
-  document.documentElement.classList.add('sc-peek');
-  lkHide();
-  vzOpenScreen();
-  vzDocFromWidget(id);
-}
-/* dodir na vidžet dok je Arhiva otključana (ili bez zaključavanja) */
-function vzFromWidget(id){
-  if(vzEl.classList.contains('open')) vzRender(); else vzOpenScreen();
-  vzDocFromWidget(id);
-}
-function vzDocFromWidget(id){
-  if(!id || id === '-') return;
-  const it = items.find(i=>i.id === id);
-  if(it) vzOpenDoc(it); else showNote(t('vzGone'), 6000);
-}
 function vzBoot(){
   if(!vzNative()) return;
   vzSoon(0);
