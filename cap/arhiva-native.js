@@ -86,6 +86,7 @@
       var lk = window.ARHIVA_LK_NAZAD ? window.ARHIVA_LK_NAZAD() : false;
       if(lk === 'izlaz'){ App.exitApp(); return; }
       if(lk) return;
+      if(window.ARHIVA_VZ_NAZAD && window.ARHIVA_VZ_NAZAD()) return;   /* v219: nazad u prozor vidžeta — Arhiva prvo ode */
       if(e && e.canGoBack) history.back(); else App.exitApp();
     });
   }catch(e){ console.error('arhiva-native back', e); }
