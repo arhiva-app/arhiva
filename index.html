@@ -1211,6 +1211,14 @@ html[data-theme="ponoc"]{
 .exp-hdr-btn.alert .exp-hdr-count{ display:inline-flex; }
 .exp-hdr-btn.expired{ color:var(--danger); border-color:var(--danger-line); }
 .exp-hdr-btn.expired .exp-hdr-count{ background:var(--danger); color:var(--on-danger); }
+/* v213: spisak izmena sa drugog uređaja */
+.sync-row{ cursor:default; padding-right:4px; }
+.sync-row .exp-main{ cursor:pointer; }
+.sync-row .exp-album{ white-space:normal; overflow-wrap:anywhere; }
+.sync-x{ flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:none; background:none;
+  color:var(--ink-faint); font-size:17px; cursor:pointer; border-radius:50%; }
+.sync-x:active{ background:var(--surface-2); color:var(--ink); }
+.sync-clear{ margin-top:6px; }
 /* ekran „Rokovi“ */
 .exp-scr-hint{ font-size:13px; color:var(--ink-dim); margin:0 2px 18px; line-height:1.45; }
 .exp-grp-label{ display:flex; align-items:center; gap:8px; margin:0 2px 8px; font-family:var(--font-ui); font-size:12.5px; font-weight:700;
@@ -2402,6 +2410,9 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
         <button class="icon-btn exp-hdr-btn" id="expHdrBtn" type="button" style="display:none;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span class="exp-hdr-count" id="expHdrCount"></span>
         </button>
+        <button class="icon-btn exp-hdr-btn alert" id="syncHdrBtn" type="button" style="display:none;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3"></path><polyline points="18 3 18 7 14 7"></polyline><path d="M20 12a8 8 0 0 1-14 5.3"></path><polyline points="6 21 6 17 10 17"></polyline></svg><span class="exp-hdr-count" id="syncHdrCount"></span>
+        </button>
         <button class="icon-btn" id="settingsBtn" title="Podešavanja">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
         </button>
@@ -2848,6 +2859,7 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 
 <div class="set-screen" id="settingsScreen"><div id="settingsPanel"></div></div>
 <div class="set-screen" id="expScreen"><div id="expPanel"></div></div>
+<div class="set-screen" id="syncScreen"><div id="syncPanel"></div></div>
 <input type="file" id="importInput" accept=".zip,.json,application/zip,application/json" style="display:none">
 <div class="set-screen" id="migrateScreen" style="z-index:75;"><div id="migratePanel"></div></div>
 
@@ -3928,6 +3940,12 @@ const I18N = {
     drSync1: 'Svi uređaji sa ovim nalogom imaju iste podatke: šta dodaš, izmeniš ili izbrišeš na jednom, stiže i na ostale — kad otvoriš Arhivu i dok je otvorena.',
     drSync2: 'Kad dva uređaja izmene istu stavku, važi kasnija izmena. Izbrisano na jednom uređaju ide u korpu i na ostalima.',
     drInRun: 'Preuzimam sa drugog uređaja: {n} / {total}',
+    /* v213: spisak izmena sa drugog uređaja */
+    syTitle: 'Sa drugog uređaja', syHdr: 'Izmene sa drugog uređaja', syToday: 'Danas', syYest: 'Juče',
+    syNew: '+ nova stavka · {a}', syBack: '↺ vraćeno iz korpe', syTrash: '🗑 premešteno u korpu',
+    syName: '✎ ime: „{a}“ → „{b}“', syAlb: '✎ album: {a} → {b}', syRok: '✎ rok: {a} → {b}', syEdit: '✎ izmenjeno', syNone: 'bez roka',
+    syClear: 'Obriši spisak', syHint: 'Dodir na stavku je otvara. ✕ briše samo red sa spiska, ne i dokument. Kad je spisak prazan, ikonica nestaje.',
+    syGone: 'stavke više nema',
     drPullPart: 'Nije sve preuzeto (nedostaje: {n}). Drive je ostao isključen — dodirni ponovo „Poveži Google Drive“ i nastaviće gde je stalo.',
     drAgoNow: 'upravo', drAgoMin: 'pre {n} min', drAgoH: 'pre {n} h',
     lkTile: 'zaključavanje',
@@ -4682,6 +4700,11 @@ const I18N = {
     drSync1: 'All devices on this account have the same data: what you add, change or delete on one reaches the others — when you open Arhiva and while it is open.',
     drSync2: 'When two devices change the same item, the later change wins. What you delete on one device goes to the trash on the others too.',
     drInRun: 'Downloading from your other device: {n} / {total}',
+    syTitle: 'From another device', syHdr: 'Changes from another device', syToday: 'Today', syYest: 'Yesterday',
+    syNew: '+ new item · {a}', syBack: '↺ restored from trash', syTrash: '🗑 moved to trash',
+    syName: '✎ name: “{a}” → “{b}”', syAlb: '✎ album: {a} → {b}', syRok: '✎ due date: {a} → {b}', syEdit: '✎ changed', syNone: 'none',
+    syClear: 'Clear list', syHint: 'Tap an item to open it. ✕ removes only the row from the list, not the document. When the list is empty, the icon disappears.',
+    syGone: 'item no longer exists',
     drPullPart: 'Not everything was downloaded (missing: {n}). Drive stayed off — tap “Connect Google Drive” again and it continues where it stopped.',
     drAgoNow: 'just now', drAgoMin: '{n} min ago', drAgoH: '{n} h ago',
     lkTile: 'app lock',
@@ -5146,6 +5169,7 @@ function updateExpHeader(){
   expHdrBtn.classList.toggle('alert', due.length > 0);
   expHdrBtn.classList.toggle('expired', due.some(x=>x.days < 0));
   document.getElementById('expHdrCount').textContent = due.length > 99 ? '99+' : String(due.length);
+  syUpdateHeader();
 }
 expHdrBtn.onclick = ()=>openExpScreen();
 
@@ -6701,7 +6725,7 @@ let _note = null, _noteTimer = null, _notePoll = null, _noteWarn = null;
 /* v148: --pop-top = donja ivica zamrznutog zaglavlja ekrana ispod prozora koji se otvara (merenje u trenutku otvaranja). */
 const POP_HEADS = { modalBg:['#modalPath','#modalBar'], docRd:['.dr-head'], pageEditor:['.set-header'], pgView:['.pv-head','#pvHint'],
   aiWs:['.set-header','#wsTop'], wsResScr:['.set-header'], wsFill:['.set-header','.wf-top'], wsEditW:['.set-header'],
-  settingsScreen:['.set-header'], expScreen:['.set-header'], migrateScreen:['.set-header'] };
+  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], migrateScreen:['.set-header'] };
 function popTopFor(pop){
   const pz = pop ? (parseInt(getComputedStyle(pop).zIndex, 10) || 0) : 1e9;
   let host = null, hz = -1;
@@ -6733,7 +6757,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['modalBg','docRd','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','wsAddSheet','settingsScreen','expScreen','migrateScreen','zsScr'];
+const NOTE_SCREENS = ['modalBg','docRd','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','wsAddSheet','settingsScreen','expScreen','syncScreen','migrateScreen','zsScr'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -9795,7 +9819,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 212;
+const APP_VERSION = 213;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -19210,6 +19234,11 @@ async function drApply(st){
     if(wasLive) res.trashed++;
   }
   for(const it of toPurge){ trash = trash.filter(x=>x !== it); setThumbUrl(it, null); await idbDelete(it.id); }
+  /* v213: kako je bilo pre (za spisak „Sa drugog uređaja“) */
+  const prev = new Map();
+  live.forEach(d=>{ const l = L.get(d.id); if(l && l.it) prev.set(d.id, {w:l.w, name:l.it.name, cat:l.it.category || null, vu:l.it.validUntil || ''}); });
+  const log = [];
+  toTrash.forEach(x=>{ if(x.wasLive) log.push({id:x.it.id, n:x.it.name, c:[{k:'trash'}]}); });
   if(live.length){
     const need = [];
     live.forEach(d=>{
@@ -19225,7 +19254,22 @@ async function drApply(st){
     const r = await mergeBackup(src, {quiet:true, prog:(n, total)=>{ if(big) toastPersist(t('drInRun', {n, total})); }});
     if(big) toastHide();
     res.added += r.added; res.updated += r.updated; res.bad += r.bad;
+    live.forEach(d=>{
+      const it = items.find(i=>i.id === d.id);
+      if(!it || (it.updatedAt || 0) !== (d.updatedAt || 0)) return;   /* nije stiglo: pokušava se ponovo, beleži se tada */
+      const p = prev.get(d.id), c = [];
+      if(!p || p.w === 'purged') c.push({k:'new', a:syAlbName(it.category)});
+      else{
+        if(p.w === 'trash') c.push({k:'back'});
+        if(p.name !== it.name) c.push({k:'name', a:p.name, b:it.name});
+        if(p.w === 'live' && p.cat !== (it.category || null)) c.push({k:'alb', a:syAlbName(p.cat), b:syAlbName(it.category)});
+        if(p.w === 'live' && p.vu !== (it.validUntil || '')) c.push({k:'rok', a:p.vu, b:it.validUntil || ''});
+        if(!c.length) c.push({k:'edit'});
+      }
+      log.push({id:it.id, n:it.name, c});
+    });
   }
+  if(log.length) syAdd(log);
   /* 4. obrisani albumi u korpi (opis grupe) */
   const g0 = trAlbs(), gids = new Set(g0.map(g=>g.gid));
   const gAdd = (Array.isArray(st.trAlbs) ? st.trAlbs : []).filter(g=>g && g.gid && !gids.has(g.gid) && trash.some(it=>it.trashGroup === g.gid));
@@ -19256,7 +19300,7 @@ async function drApplyAll(){
     tot.added += r.added; tot.updated += r.updated; tot.trashed += r.trashed;
     if(!r.bad) c.todo = false;   /* oštećen/nedostupan fajl: pokušava se ponovo sledeći put */
   }
-  if(tot.added || tot.updated || tot.trashed) showNote(drInTxt(tot), 7000);
+  /* v213: umesto kratkog obaveštenja — ikonica u zaglavlju i spisak (syAdd u drApply) */
 }
 /* stanje ovog uređaja (fajl koji piše samo on) + vreme izmene svakog dokumenta ovde (i trajno obrisanih) */
 async function drState(manifest){
@@ -19296,6 +19340,76 @@ async function drPutState(state){
   catch(er){ if(er.status === 404) _dr.devDir = null; throw er; }
   drSave();
 }
+
+/* ---- v213: spisak „Sa drugog uređaja“ — samo na ovom uređaju (localStorage), ne ide na Drive ni u kopiju; najviše 100 redova ---- */
+function syKey(){ return LS_PREFIX + 'syncLog'; }   /* funkcija, ne const: zaglavlje se crta pre ovog dela skripte */
+function syAlbName(id){ return (id && catLabel(id)) || t('expAlbumNone'); }
+function syLoad(){ try{ const v = JSON.parse(localStorage.getItem(syKey()) || '[]'); return Array.isArray(v) ? v.filter(x=>x && x.id && Array.isArray(x.c)) : []; }catch(e){ return []; } }
+function sySave(v){ try{ if(v.length) localStorage.setItem(syKey(), JSON.stringify(v.slice(0, 100))); else localStorage.removeItem(syKey()); }catch(e){} syUpdateHeader(); }
+function syAdd(list){
+  const now = Date.now();
+  sySave(list.map((x, i)=>Object.assign({ts:now, r:now.toString(36) + i}, x)).reverse().concat(syLoad()));
+  if(document.getElementById('syncScreen').classList.contains('open')) syRender();
+}
+function syUpdateHeader(){
+  const b = document.getElementById('syncHdrBtn'); if(!b) return;
+  const n = syLoad().length;
+  b.style.display = (n && !selectionMode) ? 'flex' : 'none';
+  document.getElementById('syncHdrCount').textContent = n > 99 ? '99+' : String(n);
+}
+function syDesc(c){
+  const d = (v)=>v ? fmtExpDate(v, false) : t('syNone');
+  return c.map(x=>x.k === 'new' ? t('syNew', {a:x.a}) : x.k === 'back' ? t('syBack') : x.k === 'trash' ? t('syTrash')
+    : x.k === 'name' ? t('syName', {a:x.a, b:x.b}) : x.k === 'alb' ? t('syAlb', {a:x.a, b:x.b}) : x.k === 'rok' ? t('syRok', {a:d(x.a), b:d(x.b)}) : t('syEdit')).join(' · ');
+}
+function syDay(ts){
+  const d = new Date(ts), now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+  const same = (a, b)=>a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  if(same(d, now)) return t('syToday');
+  if(same(d, y)) return t('syYest');
+  return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.';
+}
+const syScreen = document.getElementById('syncScreen');
+function openSyncScreen(){ syRender(); syScreen.classList.add('open'); syScreen.scrollTop = 0; pushBack(closeSyncScreen); }
+const closeSyncScreen = ()=>{ syScreen.classList.remove('open'); };
+function syRender(){
+  const panel = document.getElementById('syncPanel');
+  panel.innerHTML = settingsHeader(t('syTitle')) + '<div class="set-body" id="syncBody"></div>';
+  const body = document.getElementById('syncBody'), list = syLoad();
+  let box = null, day = null;
+  list.forEach(x=>{
+    const dl = syDay(x.ts);
+    if(dl !== day){
+      day = dl;
+      const lab = document.createElement('div'); lab.className = 'exp-grp-label'; lab.textContent = dl; body.appendChild(lab);
+      box = document.createElement('div'); box.className = 'exp-bar'; box.style.marginBottom = '22px'; body.appendChild(box);
+    }
+    const it = items.find(i=>i.id === x.id), tr = it ? null : trash.find(i=>i.id === x.id);
+    const k0 = x.c[0] && x.c[0].k;
+    const row = document.createElement('div');
+    row.className = 'exp-row sync-row' + (k0 === 'new' ? ' lvl-warn' : '');
+    const tm = new Date(x.ts), hm = String(tm.getHours()).padStart(2, '0') + ':' + String(tm.getMinutes()).padStart(2, '0');
+    row.innerHTML = '<span class="exp-dot"></span><span class="exp-main"><span class="exp-name">' + escapeHtml((it || tr || x).name || x.n) + '</span>' +
+      '<span class="exp-album">' + escapeHtml(it || tr ? syDesc(x.c) : syDesc(x.c) + ' · ' + t('syGone')) + '</span></span>' +
+      '<span class="exp-when"><b>' + hm + '</b></span><button type="button" class="sync-x" aria-label="✕">✕</button>';
+    row.querySelector('.exp-main').onclick = ()=>{
+      if(it) requestCloseThen(()=>openFromExpiry(it));
+      else if(tr) requestCloseThen(()=>{ openSettings(); openSettingsSub('trash'); });
+    };
+    row.querySelector('.sync-x').onclick = ()=>{
+      const rest = syLoad().filter(y=>y.r !== x.r); sySave(rest);
+      if(rest.length) syRender(); else requestClose();
+    };
+    box.appendChild(row);
+  });
+  if(list.length){
+    const clr = document.createElement('button'); clr.type = 'button'; clr.className = 'dr-btn dr-btn2 sync-clear'; clr.id = 'syncClear';
+    clr.textContent = t('syClear'); clr.onclick = ()=>{ sySave([]); requestClose(); };
+    body.appendChild(clr);
+    body.insertAdjacentHTML('beforeend', '<div class="settings-hint">' + escapeHtml(t('syHint')) + '</div>');
+  }
+}
+(()=>{ const b = document.getElementById('syncHdrBtn'); b.title = t('syHdr'); b.setAttribute('aria-label', t('syHdr')); b.onclick = ()=>openSyncScreen(); })();
 
 /* ---- slanje ---- */
 function drSoon(ms){
