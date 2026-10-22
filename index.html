@@ -5319,10 +5319,14 @@ async function markExpSeen(item){
   else delete _expNotified[item.id];
   await saveExpNotified();
 }
+function expWidgetBusy(){ return vwEl.classList.contains('open') || document.documentElement.classList.contains('vw-wait') || scPeekOn; }
 async function checkExpNotices(){
   if(_expNoticeBusy || document.hidden) return;
   _expNoticeBusy = true;
   try{
+    /* v223: dodir na vidžet — prvo se otvara prozor vidžeta; obaveštenje ne ide preko njega (ni preko pregleda bez PIN-a),
+       pokaže se pri sledećem ulasku u Arhivu */
+    if(vzNative()){ await new Promise(r=>setTimeout(r, 900)); if(document.hidden || expWidgetBusy()) return; }
     const map = await loadExpNotified();
     const due = [];
     items.forEach(it=>{
@@ -9878,7 +9882,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 222;
+const APP_VERSION = 223;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
