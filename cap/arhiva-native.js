@@ -187,7 +187,8 @@
       postavi: function(podaci){ return Vz.postavi({ podaci: podaci }); },
       stanje: function(){ return Vz.stanje(); },
       naEkran: function(){ return Vz.naEkran(); },
-      prozor: function(){ return Vz.prozor(); }   /* v218: nazad iz Arhive → prozor vidžeta */
+      prozor: function(){ return Vz.prozor(); },   /* v218 (stariji APK) */
+      skloni: function(){ return Vz.skloni(); }    /* v221: Arhiva u pozadinu (nazad sa prozora vidžeta) */
     };
   }
 
