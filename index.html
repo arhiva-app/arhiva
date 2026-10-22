@@ -9868,7 +9868,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 216;
+const APP_VERSION = 217;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18328,7 +18328,9 @@ function lkHide(){
 function lkBack(){
   if(!lkEl || !lkEl.classList.contains('open')) return false;
   if(lkBackFn){ lkBackFn(); return true; }
-  return lkState === 'open' ? true : 'izlaz';
+  if(lkState === 'open') return true;
+  scBackGen++;   /* v217: izlaz sa zaključanog ekrana otkazuje ono što je čekalo iza PIN-a (ekran „Vidžet“, prečica) */
+  return 'izlaz';
 }
 /* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak prsta · PIN/Šablon; bez biometrije samo PIN/Šablon).
    interactive=false: ispod Androidovog prozora ili posle gašenja ekrana — dodir na polje pokreće otključavanje.
@@ -18373,7 +18375,7 @@ function lkPrompt(o){
     let busy = false, done = false, reset = ()=>{};
     const finish = (v)=>{ if(done) return; done = true; lkPend = null; lkBackFn = null; res(v); };
     lkPend = ()=>finish(null);
-    lkBackFn = o.cancel ? ()=>finish(null) : ()=>{};
+    lkBackFn = o.cancel ? ()=>finish(null) : (o.backExit ? null : ()=>{});   /* v217: backExit — Nazad izlazi iz Arhive (ostaje zaključana) */
     const fl = el.querySelector('[data-a=forgot]'); if(fl){ fl.textContent = t(pin ? 'lkForgotPin' : 'lkForgotPat'); fl.onclick = ()=>{ if(!busy) finish(LK_FORGOT); }; }
     const cl = el.querySelector('[data-a=cancel]'); if(cl){ cl.textContent = t('lkCancel'); cl.onclick = ()=>finish(null); }
     const bl = el.querySelector('[data-a=bio]'); if(bl){ bl.textContent = t('lkFpLink'); bl.onclick = ()=>{ if(!busy && !done) o.onBio(); }; }   /* v205: ponovo Androidov prozor za otisak */
@@ -18545,7 +18547,8 @@ async function lkUnlock(first, fromPeek){
         if(r.ok){ bioDone = true; if(lkPend){ const f = lkPend; lkPend = null; f(); } }
       };
       const pp = lkPrompt({kind:c.mode, title:lkK(c, 'lkPinTitle', 'lkPatTitle'),
-        sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, onBio: bioOk ? runBio : null, check:lkCheckCurrent});
+        sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, onBio: bioOk ? runBio : null, check:lkCheckCurrent,
+        backExit:true});   /* v217 (Zoran): Nazad na PIN-u pri otključavanju → početni ekran telefona, ne zarobljava */
       if(bioOk && autoBio) runBio();
       autoBio = false;
       const v = await pp;
@@ -18776,6 +18779,7 @@ function scWaitOpen(){
 }
 /* id i vrsta prečice: jedan poziv dodatku, rezultat dele otključavanje (scPeekGate) i scFromShortcut */
 let _scTakeP = null;
+var scBackGen = 0;   /* v217: raste kad se Nazad-om izađe sa zaključanog ekrana (var: lkBack je ranije u skripti) */
 function scTake(){
   if(!_scTakeP){
     const n = scNative();
@@ -18839,7 +18843,9 @@ async function scFromShortcut(){
   if(!r) return;
   await new Promise(res=>setTimeout(res, 700));   /* povratak: zaključavanje prvo odluči (i preuzme prečicu sa početnog ekrana) */
   if(!scClaim(r)) return;
+  const gen = scBackGen;
   await scWaitOpen();
+  if(gen !== scBackGen) return;   /* v217: korisnik je na PIN-u izašao nazad — odustao */
   if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')){ vzOpenEdit(); return; }   /* v216: „Uredi ›“ sa prozora vidžeta */
   const item = items.find(i=>i.id === r.id);
   if(item){ openFromSearch(item); return; }
