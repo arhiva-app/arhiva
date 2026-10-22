@@ -10,7 +10,8 @@
    v194: „Sačuvaj kao“ ide redom (više fajlova jedan za drugim)
    7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA)
    8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA)
-   9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE) */
+   9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE)
+   10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -178,4 +179,14 @@
       throw e;
     }
   };
+  /* 10) v214 vidžet: postavi(podaci JSON), stanje() → {broj, moze}, naEkran() → {ok} */
+  if(C.isPluginAvailable && C.isPluginAvailable('Vidzet')){
+    var Vz = reg('Vidzet');
+    window.ARHIVA_VIDZET = {
+      postavi: function(podaci){ return Vz.postavi({ podaci: podaci }); },
+      stanje: function(){ return Vz.stanje(); },
+      naEkran: function(){ return Vz.naEkran(); }
+    };
+  }
+
 })();
