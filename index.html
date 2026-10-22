@@ -9870,7 +9870,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 219;
+const APP_VERSION = 220;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18901,7 +18901,7 @@ async function scFromShortcut(){
   if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')){ vzOpenEdit(true); return; }   /* v216: „Uredi ›“ sa prozora vidžeta */
   if(r.vrsta === 'vidzet'){   /* v218: dokument iz prozora vidžeta — samo pregled; nazad vraća u prozor */
     const it = items.find(i=>i.id === r.id);
-    if(it){ _vzDocW = true; currentGalleryItems = [it]; openModal(it); return; }
+    if(it){ vzOpenWidgetDoc(it); return; }
   }
   const item = items.find(i=>i.id === r.id);
   if(item){ openFromSearch(item); return; }
@@ -19004,6 +19004,16 @@ const closeVzScreen = ()=>{
   if(_vzToDoc){ _vzToDoc = false; return; }   /* ide se u pregled dokumenta; nazad vraća ovde */
   if(_vzFromW){ _vzFromW = false; if(!homeUnwind && !_vzLeaving) vzToWidget(); }   /* v218: nazad → prozor vidžeta (sa izmenama) */
 };
+/* v220: dokument iz prozora vidžeta (Arhiva otključana) — prvo se zatvori ono što je u Arhivi ostalo otvoreno
+   (npr. Podešavanja), pa dokument dolazi preko celog ekrana; ranije se otvarao ispod tog ekrana i nije se video. */
+function vzOpenWidgetDoc(it){
+  _vzDocW = false; _vzBack = false; _vzFromW = false; _vzToDoc = false;   /* zatvaranje ne sme da vraća u prozor */
+  const step = ()=>{
+    if(!backStack.length){ _vzDocW = true; currentGalleryItems = [it]; openModal(it); return; }
+    requestCloseThen(step);
+  };
+  step();
+}
 function vzOpenEdit(fromWidget){ if(fromWidget) _vzFromW = true; if(vzEl.classList.contains('open')) vzRender(); else vzOpenScreen(); }
 /* v218 (Zoran): korak nazad = tačno jedan ekran unazad. Iz Arhive otvorene iz prozora vidžeta nazad vodi u prozor
    (Android: Vidzet.prozor; Arhiva ide iza). Stariji APK nema prozor() → kao ranije, Arhiva se zatvara. */
