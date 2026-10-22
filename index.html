@@ -8504,7 +8504,7 @@ function zmSettled(){
   }).catch(e=>console.error(e));
 }
 
-const closeModal = ()=>{ modalBg.classList.remove('open'); zmReset(false); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vzBack){ _vzBack = false; vzReturn(); } else if(scPeekOn) scPeekClosed(); };
+const closeModal = ()=>{ modalBg.classList.remove('open'); zmReset(false); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind) vzToWidget(); } else if(scPeekOn) scPeekClosed(); };
 document.getElementById('modalClose').onclick = ()=>requestClose();
 modalBg.onclick = (e)=>{ if(e.target === modalBg){ requestClose(); } };
 
@@ -9868,7 +9868,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 217;
+const APP_VERSION = 218;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -18330,6 +18330,7 @@ function lkBack(){
   if(lkBackFn){ lkBackFn(); return true; }
   if(lkState === 'open') return true;
   scBackGen++;   /* v217: izlaz sa zaključanog ekrana otkazuje ono što je čekalo iza PIN-a (ekran „Vidžet“, prečica) */
+  if(scWidgetWait){ scWidgetWait = false; vzToWidget(); return true; }   /* v218: došlo se iz prozora vidžeta → nazad u njega */
   return 'izlaz';
 }
 /* Ekran „Arhiva je zaključana“: znak u sjaju i dva polja (Otisak prsta · PIN/Šablon; bez biometrije samo PIN/Šablon).
@@ -18779,12 +18780,14 @@ function scWaitOpen(){
 }
 /* id i vrsta prečice: jedan poziv dodatku, rezultat dele otključavanje (scPeekGate) i scFromShortcut */
 let _scTakeP = null;
-var scBackGen = 0;   /* v217: raste kad se Nazad-om izađe sa zaključanog ekrana (var: lkBack je ranije u skripti) */
+var scBackGen = 0;
+var scWidgetWait = false, scPeekWidget = false;   /* v218: Arhiva otvorena iz prozora vidžeta — nazad vraća u prozor */   /* v217: raste kad se Nazad-om izađe sa zaključanog ekrana (var: lkBack je ranije u skripti) */
 function scTake(){
   if(!_scTakeP){
     const n = scNative();
     _scTakeP = (n ? Promise.resolve(n.cekaj()).catch(()=>null) : Promise.resolve(null)).then(r=>{
       if(!(r && r.id)){ _scTakeP = null; return null; }
+      if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')) scWidgetWait = true;   /* v218 */
       return r;
     });
   }
@@ -18799,6 +18802,7 @@ async function scPeekGate(){
   /* v216: dokument sa vidžeta se gleda bez PIN-a kao sa prečice; „Uredi“ (vidzet-uredi) ide kroz PIN */
   if(!r || r.handled || (r.vrsta !== 'precica' && !(r.vrsta === 'vidzet' && r.id !== '-')) || !scClaim(r)) return false;
   scPeekOn = true;   /* odmah: drugi poziv otključavanja (npr. dodir) ne pokreće PIN */
+  scPeekWidget = r.vrsta === 'vidzet';   /* v218: nazad iz pregleda → prozor vidžeta */
   await scItemsReady();
   const item = items.find(i=>i.id === r.id);
   if(!item){   /* obrisana ili u korpi: obično otključavanje, pa poruka */
@@ -18824,7 +18828,8 @@ function scPeekClosed(){
   document.documentElement.classList.remove('sc-peek');
   render();
   lkLockedScreen(false);
-  if(scPeekExit) setTimeout(()=>window.close(), 50);   /* aplikacija se zatvara; sledeće otvaranje traži PIN */
+  const w = scPeekWidget; scPeekWidget = false;
+  if(scPeekExit) setTimeout(()=>{ if(w) vzToWidget(); else window.close(); }, 50);   /* aplikacija se zatvara (ili nazad u prozor vidžeta); sledeće otvaranje traži PIN */
 }
 document.getElementById('modalUnlock').onclick = (e)=>{
   e.stopPropagation();
@@ -18845,8 +18850,13 @@ async function scFromShortcut(){
   if(!scClaim(r)) return;
   const gen = scBackGen;
   await scWaitOpen();
+  scWidgetWait = false;
   if(gen !== scBackGen) return;   /* v217: korisnik je na PIN-u izašao nazad — odustao */
-  if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')){ vzOpenEdit(); return; }   /* v216: „Uredi ›“ sa prozora vidžeta */
+  if(r.vrsta === 'vidzet-uredi' || (r.vrsta === 'vidzet' && r.id === '-')){ vzOpenEdit(true); return; }   /* v216: „Uredi ›“ sa prozora vidžeta */
+  if(r.vrsta === 'vidzet'){   /* v218: dokument iz prozora vidžeta — samo pregled; nazad vraća u prozor */
+    const it = items.find(i=>i.id === r.id);
+    if(it){ _vzDocW = true; currentGalleryItems = [it]; openModal(it); return; }
+  }
   const item = items.find(i=>i.id === r.id);
   if(item){ openFromSearch(item); return; }
   showNote(trash.some(x=>x.id === r.id) ? t('scInTrash') : t('scGone'), 6000);
@@ -18941,13 +18951,23 @@ async function vzToggle(it){
 }
 /* ---- ekran „Na početnom ekranu“ ---- */
 const vzEl = document.getElementById('vzScreen');
-let _vzToDoc = false, _vzBack = false;
+let _vzToDoc = false, _vzBack = false, _vzFromW = false, _vzDocW = false;   /* v218: _vzFromW/_vzDocW — došlo se iz prozora vidžeta */
 function vzOpenScreen(){ vzRender(); vzEl.classList.add('open'); document.documentElement.classList.add('vz-open'); vzEl.scrollTop = 0; pushBack(closeVzScreen); }
 const closeVzScreen = ()=>{
   vzEl.classList.remove('open'); document.documentElement.classList.remove('vz-open');
   if(_vzToDoc){ _vzToDoc = false; return; }   /* ide se u pregled dokumenta; nazad vraća ovde */
+  if(_vzFromW){ _vzFromW = false; if(!homeUnwind) vzToWidget(); }   /* v218: nazad → prozor vidžeta (sa izmenama) */
 };
-function vzOpenEdit(){ if(vzEl.classList.contains('open')) vzRender(); else vzOpenScreen(); }
+function vzOpenEdit(fromWidget){ if(fromWidget) _vzFromW = true; if(vzEl.classList.contains('open')) vzRender(); else vzOpenScreen(); }
+/* v218 (Zoran): korak nazad = tačno jedan ekran unazad. Iz Arhive otvorene iz prozora vidžeta nazad vodi u prozor
+   (Android: Vidzet.prozor; Arhiva ide iza). Stariji APK nema prozor() → kao ranije, Arhiva se zatvara. */
+async function vzToWidget(){
+  const n = vzNative();
+  if(!n){ window.close(); return; }
+  clearTimeout(_vzTimer);
+  try{ await vzPush(); }catch(e){}   /* prozor odmah pokazuje izmene */
+  try{ await n.prozor(); }catch(e){ window.close(); }
+}
 function vzRefresh(){ if(vzEl.classList.contains('open')) vzRender(); }
 function vzRender(){
   const panel = document.getElementById('vzPanel');

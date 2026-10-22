@@ -179,13 +179,14 @@
       throw e;
     }
   };
-  /* 10) v214 vidžet: postavi(podaci JSON), stanje() → {broj, moze}, naEkran() → {ok} */
+  /* 10) v214 vidžet: postavi(podaci JSON), stanje() → {broj, moze}, naEkran() → {ok}; v218 prozor() */
   if(C.isPluginAvailable && C.isPluginAvailable('Vidzet')){
     var Vz = reg('Vidzet');
     window.ARHIVA_VIDZET = {
       postavi: function(podaci){ return Vz.postavi({ podaci: podaci }); },
       stanje: function(){ return Vz.stanje(); },
-      naEkran: function(){ return Vz.naEkran(); }
+      naEkran: function(){ return Vz.naEkran(); },
+      prozor: function(){ return Vz.prozor(); }   /* v218: nazad iz Arhive → prozor vidžeta */
     };
   }
 
