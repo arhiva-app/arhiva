@@ -2802,7 +2802,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
     <div class="pe-crop" id="peCrop" hidden><canvas id="peCropCv"></canvas></div>
     <div class="xe-crop" id="xeCrop" hidden></div>
     <div class="pe-crop-cap" id="peCropCap" hidden></div>
-    <textarea id="weTx" class="sheet-input we-tx" rows="4" maxlength="5000" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"></textarea>
+    <textarea id="weTx" class="sheet-input we-tx" rows="4" maxlength="5000" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go"></textarea>
     <label class="pe-same" id="peSame" hidden><input type="checkbox" id="peSameCb"><span class="pe-same-box"></span><span class="pe-same-t"><span id="peSameT1"></span><small id="peSameT2"></small></span></label>
     <p class="ai-hint" id="weHint"></p>
     <div class="we-ok-row"><button type="button" class="pg-btn we-cancel" id="weCancel"></button><button type="button" class="sheet-cta" id="weOk"></button></div>
@@ -9985,7 +9985,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 228;
+const APP_VERSION = 229;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -17494,6 +17494,8 @@ function weEdit(u, k){
   snapshotField(weTx);
   weTxReset();
   pushBack(weCloseSheet);
+  /* v229: tastatura odmah gore — fokus u istom dodiru (Chrome otvara tastaturu samo na fokus iz korisnikove radnje) */
+  try{ weTx.focus({preventScroll:true}); }catch(e){}
 }
 /* v143: u prozoru izmene PDF-a isečak prave stranice oko tog mesta (tekst uokviren) i „promeni i tamo“ za isti tekst na drugim mestima */
 function peSameUnits(u){ return _we && _we.pdf ? _we.m.units.filter(o=>o !== u && o.norm === u.norm) : []; }
@@ -17604,7 +17606,10 @@ function weTxStep(d){
   b.addEventListener('pointerdown', e=>{ if(document.activeElement === weTx) e.preventDefault(); });
   b.onclick = ()=>weTxStep(id === 'weTxUndo' ? -1 : 1);
 });
-weTx.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); } });
+/* v229: Enter na tastaturi (Gboard „→“) = Primeni — u prozoru dela nema novog reda (isto kao fieldChain, v202) */
+function weEnterOk(e){ e.preventDefault(); if(weSheet.classList.contains('open')) document.getElementById('weOk').click(); }
+weTx.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') weEnterOk(e); });
+weTx.addEventListener('beforeinput', (e)=>{ if(e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') weEnterOk(e); });
 function weSet(fn){
   if(!_we || !_we.cur) return;
   fn(_we.cur.u, _we.cur.k);
