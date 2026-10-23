@@ -1009,6 +1009,10 @@ html[data-theme="ponoc"]{
    KORAK 2: dokument od više stranica, PDF, uputstvo
    ========================================================= */
 /* oznaka broja stranica u mreži */
+.thumb-box img.pdf-page{ object-position:top center; background:#fff; }
+.pdf-tag{ position:absolute; left:6px; bottom:6px; z-index:2; padding:3px 5px 2px; border-radius:5px; background:#d93025; color:#fff;
+  font:700 10px/1 var(--font-ui); letter-spacing:.4px; pointer-events:none; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.card.has-exp .pdf-tag{ bottom:26px; }
 .pages-badge{ position:absolute; right:5px; bottom:5px; z-index:2; padding:3px 7px; border-radius:9px;
   background:var(--mark-bg); color:var(--ink); border:1px solid var(--line);
   font-family:var(--font-num); font-size:10.5px; line-height:1.2; letter-spacing:.3px; pointer-events:none; }
@@ -6065,7 +6069,66 @@ async function ensureMissingThumbs(){
       }catch(e){ it._thumbFailed = true; console.error(e); }
     }
     if(todo.length) render();
+    await pdfThumbsMissing(pdfDelay);
   }finally{ _thumbFixRunning = false; }
+}
+/* v228: sličica prve strane PDF-a — pravi se JEDNOM i čuva u skladištu sličica (ključ = fajl prve strane, kao kod slika).
+   Upisuje se samo sličica (zapis dokumenta se ne menja → Drive nema šta da šalje). PDF fajl se ne menja.
+   Pozadina: posle pokretanja (3 s), jedan po jedan, čeka dok je pregled otvoren (isti pdf.js radnik).
+   PDF od kog sličica ne može (zaključan, oštećen) se pamti na ovom uređaju (galerija:pdfNoThumb) i ne pokušava ponovo. */
+const PDF_NO_THUMB_KEY = 'galerija:pdfNoThumb';
+let _pdfNoThumb = null;
+function pdfNoThumbSet(){
+  if(!_pdfNoThumb){ _pdfNoThumb = new Set(); try{ (JSON.parse(localStorage.getItem(PDF_NO_THUMB_KEY)) || []).forEach(f=>_pdfNoThumb.add(f)); }catch(e){} }
+  return _pdfNoThumb;
+}
+function pdfNoThumbAdd(f, keep){
+  pdfNoThumbSet().add(f);
+  if(keep){ try{ const a = JSON.parse(localStorage.getItem(PDF_NO_THUMB_KEY) || '[]'); if(a.indexOf(f) < 0){ a.push(f); localStorage.setItem(PDF_NO_THUMB_KEY, JSON.stringify(a.slice(-500))); } }catch(e){} }
+}
+async function pdfThumbBlob(it){
+  const bytes = new Uint8Array(await (await getFileBlob(it, 0)).arrayBuffer());
+  const doc = await pdfOpen(bytes).promise;
+  try{
+    const page = await doc.getPage(1);
+    const b = page.getViewport({scale:1});
+    const scale = Math.min(THUMB_SHORT / Math.min(b.width, b.height), THUMB_LONG / Math.max(b.width, b.height));
+    const vp = page.getViewport({scale});
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(vp.width)); cv.height = Math.max(1, Math.round(vp.height));
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    await page.render({canvasContext:ctx, viewport:vp}).promise;
+    page.cleanup();
+    const blob = await new Promise((res, rej)=>cv.toBlob(x=>x ? res(x) : rej(new Error('sličica')), 'image/jpeg', THUMB_QUALITY));
+    cv.width = cv.height = 0;
+    return blob;
+  }finally{ try{ doc.destroy(); }catch(e){} }
+}
+let pdfDelay = 3000;
+async function pdfThumbsMissing(delay){
+  const wait = (ms)=>new Promise(r=>setTimeout(r, ms));
+  const todo = ()=>items.concat(trash).find(it=>it.type === 'pdf' && !it.thumb && it.pages[0] && !pdfNoThumbSet().has(it.pages[0].file));
+  if(!todo() || !window.pdfLibP) return;
+  if(delay) await wait(delay);
+  pdfDelay = 300;
+  let n = 0, rt = null;
+  for(let it = todo(); it; it = todo()){
+    if(window.__pdfLibErr) return;
+    while(modalBg.classList.contains('open')) await wait(1500);   /* korisnik gleda dokument — ne zauzimati radnika */
+    const f = it.pages[0].file;
+    try{
+      const blob = await pdfThumbBlob(it);
+      await Skladiste.upisi({thumbs:[{id:f, blob}]});
+      if(!it.thumb) setThumbUrl(it, blob);
+      n++;
+      clearTimeout(rt); rt = setTimeout(render, 500);
+    }catch(e){
+      const bad = e && (e.name === 'PasswordException' || e.name === 'InvalidPDFException');
+      pdfNoThumbAdd(f, bad);
+      if(!bad) console.error('PDF sličica', e);
+    }
+  }
 }
 
 /* ================= PRELAZAK NA NOVU BAZU =================
@@ -7623,10 +7686,19 @@ function buildCard(item, indexNumber){
   const thumbBox = document.createElement('div');
   const isPdf = item.type === 'pdf';
   const isDoc = item.type === 'doc';
-  thumbBox.className = 'thumb-box' + ((isPdf || isDoc) ? ' pdf-thumb' : '');
+  const pdfPic = isPdf && !!item.thumb;   /* v228: PDF sa sličicom prve strane */
+  thumbBox.className = 'thumb-box' + ((isPdf || isDoc) && !pdfPic ? ' pdf-thumb' : '');
   const corner = document.createElement('div');
   corner.className = 'corner';
-  if(isPdf || isDoc || !item.thumb){
+  if(pdfPic){
+    const img = document.createElement('img');
+    img.className = 'pdf-page'; img.src = item.thumb; img.loading = 'lazy';
+    thumbBox.appendChild(img);
+    const tag = document.createElement('span');
+    tag.className = 'pdf-tag'; tag.textContent = 'PDF';
+    thumbBox.appendChild(tag);
+    thumbBox.appendChild(corner);
+  }else if(isPdf || isDoc || !item.thumb){
     if(!isPdf && !isDoc) thumbBox.className = 'thumb-box pdf-thumb';
     thumbBox.innerHTML = (isPdf || isDoc) ? fileTypeIcon(fileTypeOf(item)) : pdfIconSvg() + '<span class="pdf-label">SLIKA</span>';
     thumbBox.appendChild(corner);
@@ -9243,6 +9315,7 @@ async function addFile(file, category, o){
         if(content) saveDocText(item, normalizeSr(content)).catch(e=>console.error(e));
       });
     }
+    if(item.type === 'pdf') ensureMissingThumbs();   /* v228: sličica prve strane odmah (u pozadini) */
     return item;
   }catch(e){
     console.error(e);
@@ -9912,7 +9985,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 227;
+const APP_VERSION = 228;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
