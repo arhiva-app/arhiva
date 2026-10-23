@@ -2401,7 +2401,17 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 /* v148: ukupan broj stavki iste veličine kao broj albuma */
 .mark-cnt-2{ font-size:1em; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/* v227: pdf.js 6.4.299, verzija „legacy“ (zvanično Chrome 125+), u repou Arhive (radi i bez interneta, bez tuđeg servera).
+   Skenirani PDF crta ugrađenim dekoderom slika (ImageDecoder) — 3.11 je to radio svojim sporim kodom (~5 puta sporije).
+   Učitava se kao modul (dynamic import); sve što koristi pdf.js čeka window.pdfLibP (pdfOpen), greška → window.__pdfLibErr. */
+window.PDFJS_DIR = new URL('lib/pdfjs-6.4.299/', location.href).href;
+window.pdfLibP = import(PDFJS_DIR + 'pdf.min.mjs').then(function(L){
+  L.GlobalWorkerOptions.workerSrc = PDFJS_DIR + 'pdf.worker.min.mjs';
+  window.pdfjsLib = L; return L;
+});
+window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.js nije učitan', e); });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -3222,8 +3232,7 @@ async function extractContentForItem(item){
     if(item.type !== 'pdf' && item.type !== 'doc') return null;
     const ext = (item.ext || '').toLowerCase();
     if(item.type === 'pdf'){
-      if(typeof pdfjsLib === 'undefined') return null;
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      if(window.__pdfLibErr) return null;
       const bytes = new Uint8Array(await (await getFileBlob(item)).arrayBuffer());
       const pdf = await pdfOpen(bytes).promise;
       let text = '';
@@ -7920,7 +7929,7 @@ function showModalFile(item){
   const p = (item.pages || [])[0];
   document.getElementById('mfMeta').textContent = fmtFileSize(p && p.size);   /* vrsta je već na ikonici */
   document.getElementById('mfOpen').textContent = t('fileOpen');
-  const why = item.type === 'pdf' ? (_pdfBad.get(pdfFileId(item)) || (typeof pdfjsLib === 'undefined' ? 'broken' : '')) : '';
+  const why = item.type === 'pdf' ? (_pdfBad.get(pdfFileId(item)) || (window.__pdfLibErr ? 'broken' : '')) : '';
   document.getElementById('mfNote').textContent = why ? t(why === 'locked' ? 'pdfLocked' : 'pdfBroken') : '';
   document.getElementById('modalFile').hidden = false;
   document.getElementById('modalDelete').setAttribute('aria-label', t('delFileLbl'));
@@ -7941,13 +7950,12 @@ const _pdfDocs = new Map();       /* ID fajla -> {p: Promise<doc>, doc} */
 const _pdfBad = new Map();        /* ID fajla koji pdf.js ne može da pročita -> 'locked' | 'broken' */
 const _pdfPages = new Map();      /* 'ID fajla#stranica' -> Promise<adresa slike> */
 function pdfFileId(it){ const p = (it.pages || [])[0]; return p ? p.file : null; }
-function pdfCanView(it){ const f = pdfFileId(it); return !!f && typeof pdfjsLib !== 'undefined' && !_pdfBad.has(f); }
+function pdfCanView(it){ const f = pdfFileId(it); return !!f && !window.__pdfLibErr && !_pdfBad.has(f); }
 function pdfKnownTotal(it){ const e = _pdfDocs.get(pdfFileId(it)); return (e && e.doc) ? e.doc.numPages : 0; }
 function modalTotal(it){ return (it.type === 'pdf' && pdfCanView(it)) ? (pdfKnownTotal(it) || 1) : pageCount(it); }
 function pdfDocFor(it){
   const f = pdfFileId(it);
   if(_pdfDocs.has(f)){ const e = _pdfDocs.get(f); _pdfDocs.delete(f); _pdfDocs.set(f, e); return e.p; }
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const e = {doc:null, p:null};
   e.p = (async ()=>{
     const bytes = new Uint8Array(await (await getFileBlob(it, 0)).arrayBuffer());
@@ -8023,7 +8031,9 @@ function showModalPdf(item, page){
     document.getElementById('modalPageNo').textContent = n > 1 ? t('pgPageNo', {n:modalPage+1, total:n}) : '';
   };
   setNav(known || 1);
-  setModalSrc('');
+  /* v227: dok se stranica crta, odmah se vidi sličica (prva stranica) — nikad prazan ekran */
+  const _pk = pdfFileId(item) + '#' + modalPage;
+  setModalSrc(modalPage === 0 && item.thumb && !_pdfPages.has(_pk) ? item.thumb : '');
   const load = document.getElementById('modalLoad');
   load.hidden = false;
   pdfDocFor(item).then(doc=>{
@@ -9902,7 +9912,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 226;
+const APP_VERSION = 227;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -15932,8 +15942,7 @@ function wdRewrite(u, text){
 function tplIsWord(tp){ return !!(tp && tp.file && tp.file.ext === 'docx'); }
 function tplIsPdf(tp){ return !!(tp && tp.file && tp.file.ext === 'pdf'); }
 function pdfJsReady(){
-  if(typeof pdfjsLib === 'undefined') throw aiError('aiErrFile');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if(window.__pdfLibErr || !window.pdfLibP) throw aiError('aiErrFile');
 }
 /* v225: JEDAN zajednički pdf.js radnik za sve PDF-ove. Bez njega pdf.js za svaki dokument pravi nov radnik
    (pdf.js 3.11.174 getDocument: new PDFWorker ako nije dat `worker`) i prvi PDF čeka učitavanje i pokretanje 1 MB
@@ -15941,7 +15950,6 @@ function pdfJsReady(){
    Neuspeo radnik (npr. bez interneta) se zaboravlja, pa sledeći pokušaj pravi nov. */
 let _pdfWorker = null;
 function pdfWorker(){
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   if(!_pdfWorker || _pdfWorker.destroyed){
     const w = new pdfjsLib.PDFWorker();
     w.promise.catch(()=>{ if(_pdfWorker === w) _pdfWorker = null; });
@@ -15949,11 +15957,15 @@ function pdfWorker(){
   }
   return _pdfWorker;
 }
-function pdfOpen(bytes){ return pdfjsLib.getDocument({data: bytes, worker: pdfWorker()}); }
+/* v227: pdf.js 6 nema doc.destroy() — dodaje se (gasi samo taj dokument; zajednički radnik ostaje); wasm = JPEG2000, JBIG2, boje (ICC) */
+function pdfOpen(bytes){
+  return {promise: window.pdfLibP.then(L=>L.getDocument({data: bytes, worker: pdfWorker(), wasmUrl: PDFJS_DIR + 'wasm/'}).promise)
+    .then(doc=>{ if(typeof doc.destroy !== 'function') doc.destroy = ()=>doc.loadingTask.destroy(); return doc; })};
+}
 /* posle pokretanja, ako u Arhivi ima PDF-ova: radnik se sprema unapred (učitava se i pokreće u svojoj niti) */
 function pdfWarmUp(){
-  if(typeof pdfjsLib === 'undefined' || !items.some(i=>i.type === 'pdf')) return;
-  setTimeout(()=>{ try{ pdfWorker(); }catch(e){} }, 2000);
+  if(!window.pdfLibP || window.__pdfLibErr || !items.some(i=>i.type === 'pdf')) return;
+  setTimeout(()=>{ window.pdfLibP.then(()=>pdfWorker()).catch(()=>{}); }, 2000);
 }
 /* Čita PDF i pravi pasuse: {text, head, ch:[{li, x, w}|null]} — ch prati svaki znak teksta (null = razmak između reči ili redova).
    lines: [{p, y, fs, fam, x0, x1, next:[x početka sledećih znakova]}]. Isti PDF uvek daje iste pasuse (šablon i popunjavanje se sparuju po tekstu). */
@@ -16178,7 +16190,8 @@ async function pdfRenderEdited(m, edits, title){
       const L0 = m.lines[e.li], L = {y:e.y, fs:e.fs, fam:L0.fam};
       const fo = e.fn ? pdfFontObj(page, e.fn) : null, bold = !!(fo && (fo.bold || fo.black || /bold|black|heavy|semibold|demi/i.test(String(fo.name || fo.loadedName || ''))));
       const pad = 0.08 * L.fs;
-      const r = vp.convertToViewportRectangle([e.a - pad, L.y - 0.23 * L.fs, e.b + pad, L.y + 0.92 * L.fs]);
+      /* v227: pdf.js 6 nema convertToViewportRectangle — dve tačke (isto kao njegova stara definicija u 3.11) */
+      const r = vp.convertToViewportPoint(e.a - pad, L.y - 0.23 * L.fs).concat(vp.convertToViewportPoint(e.b + pad, L.y + 0.92 * L.fs));
       let x = Math.min(r[0], r[2]), w = Math.abs(r[2] - r[0]);
       const y = Math.min(r[1], r[3]), h = Math.abs(r[3] - r[1]);
       const col = pdfSampleColors(ctx, x, y, w, h);
