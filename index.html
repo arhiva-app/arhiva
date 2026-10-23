@@ -3240,7 +3240,7 @@ async function extractContentForItem(item){
       if(typeof pdfjsLib === 'undefined') return null;
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       const bytes = new Uint8Array(await (await getFileBlob(item)).arrayBuffer());
-      const pdf = await pdfjsLib.getDocument({data: bytes}).promise;
+      const pdf = await pdfOpen(bytes).promise;
       let text = '';
       const maxPages = Math.min(pdf.numPages, 15);
       for(let p=1;p<=maxPages;p++){
@@ -7970,7 +7970,7 @@ function pdfDocFor(it){
   const e = {doc:null, p:null};
   e.p = (async ()=>{
     const bytes = new Uint8Array(await (await getFileBlob(it, 0)).arrayBuffer());
-    const doc = await pdfjsLib.getDocument({data: bytes}).promise;   /* zaključan PDF: PasswordException */
+    const doc = await pdfOpen(bytes).promise;   /* zaključan PDF: PasswordException */
     e.doc = doc;
     return doc;
   })();
@@ -9474,7 +9474,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices();
+loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp();
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -9887,7 +9887,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 224;
+const APP_VERSION = 225;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -14308,7 +14308,7 @@ async function wsScanPages(src){
     let blob;
     try{ blob = await getFileBlob(src); }catch(e){ throw aiError('aiErrFile'); }
     pdfJsReady();
-    const pdf = await pdfjsLib.getDocument({data:new Uint8Array(await blob.arrayBuffer())}).promise;
+    const pdf = await pdfOpen(new Uint8Array(await blob.arrayBuffer())).promise;
     const n = Math.min(pdf.numPages, 20);
     for(let p = 1; p <= n; p++) out.push(async ()=>{
       const page = await pdf.getPage(p), v1 = page.getViewport({scale:1}), vp = page.getViewport({scale:Math.min(4, 2000 / v1.width)});
@@ -15920,6 +15920,26 @@ function pdfJsReady(){
   if(typeof pdfjsLib === 'undefined') throw aiError('aiErrFile');
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
+/* v225: JEDAN zajednički pdf.js radnik za sve PDF-ove. Bez njega pdf.js za svaki dokument pravi nov radnik
+   (pdf.js 3.11.174 getDocument: new PDFWorker ako nije dat `worker`) i prvi PDF čeka učitavanje i pokretanje 1 MB
+   koda radnika. Radnik dat kroz `worker` se ne gasi sa dokumentom (gasi se samo onaj koji pdf.js sam napravi).
+   Neuspeo radnik (npr. bez interneta) se zaboravlja, pa sledeći pokušaj pravi nov. */
+let _pdfWorker = null;
+function pdfWorker(){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if(!_pdfWorker || _pdfWorker.destroyed){
+    const w = new pdfjsLib.PDFWorker();
+    w.promise.catch(()=>{ if(_pdfWorker === w) _pdfWorker = null; });
+    _pdfWorker = w;
+  }
+  return _pdfWorker;
+}
+function pdfOpen(bytes){ return pdfjsLib.getDocument({data: bytes, worker: pdfWorker()}); }
+/* posle pokretanja, ako u Arhivi ima PDF-ova: radnik se sprema unapred (učitava se i pokreće u svojoj niti) */
+function pdfWarmUp(){
+  if(typeof pdfjsLib === 'undefined' || !items.some(i=>i.type === 'pdf')) return;
+  setTimeout(()=>{ try{ pdfWorker(); }catch(e){} }, 2000);
+}
 /* Čita PDF i pravi pasuse: {text, head, ch:[{li, x, w}|null]} — ch prati svaki znak teksta (null = razmak između reči ili redova).
    lines: [{p, y, fs, fam, x0, x1, next:[x početka sledećih znakova]}]. Isti PDF uvek daje iste pasuse (šablon i popunjavanje se sparuju po tekstu). */
 let _pdfMeasure = null;
@@ -15931,7 +15951,7 @@ function pdfCharW(c, fam){
 }
 async function pdfTextModel(bytes, maxPages){
   pdfJsReady();
-  const pdf = await pdfjsLib.getDocument({data:bytes}).promise;
+  const pdf = await pdfOpen(bytes).promise;
   const n = Math.min(pdf.numPages, maxPages || 40);
   const pages = [], lines = [];
   let chars = 0;
@@ -17406,7 +17426,7 @@ function peSheetExtras(u){
   if(cyT - cyB < minH){ const m = (cyT + cyB) / 2; cyT = m + minH / 2; cyB = m - minH / 2; }
   cyT = Math.min(pg.h, cyT); cyB = Math.max(0, cyB);
   const we = _we;
-  if(!we.pdfDoc){ pdfJsReady(); we.pdfDoc = pdfjsLib.getDocument({data:we.bytes.slice()}).promise; }
+  if(!we.pdfDoc){ pdfJsReady(); we.pdfDoc = pdfOpen(we.bytes.slice()).promise; }
   we.pdfDoc.then(async doc=>{
     const page = await doc.getPage(u.p + 1);
     if(_we !== we || we.cropTok !== tok) return;
