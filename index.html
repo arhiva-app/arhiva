@@ -10002,7 +10002,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 231;
+const APP_VERSION = 232;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -16264,6 +16264,51 @@ async function tplFillPdf(tp, vals, title){
   return {blob:r.blob, thumb:r.thumb, lost};
 }
 /* v141: stranice PDF-a sa izmenama (prekrij stari tekst bojom podloge, upiši nov na isto mesto) — zajedničko za Popuni šablon i Izmeni PDF */
+/* v232: jedna izmena reda na slici stranice (nov PDF i isečak u prozoru crtaju isto) */
+function pdfDrawEdit(ctx, page, vp, m, e){
+  const sc = vp.scale;
+  const L0 = m.lines[e.li], L = {y:e.y, fs:e.fs, fam:L0.fam};
+  const fo = e.fn ? pdfFontObj(page, e.fn) : null, bold = !!(fo && (fo.bold || fo.black || /bold|black|heavy|semibold|demi/i.test(String(fo.name || fo.loadedName || ''))));
+  const pad = 0.08 * L.fs;
+  /* v227: pdf.js 6 nema convertToViewportRectangle — dve tačke (isto kao njegova stara definicija u 3.11) */
+  const r = vp.convertToViewportPoint(e.a - pad, L.y - 0.23 * L.fs).concat(vp.convertToViewportPoint(e.b + pad, L.y + 0.92 * L.fs));
+  let x = Math.min(r[0], r[2]), w = Math.abs(r[2] - r[0]);
+  const y = Math.min(r[1], r[3]), h = Math.abs(r[3] - r[1]);
+  const col = pdfSampleColors(ctx, x, y, w, h);
+  /* tačne ivice po slici: početak podatka = kraj razmaka pred njim, kraj = početak razmaka iza njega */
+  const tailW = Array.from(e.tail || '').reduce((q, c)=>q + pdfCharW(c, L.fam), 0) / 100 * L.fs * sc;
+  /* v141: obrisan ceo red (Izmeni PDF) — prekriva se ceo red sa malo prostora desno (procena širine slova ume da bude kraća) */
+  const fx = e.full ? {x, w:w + 0.4 * L.fs * sc, top:-1, free:Infinity} : pdfSnapX(ctx, x, y, w, h, L.fs * sc, e.snapA, e.snapB, tailW, e.words);
+  x = fx.x; w = fx.w;
+  const inkTop = fx.top;
+  ctx.fillStyle = col.bg;
+  ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+  if(!e.text) return;
+  const base = [x + 0.08 * L.fs * sc, vp.convertToViewportPoint(e.a, L.y)[1]];
+  const avail = Math.max(w, Math.min((e.right - e.a) * sc - 0.25 * L.fs * sc, fx.free - x));
+  const fam = /mono/i.test(L.fam) ? 'monospace' : (/serif/i.test(L.fam) && !/sans/i.test(L.fam) ? 'serif' : 'sans-serif');
+  const wt = bold ? 'bold ' : '';
+  let px = L.fs * sc;
+  ctx.font = wt + px + 'px ' + fam;
+  /* ista visina slova kao u originalu (slova na telefonu nisu ista kao u PDF-u) */
+  if(inkTop >= 0){
+    const want = base[1] - inkTop, have = ctx.measureText(e.old || 'H').actualBoundingBoxAscent;   /* ista slova kao stari podatak */
+    if(want > 0 && have > 0){ const k = Math.max(0.85, Math.min(1.3, want / have)); px *= k; ctx.font = wt + px + 'px ' + fam; }
+  }
+  let tw = ctx.measureText(e.text).width;
+  /* prvo se slova malo suze (do 82 %), pa tek onda smanjuju — da podatak bude iste visine kao okolni tekst */
+  if(tw * 0.82 > avail){ px = Math.max(px * 0.55, px * avail / (tw * 0.82)); ctx.font = wt + px + 'px ' + fam; tw = ctx.measureText(e.text).width; }
+  if(tw > avail + 8){
+    const extra = Math.min((e.right - e.b) * sc, fx.free - (x + w));   /* ni najmanja slova ne staju: proširi podlogu do ivice */
+    if(extra > 0){ ctx.fillStyle = col.bg; ctx.fillRect(x + w, y - 1, Math.min(extra, tw - w), h + 2); }
+  }
+  ctx.fillStyle = col.ink;
+  ctx.textBaseline = 'alphabetic';
+  ctx.save();
+  if(tw > avail){ const k = Math.max(0.72, avail / tw); ctx.setTransform(k, 0, 0, 1, base[0] * (1 - k), 0); }
+  ctx.fillText(e.text, base[0], base[1]);
+  ctx.restore();
+}
 async function pdfRenderEdited(m, edits, title, pins){
   const pages = [];
   let thumb = null;
@@ -16276,49 +16321,7 @@ async function pdfRenderEdited(m, edits, title, pins){
     const ctx = cv.getContext('2d', {willReadFrequently:true});
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
     await page.render({canvasContext:ctx, viewport:vp}).promise;
-    edits.filter(e=>m.lines[e.li].p === p).forEach(e=>{
-      const L0 = m.lines[e.li], L = {y:e.y, fs:e.fs, fam:L0.fam};
-      const fo = e.fn ? pdfFontObj(page, e.fn) : null, bold = !!(fo && (fo.bold || fo.black || /bold|black|heavy|semibold|demi/i.test(String(fo.name || fo.loadedName || ''))));
-      const pad = 0.08 * L.fs;
-      /* v227: pdf.js 6 nema convertToViewportRectangle — dve tačke (isto kao njegova stara definicija u 3.11) */
-      const r = vp.convertToViewportPoint(e.a - pad, L.y - 0.23 * L.fs).concat(vp.convertToViewportPoint(e.b + pad, L.y + 0.92 * L.fs));
-      let x = Math.min(r[0], r[2]), w = Math.abs(r[2] - r[0]);
-      const y = Math.min(r[1], r[3]), h = Math.abs(r[3] - r[1]);
-      const col = pdfSampleColors(ctx, x, y, w, h);
-      /* tačne ivice po slici: početak podatka = kraj razmaka pred njim, kraj = početak razmaka iza njega */
-      const tailW = Array.from(e.tail || '').reduce((q, c)=>q + pdfCharW(c, L.fam), 0) / 100 * L.fs * sc;
-      /* v141: obrisan ceo red (Izmeni PDF) — prekriva se ceo red sa malo prostora desno (procena širine slova ume da bude kraća) */
-      const fx = e.full ? {x, w:w + 0.4 * L.fs * sc, top:-1, free:Infinity} : pdfSnapX(ctx, x, y, w, h, L.fs * sc, e.snapA, e.snapB, tailW, e.words);
-      x = fx.x; w = fx.w;
-      const inkTop = fx.top;
-      ctx.fillStyle = col.bg;
-      ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
-      if(!e.text) return;
-      const base = [x + 0.08 * L.fs * sc, vp.convertToViewportPoint(e.a, L.y)[1]];
-      const avail = Math.max(w, Math.min((e.right - e.a) * sc - 0.25 * L.fs * sc, fx.free - x));
-      const fam = /mono/i.test(L.fam) ? 'monospace' : (/serif/i.test(L.fam) && !/sans/i.test(L.fam) ? 'serif' : 'sans-serif');
-      const wt = bold ? 'bold ' : '';
-      let px = L.fs * sc;
-      ctx.font = wt + px + 'px ' + fam;
-      /* ista visina slova kao u originalu (slova na telefonu nisu ista kao u PDF-u) */
-      if(inkTop >= 0){
-        const want = base[1] - inkTop, have = ctx.measureText(e.old || 'H').actualBoundingBoxAscent;   /* ista slova kao stari podatak */
-        if(want > 0 && have > 0){ const k = Math.max(0.85, Math.min(1.3, want / have)); px *= k; ctx.font = wt + px + 'px ' + fam; }
-      }
-      let tw = ctx.measureText(e.text).width;
-      /* prvo se slova malo suze (do 82 %), pa tek onda smanjuju — da podatak bude iste visine kao okolni tekst */
-      if(tw * 0.82 > avail){ px = Math.max(px * 0.55, px * avail / (tw * 0.82)); ctx.font = wt + px + 'px ' + fam; tw = ctx.measureText(e.text).width; }
-      if(tw > avail + 8){
-        const extra = Math.min((e.right - e.b) * sc, fx.free - (x + w));   /* ni najmanja slova ne staju: proširi podlogu do ivice */
-        if(extra > 0){ ctx.fillStyle = col.bg; ctx.fillRect(x + w, y - 1, Math.min(extra, tw - w), h + 2); }
-      }
-      ctx.fillStyle = col.ink;
-      ctx.textBaseline = 'alphabetic';
-      ctx.save();
-      if(tw > avail){ const k = Math.max(0.72, avail / tw); ctx.setTransform(k, 0, 0, 1, base[0] * (1 - k), 0); }
-      ctx.fillText(e.text, base[0], base[1]);
-      ctx.restore();
-    });
+    edits.filter(e=>m.lines[e.li].p === p).forEach(e=>pdfDrawEdit(ctx, page, vp, m, e));
     (pins || []).filter(x=>x.p === p).forEach(x=>pinDraw(ctx, x, vp));   /* v230: dopisan tekst */
     const jb = await new Promise(res=>cv.toBlob(res, 'image/jpeg', 0.9));
     if(!jb) throw new Error('JPEG');
@@ -17913,18 +17916,39 @@ function peSheetExtras(u){
     const ctx = c2.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c2.width, c2.height);
     await page.render({canvasContext:ctx, viewport:vp}).promise;
     if(_we !== we || we.cropTok !== tok) return;
-    const brass = getComputedStyle(document.body).getPropertyValue('--brass').trim() || '#C9A24A';
-    u.lis.forEach(li=>{
-      const L = _we.m.lines[li], pad = 0.25 * L.fs;
-      const p = vp.convertToViewportPoint(L.x0 - pad, L.y - 0.32 * L.fs), q = vp.convertToViewportPoint(L.x1 + pad, L.y + 0.98 * L.fs);
-      const rx = Math.min(p[0], q[0]), ry = Math.min(p[1], q[1]), rw = Math.abs(p[0] - q[0]), rh = Math.abs(p[1] - q[1]);
-      ctx.fillStyle = 'rgba(201,162,74,.20)'; ctx.fillRect(rx, ry, rw, rh);
-      ctx.lineWidth = Math.max(3, Math.round(2.5 * S / 2)); ctx.strokeStyle = brass; ctx.strokeRect(rx, ry, rw, rh);
-    });
-    cv.width = c2.width; cv.height = c2.height; cv.getContext('2d').drawImage(c2, 0, 0);
-    c2.width = c2.height = 0;
+    /* v232: isečak pokazuje stranicu kako će biti u novom PDF-u (izmene, dopisan tekst), uživo dok kucaš */
+    we.peCrop = {tok, base:c2, vp, page, u, S};
+    peCropDraw();
   }).catch(e=>{ console.error(e); if(_we === we){ document.getElementById('peCrop').hidden = true; } });
 }
+function peCropDraw(){
+  const pc = _we && _we.peCrop;
+  if(!pc || _we.cropTok !== pc.tok) return;
+  const u = pc.u, vp = pc.vp, S = pc.S, cv = document.getElementById('peCropCv');
+  cv.width = pc.base.width; cv.height = pc.base.height;
+  const ctx = cv.getContext('2d', {willReadFrequently:true});
+  ctx.drawImage(pc.base, 0, 0);
+  /* izmene kao da je sada „Primeni“: ista pravila kao dugme Primeni (i „promeni i tamo“) */
+  const E = new Map(_we.edits), v = weTx.value.replace(/\s+/g, ' ').trim();
+  const put = o=>{ if(v === o.norm) E.delete(o.i); else if(!v) E.set(o.i, {text:o.norm, del:true}); else E.set(o.i, {text:v, del:false}); };
+  if(peSameOn()) peSameUnits(u).forEach(put);
+  put(u);
+  try{
+    peLineEdits(_we.m, {edits:E, m:_we.m}).filter(e=>_we.m.lines[e.li].p === u.p).forEach(e=>{ try{ pdfDrawEdit(ctx, pc.page, vp, _we.m, e); }catch(err){ console.error(err); } });
+  }catch(err){ console.error(err); }
+  (_we.pins || new Map()).forEach(pin=>{ if(pin.p === u.p) pinDraw(ctx, pin, vp); });
+  const brass = getComputedStyle(document.body).getPropertyValue('--brass').trim() || '#C9A24A';
+  u.lis.forEach(li=>{
+    const L = _we.m.lines[li], pad = 0.25 * L.fs;
+    const p = vp.convertToViewportPoint(L.x0 - pad, L.y - 0.32 * L.fs), q = vp.convertToViewportPoint(L.x1 + pad, L.y + 0.98 * L.fs);
+    const rx = Math.min(p[0], q[0]), ry = Math.min(p[1], q[1]), rw = Math.abs(p[0] - q[0]), rh = Math.abs(p[1] - q[1]);
+    ctx.lineWidth = Math.max(3, Math.round(2.5 * S / 2)); ctx.strokeStyle = brass; ctx.strokeRect(rx, ry, rw, rh);
+  });
+}
+let _peCropRaf = 0;
+function peCropSoon(){ if(_peCropRaf) return; _peCropRaf = requestAnimationFrame(()=>{ _peCropRaf = 0; peCropDraw(); }); }
+weTx.addEventListener('input', ()=>{ if(_we && _we.peCrop && _we.cur && _we.cur.u.kind === 'line') peCropSoon(); });
+document.getElementById('peSameCb').addEventListener('change', ()=>{ if(_we && _we.peCrop) peCropSoon(); });
 function weFit(){ weTx.style.height = 'auto'; weTx.style.height = Math.min(Math.max(weTx.scrollHeight + 2, 96), Math.round(window.innerHeight * 0.45)) + 'px'; }
 function weCloseSheet(){
   /* prazan nov pasus koji nije popunjen se ne čuva (osim onog koji se upravo otvara) */
@@ -17938,6 +17962,7 @@ function weCloseSheet(){
     weRender();
     weCommit();
     if(_we.pinCrop){ _we.pinCrop.base.width = 0; _we.pinCrop = null; }
+    if(_we.peCrop){ _we.peCrop.base.width = 0; _we.peCrop = null; }
   }
   weSheet.classList.remove('open');
   if(_pd){ const c = _we && _we.cur; if(c) c.u = {kind:'x'}; pdDraw(null); }   /* Otkaži: okvir polja nestaje, stranica ostaje */
