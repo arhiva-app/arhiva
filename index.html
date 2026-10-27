@@ -13,9 +13,10 @@
      van obuhvata instalirane Arhive, pa ih Chrome ne vezuje za aplikaciju -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" id="themeColor" content="#0d0e10">
+<meta name="color-scheme" content="light dark"><!-- v239: Android WebView poštuje prefers-color-scheme tek uz ovu oznaku (zvanično: developer.android.com/guide/webapps/dark-theme) -->
 <script>
 /* tema se postavlja pre prvog iscrtavanja, da ne bi "bljesnula" klasična */
-(function(){ try{ var t = localStorage.getItem('galerija:theme') || 'klasicna'; var bars = {banka:'#0E2747', crna:'#000000', ponoc:'#000000', koza:'#1F3A2E', klasicna:'#E9ECEF'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); var m = document.getElementById('themeColor'); if(m) m.setAttribute('content', bars[t]); } }catch(e){} })();
+(function(){ try{ var t = localStorage.getItem('galerija:theme') || ((window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'crna' : 'banka'); var bars = {banka:'#0E2747', crna:'#000000', ponoc:'#000000', koza:'#1F3A2E', klasicna:'#E9ECEF'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); var m = document.getElementById('themeColor'); if(m) m.setAttribute('content', bars[t]); } }catch(e){} })();
 </script>
 <link rel="apple-touch-icon" href="icon-192.png">
 <style id="ugradjeniFontovi">
@@ -10117,11 +10118,14 @@ const THEMES = [
 function getTheme(){
   let v = null;
   try{ v = localStorage.getItem(LS_PREFIX+'theme'); }catch(e){}
-  return (v && THEMES.some(x=>x.id===v)) ? v : 'klasicna';
+  return (v && THEMES.some(x=>x.id===v)) ? v : defaultTheme();
 }
-function themeName(id){ const x = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id==='klasicna'); return t('th_' + x.id); }
+/* v239 (Zoran): ko nikad nije izabrao temu dobija lepu temu za prvi utisak — Privatno bankarstvo, a na telefonu u tamnom
+   režimu Crnu karticu (zvanično: CSS media upit prefers-color-scheme). Izabrana tema se ne dira. */
+function defaultTheme(){ try{ if(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) return 'crna'; }catch(e){} return 'banka'; }
+function themeName(id){ const x = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id===defaultTheme()); return t('th_' + x.id); }
 function applyTheme(id){
-  const th = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id==='klasicna');
+  const th = THEMES.find(x=>x.id===id) || THEMES.find(x=>x.id===defaultTheme());
   document.documentElement.setAttribute('data-theme', th.id);
   const meta = document.getElementById('themeColor');
   if(meta) meta.setAttribute('content', th.bar);
