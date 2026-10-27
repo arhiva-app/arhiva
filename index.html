@@ -1055,6 +1055,15 @@ html[data-theme="koza"] .home-inbox.home-inbox:active{ background-color:#EADFC6;
   background:linear-gradient(90deg,#5E1A26,#8A2B3A 50%,#5E1A26); clip-path:polygon(0 0,100% 0,100% 100%,50% 85%,0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
 [data-theme="koza"] .folder-tile-row .pin-mark{ right:auto; left:40px; }
 [data-theme="koza"] .folder-tile-row .drag-handle{ color:rgba(31,58,46,.3); }
+/* v238 (Zoran): obaveštenje kao papirna cedulja (isto kao „Bez albuma“): papir sa zrnom, prošiven okvir, tamnozelena slova,
+   ikonica kao bordo pečat. Upozorenje: pečat boje mastila; „NIJE SAČUVANO!“ ostaje crveno. */
+[data-theme="koza"] .note-bar:not(.save-fail){ background-color:#F6EEDB; background-image:var(--paper); border:none; color:#1F3A2E;
+  font-family:var(--font-num); font-weight:600; outline:1.5px dashed rgba(122,95,40,.45); outline-offset:-6px;
+  box-shadow:0 8px 18px -8px rgba(20,30,20,.55), inset 0 1px 0 rgba(255,255,255,.6); }
+[data-theme="koza"] .note-bar:not(.save-fail) svg{ color:#F3E6C4; background:radial-gradient(circle at 35% 30%, #9A3445, #7A2331 60%, #5E1A26); border:none; padding:9px;
+  box-shadow:0 1px 2px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.12); }
+[data-theme="koza"] .note-bar.warn svg{ color:#F3E6C4; background:radial-gradient(circle at 35% 30%, #3A5C4A, #1F3A2E 60%, #15291F); }
+[data-theme="koza"] .note-bar .note-act{ border-color:#7A2331; color:#7A2331; font-family:var(--font-ui); }
 
 /* =========================================================
    TEMA: PONOĆ (boje iz aplikacije Glasovni prevodilac)
@@ -10106,7 +10115,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 237;
+const APP_VERSION = 238;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
