@@ -15,7 +15,7 @@
 <meta name="theme-color" id="themeColor" content="#0d0e10">
 <script>
 /* tema se postavlja pre prvog iscrtavanja, da ne bi "bljesnula" klasična */
-(function(){ try{ var t = localStorage.getItem('galerija:theme'); var bars = {banka:'#0E2747', crna:'#000000', ponoc:'#000000', koza:'#1F3A2E'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); var m = document.getElementById('themeColor'); if(m) m.setAttribute('content', bars[t]); } }catch(e){} })();
+(function(){ try{ var t = localStorage.getItem('galerija:theme') || 'klasicna'; var bars = {banka:'#0E2747', crna:'#000000', ponoc:'#000000', koza:'#1F3A2E', klasicna:'#E9ECEF'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); var m = document.getElementById('themeColor'); if(m) m.setAttribute('content', bars[t]); } }catch(e){} })();
 </script>
 <link rel="apple-touch-icon" href="icon-192.png">
 <style id="ugradjeniFontovi">
@@ -860,6 +860,23 @@ html[data-theme="koza"]{
   --font-num:"TR Serif",serif; --font-title:"TR Script",cursive;
   --font-name:var(--font-ui); --name-style:normal;
 }
+/* v239 (Zoran): KLASIČNA = „Kartoteka“ — svetla, švajcarski čist izgled: hladno siva pozadina, bele kartice, crn tekst,
+   jedna boja (signalno crvena). Ranije tamna (treća tamna tema uz Crnu karticu i Ponoć). Promenljive su ovde, ne u :root,
+   da ostale teme ostanu iste; skripta na vrhu stavlja data-theme="klasicna" i kad tema nije izabrana (bez tamnog bljeska). */
+html[data-theme="klasicna"]{
+  color-scheme:light;
+  --bg:#E9ECEF; --surface:#FFFFFF; --surface-2:#F3F4F6; --line:#D9DDE2; --line-soft:#ECEEF1;
+  --ink:#111316; --ink-dim:#6B7078; --ink-faint:#8A9099;
+  --brass:#111316; --brass-soft:#3A3D42; --brass-glow:rgba(17,19,22,.08); --danger:#C62828;   /* ikonice crne; crvena (--accent) samo za glavno */
+  --accent:#E2381B; --on-accent:#fff; --on-brass:#fff; --title-color:#111316;
+  --page-bg:var(--bg); --scrim:rgba(17,19,22,.45); --scrim-strong:rgba(233,236,239,.97);
+  --mark-bg:rgba(255,255,255,.9); --nav-bg:rgba(255,255,255,.9);
+  --shadow-drag:0 10px 26px rgba(0,0,0,.18); --corner-shadow:drop-shadow(0 1px 2px rgba(0,0,0,.15));
+  --danger-soft:rgba(198,40,40,.08); --danger-line:rgba(198,40,40,.35);
+  --overlay-fade:linear-gradient(to top, rgba(233,236,239,.95), rgba(233,236,239,0));
+  --font-title:'TR Inter',sans-serif; --font-ui:'TR Inter',sans-serif; --font-num:'TR Inter',sans-serif;
+  --font-name:'TR Inter',sans-serif; --name-style:normal;
+}
 html[data-theme="ponoc"]{
   color-scheme:dark;
   --bg:#000000; --surface:#1E2024; --surface-2:#1D1F24; --line:#34363C; --line-soft:#34363C;
@@ -1064,6 +1081,41 @@ html[data-theme="koza"] .home-inbox.home-inbox:active{ background-color:#EADFC6;
   box-shadow:0 1px 2px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.12); }
 [data-theme="koza"] .note-bar.warn svg{ color:#F3E6C4; background:radial-gradient(circle at 35% 30%, #3A5C4A, #1F3A2E 60%, #15291F); }
 [data-theme="koza"] .note-bar .note-act{ border-color:#7A2331; color:#7A2331; font-family:var(--font-ui); }
+/* v239: KLASIČNA „Kartoteka“ — početni ekran, albumi kao jedan spisak, obaveštenje kao crna traka sa crvenim krugom */
+[data-theme="klasicna"] body:not(.in-album) .mark-row{ border-top:3px solid var(--ink); border-bottom:1px solid var(--ink); }
+[data-theme="klasicna"] .mark-row h1{ font-family:var(--font-ui); font-style:normal; font-weight:800; letter-spacing:-1px; text-transform:lowercase; font-size:30px; color:var(--ink); }
+[data-theme="klasicna"] .mark-row h1::after{ content:"."; color:var(--accent); }
+[data-theme="klasicna"] .mark{ border:none; background:var(--accent); transform:none; width:14px; height:14px; border-radius:0; }
+[data-theme="klasicna"] .mark-cnt{ font-size:11px; color:var(--ink-dim); font-weight:600; }
+[data-theme="klasicna"] .icon-btn, [data-theme="klasicna"] .back-btn{ background:var(--surface); border:none; border-radius:50%; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+[data-theme="klasicna"] .alb-ico-sq{ background:var(--surface); border:none; border-radius:14px; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+[data-theme="klasicna"] .alb-ico-sq.add-sq{ background:var(--accent); color:#fff; }
+[data-theme="klasicna"] .alb-ico-tx{ font-weight:600; color:var(--ink); }
+html[data-theme="klasicna"] .home-inbox.home-inbox{ background:var(--ink); border:none; border-radius:14px; color:#fff; }
+html[data-theme="klasicna"] .home-inbox.home-inbox:active{ background:#2A2D32; }
+[data-theme="klasicna"] .home-inbox svg{ color:var(--accent); }
+[data-theme="klasicna"] .home-inbox .hi-nm{ font-weight:700; color:#fff; }
+[data-theme="klasicna"] .home-inbox .hi-ct{ color:#9AA0A8; font-weight:600; }
+[data-theme="klasicna"] .folders-list{ gap:0; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+[data-theme="klasicna"] .folder-tile-row{ height:68px; padding:0 14px 0 0; gap:10px; background:var(--surface); border:none; border-bottom:1px solid #EDEFF2; border-radius:0; }
+[data-theme="klasicna"] .folder-tile-row:last-child{ border-bottom:none; }
+[data-theme="klasicna"] .folder-tile-row .ftile-cover{ width:62px; height:68px; margin:0; background:transparent; }
+[data-theme="klasicna"] .folder-tile-row .ftile-cover img{ width:44px; height:44px; margin:12px 9px; border-radius:8px; }
+[data-theme="klasicna"] .folder-tile-row .nocover, [data-theme="klasicna"] .folder-tile .nocover{ background:none; }
+[data-theme="klasicna"] .folder-tile .nocover{ background:var(--surface); }
+[data-theme="klasicna"] .folder-tile-row .nocover svg, [data-theme="klasicna"] .folder-tile .nocover svg{ display:none; }
+[data-theme="klasicna"] .folder-tile-row .nocover span, [data-theme="klasicna"] .folder-tile .nocover span{ transform:translateY(-50%); font-family:var(--font-ui); font-style:normal; color:var(--accent); opacity:1; font-weight:800; }
+[data-theme="klasicna"] .folder-tile-row .nocover span{ font-size:22px; }
+[data-theme="klasicna"] .folder-tile .nocover span{ font-size:40px; }
+[data-theme="klasicna"] .folder-tile-row .fname{ font-family:var(--font-ui); font-style:normal; font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-.2px; }
+[data-theme="klasicna"] .folder-tile-row .fcount{ font-family:var(--font-ui); font-size:12px; color:var(--ink-dim); font-weight:500; }
+[data-theme="klasicna"] .pin-mark{ top:12px; left:10px; right:auto; width:6px; height:6px; padding:0; border:none; border-radius:50%; background:var(--accent); font-size:0; color:transparent; box-shadow:none; z-index:3; }
+[data-theme="klasicna"] .folder-tile .pin-mark{ top:10px; left:auto; right:10px; width:8px; height:8px; }
+[data-theme="klasicna"] .folder-tile-row .drag-handle{ color:#C3C7CD; }
+[data-theme="klasicna"] .note-bar:not(.save-fail){ background:var(--ink); color:#fff; border:none; box-shadow:0 10px 24px -10px rgba(0,0,0,.45); }
+[data-theme="klasicna"] .note-bar:not(.save-fail) svg{ color:#fff; background:var(--accent); border:none; padding:9px; }
+[data-theme="klasicna"] .note-bar.warn svg{ color:var(--ink); background:#fff; }
+[data-theme="klasicna"] .note-bar .note-act{ border-color:#fff; color:#fff; }
 
 /* =========================================================
    TEMA: PONOĆ (boje iz aplikacije Glasovni prevodilac)
@@ -10060,7 +10112,7 @@ const THEMES = [
   {id:'crna',     name:'Crna kartica',        bar:'#000000', bg:'#000000', card:'linear-gradient(150deg,#34343A,#111113)', num:'#CDB27A'},
   {id:'ponoc',    name:'Ponoć',               bar:'#000000', bg:'#000000', card:'#1E2024', num:'#6FC48A'},
   {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#F1E9D6', top:'#203A2D', card:'#1F3A2E', num:'#7A2331'},
-  {id:'klasicna', name:'Klasična',            bar:'#0d0e10', bg:'#0d0e10', card:'#1f2124', num:'#c9a355'}
+  {id:'klasicna', name:'Klasična',            bar:'#E9ECEF', bg:'#E9ECEF', card:'#FFFFFF', num:'#E2381B'}
 ];
 function getTheme(){
   let v = null;
@@ -10115,7 +10167,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 238;
+const APP_VERSION = 239;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
