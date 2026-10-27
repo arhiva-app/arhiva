@@ -3675,6 +3675,7 @@ const I18N = {
     wsTaskTrans: 'Prevedi',
     wsTaskTemplate: 'Šablon',
     wsErrDet: 'Detalji',
+    aiGoogleMsg: 'Poruka Google-a',
     wsErrCode: 'šifra',
     wsErrFinish: 'razlog završetka',
     wsErrRaw: 'odgovor AI ({n} znakova)',
@@ -4482,6 +4483,7 @@ const I18N = {
     wsTaskTrans: 'Translate',
     wsTaskTemplate: 'Template',
     wsErrDet: 'Details',
+    aiGoogleMsg: 'Google’s message',
     wsErrCode: 'code',
     wsErrFinish: 'finish reason',
     wsErrRaw: 'AI response ({n} characters)',
@@ -10171,7 +10173,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 239;
+const APP_VERSION = 240;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12103,7 +12105,10 @@ function aiErrText(e){
   return t('aiErrOther', {code:'?', msg:String((e && e.message) || e).slice(0, 160)});
 }
 
-/* MODUL gemini v3 — prilagođeno Arhivi: poruke iz I18N (aiError), prekid korisnika (signal) prekida sve pokušaje,
+/* MODUL gemini v6 — prilagođeno Arhivi (v240: v3 → v6):
+   v4: odgovor zadržava groundingMetadata; v5: tačan tekst Google-a uz grešku — u Arhivi ide u e.gtxt („Detalji“ i dnevnik
+   grešaka), naša rečenica na ekranu ostaje ista; v6: opt.hedgeSame/opt.hedgeMs (Arhiva ih ne koristi; bez njih sve kao pre).
+   Ranije: poruke iz I18N (aiError), prekid korisnika (signal) prekida sve pokušaje,
    rezervni model = drugi iz AI_MODELS, trošak po modelu koji je stvarno odgovorio. Ključ u zaglavlju x-goog-api-key.
    v173 (brzina): odgovor stiže u delovima (streamGenerateContent?alt=sse), pa se zna kad model POČNE da odgovara.
    - Glavni bez prvog dela za GEMINI_HEDGE_MS (+ vreme slanja velikog fajla) → istovremeno rezervni; važi prvi gotov,
@@ -12137,7 +12142,7 @@ function geminiCollect(txt){
   if(!frames.length) return null;
   const er = frames.find(f=>f.error);
   if(er) return {error:er.error};
-  let text = '', finish = '', usage = null, pf = null, cand = false;
+  let text = '', finish = '', usage = null, pf = null, cand = false, gm = null;
   frames.forEach(f=>{
     if(f.promptFeedback) pf = f.promptFeedback;
     if(f.usageMetadata) usage = f.usageMetadata;
@@ -12145,9 +12150,11 @@ function geminiCollect(txt){
     if(!c) return;
     cand = true;
     if(c.finishReason) finish = c.finishReason;
+    if(c.groundingMetadata) gm = c.groundingMetadata;   /* v4 */
     ((c.content || {}).parts || []).forEach(p=>{ if(typeof p.text === 'string' && !p.thought) text += p.text; });
   });
   const data = {candidates:cand ? [{content:{role:'model', parts:[{text}]}, finishReason:finish}] : [], usageMetadata:usage || {}};
+  if(gm && data.candidates[0]) data.candidates[0].groundingMetadata = gm;
   if(pf) data.promptFeedback = pf;
   return {data};
 }
@@ -12198,7 +12205,7 @@ function geminiFetch(models, body, key, signal, opt){
   const cache = {};
   const bodyFor = m=>cache[m.id] || (cache[m.id] = JSON.stringify(typeof body === 'function' ? body(m) : body));
   const thinkFirstMs = models[1] && models[0].think ? GEMINI_THINK_FIRST_MS + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
-  const hedgeMs = models[1] && !models[0].think ? GEMINI_HEDGE_MS + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
+  const hedgeMs = (models[1] || opt.hedgeSame) && !models[0].think ? (opt.hedgeMs || GEMINI_HEDGE_MS) + Math.round(bodyFor(models[0]).length / 1048576 * GEMINI_HEDGE_PER_MB) : 0;
   return new Promise((resolve, reject)=>{
     let next = 0, pending = 0, tries = 0, done = false, lastErr = null, hardErr = null, netErr = false, pauseTm = null, hedgeTm = null;
     const live = new Map(), dead = new Set();   /* live: ctl → {m, t0, first} */
@@ -12229,7 +12236,7 @@ function geminiFetch(models, body, key, signal, opt){
       const idx = tries++;
       const ctl = new AbortController(), me = {m, t0:performance.now(), first:false};
       live.set(ctl, me);
-      if(idx === 0 && hedgeMs) hedgeTm = setTimeout(()=>{ hedgeTm = null; if(!done && next === 1) start(false); }, hedgeMs);
+      if(idx === 0 && hedgeMs) hedgeTm = setTimeout(()=>{ hedgeTm = null; if(done || next !== 1) return; if(opt.hedgeSame){ pending++; run(models[0]); } else start(false); }, hedgeMs);
       const r = await geminiAttempt(m, bodyFor(m), key, ctl, opt.timeout || (m === models[0] ? thinkFirstMs : 0), ()=>{ me.first = true; if(idx === 0 && hedgeTm){ clearTimeout(hedgeTm); hedgeTm = null; } });
       live.delete(ctl); pending--;
       if(done || r.st === 'X') return;
@@ -12273,7 +12280,7 @@ async function aiRequest(parts, o){
     return r;
   }
   catch(e){
-    if(!(e && e.name === 'AbortError') && !(e && e.aiCode === 'aiErrNoKey')) logError('AI', (e && e.aiCode ? e.aiCode + ': ' : '') + aiErrText(e));
+    if(!(e && e.name === 'AbortError') && !(e && e.aiCode === 'aiErrNoKey')) logError('AI', (e && e.aiCode ? e.aiCode + ': ' : '') + aiErrText(e) + (e && e.gtxt ? ' — ' + t('aiGoogleMsg') + ': ' + e.gtxt : ''));
     throw e;
   }
 }
@@ -12304,22 +12311,24 @@ async function aiRequestOnce(parts, o){
     const err = (j && j.error) || {};
     const msg = String(err.message || '');
     const det = JSON.stringify(err.details || '');
-    if(res.status === 400 && /API_KEY_INVALID|API key/i.test(msg + det)) throw aiError('aiErrKey');
+    /* v240 (modul gemini v5): tačan tekst Google-a ide uz grešku — „Detalji“ i dnevnik grešaka */
+    const gx = e=>{ if(msg) e.gtxt = msg.slice(0, 300); return e; };
+    if(res.status === 400 && /API_KEY_INVALID|API key/i.test(msg + det)) throw gx(aiError('aiErrKey'));
     /* verzija 76: odbijena šema se pamti (razlog od Google-a), da se vidi u „Detalji“ umesto nagađanja */
     if(res.status === 400 && i < bodies.length - 1 && /response_?format|unknown name|invalid json payload|schema/i.test(msg)){ schemaRej = msg.slice(0, 400) || String(res.status); continue; }
-    if(res.status === 401 || res.status === 403) throw aiError('aiErrKey');
-    if(res.status === 404) throw aiError('aiErrModel', {m:model.name});
+    if(res.status === 401 || res.status === 403) throw gx(aiError('aiErrKey'));
+    if(res.status === 404) throw gx(aiError('aiErrModel', {m:model.name}));
     if(res.status === 429){
       /* v165: Google u 429 šalje QuotaFailure (quotaId …PerDay… / …PerMinute…) i RetryInfo.retryDelay („27s“) — viđeno u stvarnim odgovorima */
       const qi = aiQuotaInfo(err);
       if(o.att && o.att.length){ const la = o.att[o.att.length - 1]; if(la.st === 429) Object.assign(la, qi); }
-      throw aiError(qi.day ? 'aiErrQuotaDay' : qi.wait ? 'aiErrQuotaWait' : 'aiErrQuota', {s:qi.wait || 0, n:g.tries || tries});
+      throw gx(aiError(qi.day ? 'aiErrQuotaDay' : qi.wait ? 'aiErrQuotaWait' : 'aiErrQuota', {s:qi.wait || 0, n:g.tries || tries}));
     }
-    if(res.status >= 500) throw aiError('aiErrServer', {code:res.status});
+    if(res.status >= 500) throw gx(aiError('aiErrServer', {code:res.status}));
     throw aiError('aiErrOther', {code:res.status, msg:(msg || res.statusText || '').slice(0, 160)});
   }
   if(!data) throw aiError('aiErrParse');
-  if(data.promptFeedback && data.promptFeedback.blockReason) throw aiError('aiErrBlocked');
+  if(data.promptFeedback && data.promptFeedback.blockReason){ const e = aiError('aiErrBlocked'); e.gtxt = String(data.promptFeedback.blockReason); throw e; }
   const cand = (data.candidates || [])[0] || null;
   const um = data.usageMetadata || {};
   const usage = {inp:um.promptTokenCount || 0, out:um.candidatesTokenCount || 0, think:um.thoughtsTokenCount || 0};
@@ -12493,7 +12502,7 @@ function aiShowError(e, item){
   const toSettings = code === 'aiErrNoKey' || code === 'aiErrKey' || code === 'aiErrModel';
   const retry = !toSettings && ['aiErrBig', 'aiErrNoText', 'aiErrFile', 'aiErrBlocked'].indexOf(code) < 0;
   aiBody.innerHTML = '<div class="exp-doc">' + escapeHtml(itemLabel(item)) + '</div>' +
-    '<p class="ai-p ai-err">' + escapeHtml(aiErrText(e)) + '</p>' +
+    '<p class="ai-p ai-err">' + escapeHtml(aiErrText(e)) + '</p>' + (e && (e.gtxt || !e.aiCode) ? wsErrDetails(e) : '') +
     (toSettings ? '<button type="button" class="sheet-cta" id="aiErrSet">' + escapeHtml(t('aiOpenSettings')) + '</button>' : '') +
     (retry ? '<button type="button" class="sheet-cta" id="aiErrRetry">' + escapeHtml(t('aiTryAgain')) + '</button>' : '') +
     '<button type="button" class="sheet-cta secondary ai-gap" id="aiErrClose">' + escapeHtml(t('aiClose')) + '</button>';
@@ -12860,6 +12869,7 @@ function wsErrDetails(e){
   const lines = [];
   if(e.aiCode) lines.push(t('wsErrCode') + ': ' + e.aiCode + (e.aiVars && e.aiVars.code ? ' (' + e.aiVars.code + ')' : ''));
   if(e.finish) lines.push(t('wsErrFinish') + ': ' + e.finish);
+  if(e.gtxt) lines.push(t('aiGoogleMsg') + ': ' + e.gtxt);
   if(e.schemaRej) lines.push(t('wsSchemaRej') + ': ' + e.schemaRej);
   if(e.aiVars && e.aiVars.msg) lines.push(String(e.aiVars.msg).slice(0, 400));
   if(typeof e.raw === 'string') lines.push(t('wsErrRaw', {n:e.raw.length}) + ':\n' + (e.raw.slice(0, 700) || '—') + (e.raw.length > 700 ? ' …' : ''));
