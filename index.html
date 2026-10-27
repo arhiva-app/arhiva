@@ -1010,6 +1010,51 @@ html[data-theme="banka"] .home-inbox.home-inbox:active{ background:linear-gradie
 /* Bez albuma: u skladu sa podlogom Abeceda/Datum */
 [data-theme="koza"] .inbox-row .folder-tile-wide{ background:#E4D9C2; border-radius:22px; }
 [data-theme="koza"] .inbox-row .folder-tile-wide .fw-icon{ background:var(--surface); }
+/* v236 (Zoran): „pravi rokovnik“ — gore kožne korice (tekstura, prošiven šav, zlatno utisnut naslov; samo početni ekran),
+   „Bez albuma“ papirna etiketa u koži, albumi = stranice sa kožnim jezičkom registra (zlatno slovo, šav), broj stavki
+   rukopisom na liniji, „P“ = bordo platnena traka, pozadina topao papir sa zrnom. */
+html[data-theme="koza"]{ --bg:#F1E9D6; --page-bg:#F1E9D6; --stitch:rgba(226,201,138,.55);
+  --leather:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .15 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+[data-theme="koza"] body, [data-theme="koza"] #stickyTop, [data-theme="koza"] .set-screen, [data-theme="koza"] .set-header,
+[data-theme="koza"] .pg-screen, [data-theme="koza"] .ws-screen, [data-theme="koza"] .sheet-bg.sheet-full{ background-color:var(--bg); background-image:var(--paper); }
+[data-theme="koza"] body:not(.in-album) #stickyTop{ background-color:#1F3A2E; background-image:var(--leather), radial-gradient(120% 90% at 50% 0%, #2A4D3C 0%, #1B3328 70%, #15291F 100%);
+  margin:-28px -18px 14px; padding:34px 18px 18px; border-radius:0 0 26px 26px; box-shadow:0 10px 22px -12px rgba(20,30,20,.7); }
+[data-theme="koza"] body:not(.in-album) #stickyTop::after{ content:""; position:absolute; left:8px; right:8px; top:0; bottom:8px; border:1.5px dashed var(--stitch); border-top:none; border-radius:0 0 20px 20px; pointer-events:none; }
+[data-theme="koza"] body:not(.in-album) header{ background:transparent; }
+[data-theme="koza"] body:not(.in-album) .mark-row{ border-top:none; border-bottom:1px solid rgba(226,201,138,.25); }
+[data-theme="koza"] body:not(.in-album) h1{ color:#E2C98A; text-shadow:0 1px 0 rgba(0,0,0,.5), 0 -1px 0 rgba(255,240,200,.15); }
+[data-theme="koza"] body:not(.in-album) .mark{ border-color:#E2C98A; }
+[data-theme="koza"] body:not(.in-album) .mark-cnt{ color:rgba(234,214,162,.75); }
+[data-theme="koza"] body:not(.in-album) #stickyTop .icon-btn{ background:rgba(0,0,0,.18); border:1px solid rgba(226,201,138,.45); color:#EAD6A2; box-shadow:inset 0 1px 2px rgba(0,0,0,.35); }
+[data-theme="koza"] body:not(.in-album) .alb-icons .alb-ico-sq{ background:rgba(0,0,0,.18); border:1px solid rgba(226,201,138,.4); color:#EAD6A2; box-shadow:inset 0 1px 3px rgba(0,0,0,.35); }
+[data-theme="koza"] body:not(.in-album) .alb-icons .alb-ico-sq.add-sq{ background:linear-gradient(#F3E6C4,#DCC796); color:#1F3A2E; border:none; box-shadow:0 2px 4px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.4); }
+[data-theme="koza"] body:not(.in-album) .alb-icons .alb-ico-tx{ color:rgba(234,214,162,.85); }
+html[data-theme="koza"] .home-inbox.home-inbox{ background-color:#F6EEDB; background-image:var(--paper); border:none; outline:1.5px dashed rgba(122,95,40,.45); outline-offset:-6px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.25), 0 1px 0 rgba(255,255,255,.08); }
+html[data-theme="koza"] .home-inbox.home-inbox:active{ background-color:#EADFC6; }
+[data-theme="koza"] .home-inbox .hi-nm{ font-family:var(--font-num); font-size:18px; color:#1F3A2E; }
+[data-theme="koza"] .home-inbox .hi-ct{ color:#7A2331; font-family:var(--font-num); }
+[data-theme="koza"] .home-inbox svg{ color:#7A2331; }
+[data-theme="koza"] .folders-list{ gap:10px; }
+[data-theme="koza"] .folder-tile-row{ padding:0 14px 0 0; height:70px; gap:16px; margin-left:6px; width:calc(100% - 6px); overflow:visible; border-radius:6px 14px 14px 6px; background-color:#FBF6EA;
+  background-image:linear-gradient(180deg, transparent 55px, rgba(70,110,140,.22) 55px, rgba(70,110,140,.22) 56px, transparent 56px);
+  box-shadow:0 1px 0 #D9CDB4, 0 6px 14px -10px rgba(60,45,20,.5); }
+[data-theme="koza"] .folder-tile-row .ftile-cover{ width:50px; height:70px; margin:0 0 0 -6px; border-radius:10px 4px 4px 10px; overflow:visible;
+  background-color:#1F3A2E; background-image:var(--leather); box-shadow:2px 0 4px rgba(0,0,0,.25); }
+[data-theme="koza"] .folder-tile-row .ftile-cover::before{ content:""; position:absolute; inset:5px; border:1.2px dashed var(--stitch); border-radius:7px 3px 3px 7px; pointer-events:none; z-index:2; }
+[data-theme="koza"] .folder-tile-row .ftile-cover img{ border-radius:10px 4px 4px 10px; }
+[data-theme="koza"] .folder-tile-row .nocover, [data-theme="koza"] .folder-tile .nocover{ background-color:#1F3A2E; background-image:var(--leather); border-radius:inherit; }
+[data-theme="koza"] .folder-tile-row .nocover svg, [data-theme="koza"] .folder-tile .nocover svg{ display:none; }
+[data-theme="koza"] .folder-tile-row .nocover span, [data-theme="koza"] .folder-tile .nocover span{ transform:translateY(-50%); font-family:var(--font-num); font-style:normal; font-weight:700; color:#E2C98A; opacity:1; text-shadow:0 1px 0 rgba(0,0,0,.5); }
+[data-theme="koza"] .folder-tile-row .nocover span{ font-size:26px; }
+[data-theme="koza"] .folder-tile .nocover span{ font-size:44px; }
+[data-theme="koza"] .folder-tile-row .fname{ font-family:var(--font-num); font-size:19px; font-weight:600; color:#1F3A2E; }
+[data-theme="koza"] .folder-tile-row .fcount{ font-family:var(--font-title); font-size:15px; color:#7A2331; margin-top:2px; line-height:1.2; }
+[data-theme="koza"] .pin-mark{ top:-6px; right:12px; width:10px; height:40px; padding:0; border:none; border-radius:0; font-size:0; color:transparent; z-index:4;
+  background:linear-gradient(90deg,#5E1A26,#8A2B3A 50%,#5E1A26); clip-path:polygon(0 0,100% 0,100% 100%,50% 85%,0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+[data-theme="koza"] .folder-tile-row .pin-mark{ right:auto; left:40px; }
+[data-theme="koza"] .folder-tile-row .drag-handle{ color:rgba(31,58,46,.3); }
 
 /* =========================================================
    TEMA: PONOĆ (boje iz aplikacije Glasovni prevodilac)
@@ -10001,7 +10046,7 @@ const THEMES = [
   {id:'banka',    name:'Privatno bankarstvo', bar:'#0E2747', bg:'#F1E7D5', card:'linear-gradient(140deg,#16365F,#0A1C34)', num:'#D9B46A'},
   {id:'crna',     name:'Crna kartica',        bar:'#000000', bg:'#000000', card:'linear-gradient(150deg,#34343A,#111113)', num:'#CDB27A'},
   {id:'ponoc',    name:'Ponoć',               bar:'#000000', bg:'#000000', card:'#1E2024', num:'#6FC48A'},
-  {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#EFE8D8', card:'#1F3A2E', num:'#7A2331'},
+  {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#F1E9D6', card:'#1F3A2E', num:'#7A2331'},
   {id:'klasicna', name:'Klasična',            bar:'#0d0e10', bg:'#0d0e10', card:'#1f2124', num:'#c9a355'}
 ];
 function getTheme(){
@@ -10057,7 +10102,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 235;
+const APP_VERSION = 236;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
