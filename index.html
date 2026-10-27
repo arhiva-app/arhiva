@@ -6874,8 +6874,12 @@ function fitPathBar(bar){
 window.addEventListener('resize', ()=>fitPathBar());
 /* v113: font se ucitava posle prvog crtanja (font-display:swap) i menja sirinu teksta: ponovo uklopi putanju */
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>fitPathBar());
-if(window.ResizeObserver) new ResizeObserver(()=>fitPathBar()).observe(pathZone);
-if(window.ResizeObserver) { const ro = new ResizeObserver(()=>{ if(!currentFolder) fitMarkRow(); }); ro.observe(document.querySelector('.mark-row')); ro.observe(document.querySelector('.mark-row h1')); ro.observe(document.querySelector('.mark-row .header-actions')); }   /* h1 menja širinu kad se učita pravi font */
+/* v237: prilagođavanje ide u sledeći kadar (requestAnimationFrame). Ranije je menjalo veličinu baš onih elemenata koje
+   posmatrač prati, u istom kadru — Chrome je to javljao kao grešku „ResizeObserver loop completed with undelivered
+   notifications“ (dnevnik grešaka, pri promeni teme). Izgled je bio dobar; greška je bila samo upozorenje. */
+const rafOnce = (fn)=>{ let id = 0; return ()=>{ if(id) return; id = requestAnimationFrame(()=>{ id = 0; fn(); }); }; };
+if(window.ResizeObserver) new ResizeObserver(rafOnce(()=>fitPathBar())).observe(pathZone);
+if(window.ResizeObserver) { const ro = new ResizeObserver(rafOnce(()=>{ if(!currentFolder) fitMarkRow(); })); ro.observe(document.querySelector('.mark-row')); ro.observe(document.querySelector('.mark-row h1')); ro.observe(document.querySelector('.mark-row .header-actions')); }   /* h1 menja širinu kad se učita pravi font */
 if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', ()=>{ if(!currentFolder) fitMarkRow(); });
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ if(!currentFolder) fitMarkRow(); });
 function jumpSet(to, ids){ _jump = (currentFolder && to !== currentFolder) ? {from:currentFolder, to, ids:ids.slice()} : null; }
@@ -10102,7 +10106,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 236;
+const APP_VERSION = 237;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
