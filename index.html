@@ -10050,7 +10050,7 @@ const THEMES = [
   {id:'banka',    name:'Privatno bankarstvo', bar:'#0E2747', bg:'#F1E7D5', card:'linear-gradient(140deg,#16365F,#0A1C34)', num:'#D9B46A'},
   {id:'crna',     name:'Crna kartica',        bar:'#000000', bg:'#000000', card:'linear-gradient(150deg,#34343A,#111113)', num:'#CDB27A'},
   {id:'ponoc',    name:'Ponoć',               bar:'#000000', bg:'#000000', card:'#1E2024', num:'#6FC48A'},
-  {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#F1E9D6', card:'#1F3A2E', num:'#7A2331'},
+  {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#F1E9D6', top:'#203A2D', card:'#1F3A2E', num:'#7A2331'},
   {id:'klasicna', name:'Klasična',            bar:'#0d0e10', bg:'#0d0e10', card:'#1f2124', num:'#c9a355'}
 ];
 function getTheme(){
@@ -10064,7 +10064,7 @@ function applyTheme(id){
   document.documentElement.setAttribute('data-theme', th.id);
   const meta = document.getElementById('themeColor');
   if(meta) meta.setAttribute('content', th.bar);
-  if(window.ARHIVA_TRAKE) window.ARHIVA_TRAKE(th.bg);   /* Android: trake telefona u boji pozadine (cap/arhiva-native.js) */
+  if(window.ARHIVA_TRAKE) window.ARHIVA_TRAKE(th.bg, th.top || th.bg);   /* v237: gornja traka može imati svoju boju (rokovnik: koža) */   /* Android: trake telefona u boji pozadine (cap/arhiva-native.js) */
 }
 function setTheme(id){
   if(!THEMES.some(x=>x.id===id)) return;

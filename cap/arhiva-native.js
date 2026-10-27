@@ -23,7 +23,7 @@
   /* 5) Arhiva zove ARHIVA_TRAKE(boja pozadine) iz applyTheme — pri pokretanju i pri promeni teme */
   if(C.isPluginAvailable && C.isPluginAvailable('Trake')){
     var Trake = reg('Trake');
-    window.ARHIVA_TRAKE = function(boja){ try{ Trake.boja({ boja: boja }).catch(function(){}); }catch(e){} };
+    window.ARHIVA_TRAKE = function(boja, gore){ try{ Trake.boja({ boja: boja, gore: gore || boja }).catch(function(){}); }catch(e){} };   /* v237: gore = gornja traka (stariji APK je zanemari) */
   }
 
   /* 6) zaključavanje: dok Arhiva ne nacrta svoj ekran, ništa se ne vidi (klasa lk-boot) */
