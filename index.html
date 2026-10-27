@@ -813,15 +813,18 @@ html.vw-wait #vzWin, html.vw-wait #lockScr{ visibility:visible; }
    ========================================================= */
 html[data-theme="banka"]{
   color-scheme:light;
-  --bg:#F6F5F1; --surface:#FFFFFF; --surface-2:#EEEBE3; --line:#E6E1D6; --line-soft:#F0ECE3;
+  --bg:#F1E7D5; --surface:#FAF4E8; --surface-2:#ECE1CC; --line:#E0D3BA; --line-soft:#EADFCB;   /* v235: toplo (Zoran: „kožni povezi“) */
   --ink:#18202E; --ink-dim:#7A7F89; --ink-faint:#7A7F89;
   --brass:#B8924A; --brass-soft:#8C6A2C; --brass-glow:rgba(184,146,74,.22); --danger:#B3432D;
   --accent:#0E2747; --on-accent:#fff; --on-brass:#fff; --title-color:#0E2747;
-  --page-bg:var(--bg); --scrim:rgba(20,20,20,.5); --scrim-strong:rgba(246,245,241,.97);
-  --mark-bg:rgba(255,255,255,.85); --nav-bg:rgba(255,255,255,.85);
+  --page-bg:var(--bg); --scrim:rgba(20,20,20,.5); --scrim-strong:rgba(241,231,213,.97);
+  --mark-bg:rgba(250,244,232,.88); --nav-bg:rgba(250,244,232,.88);
   --shadow-drag:0 10px 26px rgba(14,39,71,.25); --corner-shadow:drop-shadow(0 1px 2px rgba(0,0,0,.15));
   --danger-soft:rgba(179,67,45,.08); --danger-line:rgba(179,67,45,.35);
-  --overlay-fade:linear-gradient(to top, rgba(246,245,241,.95), rgba(246,245,241,0));
+  --overlay-fade:linear-gradient(to top, rgba(241,231,213,.95), rgba(241,231,213,0));
+  --gold:#C9A961; --gold-hi:#E6C77E;
+  /* zrno papira (šum bez šare — dva sloja se ne vide kao spoj) */
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .32 0 0 0 0 .18 0 0 0 .24 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   --font-ui:-apple-system,"Segoe UI",Roboto,sans-serif;
   --font-num:"TR Serif",serif; --font-title:"TR Serif",serif;
   --font-name:var(--font-ui); --name-style:normal;
@@ -926,8 +929,8 @@ html[data-theme="ponoc"]{
    ========================================================= */
 /* v113: zaglavlje neprozirno (ranije poluprozirno: sadrzaj albuma se video kroz zaglavlje pri pomeranju) */
 [data-theme="banka"] h1{ letter-spacing:-.2px; }
-[data-theme="banka"] .icon-btn, [data-theme="banka"] .back-btn{ background:#fff; border:1px solid var(--line); box-shadow:0 1px 2px rgba(14,39,71,.06); color:var(--title-color); }
-[data-theme="banka"] .sort-seg{ background:#EAE6DC; }
+[data-theme="banka"] .icon-btn, [data-theme="banka"] .back-btn{ background:var(--surface); border:1px solid var(--line); box-shadow:0 1px 2px rgba(14,39,71,.06); color:var(--title-color); }
+[data-theme="banka"] .sort-seg{ background:#E6DAC2; }
 [data-theme="banka"] .sort-btn{ color:#6B6F78; }
 [data-theme="banka"] .sort-btn.active{ background:#fff; color:var(--title-color); box-shadow:0 1px 3px rgba(14,39,71,.15); }
 [data-theme="banka"] .folder-tile .ftile-cover, [data-theme="banka"] .folder-tile-row, [data-theme="banka"] .folder-tile-wide, [data-theme="banka"] .thumb-box{ border:none; box-shadow:0 1px 0 rgba(14,39,71,.04), 0 6px 18px -8px rgba(14,39,71,.18); }
@@ -935,6 +938,41 @@ html[data-theme="ponoc"]{
 [data-theme="banka"] .date-label::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg,rgba(184,146,74,.55),transparent); }
 [data-theme="banka"] .add-sq{ background:linear-gradient(140deg,#16365F,#0E2747); color:#E8CE92; box-shadow:inset 0 0 0 1px rgba(212,178,110,.5); }
 [data-theme="banka"] .folder-tile-wide .add-sq{ border-left:none; }
+/* v235 (Zoran): „kožni povezi“ — topla slonovača sa zrnom papira, krem pločice, albumi kao povezi knjiga (hrbat u boji kože
+   po albumu — albumSpine, zlatno početno slovo, zlatna traka umesto „P“), „Bez albuma“ tamnoplava kartica, dvostruka zlatna linija. */
+[data-theme="banka"] body, [data-theme="banka"] #stickyTop, [data-theme="banka"] .set-screen, [data-theme="banka"] .set-header,
+[data-theme="banka"] .pg-screen, [data-theme="banka"] .ws-screen, [data-theme="banka"] .sheet-bg.sheet-full{ background-color:var(--bg); background-image:var(--paper); }
+[data-theme="banka"] body:not(.in-album) .mark-row{ position:relative; border-top-color:var(--gold); border-bottom-color:var(--gold); margin-bottom:6px; }
+[data-theme="banka"] body:not(.in-album) .mark-row::after{ content:""; position:absolute; left:0; right:0; bottom:-5px; border-top:1px solid rgba(201,169,97,.55); pointer-events:none; }
+[data-theme="banka"] .mark-cnt{ font-variant:small-caps; letter-spacing:.6px; color:var(--brass-soft); }
+[data-theme="banka"] .icon-btn, [data-theme="banka"] .back-btn{ border-color:rgba(184,146,74,.45); box-shadow:0 2px 6px -3px rgba(14,39,71,.25); }
+[data-theme="banka"] .alb-icons .alb-ico-sq:not(.add-sq){ background:var(--surface); border:1px solid rgba(184,146,74,.45); color:var(--title-color); box-shadow:0 3px 8px -5px rgba(14,39,71,.35); }
+[data-theme="banka"] .alb-icons .alb-ico-sq.add-sq{ background:linear-gradient(150deg,#1B3F6B,#0B1F3A); color:var(--gold-hi); box-shadow:inset 0 0 0 1px var(--gold); }
+[data-theme="banka"] body:not(.in-album) .alb-icons .alb-ico-tx{ font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#6E5A35; }
+html[data-theme="banka"] .home-inbox.home-inbox{ background:linear-gradient(135deg,#163558 0%,#0B1F3A 100%); border:1px solid var(--gold); color:#F7F2E6; box-shadow:0 8px 20px -10px rgba(11,31,58,.6); }
+html[data-theme="banka"] .home-inbox.home-inbox:active{ background:linear-gradient(135deg,#1D416B 0%,#102A4C 100%); }
+[data-theme="banka"] .home-inbox svg{ color:var(--gold-hi); }
+[data-theme="banka"] .home-inbox .hi-nm{ font-family:var(--font-title); font-size:19px; color:#F7F2E6; }
+[data-theme="banka"] .home-inbox .hi-ct{ color:var(--gold-hi); font-variant:small-caps; letter-spacing:.6px; }
+[data-theme="banka"] .folders-list{ gap:8px; }
+[data-theme="banka"] .folder-tile-row{ padding:0 14px 0 0; height:74px; gap:16px; border-radius:12px; background:var(--surface); border:1px solid rgba(201,169,97,.38);
+  box-shadow:0 1px 0 rgba(14,39,71,.03), 0 8px 18px -12px rgba(14,39,71,.35); }
+[data-theme="banka"] .folder-tile-row .ftile-cover{ width:58px; height:74px; margin:0; background:var(--spine, #14294A);
+  box-shadow:inset -4px 0 6px -3px rgba(0,0,0,.45), inset 3px 0 4px -2px rgba(255,255,255,.12); }
+[data-theme="banka"] .folder-tile-row .ftile-cover::before{ content:""; position:absolute; top:8px; bottom:8px; left:6px; right:6px; z-index:2; pointer-events:none;
+  border-top:1px solid rgba(230,199,126,.55); border-bottom:1px solid rgba(230,199,126,.55); }
+[data-theme="banka"] .folder-tile-row .ftile-cover img{ filter:saturate(.85) contrast(1.05); }
+[data-theme="banka"] .folder-tile-row .nocover, [data-theme="banka"] .folder-tile .nocover{ background:var(--spine, #14294A); }
+[data-theme="banka"] .folder-tile-row .nocover svg, [data-theme="banka"] .folder-tile .nocover svg{ display:none; }
+[data-theme="banka"] .folder-tile-row .nocover span, [data-theme="banka"] .folder-tile .nocover span{ transform:translateY(-50%); font-family:var(--font-title); font-style:normal;
+  font-weight:600; color:var(--gold-hi); opacity:1; text-shadow:0 1px 0 rgba(0,0,0,.45), 0 -1px 0 rgba(255,240,200,.25); }
+[data-theme="banka"] .folder-tile-row .nocover span{ font-size:30px; }
+[data-theme="banka"] .folder-tile .nocover span{ font-size:44px; }
+[data-theme="banka"] .folder-tile-row .fname{ font-family:var(--font-title); font-size:19px; font-weight:600; color:var(--title-color); }
+[data-theme="banka"] .folder-tile-row .fcount{ font-family:var(--font-ui); font-size:11px; text-transform:uppercase; letter-spacing:1.1px; color:#9A7A3E; margin-top:4px; }
+[data-theme="banka"] .pin-mark{ top:0; right:8px; left:auto; width:12px; height:20px; padding:0; border:none; border-radius:0; background:linear-gradient(#E6C77E,#B8924A);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%); font-size:0; color:transparent; box-shadow:none; z-index:3; }
+[data-theme="banka"] .folder-tile-row .drag-handle{ color:rgba(14,39,71,.25); }
 
 /* =========================================================
    TEMA: CRNA KARTICA
@@ -7015,6 +7053,9 @@ function commitGroupOrder(groupCats, container){
   saveCategories();
 }
 
+/* v235: boja kože za album (tema Privatno bankarstvo) — po id-ju albuma, pa ostaje ista i posle preimenovanja ili premeštanja */
+const ALBUM_SPINES = ['#14294A', '#5A1F2B', '#1F3A2E', '#6B3F1F', '#2B2E35', '#3D2340'];
+function albumSpine(id){ let h = 0; for(const c of String(id || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0; return ALBUM_SPINES[h % ALBUM_SPINES.length]; }
 const buildFolderTile = (cat, groupCats, onOpen)=>{
   const name = cat.name;
   const count = countDeep(cat.id);
@@ -7024,6 +7065,7 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
   const coverItem = coverItemFor(cat);
   const isList = albumViewMode === 'list';
   tile.className = isList ? 'folder-tile-row' : 'folder-tile';
+  tile.style.setProperty('--spine', albumSpine(cat.id));   /* v235: tema Privatno bankarstvo — boja kože poveza */
   const coverInner = (coverItem && coverItem.thumb) ? '<img src="'+coverItem.thumb+'">' : noCoverHtml(cat);
   if(isList){
     tile.innerHTML = '<div class="ftile-cover">'+coverInner+'</div><div class="fr-text"><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+(subN ? ' \u00B7 '+podalbumiTxt(subN) : '')+'</span></div>';
@@ -9956,7 +9998,7 @@ function saveBackupInterval(v){
 
 /* ---------- TEME (iste kao u aplikaciji Troškovi) ---------- */
 const THEMES = [
-  {id:'banka',    name:'Privatno bankarstvo', bar:'#0E2747', bg:'#F6F5F1', card:'linear-gradient(140deg,#16365F,#0A1C34)', num:'#D9B46A'},
+  {id:'banka',    name:'Privatno bankarstvo', bar:'#0E2747', bg:'#F1E7D5', card:'linear-gradient(140deg,#16365F,#0A1C34)', num:'#D9B46A'},
   {id:'crna',     name:'Crna kartica',        bar:'#000000', bg:'#000000', card:'linear-gradient(150deg,#34343A,#111113)', num:'#CDB27A'},
   {id:'ponoc',    name:'Ponoć',               bar:'#000000', bg:'#000000', card:'#1E2024', num:'#6FC48A'},
   {id:'koza',     name:'Kožni rokovnik',      bar:'#1F3A2E', bg:'#EFE8D8', card:'#1F3A2E', num:'#7A2331'},
@@ -10015,7 +10057,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 234;
+const APP_VERSION = 235;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
