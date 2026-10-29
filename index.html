@@ -2518,6 +2518,14 @@ body:not(.in-album) .mark-row.fit4 .mark-title{ gap:6px; }
   background:var(--surface-2); border:1px solid var(--line); color:var(--ink); font-family:var(--font-ui); text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .home-inbox:active{ background:var(--brass-glow); }
 .home-inbox svg{ flex:none; color:var(--brass); width:24px; height:24px; }
+/* v241: dobrodošlica (prazna Arhiva) */
+.home-welcome{ margin:12px 0 6px; padding:24px 18px 10px; border-radius:16px; background:var(--surface); border:1px solid var(--line); text-align:center; }
+.home-welcome .hw-ico svg{ width:40px; height:40px; color:var(--brass); }
+.home-welcome .hw-title{ margin:8px 0 6px; font-family:var(--font-title); font-size:22px; font-weight:700; color:var(--title-color, var(--ink)); }
+.home-welcome .hw-text{ margin:0 0 18px; font-size:15px; line-height:1.45; color:var(--ink-dim); }
+.home-welcome .hw-add{ width:100%; margin:0; }
+.home-welcome .hw-restore{ display:block; width:100%; min-height:48px; margin:6px 0 0; background:none; border:0; font:inherit; font-size:15px; font-weight:600; color:var(--brass-soft); }
+[data-theme="ponoc"] .home-welcome .hw-restore{ color:var(--brass); }
 .home-inbox .hi-nm{ flex:1 1 auto; min-width:0; font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .home-inbox .hi-ct{ flex:none; font-size:14px; color:var(--ink-dim); white-space:nowrap; }
 /* v118: na uskom ekranu okrugla dugmad gore malo manja, da stane i broj albuma */
@@ -3906,6 +3914,7 @@ const I18N = {
     aiSetModel: 'model',
     aiModelLite: 'najjeftiniji i brz',
     aiModelFlash: 'jači i skuplji',
+    aiKindAsk: 'Pitaj', aiSetKinds: 'Ovog meseca po vrsti posla', aiKindRow: '{n}× · {usd} (prosek {avg})',
     aiJobRead: 'Pročitaj', aiJobTpl: 'Šablon', aiJobTplEdit: 'Dorada šablona', aiJobList: 'Spisak', aiJobEdit: 'Izmena', aiJobFill: 'Popuni', aiJobTask: 'Zadatak', aiJobRefine: 'Dorada',
     aiSetModelHint: 'isti dokument možeš da pročitaš sa oba modela i uporediš tačnost i trošak.',
     aiSetConsent: 'saglasnost za slanje',
@@ -4714,6 +4723,7 @@ const I18N = {
     aiSetModel: 'model',
     aiModelLite: 'cheapest and fast',
     aiModelFlash: 'stronger and more expensive',
+    aiKindAsk: 'Ask', aiSetKinds: 'This month by kind of job', aiKindRow: '{n}× · {usd} (avg {avg})',
     aiJobRead: 'Read', aiJobTpl: 'Template', aiJobTplEdit: 'Template edit', aiJobList: 'List', aiJobEdit: 'Edit', aiJobFill: 'Fill in', aiJobTask: 'Task', aiJobRefine: 'Refine',
     aiSetModelHint: 'you can read the same document with both models and compare accuracy and cost.',
     aiSetConsent: 'consent to send',
@@ -5053,7 +5063,9 @@ Object.assign(I18N.en, {
 /* v185: ekran albuma */
 Object.assign(I18N.sr, {
   dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi',
-  emptyNoRes: 'Nema rezultata', emptyNoResX: 'Nema rezultata za "{q}".', albEmpty: 'Album je prazan', albEmptyX: 'Ovaj album je prazan. Dodaj nešto ikonicom „Dodaj“ gore.',
+  hwTitle: 'Arhiva je spremna', hwText: 'Ovde čuvaš račune, ugovore, garancije i ostala dokumenta. Slikaj ih ili dodaj iz telefona — Arhiva ih pronalazi po tekstu i podseća te na rokove.',
+  hwAdd: 'Dodaj prvi dokument', hwRestore: 'Imaš rezervnu kopiju? Vrati je',
+  emptyNoRes: 'Nema rezultata', emptyNoResX: 'Nema rezultata za "{q}".', albEmpty: 'Album je prazan', albEmptyX: 'Dodaj nešto ikonicom „Dodaj“ gore.',
   addTitle: 'Dodaj', addGallery: 'Iz galerije', addCamera: 'Slikaj', addDoc: 'Dokument',
   nfAlbum: 'Novi album', nfAlbumBtn: 'Napravi album', nfSub: 'Novi podalbum', nfSubBtn: 'Napravi podalbum', nfPh: 'Naziv albuma',
   mcMove: 'Premesti', mcCopy: 'Kopiraj', mcTitle: 'Album „{name}“',
@@ -5072,7 +5084,9 @@ Object.assign(I18N.sr, {
 });
 Object.assign(I18N.en, {
   dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
-  emptyNoRes: 'No results', emptyNoResX: 'No results for "{q}".', albEmpty: 'The album is empty', albEmptyX: 'This album is empty. Add something with the “Add” icon above.',
+  hwTitle: 'Your archive is ready', hwText: 'Keep receipts, contracts, warranties and other documents here. Take a photo or add them from your phone — Arhiva finds them by their text and reminds you of deadlines.',
+  hwAdd: 'Add your first document', hwRestore: 'Have a backup? Restore it',
+  emptyNoRes: 'No results', emptyNoResX: 'No results for "{q}".', albEmpty: 'The album is empty', albEmptyX: 'Add something with the “Add” icon above.',
   addTitle: 'Add', addGallery: 'From gallery', addCamera: 'Take a photo', addDoc: 'Document',
   nfAlbum: 'New album', nfAlbumBtn: 'Create album', nfSub: 'New sub-album', nfSubBtn: 'Create sub-album', nfPh: 'Album name',
   mcMove: 'Move', mcCopy: 'Copy', mcTitle: 'Album “{name}”',
@@ -7531,6 +7545,7 @@ function _renderView(){
     if(filtered.length === 0 && shownSubs.length > 0){ currentGalleryItems = []; return; }
     if(filtered.length === 0 && q && !selectionMode){ contentArea.appendChild(searchEmptyAlt(true)); currentGalleryItems = []; return; }   /* v161 */
     if(filtered.length === 0){
+      if(!q && !selectionMode) selBar.classList.remove('show');   /* v241: prazan album — nema na šta da se primeni donja traka */
       const msg = q ? escapeHtml(t('emptyNoResX', {q:searchEl.value})) : currentFolder === ALL ? t('allEmpty') : t('albEmptyX');
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty';
@@ -7656,7 +7671,9 @@ function _renderView(){
   inboxTile.querySelector('.hi-nm').textContent = t('allImages');
   inboxTile.querySelector('.hi-ct').textContent = stavkeTxt(inboxCount) + ' \u203a';
   inboxTile.onclick = ()=>{ currentFolder = INBOX; searchEl.value=''; pushBack(closeAlbumView); render(); };
-  homeHead.appendChild(inboxTile);
+  /* v241: prazna Arhiva (nema stavki ni albuma) — dobrodošlica umesto „Bez albuma · 0“; nestaje sa prvom stavkom */
+  if(!items.length && !categories.length && !selectionMode && !searchOpen) homeHead.appendChild(homeWelcome());
+  else homeHead.appendChild(inboxTile);
   albumHeaderZone.appendChild(homeHead);
 
 
@@ -9656,7 +9673,7 @@ async function askRun(){
     const r = await aiRequest([{text:askPrompt(q, docs)}], {schema:ASK_SCHEMA, signal:ctrl.signal, model, timeout:ASK_TIMEOUT, att});
     if(req !== _askReq) return;
     const tm = {loc:Math.round(t1 - t0), ai:Math.round(performance.now() - t1), tries:r.tries || 1, att:att.map(a=>[a.st, a.ms])};
-    aiUsageAdd({model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm});
+    aiUsageAdd({kind:'ask', lb:t('aiKindAsk'), model:(r.model || model).id, name:'Pitaj: ' + q.slice(0, 60), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const j = aiParseJson(r.text);
     if(!j || typeof j.answer !== 'string'){ throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse'); }
@@ -10173,7 +10190,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 240;
+const APP_VERSION = 241;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10406,6 +10423,18 @@ function openSettingsSub(which){
 /* povratak sa pod-ekrana na pločice (strelica i dugme "nazad" telefona idu kroz istoriju) */
 const settingsBackToTiles = ()=>{ settingsSubOpen = false; renderSettingsTiles(); };
 function triggerImportBackup(){ importInput.click(); }
+/* v241: dobrodošlica na praznom početnom ekranu — šta je Arhiva, prvi dokument, vraćanje rezervne kopije */
+function homeWelcome(){
+  const d = document.createElement('div');
+  d.className = 'home-welcome';
+  d.innerHTML = '<div class="hw-ico">' + INBOX_SVG_HOME + '</div><div class="hw-title"></div><p class="hw-text"></p>' +
+    '<button type="button" class="sheet-cta hw-add"></button><button type="button" class="hw-restore"></button>';
+  d.querySelector('.hw-title').textContent = t('hwTitle');
+  d.querySelector('.hw-text').textContent = t('hwText');
+  const a = d.querySelector('.hw-add'); a.textContent = t('hwAdd'); a.onclick = ()=>openAddSheet();
+  const r = d.querySelector('.hw-restore'); r.textContent = t('hwRestore'); r.onclick = ()=>{ openSettings(); openSettingsSub('backup'); };
+  return d;
+}
 document.getElementById('settingsBtn').onclick = openSettings;
 document.getElementById('newAlbumBtn').onclick = ()=>openNewFolderSheet(null);
 
@@ -12051,10 +12080,11 @@ function aiUsageLoad(){
   const empty = ()=>({n:0, inp:0, out:0, usd:0});
   try{
     const o = JSON.parse(aiLsGet(AI_LS_USAGE) || 'null');
-    if(o && typeof o === 'object') return {months:(o.months && typeof o.months === 'object') ? o.months : {}, total:o.total || empty(), last:Array.isArray(o.last) ? o.last : []};
+    if(o && typeof o === 'object') return {months:(o.months && typeof o.months === 'object') ? o.months : {}, total:o.total || empty(), last:Array.isArray(o.last) ? o.last : [], kinds:(o.kinds && typeof o.kinds === 'object') ? o.kinds : {}};
   }catch(e){}
-  return {months:{}, total:empty(), last:[]};
+  return {months:{}, total:empty(), last:[], kinds:{}};
 }
+/* v241: zbir po vrsti posla po mesecu (za analizu cene pretplate): kinds[mesec][vrsta] = {n, inp, out, usd, lb} */
 function aiUsageAdd(e){
   const u = aiUsageLoad();
   const mk = todayYmd().slice(0, 7);
@@ -12062,9 +12092,11 @@ function aiUsageAdd(e){
   const add = (o)=>{ o = o || {}; o.n = (o.n || 0) + 1; o.inp = (o.inp || 0) + (e.inp || 0); o.out = (o.out || 0) + out; o.usd = (o.usd || 0) + (e.usd || 0); return o; };
   u.months[mk] = add(u.months[mk]);
   u.total = add(u.total);
+  if(e.kind){ const km = u.kinds[mk] = u.kinds[mk] || {}; km[e.kind] = add(km[e.kind]); km[e.kind].lb = e.lb || e.kind; }
   u.last.unshift(Object.assign({ts:Date.now(), model:e.model, name:e.name || '', inp:e.inp || 0, out, usd:e.usd || 0}, e.tm ? {tm:e.tm} : {}));
   u.last = u.last.slice(0, 10);
   Object.keys(u.months).sort().slice(0, -12).forEach(k=>{ delete u.months[k]; });
+  Object.keys(u.kinds).sort().slice(0, -12).forEach(k=>{ delete u.kinds[k]; });
   aiLsSet(AI_LS_USAGE, JSON.stringify(u));
 }
 /* v163: „pokušaji: 503 posle 110,2 s · uspeh 3,1 s“ */
@@ -12485,7 +12517,7 @@ async function aiRunRead(item){
     if(req !== _aiReq) return;
     const r = await aiRequest([{text:aiReadPrompt(albums)}].concat(docParts), {schema:AI_READ_SCHEMA, signal:ctrl.signal, model});
     if(req !== _aiReq) return;
-    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobRead'), item.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+    aiUsageAdd({kind:'read', lb:t('aiJobRead'), model:(r.model || model).id, name:aiJobName(t('aiJobRead'), item.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const res = aiCleanRead(aiParseJson(r.text), albums);
     if(!res) throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse');
@@ -14653,8 +14685,8 @@ async function wsTplMake(src, signal, model, req){
     /* v137: slika i sken — AI samo prepiše tekst (stranicu po stranicu), dalje isto kao Word: AI vraća podatke, Arhiva pravi polja */
     /* trošak prepisa ide u isti zbir (upisuje se jednom, na kraju); ako prepis padne, upisuje se odmah */
     try{ blocks = await wsScanBlocks(src, signal, model, req, usage); }
-    catch(e){ if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); throw e; }
-    if(!blocks){ if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); return null; }
+    catch(e){ if(usage.inp || usage.out) aiUsageAdd({kind:'tpl', lb:t('aiJobTpl'), model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); throw e; }
+    if(!blocks){ if(usage.inp || usage.out) aiUsageAdd({kind:'tpl', lb:t('aiJobTpl'), model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm}); return null; }
   }else blocks = await wsTplBlocks(src);
   const chunks = wsTplChunks(blocks);
   const found = [];
@@ -14683,7 +14715,7 @@ async function wsTplMake(src, signal, model, req){
       });
     }
   }finally{
-    if(usage.inp || usage.out) aiUsageAdd({model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm});
+    if(usage.inp || usage.out) aiUsageAdd({kind:'tpl', lb:t('aiJobTpl'), model:usage.model || model.id, name:aiJobName(t('aiJobTpl'), src.name), inp:usage.inp, out:usage.out, think:usage.think, usd:usage.usd, tm:usage.tm});
   }
   const ap = wsTplApply(blocks, found.concat(wsTplPairs(blocks)));
   /* naslov iz prvog naslova dokumenta (ime fajla često sadrži ime osobe); VELIKA SLOVA → „Ugovor o zakupu stana“ */
@@ -14735,7 +14767,7 @@ function wsTplEditPrompt(res, instr){
 async function wsTplRefine(task, base, signal, model, src){
   const cur = base.res;
   const r = await aiRequest([{text:wsTplEditPrompt(cur, task.text)}], {schema:WS_TPL_EDIT_SCHEMA, signal, model});
-  aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobTplEdit'), src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+  aiUsageAdd({kind:'tplEdit', lb:t('aiJobTplEdit'), model:(r.model || model).id, name:aiJobName(t('aiJobTplEdit'), src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
   if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
   const o = aiParseJson(r.text);
   if(!o || typeof o !== 'object'){ const er = aiError('aiErrParse'); er.raw = String(r.text || ''); er.finish = r.finish || ''; er.schemaRej = r.schemaRej || ''; throw er; }
@@ -14837,7 +14869,7 @@ async function wsRun(task){
     const r = await aiRequest([{text:wsPrompt(task, cur)}].concat(docParts), {schema:WS_SCHEMA, signal:ctrl.signal, model});
     const job = task.kind === 'custom' ? t('aiJobTask') : task.kind === 'refine' ? t('aiJobRefine') : String(task.label || t('aiJobTask'));
     if(req !== _wsReq) return;
-    aiUsageAdd({model:(r.model || model).id, name:aiJobName(job, src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+    aiUsageAdd({kind:'task:' + (task.kind || 'x'), lb:job, model:(r.model || model).id, name:aiJobName(job, src.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
     const raw = aiParseJson(r.text);
     res = wsClean(raw);
@@ -15717,7 +15749,7 @@ async function zsRun(){
       if(req !== _zsReq) return;
       const r = await aiRequest([{text:zsPrompt(kind, cols)}].concat(parts), {schema:zsSchema(kind, cols), signal:ctrl.signal, model});
       if(req !== _zsReq) return;
-      aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobList'), it.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+      aiUsageAdd({kind:'list', lb:t('aiJobList'), model:(r.model || model).id, name:aiJobName(t('aiJobList'), it.name), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
       if(/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/.test(r.finish)) throw aiError('aiErrBlocked');
       const o = aiParseJson(r.text);
       if(!o || typeof o !== 'object') throw aiError(r.finish === 'MAX_TOKENS' ? 'aiErrCut' : 'aiErrParse');
@@ -18605,7 +18637,7 @@ async function weAiRun(){
   let a = we.ai;
   try{
     const r = await aiRequest([{text:weAiPrompt(doc, req)}], {schema:WE_AI_SCHEMA, signal:ctrl.signal, model});
-    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobEdit'), we.src.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+    aiUsageAdd({kind:'edit', lb:t('aiJobEdit'), model:(r.model || model).id, name:aiJobName(t('aiJobEdit'), we.src.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     const j = aiParseJson(r.text);
     if(!j || !Array.isArray(j.changes)){ const e = aiError('aiErrParse'); e.raw = r.text; e.finish = r.finish; e.schemaRej = r.schemaRej; throw e; }
     if(_we !== we || we.ai !== a) return;
@@ -18919,7 +18951,7 @@ async function wfAiRun(){
     const note = a.src.length >= 2 ? a.note.trim() : '';
     parts.push({text:wfAiPrompt(wf.tp, empty, filled, note, a.src.length)});
     const r = await aiRequest(parts, {schema:WF_AI_SCHEMA, signal:ctrl.signal, model});
-    aiUsageAdd({model:(r.model || model).id, name:aiJobName(t('aiJobFill'), wf.tp.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
+    aiUsageAdd({kind:'fill', lb:t('aiJobFill'), model:(r.model || model).id, name:aiJobName(t('aiJobFill'), wf.tp.name || ''), inp:r.usage.inp, out:r.usage.out, think:r.usage.think, usd:r.usage.usd, tm:r.tm});
     const j = aiParseJson(r.text);
     if(!j || !Array.isArray(j.values)){ const e = aiError('aiErrParse'); e.raw = r.text; e.finish = r.finish; e.schemaRej = r.schemaRej; throw e; }
     if(_wf !== wf) return;
@@ -18961,6 +18993,15 @@ function aiSetRow(id, icon, label, danger){
   return '<button type="button" class="settings-row" id="' + id + '"><span class="row-icon">' + icon + '</span><span class="row-label"' +
     (danger ? ' style="color:var(--danger);"' : '') + '>' + escapeHtml(label) + '</span><span class="chevron">›</span></button>';
 }
+/* v241: ovaj mesec po vrsti posla, najskuplje prvo */
+function aiKindsHtml(u){
+  const km = u.kinds[todayYmd().slice(0, 7)] || {};
+  const ks = Object.keys(km).sort((a, b)=>(km[b].usd || 0) - (km[a].usd || 0));
+  if(!ks.length) return '';
+  return '<div class="ai-set-lbl">' + escapeHtml(t('aiSetKinds')) + '</div><div class="settings-card">' +
+    ks.map(k=>'<div class="ai-use-row"><span>' + escapeHtml(km[k].lb || k) + '</span><b>' +
+      escapeHtml(t('aiKindRow', {n:fmtInt(km[k].n || 0), usd:fmtUsd(km[k].usd || 0), avg:fmtUsd((km[k].usd || 0) / Math.max(1, km[k].n || 0))})) + '</b></div>').join('') + '</div>';
+}
 function aiSettingsHtml(){
   const k = aiGetKey(), sh = aiSharedKey(), m = aiModel();
   const u = aiUsageLoad();
@@ -18987,6 +19028,7 @@ function aiSettingsHtml(){
     '<div class="settings-card">' +
     '<div class="ai-use-row"><span>' + escapeHtml(t('aiSetMonth')) + '</span><b>' + escapeHtml(useRow(cm)) + '</b></div>' +
     '<div class="ai-use-row"><span>' + escapeHtml(t('aiSetTotal')) + '</span><b>' + escapeHtml(useRow(u.total)) + '</b></div></div>' +
+    aiKindsHtml(u) +
     '<div class="ai-set-lbl">' + escapeHtml(t('aiSetLast')) + '</div>' +
     '<div class="settings-card">' +
     (u.last.length ? u.last.map(x=>{
