@@ -2518,14 +2518,49 @@ body:not(.in-album) .mark-row.fit4 .mark-title{ gap:6px; }
   background:var(--surface-2); border:1px solid var(--line); color:var(--ink); font-family:var(--font-ui); text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .home-inbox:active{ background:var(--brass-glow); }
 .home-inbox svg{ flex:none; color:var(--brass); width:24px; height:24px; }
+/* v242: upoznavanje */
+.intro-ov{ position:fixed; inset:0; z-index:85; display:flex; flex-direction:column; background:var(--bg); background-image:var(--page-bg);
+  padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); box-sizing:border-box; }
+body.intro-on{ overflow:hidden; }
+.intro-skip{ align-self:flex-end; min-height:48px; margin:6px 8px 0; padding:0 14px; background:none; border:0; font:inherit; font-size:15px; font-weight:600; color:var(--ink-dim); }
+.intro-track{ flex:1 1 auto; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
+.intro-track::-webkit-scrollbar{ display:none; }
+.intro-sl{ flex:0 0 100%; box-sizing:border-box; scroll-snap-align:center; scroll-snap-stop:always; display:flex; flex-direction:column; justify-content:center;
+  align-items:center; text-align:center; padding:0 28px 12px; overflow-y:auto; }
+.intro-ill{ width:min(78vw, 300px); height:auto; margin:0 0 22px; }
+.intro-ti{ margin:0 0 10px; font-family:var(--font-title); font-size:26px; line-height:1.2; font-weight:700; color:var(--title-color, var(--ink)); }
+.intro-tx{ margin:0; max-width:380px; font-size:16px; line-height:1.5; color:var(--ink-dim); }
+.intro-sl .intro-add{ width:100%; max-width:380px; margin:26px 0 0; }
+.intro-sl .intro-rest{ max-width:380px; }
+.intro-foot{ display:flex; align-items:center; gap:14px; padding:10px 20px 16px; }
+.intro-dots{ flex:1 1 auto; display:flex; gap:7px; }
+.intro-dots i{ width:7px; height:7px; border-radius:4px; background:var(--line); transition:width .2s, background .2s; }
+.intro-dots i.on{ width:20px; background:var(--brass); }
+.intro-foot .intro-next{ width:auto; min-width:120px; margin:0; }
+.intro-ov.last .intro-next{ visibility:hidden; }
+.intro-ill .o-p{ fill:var(--surface); stroke:var(--line); stroke-width:2; }
+.intro-ill .o-p1{ fill:var(--surface-2); stroke:var(--line); stroke-width:2; }
+.intro-ill .o-ln{ stroke:var(--ink-faint); stroke-width:5; stroke-linecap:round; opacity:.55; }
+.intro-ill .o-acc{ fill:none; stroke:var(--brass); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+.intro-ill .o-acc2{ fill:none; stroke:var(--brass); stroke-width:4; stroke-linejoin:round; }
+.intro-ill .o-dot, .intro-ill .o-fill{ fill:var(--brass); }
+.intro-ill .o-hl{ fill:var(--brass-glow); stroke:var(--brass); stroke-width:1.5; }
+.intro-ill .o-lens{ fill:color-mix(in srgb, var(--surface) 60%, transparent); stroke:var(--brass); stroke-width:5; }
+.intro-ill .o-bar{ fill:var(--brass); opacity:.85; }
+.intro-ill .o-bell{ fill:var(--surface); stroke:var(--ink); stroke-width:3; stroke-linejoin:round; }
+.intro-ill .o-spark{ fill:var(--brass); }
+.intro-ill .o-shield{ fill:var(--brass-glow); stroke:var(--brass); stroke-width:3; stroke-linejoin:round; }
+.intro-ill .o-tx{ font:700 17px var(--font-ui); fill:var(--ink); text-anchor:middle; letter-spacing:.5px; }
+.intro-ill .o-big{ font:700 40px var(--font-title); fill:var(--ink); text-anchor:middle; }
+.intro-again{ width:100%; margin:4px 0 14px; }
 /* v241: dobrodošlica (prazna Arhiva) */
 .home-welcome{ margin:12px 0 6px; padding:24px 18px 10px; border-radius:16px; background:var(--surface); border:1px solid var(--line); text-align:center; }
 .home-welcome .hw-ico svg{ width:40px; height:40px; color:var(--brass); }
 .home-welcome .hw-title{ margin:8px 0 6px; font-family:var(--font-title); font-size:22px; font-weight:700; color:var(--title-color, var(--ink)); }
 .home-welcome .hw-text{ margin:0 0 18px; font-size:15px; line-height:1.45; color:var(--ink-dim); }
 .home-welcome .hw-add{ width:100%; margin:0; }
-.home-welcome .hw-restore{ display:block; width:100%; min-height:48px; margin:6px 0 0; background:none; border:0; font:inherit; font-size:15px; font-weight:600; color:var(--brass-soft); }
-[data-theme="ponoc"] .home-welcome .hw-restore{ color:var(--brass); }
+.hw-restore{ display:block; width:100%; min-height:48px; margin:6px 0 0; background:none; border:0; font:inherit; font-size:15px; font-weight:600; color:var(--brass-soft); }
+[data-theme="ponoc"] .hw-restore{ color:var(--brass); }
 .home-inbox .hi-nm{ flex:1 1 auto; min-width:0; font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .home-inbox .hi-ct{ flex:none; font-size:14px; color:var(--ink-dim); white-space:nowrap; }
 /* v118: na uskom ekranu okrugla dugmad gore malo manja, da stane i broj albuma */
@@ -5063,6 +5098,18 @@ Object.assign(I18N.en, {
 /* v185: ekran albuma */
 Object.assign(I18N.sr, {
   dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi',
+  introSkip: 'Preskoči', introClose: 'Zatvori', introNext: 'Dalje', introAgain: '▶ Pogledaj upoznavanje sa aplikacijom',
+  introSlides: [
+    ['Dobrodošli u aplikaciju {app}', 'Računi, ugovori, garancije i ostala dokumenta — sređeni, uvek pri ruci i lako se pronalaze.'],
+    ['Sve na jednom mestu', 'Slike, PDF, Word i Excel. Slikaj dokument, dodaj ga iz telefona ili složi više stranica u jedan dokument.'],
+    ['Albumi kao fascikle', 'Napravi album za kuću, auto ili posao, a u njemu podalbume. Sve stoji tamo gde očekuješ.'],
+    ['Pronađi bilo šta', 'Pretraga traži i po tekstu unutar dokumenta, ne samo po imenu. Upiši reč i dokument je tu.'],
+    ['Ne propusti rok', 'Upiši rok za garanciju, registraciju ili ugovor. {app} te upozori kad se rok približi.'],
+    ['AI radionica', 'AI pročita dokument i izvuče podatke, napravi sažetak, sabere iznose ili prevede. Od dokumenta napravi šablon koji posle samo popuniš.'],
+    ['Pošalji kako treba', 'Više slika pošalji kao jedan PDF. Dokument podeli porukom, mejlom ili gde god treba, u nekoliko dodira.'],
+    ['Tvoji podaci su kod tebe', 'Dokumenti se čuvaju na tvom telefonu. Napravi rezervnu kopiju, a obrisano čeka 30 dana u korpi. AI dobija dokument samo kad ga ti pokreneš.'],
+    ['Spremno je', 'Dodaj prvi dokument i {app} počinje da radi za tebe.']
+  ],
   hwTitle: 'Arhiva je spremna', hwText: 'Ovde čuvaš račune, ugovore, garancije i ostala dokumenta. Slikaj ih ili dodaj iz telefona — Arhiva ih pronalazi po tekstu i podseća te na rokove.',
   hwAdd: 'Dodaj prvi dokument', hwRestore: 'Imaš rezervnu kopiju? Vrati je',
   emptyNoRes: 'Nema rezultata', emptyNoResX: 'Nema rezultata za "{q}".', albEmpty: 'Album je prazan', albEmptyX: 'Dodaj nešto ikonicom „Dodaj“ gore.',
@@ -5084,6 +5131,18 @@ Object.assign(I18N.sr, {
 });
 Object.assign(I18N.en, {
   dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
+  introSkip: 'Skip', introClose: 'Close', introNext: 'Next', introAgain: '▶ Watch the app introduction',
+  introSlides: [
+    ['Welcome to {app}', 'Receipts, contracts, warranties and other documents — organized, always at hand and easy to find.'],
+    ['Everything in one place', 'Images, PDF, Word and Excel. Photograph a document, add it from your phone or put several pages into one document.'],
+    ['Albums like folders', 'Make an album for your home, car or work, with sub-albums inside. Everything stays where you expect it.'],
+    ['Find anything', 'Search looks at the text inside documents too, not only the name. Type a word and the document is there.'],
+    ['Never miss a deadline', 'Add a deadline for a warranty, registration or contract. {app} warns you when it gets close.'],
+    ['AI workshop', 'AI reads a document and pulls out the data, writes a summary, adds up amounts or translates. It turns a document into a template you just fill in.'],
+    ['Send it the right way', 'Send several images as one PDF. Share a document by message, email or anywhere else in a few taps.'],
+    ['Your data stays with you', 'Documents are stored on your phone. Make a backup, and deleted items wait 30 days in the trash. AI gets a document only when you start it.'],
+    ['All set', 'Add your first document and {app} starts working for you.']
+  ],
   hwTitle: 'Your archive is ready', hwText: 'Keep receipts, contracts, warranties and other documents here. Take a photo or add them from your phone — Arhiva finds them by their text and reminds you of deadlines.',
   hwAdd: 'Add your first document', hwRestore: 'Have a backup? Restore it',
   emptyNoRes: 'No results', emptyNoResX: 'No results for "{q}".', albEmpty: 'The album is empty', albEmptyX: 'Add something with the “Add” icon above.',
@@ -9774,7 +9833,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp();
+loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp();
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -10190,7 +10249,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 241;
+const APP_VERSION = 242;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10423,6 +10482,97 @@ function openSettingsSub(which){
 /* povratak sa pod-ekrana na pločice (strelica i dugme "nazad" telefona idu kroz istoriju) */
 const settingsBackToTiles = ()=>{ settingsSubOpen = false; renderSettingsTiles(); };
 function triggerImportBackup(){ importInput.click(); }
+/* v242: upoznavanje — niz ekrana pri prvom otvaranju (prazna Arhiva), posle iz Uputstva. Ime: APP_NAME.
+   Na Androidu pitanje o zaključavanju (lkFirstRun) čeka kraj upoznavanja (introAfter). */
+const APP_NAME = 'Arhiva';
+const INTRO_SEEN = LS_PREFIX + 'introSeen';
+var introAfter = null;
+const INTRO_ILL = [
+/* 0 dobrodošli: snop dokumenata + znak Arhive */
+'<rect x="66" y="40" width="92" height="120" rx="10" class="o-p1" transform="rotate(-9 112 100)"/><rect x="84" y="34" width="92" height="120" rx="10" class="o-p1" transform="rotate(7 130 94)"/>' +
+'<rect x="74" y="26" width="92" height="124" rx="10" class="o-p"/><line class="o-ln" x1="90" y1="48" x2="150" y2="48"/><line class="o-ln" x1="90" y1="62" x2="136" y2="62"/>' +
+'<path class="o-acc" d="M120 82l22 22-22 22-22-22z"/>',
+/* 1 sve na jednom mestu: slika, PDF, DOC, XLS */
+'<rect x="52" y="22" width="64" height="64" rx="10" class="o-p"/><polyline class="o-acc2" points="60 76 76 60 88 70 96 64 108 76"/><circle class="o-dot" cx="76" cy="40" r="6"/>' +
+'<rect x="124" y="22" width="64" height="64" rx="10" class="o-p"/><text x="156" y="62" class="o-tx">PDF</text>' +
+'<rect x="52" y="94" width="64" height="64" rx="10" class="o-p"/><text x="84" y="134" class="o-tx">DOC</text>' +
+'<rect x="124" y="94" width="64" height="64" rx="10" class="o-p"/><text x="156" y="134" class="o-tx">XLS</text>',
+/* 2 albumi: fascikle */
+'<path class="o-p1" d="M46 64h46l10 12h92v72a8 8 0 0 1-8 8H54a8 8 0 0 1-8-8z"/>' +
+'<path class="o-p" d="M58 48h40l10 12h80v68a8 8 0 0 1-8 8H66a8 8 0 0 1-8-8z" transform="translate(-6 26)"/>' +
+'<path class="o-acc" d="M70 112h100"/><path class="o-acc" d="M70 126h64"/>',
+/* 3 pretraga: dokument, istaknuta reč, lupa */
+'<rect x="50" y="20" width="104" height="140" rx="10" class="o-p"/><line class="o-ln" x1="66" y1="44" x2="138" y2="44"/><line class="o-ln" x1="66" y1="60" x2="124" y2="60"/>' +
+'<rect x="62" y="70" width="58" height="16" rx="5" class="o-hl"/><line class="o-ln" x1="66" y1="96" x2="138" y2="96"/><line class="o-ln" x1="66" y1="112" x2="112" y2="112"/>' +
+'<circle class="o-lens" cx="150" cy="104" r="28"/><line class="o-acc" x1="170" y1="124" x2="194" y2="148"/>',
+/* 4 rok: kalendar i zvonce */
+'<rect x="52" y="34" width="112" height="118" rx="12" class="o-p"/><rect x="52" y="34" width="112" height="30" rx="12" class="o-bar"/><rect x="52" y="52" width="112" height="12" class="o-bar"/>' +
+'<line class="o-acc" x1="80" y1="24" x2="80" y2="44"/><line class="o-acc" x1="136" y1="24" x2="136" y2="44"/><text x="108" y="124" class="o-big">15</text>' +
+'<path class="o-bell" d="M168 118a18 18 0 0 1 18 18v14l6 8h-48l6-8v-14a18 18 0 0 1 18-18z"/><circle class="o-dot" cx="186" cy="118" r="7"/>',
+/* 5 AI: dokument → iskra → popunjen obrazac */
+'<rect x="30" y="38" width="70" height="96" rx="9" class="o-p"/><line class="o-ln" x1="44" y1="58" x2="86" y2="58"/><line class="o-ln" x1="44" y1="72" x2="78" y2="72"/><line class="o-ln" x1="44" y1="86" x2="86" y2="86"/>' +
+'<path class="o-spark" d="M120 64l5 15 15 5-15 5-5 15-5-15-15-5 15-5z"/>' +
+'<rect x="140" y="38" width="70" height="96" rx="9" class="o-p"/><rect x="152" y="54" width="46" height="12" rx="4" class="o-hl"/><rect x="152" y="76" width="46" height="12" rx="4" class="o-hl"/><rect x="152" y="98" width="30" height="12" rx="4" class="o-hl"/>',
+/* 6 pošalji: stranice u jedan PDF, strelica */
+'<rect x="34" y="40" width="44" height="58" rx="6" class="o-p1"/><rect x="42" y="62" width="44" height="58" rx="6" class="o-p1"/><rect x="50" y="84" width="44" height="58" rx="6" class="o-p1"/>' +
+'<path class="o-acc" d="M104 92h22m-8-8l8 8-8 8"/><rect x="136" y="44" width="72" height="96" rx="9" class="o-p"/><text x="172" y="100" class="o-tx">PDF</text>' +
+'<path class="o-fill" d="M196 132l18-8-6 18-3-7z"/>',
+/* 7 privatnost: telefon i štit */
+'<rect x="78" y="16" width="84" height="148" rx="16" class="o-p"/><line class="o-ln" x1="108" y1="28" x2="132" y2="28"/>' +
+'<path class="o-shield" d="M120 56l30 11v22c0 20-13 32-30 38-17-6-30-18-30-38V67z"/><polyline class="o-acc" points="106 92 116 102 136 80"/>',
+/* 8 kraj: plus */
+'<circle cx="120" cy="90" r="56" class="o-p"/><circle cx="120" cy="90" r="40" class="o-lens"/><line class="o-acc" x1="120" y1="70" x2="120" y2="110"/><line class="o-acc" x1="100" y1="90" x2="140" y2="90"/>'
+];
+function introWanted(){ try{ return !localStorage.getItem(INTRO_SEEN); }catch(e){ return false; } }
+function introRunAfter(){ const f = introAfter; introAfter = null; if(f) try{ f(); }catch(e){ console.error('introAfter', e); } }
+function introBoot(){
+  if(introWanted() && !items.length && !categories.length && !document.getElementById('introOv')) introOpen();
+  else introRunAfter();
+}
+function introOpen(){
+  const sl = tl('introSlides') || [];
+  const n = sl.length;
+  const ov = document.createElement('div');
+  ov.id = 'introOv'; ov.className = 'intro-ov';
+  ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+  ov.innerHTML = '<button type="button" class="intro-skip"></button><div class="intro-track">' +
+    sl.map((x, i)=>'<section class="intro-sl"><svg class="intro-ill" viewBox="0 0 240 180" aria-hidden="true">' + (INTRO_ILL[i] || '') + '</svg>' +
+      '<h2 class="intro-ti"></h2><p class="intro-tx"></p>' +
+      (i === n - 1 ? '<button type="button" class="sheet-cta intro-add"></button><button type="button" class="hw-restore intro-rest"></button>' : '') + '</section>').join('') +
+    '</div><div class="intro-foot"><div class="intro-dots">' + sl.map(()=>'<i></i>').join('') + '</div><button type="button" class="sheet-cta intro-next"></button></div>';
+  ov.querySelectorAll('.intro-sl').forEach((e, i)=>{
+    e.querySelector('.intro-ti').textContent = String(sl[i][0]).replace('{app}', APP_NAME);
+    e.querySelector('.intro-tx').textContent = String(sl[i][1]).replace('{app}', APP_NAME);
+  });
+  const track = ov.querySelector('.intro-track'), next = ov.querySelector('.intro-next'), skip = ov.querySelector('.intro-skip');
+  const dots = [...ov.querySelectorAll('.intro-dots i')];
+  next.textContent = t('introNext');
+  ov.querySelector('.intro-add').textContent = t('hwAdd');
+  ov.querySelector('.intro-rest').textContent = t('hwRestore');
+  ov.querySelector('.intro-add').onclick = ()=>requestCloseThen(()=>openAddSheet());
+  ov.querySelector('.intro-rest').onclick = ()=>requestCloseThen(()=>{ openSettings(); openSettingsSub('backup'); });
+  skip.onclick = ()=>requestClose();
+  let cur = -1;
+  const show = (i)=>{
+    if(i === cur) return; cur = i;
+    dots.forEach((d, k)=>d.classList.toggle('on', k === i));
+    const last = i === n - 1;
+    ov.classList.toggle('last', last);
+    skip.textContent = last ? t('introClose') : t('introSkip');
+  };
+  const idx = ()=>Math.max(0, Math.min(n - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))));
+  track.addEventListener('scroll', ()=>show(idx()), {passive:true});
+  next.onclick = ()=>track.scrollTo({left:(idx() + 1) * track.clientWidth, behavior:'smooth'});
+  dots.forEach((d, k)=>{ d.onclick = ()=>track.scrollTo({left:k * track.clientWidth, behavior:'smooth'}); });
+  document.body.appendChild(ov);
+  document.body.classList.add('intro-on');
+  show(0);
+  pushBack(()=>{
+    ov.remove(); document.body.classList.remove('intro-on');
+    try{ localStorage.setItem(INTRO_SEEN, '1'); }catch(e){}
+    introRunAfter();
+  });
+}
 /* v241: dobrodošlica na praznom početnom ekranu — šta je Arhiva, prvi dokument, vraćanje rezervne kopije */
 function homeWelcome(){
   const d = document.createElement('div');
@@ -19100,7 +19250,8 @@ document.getElementById('addMulti').onclick = ()=>requestCloseThen(()=>openPageE
    ===================================================================== */
 function guideHtml(){
   const secs = tl('guide') || [];
-  return '<p class="mig-p guide-intro">'+escapeHtml(t('guideIntro'))+'</p>'+
+  return '<button type="button" class="sheet-cta secondary intro-again" onclick="introOpen()">'+escapeHtml(t('introAgain'))+'</button>'+
+    '<p class="mig-p guide-intro">'+escapeHtml(t('guideIntro'))+'</p>'+
     '<div class="guide-list">'+secs.map(s=>'<details class="guide-item"><summary><span>'+escapeHtml(s[0])+'</span><i class="guide-chev">›</i></summary>'+
       s.slice(1).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+'</details>').join('')+'</div>';
 }
@@ -19473,7 +19624,7 @@ function lkBoot(){
         lkLockedScreen(false); setTimeout(()=>lkUnlock(), 300);
       });
     }
-    else if(!c.asked) lkFirstRun();
+    else if(!c.asked){ if(introWanted()){ document.documentElement.classList.remove('lk-boot'); introAfter = lkFirstRun; } else lkFirstRun(); }   /* v242: posle upoznavanja */
     else document.documentElement.classList.remove('lk-boot');
   }catch(e){ console.error('lkBoot', e); lkState = 'open'; lkHide(); }
 }
