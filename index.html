@@ -2518,41 +2518,85 @@ body:not(.in-album) .mark-row.fit4 .mark-title{ gap:6px; }
   background:var(--surface-2); border:1px solid var(--line); color:var(--ink); font-family:var(--font-ui); text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .home-inbox:active{ background:var(--brass-glow); }
 .home-inbox svg{ flex:none; color:var(--brass); width:24px; height:24px; }
-/* v242: upoznavanje */
-.intro-ov{ position:fixed; inset:0; z-index:85; display:flex; flex-direction:column; background:var(--bg); background-image:var(--page-bg);
+/* v244: upoznavanje — uvek izgled „Privatno bankarstvo“ (stalne boje i slova, ne promenljive teme) */
+.ob-ov{ position:fixed; inset:0; z-index:85; background:#0A1C36; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; color:#1B2433;
   padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); box-sizing:border-box; }
 body.intro-on{ overflow:hidden; }
-.intro-skip{ align-self:flex-end; min-height:48px; margin:6px 8px 0; padding:0 14px; background:none; border:0; font:inherit; font-size:15px; font-weight:600; color:var(--ink-dim); }
-.intro-track{ flex:1 1 auto; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
-.intro-track::-webkit-scrollbar{ display:none; }
-.intro-sl{ flex:0 0 100%; box-sizing:border-box; scroll-snap-align:center; scroll-snap-stop:always; display:flex; flex-direction:column; justify-content:center;
-  align-items:center; text-align:center; padding:0 28px 12px; overflow-y:auto; }
-.intro-ill{ width:min(78vw, 300px); height:auto; margin:0 0 22px; }
-.intro-ti{ margin:0 0 10px; font-family:var(--font-title); font-size:26px; line-height:1.2; font-weight:700; color:var(--title-color, var(--ink)); }
-.intro-tx{ margin:0; max-width:380px; font-size:16px; line-height:1.5; color:var(--ink-dim); }
-.intro-sl .intro-add{ width:100%; max-width:380px; margin:26px 0 0; }
-.intro-sl .intro-rest{ max-width:380px; }
-.intro-foot{ display:flex; align-items:center; gap:14px; padding:10px 20px 16px; }
-.intro-dots{ flex:1 1 auto; display:flex; gap:7px; }
-.intro-dots i{ width:7px; height:7px; border-radius:4px; background:var(--line); transition:width .2s, background .2s; }
-.intro-dots i.on{ width:20px; background:var(--brass); }
-.intro-foot .intro-next{ width:auto; min-width:120px; margin:0; }
-.intro-ov.last .intro-next{ visibility:hidden; }
-.intro-ill .o-p{ fill:var(--surface); stroke:var(--line); stroke-width:2; }
-.intro-ill .o-p1{ fill:var(--surface-2); stroke:var(--line); stroke-width:2; }
-.intro-ill .o-ln{ stroke:var(--ink-faint); stroke-width:5; stroke-linecap:round; opacity:.55; }
-.intro-ill .o-acc{ fill:none; stroke:var(--brass); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
-.intro-ill .o-acc2{ fill:none; stroke:var(--brass); stroke-width:4; stroke-linejoin:round; }
-.intro-ill .o-dot, .intro-ill .o-fill{ fill:var(--brass); }
-.intro-ill .o-hl{ fill:var(--brass-glow); stroke:var(--brass); stroke-width:1.5; }
-.intro-ill .o-lens{ fill:color-mix(in srgb, var(--surface) 60%, transparent); stroke:var(--brass); stroke-width:5; }
-.intro-ill .o-bar{ fill:var(--brass); opacity:.85; }
-.intro-ill .o-bell{ fill:var(--surface); stroke:var(--ink); stroke-width:3; stroke-linejoin:round; }
-.intro-ill .o-spark{ fill:var(--brass); }
-.intro-ill .o-shield{ fill:var(--brass-glow); stroke:var(--brass); stroke-width:3; stroke-linejoin:round; }
-.intro-ill .o-ln2{ fill:var(--ink-faint); opacity:.45; }
-.intro-ill .o-tx{ font:700 17px var(--font-ui); fill:var(--ink); text-anchor:middle; letter-spacing:.5px; }
-.intro-ill .o-big{ font:700 40px var(--font-title); fill:var(--ink); text-anchor:middle; }
+.ob-track{ height:100%; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
+.ob-track::-webkit-scrollbar{ display:none; }
+.ob-sl{ position:relative; flex:0 0 100%; height:100%; box-sizing:border-box; scroll-snap-align:center; scroll-snap-stop:always; overflow:hidden; display:flex; flex-direction:column; background:#F3EADB; }
+.ob-ov button{ font-family:inherit; cursor:pointer; }
+.ob-hero{ position:relative; overflow:hidden; flex:none; padding:20px 28px 26px; color:#F7F2E6; background:radial-gradient(130% 100% at 100% 0%, #1E4673 0%, #12305A 38%, #0A1C36 100%); }
+.ob-gil{ position:absolute; inset:0; width:100%; height:100%; opacity:.3; pointer-events:none;
+  -webkit-mask-image:radial-gradient(120% 95% at 100% 0%, #000 0%, rgba(0,0,0,.35) 55%, transparent 85%); mask-image:radial-gradient(120% 95% at 100% 0%, #000 0%, rgba(0,0,0,.35) 55%, transparent 85%); }
+.ob-hero::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:6px; animation:obSheen 1.4s ease-in-out .35s 1 both;
+  background-image:linear-gradient(100deg, #9C7735 0%, #E6C77E 22%, #C9A961 40%, #FFF3CF 50%, #C9A961 60%, #E6C77E 78%, #9C7735 100%); background-size:250% 100%; background-position:100% 0; }
+.ob-hero > :not(.ob-gil):not(.ob-top){ position:relative; }
+.ob-top{ position:absolute; top:10px; right:12px; z-index:2; min-height:44px; padding:0 10px; background:none; border:0; color:rgba(247,242,230,.72); font-size:15px; font-weight:500; }
+.ob-mark{ width:34px; height:34px; margin:12px 0 16px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+.ob-hi{ margin:0; font-size:15px; color:rgba(247,242,230,.72); letter-spacing:.3px; }
+.ob-name{ margin:0 0 4px; font-family:"TR Serif",serif; font-weight:700; font-size:clamp(38px, 12.6vw, 50px); line-height:1.04; letter-spacing:-.5px;
+  background:linear-gradient(180deg, #FFFFFF 0%, #F3E9D2 60%, #E2D2AE 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ob-cmp{ margin:0 0 16px; font-family:"TR Serif",serif; font-style:italic; font-size:16px; color:rgba(247,242,230,.84); }
+.ob-rule{ width:64px; height:2px; margin:0 0 16px; background:linear-gradient(90deg, #E6C77E, #B8924A); }
+.ob-slogan{ display:inline-block; margin:0; font-family:"TR Serif",serif; font-size:22px; line-height:1.3; -webkit-background-clip:text; background-clip:text; color:transparent;
+  background-image:linear-gradient(100deg, #D9B66A 0%, #D9B66A 40%, #FFF3CF 50%, #D9B66A 60%, #B8924A 100%); background-size:250% 100%; background-position:100% 0;
+  animation:obSheen 1.4s ease-in-out .5s 1 both; }
+@keyframes obSheen{ from{ background-position:100% 0; } to{ background-position:0% 0; } }
+@media (prefers-reduced-motion:reduce){ .ob-slogan, .ob-hero::after{ animation:none; background-position:0 0; } }
+.ob-body{ flex:1 1 auto; min-height:0; padding:20px 24px 0; overflow-y:auto; }
+.ob-h{ display:flex; align-items:center; gap:12px; margin:0 0 8px; font-family:"TR Serif",serif; font-weight:700; font-size:19px; color:#0E2747; }
+.ob-h::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(184,146,74,.55), rgba(184,146,74,0)); }
+.ob-list{ list-style:none; margin:0; padding:0; }
+.ob-list + .ob-list{ margin-top:clamp(6px, 1.3vh, 14px); }
+.ob-list li{ display:flex; align-items:center; gap:14px; min-height:clamp(32px, 4.4vh, 42px); font-size:15px; line-height:1.25; color:#1B2433; }
+.ob-ic{ flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; color:#0E2747;
+  background:radial-gradient(circle at 35% 30%, #FFFDF7, #F1E5CC); box-shadow:inset 0 0 0 1px rgba(184,146,74,.55), 0 1px 2px rgba(14,39,71,.12); }
+.ob-ic svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.ob-ic svg .g{ stroke:#A9823C; }
+.ob-foot{ display:flex; align-items:center; gap:14px; }
+.ob-foot-l{ flex:none; padding:10px 22px 16px; }
+.ob-dots{ flex:1; display:flex; justify-content:center; gap:7px; }
+.ob-dots i{ width:7px; height:7px; border-radius:4px; background:#DCCDAF; cursor:pointer; }
+.ob-dots i.on{ width:22px; background:linear-gradient(90deg, #E6C77E, #B8924A); }
+.ob-foot-l .ob-dots{ justify-content:flex-start; }
+.ob-next{ min-width:128px; min-height:48px; margin:0; border:0; border-radius:12px; font-size:16px; font-weight:700; }
+.ob-next-n{ color:#F7F2E6; background:linear-gradient(180deg, #17375F, #0B1F3A); box-shadow:inset 0 0 0 1px rgba(230,199,126,.5), 0 6px 14px -8px rgba(11,31,58,.8); }
+.ob-next-g{ color:#0A1C36; background:linear-gradient(180deg, #F2DDA4, #C9A961); box-shadow:0 6px 14px -6px rgba(0,0,0,.6); }
+/* ekrani 2–5: slika prave Arhive preko celog ekrana + tamnoplava traka */
+.ob-shot{ background:#F3EADB; }
+.ob-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; }
+.ob-band{ position:absolute; left:0; right:0; bottom:0; z-index:2; overflow:hidden; padding:26px 24px 18px; color:#F7F2E6;
+  background:radial-gradient(130% 120% at 100% 0%, #1E4673 0%, #12305A 40%, #0A1C36 100%); box-shadow:0 -18px 40px -10px rgba(11,31,58,.55); }
+.ob-band::before{ content:""; position:absolute; left:0; right:0; top:0; height:5px; z-index:1;
+  background:linear-gradient(100deg, #9C7735 0%, #E6C77E 22%, #C9A961 40%, #F2DDA4 50%, #C9A961 60%, #E6C77E 78%, #9C7735 100%); }
+.ob-band > :not(.ob-gil){ position:relative; }
+.ob-band .ob-gil{ -webkit-mask-image:radial-gradient(120% 120% at 100% 0%, #000, transparent 80%); mask-image:radial-gradient(120% 120% at 100% 0%, #000, transparent 80%); opacity:.28; }
+.ob-t{ margin:0 0 6px; font-family:"TR Serif",serif; font-weight:700; font-size:27px; line-height:1.1;
+  background:linear-gradient(180deg, #FFFFFF, #E9DCBC); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ob-s{ margin:0 0 16px; font-size:15.5px; line-height:1.45; color:rgba(247,242,230,.84); }
+.ob-band .ob-skip{ min-height:44px; padding:0 4px; border:0; background:none; color:rgba(247,242,230,.7); font-size:15px; font-weight:500; }
+.ob-band .ob-dots i{ background:rgba(247,242,230,.28); }
+.ob-band .ob-dots i.on{ background:linear-gradient(90deg, #E6C77E, #B8924A); }
+/* ekran 6 */
+.ob-end .ob-hero{ flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px 30px 40px; }
+.ob-end .ob-mark{ width:86px; height:86px; margin:0 0 26px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
+.ob-end .ob-name{ font-size:clamp(30px, 9.4vw, 40px); margin:0 0 12px; }
+.ob-endsub{ margin:0 0 22px; font-size:17px; line-height:1.45; color:rgba(247,242,230,.8); max-width:300px; }
+.ob-end .ob-rule{ margin:0 auto 18px; }
+.ob-end .ob-slogan{ font-size:21px; }
+.ob-act{ flex:none; padding:24px 24px 16px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.ob-add{ width:100%; min-height:56px; margin:0; border:0; border-radius:14px; font-size:17px; font-weight:700; letter-spacing:.3px; color:#F7F2E6;
+  background:linear-gradient(180deg, #17375F, #0B1F3A); box-shadow:inset 0 0 0 1px rgba(230,199,126,.55), 0 10px 20px -10px rgba(11,31,58,.8); display:flex; align-items:center; justify-content:center; gap:10px; }
+.ob-add svg{ width:22px; height:22px; stroke:#E6C77E; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.ob-rest{ min-height:48px; background:none; border:0; font-size:15px; font-weight:600; color:#8C6A2C; }
+.ob-act .ob-dots{ flex:none; margin-top:6px; }
+@media (max-height:780px){
+  .ob-w .ob-hero{ padding:14px 24px 20px; } .ob-w .ob-mark{ margin:4px 0 8px; width:28px; height:28px; }
+  .ob-w .ob-name{ font-size:40px; } .ob-cmp{ font-size:15px; margin-bottom:10px; } .ob-rule{ margin-bottom:10px; } .ob-w .ob-slogan{ font-size:19px; }
+  .ob-body{ padding-top:14px; } .ob-h{ font-size:17px; margin-bottom:4px; } .ob-list li{ font-size:14px; }
+  .ob-t{ font-size:24px; } .ob-s{ font-size:14.5px; margin-bottom:12px; } .ob-band{ padding-top:22px; }
+}
 .intro-again{ width:100%; margin:4px 0 14px; }
 /* v241: dobrodošlica (prazna Arhiva) */
 .home-welcome{ margin:12px 0 6px; padding:24px 18px 10px; border-radius:16px; background:var(--surface); border:1px solid var(--line); text-align:center; }
@@ -5100,19 +5144,16 @@ Object.assign(I18N.en, {
 Object.assign(I18N.sr, {
   dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi',
   introSkip: 'Preskoči', introClose: 'Zatvori', introNext: 'Dalje', introAgain: '▶ Pogledaj upoznavanje sa aplikacijom',
-  introSlides: [
-    ['Dobrodošli u aplikaciju {app}', 'Dokumenta i fotografije na jednom mestu — sređeni kako ti odgovara i pri ruci za tren. Sve što treba, ništa što smeta.'],
-    ['Bolje od galerije', 'Fotografije u albumima i podalbumima, sa pravim imenom umesto „IMG_20261029…“ i pretragom koja ih nalazi. Sve ono što galerija telefona nema.'],
-    ['Albumi i podalbumi', 'Kuća › Struja, Auto › Registracija. Napravi album, u njemu podalbume, i svaka stvar ima svoje mesto. Putanja na vrhu uvek pokazuje gde si.'],
-    ['Pronađi za sekund', 'Pretraga po imenu, albumu i tekstu unutar dokumenta. Uz svaki rezultat piše i gde se nalazi.'],
-    ['Snimak ekrana postaje tekst', 'Ubaci snimak ekrana ili sliku papira i dodirni „Pročitaj (AI)“: AI izvuče tekst i predloži ime, album i podsetnik.'],
-    ['Spoji, složi, pošalji', 'Više slika spoji u jedan dokument, složi stranice redom i pošalji sve kao jedan PDF — Viberom, mejlom ili gde god treba.'],
-    ['Podsetnik uz dokument', 'Registracija, osiguranje, račun za plaćanje: stavi podsetnik uz dokument i {app} te obavesti na vreme.'],
-    ['Na početnom ekranu telefona', 'Najvažniji dokument stavi kao ikonicu na početni ekran, a do četiri dokumenta i podsetnike u vidžet. Jedan dodir i otvoren je.'],
-    ['Zaključano i usklađeno', 'Arhivu otvaraš otiskom prsta, PIN-om ili šablonom. Preko tvog Google Drive-a isti dokumenti su na svim tvojim uređajima.'],
-    ['Tvoji podaci su kod tebe', 'Sve se čuva na tvom telefonu, ne na našem serveru. Napravi rezervnu kopiju, a obrisano čeka 30 dana u korpi. AI dobija dokument samo kad ga ti pokreneš.'],
-    ['Spremno je', 'Dodaj prvi dokument ili fotografiju i {app} počinje da radi za tebe.']
-  ],
+  obHi: 'Dobrodošli u aplikaciju', obCmp: 'Bolja od galerije. Efikasnija od fascikle.', obSlogan1: 'Pronađi u sekundi.', obSlogan2: 'Sredi jednim dodirom.',
+  obKeyT: 'Ključne karakteristike', obFeatBackup: 'Rezervna kopija',
+  obFeat: [['Albumi i podalbumi',0,1],['Dokumenta i fotografije na jednom mestu',1,1],['Preimenovanje jednim dodirom',2,1],
+    ['Pretraga i po tekstu u dokumentu',3,2],['Snimak ekrana u tekst',4,2],['Spajanje slika u jedan PDF',5,2],['Podsetnici',6,2],['AI radionica: uređivanje dokumenata',7,2],
+    ['Vidžet i prečica na početnom ekranu',8,3,'vz'],['Zaključavanje aplikacije',9,3,'lk'],['Rezervna kopija i Google Drive',10,3,'kopija']],
+  obShots: [['Sve na svom mestu', 'Ovako izgleda sređena Arhiva: albumi i podalbumi za dokumenta i fotografije.'],
+    ['Album sa podalbumima', 'Ovako izgleda album: podalbumi gore, a ispod fotografije i PDF dokumenta, sređeni po danima.'],
+    ['Važno uvek na vidiku', 'Vidžet na početnom ekranu telefona: podsetnici i izabrana dokumenta, na jedan dodir.'],
+    ['Uvek pri ruci', 'Prečica na početnom ekranu: jedan dodir i dokument, recimo ulaznica, odmah se otvara.']],
+  obEndT: 'Sve je spremno', obEndS: 'Tvoja Arhiva čeka prvi dokument ili fotografiju.',
   hwTitle: 'Arhiva je spremna', hwText: 'Ovde čuvaš račune, ugovore, garancije i ostala dokumenta. Slikaj ih ili dodaj iz telefona — Arhiva ih pronalazi po tekstu i podseća te na rokove.',
   hwAdd: 'Dodaj prvi dokument', hwRestore: 'Imaš rezervnu kopiju? Vrati je',
   emptyNoRes: 'Nema rezultata', emptyNoResX: 'Nema rezultata za "{q}".', albEmpty: 'Album je prazan', albEmptyX: 'Dodaj nešto ikonicom „Dodaj“ gore.',
@@ -5135,19 +5176,13 @@ Object.assign(I18N.sr, {
 Object.assign(I18N.en, {
   dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
   introSkip: 'Skip', introClose: 'Close', introNext: 'Next', introAgain: '▶ Watch the app introduction',
-  introSlides: [
-    ['Welcome to {app}', 'Documents and photos in one place — organized the way you like and at hand in a moment. Everything you need, nothing in the way.'],
-    ['Better than a gallery', 'Photos in albums and sub-albums, with a real name instead of “IMG_20261029…” and a search that finds them. Everything your phone’s gallery lacks.'],
-    ['Albums and sub-albums', 'Home › Electricity, Car › Registration. Make an album with sub-albums inside, and everything has its place. The path at the top always shows where you are.'],
-    ['Found in a second', 'Search by name, album and the text inside documents. Every result also shows where it is.'],
-    ['A screenshot becomes text', 'Add a screenshot or a photo of a paper and tap “Read (AI)”: AI pulls out the text and suggests a name, album and reminder.'],
-    ['Merge, arrange, send', 'Merge several images into one document, put the pages in order and send it all as one PDF — by Viber, email or anywhere else.'],
-    ['A reminder with the document', 'Registration, insurance, a bill to pay: put a reminder on the document and {app} lets you know in time.'],
-    ['On your phone’s home screen', 'Put your most important document on the home screen as an icon, and up to four documents and reminders in a widget. One tap and it is open.'],
-    ['Locked and in sync', 'Open the archive with your fingerprint, a PIN or a pattern. Through your own Google Drive the same documents are on all your devices.'],
-    ['Your data stays with you', 'Everything is stored on your phone, not on our server. Make a backup, and deleted items wait 30 days in the trash. AI gets a document only when you start it.'],
-    ['All set', 'Add your first document or photo and {app} starts working for you.']
-  ],
+  obHi: 'Welcome to', obCmp: 'Better than a gallery. Smarter than a folder.', obSlogan1: 'Find it in seconds.', obSlogan2: 'Organize with one tap.',
+  obKeyT: 'Key features', obFeatBackup: 'Backup',
+  obFeat: [['Albums and sub-albums',0,1],['Documents and photos in one place',1,1],['Rename with one tap',2,1],
+    ['Search the text inside documents',3,2],['Screenshot to text',4,2],['Merge images into one PDF',5,2],['Reminders',6,2],['AI workshop: edit documents',7,2],
+    ['Widget and shortcut on the home screen',8,3,'vz'],['App lock',9,3,'lk'],['Backup and Google Drive',10,3,'kopija']],
+  obShots: [],
+  obEndT: 'All set', obEndS: 'Your archive is waiting for its first document or photo.',
   hwTitle: 'Your archive is ready', hwText: 'Keep receipts, contracts, warranties and other documents here. Take a photo or add them from your phone — Arhiva finds them by their text and reminds you of deadlines.',
   hwAdd: 'Add your first document', hwRestore: 'Have a backup? Restore it',
   emptyNoRes: 'No results', emptyNoResX: 'No results for "{q}".', albEmpty: 'The album is empty', albEmptyX: 'Add something with the “Add” icon above.',
@@ -10254,7 +10289,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 243;
+const APP_VERSION = 244;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10487,104 +10522,75 @@ function openSettingsSub(which){
 /* povratak sa pod-ekrana na pločice (strelica i dugme "nazad" telefona idu kroz istoriju) */
 const settingsBackToTiles = ()=>{ settingsSubOpen = false; renderSettingsTiles(); };
 function triggerImportBackup(){ importInput.click(); }
-/* v242: upoznavanje — niz ekrana pri prvom otvaranju (prazna Arhiva), posle iz Uputstva. Ime: APP_NAME.
-   Na Androidu pitanje o zaključavanju (lkFirstRun) čeka kraj upoznavanja (introAfter). */
+/* v244: upoznavanje (promocija, faza 5) — 6 ekrana, uvek izgled „Privatno bankarstvo“ (ne prati temu korisnika):
+   1 dobrodošli + ključne karakteristike · 2 početni ekran · 3 album sa podalbumima · 4 vidžet · 5 prečica (4 i 5 samo u Android
+   aplikaciji) · 6 „Sve je spremno“. Ekrani 2–5 su slike prave Arhive sa izmišljenim podacima: upoznavanje/<jezik>/<n>.webp,
+   učitavaju se tek kad se upoznavanje otvori; jezik bez slika (OB_SHOTS) prikazuje samo 1 i 6. Prikazuje se jednom, pri prvom
+   otvaranju prazne Arhive; ponovo iz Uputstva. Na Androidu pitanje o zaključavanju (lkFirstRun) čeka kraj (introAfter). Ime: APP_NAME. */
 const APP_NAME = 'Arhiva';
 const INTRO_SEEN = LS_PREFIX + 'introSeen';
+const OB_SHOTS = ['sr'];   /* jezici za koje postoje slike ekrana 2–5 */
+const OB_GIL = "<svg class=\"ob-gil\" viewBox=\"0 0 400 300\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"#C9A961\" stroke-width=\".6\"><polyline points=\"0,20.0 4,21.7 8,23.3 12,24.8 16,26.1 20,27.2 24,28.1 28,28.7 32,29.0 36,29.1 40,28.9 44,28.5 48,27.9 52,27.2 56,26.4 60,25.5 64,24.6 68,23.8 72,23.1 76,22.5 80,22.0 84,21.7 88,21.6 92,21.6 96,21.7 100,21.9 104,22.1 108,22.3 112,22.6 116,22.7 120,22.7 124,22.5 128,22.2 132,21.7 136,21.0 140,20.1 144,19.0 148,17.8 152,16.6 156,15.2 160,13.9 164,12.7 168,11.5 172,10.6 176,9.8 180,9.3 184,9.1 188,9.2 192,9.6 196,10.2 200,11.2 204,12.3 208,13.6 212,15.1 216,16.6 220,18.1 224,19.6 228,21.0 232,22.3 236,23.4 240,24.2 244,24.9 248,25.3 252,25.5 256,25.5 260,25.3 264,25.0 268,24.6 272,24.2 276,23.8 280,23.4 284,23.1 288,23.0 292,22.9 296,23.0 300,23.3 304,23.6 308,24.1 312,24.7 316,25.2 320,25.8 324,26.3 328,26.7 332,27.0 336,27.0 340,26.9 344,26.5 348,25.8 352,25.0 356,23.9 360,22.6 364,21.1 368,19.6 372,17.9 376,16.3 380,14.8 384,13.3 388,12.1 392,11.1 396,10.3 400,9.8\"/><polyline points=\"0,32.8 4,34.3 8,35.8 12,37.3 16,38.8 20,40.0 24,41.1 28,42.0 32,42.6 36,42.9 40,42.9 44,42.6 48,42.0 52,41.2 56,40.2 60,39.0 64,37.7 68,36.4 72,35.1 76,33.8 80,32.6 84,31.6 88,30.8 92,30.1 96,29.7 100,29.4 104,29.3 108,29.3 112,29.5 116,29.7 120,30.0 124,30.2 128,30.4 132,30.4 136,30.4 140,30.2 144,29.9 148,29.4 152,28.7 156,28.0 160,27.1 164,26.3 168,25.4 172,24.6 176,23.9 180,23.4 184,23.0 188,22.9 192,23.0 196,23.5 200,24.1 204,25.1 208,26.3 212,27.6 216,29.2 220,30.8 224,32.5 228,34.1 232,35.7 236,37.2 240,38.4 244,39.5 248,40.3 252,40.8 256,41.1 260,41.1 264,40.8 268,40.4 272,39.7 276,39.0 280,38.1 284,37.2 288,36.4 292,35.6 296,34.9 300,34.3 304,33.9 308,33.7 312,33.5 316,33.6 320,33.7 324,33.9 328,34.1 332,34.4 336,34.6 340,34.7 344,34.6 348,34.5 352,34.1 356,33.5 360,32.7 364,31.8 368,30.7 372,29.5 376,28.2 380,26.9 384,25.6 388,24.3 392,23.2 396,22.3 400,21.7\"/><polyline points=\"0,45.7 4,46.7 8,47.7 12,48.9 16,50.1 20,51.2 24,52.2 28,53.1 32,53.8 36,54.3 40,54.5 44,54.4 48,54.0 52,53.3 56,52.4 60,51.2 64,49.9 68,48.4 72,46.8 76,45.1 80,43.5 84,42.0 88,40.7 92,39.5 96,38.5 100,37.7 104,37.2 108,37.0 112,37.0 116,37.1 120,37.5 124,37.9 128,38.5 132,39.1 136,39.6 140,40.2 144,40.6 148,40.9 152,41.1 156,41.1 160,41.0 164,40.7 168,40.4 172,40.0 176,39.6 180,39.2 184,38.8 188,38.6 192,38.5 196,38.6 200,39.0 204,39.5 208,40.3 212,41.2 216,42.4 220,43.7 224,45.2 228,46.7 232,48.3 236,49.7 240,51.1 244,52.4 248,53.4 252,54.2 256,54.7 260,54.9 264,54.8 268,54.4 272,53.8 276,52.9 280,51.9 284,50.6 288,49.3 292,48.0 296,46.7 300,45.5 304,44.3 308,43.4 312,42.6 316,42.0 320,41.5 324,41.3 328,41.3 332,41.3 336,41.5 340,41.8 344,42.0 348,42.2 352,42.4 356,42.4 360,42.3 364,42.1 368,41.7 372,41.2 376,40.5 380,39.8 384,38.9 388,38.0 392,37.2 396,36.4 400,35.7\"/><polyline points=\"0,58.7 4,58.9 8,59.3 12,59.8 16,60.4 20,61.1 24,61.7 28,62.4 32,63.0 36,63.5 40,63.8 44,63.9 48,63.8 52,63.4 56,62.8 60,61.9 64,60.8 68,59.5 72,58.0 76,56.4 80,54.7 84,53.1 88,51.5 92,50.0 96,48.7 100,47.7 104,46.8 108,46.3 112,46.0 116,46.0 120,46.3 124,46.8 128,47.5 132,48.4 136,49.4 140,50.4 144,51.5 148,52.5 152,53.4 156,54.2 160,54.9 164,55.4 168,55.7 172,55.9 176,55.9 180,55.9 184,55.7 188,55.5 192,55.3 196,55.1 200,55.1 204,55.1 208,55.4 212,55.7 216,56.3 220,57.0 224,57.9 228,59.0 232,60.1 236,61.2 240,62.4 244,63.5 248,64.5 252,65.3 256,65.9 260,66.3 264,66.4 268,66.3 272,65.8 276,65.1 280,64.1 284,62.9 288,61.4 292,59.9 296,58.3 300,56.7 304,55.1 308,53.6 312,52.3 316,51.2 320,50.2 324,49.6 328,49.1 332,48.9 336,49.0 340,49.2 344,49.6 348,50.1 352,50.6 356,51.2 360,51.8 364,52.3 368,52.7 372,52.9 376,53.1 380,53.1 384,52.9 388,52.7 392,52.3 396,51.9 400,51.5\"/><polyline points=\"0,71.7 4,71.1 8,70.7 12,70.4 16,70.3 20,70.3 24,70.4 28,70.6 32,70.9 36,71.2 40,71.5 44,71.7 48,71.8 52,71.7 56,71.5 60,71.1 64,70.5 68,69.6 72,68.6 76,67.4 80,66.1 84,64.7 88,63.3 92,61.9 96,60.6 100,59.4 104,58.5 108,57.7 112,57.2 116,57.0 120,57.1 124,57.5 128,58.2 132,59.1 136,60.2 140,61.5 144,62.9 148,64.4 152,65.9 156,67.3 160,68.6 164,69.7 168,70.7 172,71.4 176,72.0 180,72.3 184,72.5 188,72.5 192,72.3 196,72.0 200,71.7 204,71.3 208,71.0 212,70.8 216,70.6 220,70.6 224,70.7 228,71.0 232,71.4 236,71.9 240,72.6 244,73.2 248,73.9 252,74.6 256,75.1 260,75.6 264,75.8 268,75.9 272,75.7 276,75.2 280,74.5 284,73.6 288,72.4 292,71.0 296,69.5 300,67.9 304,66.3 308,64.6 312,63.1 316,61.7 320,60.4 324,59.4 328,58.6 332,58.1 336,58.0 340,58.0 344,58.4 348,59.0 352,59.7 356,60.6 360,61.7 364,62.7 368,63.8 372,64.8 376,65.7 380,66.5 384,67.1 388,67.5 392,67.8 396,67.9 400,67.9\"/><polyline points=\"0,84.4 4,83.2 8,82.1 12,81.1 16,80.2 20,79.5 24,78.9 28,78.6 32,78.4 36,78.4 40,78.4 44,78.6 48,78.8 52,79.0 56,79.2 60,79.3 64,79.2 68,79.1 72,78.7 76,78.2 80,77.6 84,76.8 88,75.9 92,74.9 96,73.9 100,73.0 104,72.1 108,71.3 112,70.8 116,70.4 120,70.3 124,70.5 128,70.9 132,71.6 136,72.6 140,73.8 144,75.2 148,76.8 152,78.4 156,80.1 160,81.7 164,83.3 168,84.7 172,85.9 176,86.9 180,87.7 184,88.2 188,88.4 192,88.4 196,88.1 200,87.7 204,87.1 208,86.4 212,85.7 216,84.9 220,84.2 224,83.5 228,83.0 232,82.6 236,82.3 240,82.2 244,82.3 248,82.4 252,82.7 256,82.9 260,83.2 264,83.5 268,83.7 272,83.8 276,83.7 280,83.4 284,82.9 288,82.2 292,81.3 296,80.3 300,79.1 304,77.7 308,76.3 312,74.9 316,73.5 320,72.3 324,71.1 328,70.2 332,69.5 336,69.1 340,69.0 344,69.2 348,69.7 352,70.4 356,71.4 360,72.6 364,73.9 368,75.3 372,76.8 376,78.3 380,79.6 384,80.9 388,82.0 392,82.9 396,83.6 400,84.1\"/><polyline points=\"0,96.6 4,95.1 8,93.5 12,91.9 16,90.5 20,89.2 24,88.1 28,87.2 32,86.5 36,86.1 40,85.9 44,85.9 48,86.1 52,86.4 56,86.8 60,87.3 64,87.8 68,88.2 72,88.6 76,88.8 80,89.0 84,89.0 88,88.8 92,88.6 96,88.2 100,87.7 104,87.2 108,86.7 112,86.2 116,85.9 120,85.6 124,85.6 128,85.7 132,86.1 136,86.7 140,87.6 144,88.6 148,89.9 152,91.3 156,92.9 160,94.4 164,96.0 168,97.6 172,99.0 176,100.2 180,101.2 184,102.0 188,102.5 192,102.7 196,102.6 200,102.2 204,101.6 208,100.7 212,99.7 216,98.6 220,97.3 224,96.1 228,94.9 232,93.8 236,92.8 240,91.9 244,91.3 248,90.8 252,90.5 256,90.3 260,90.4 264,90.5 268,90.7 272,90.9 276,91.1 280,91.2 284,91.3 288,91.2 292,91.0 296,90.6 300,90.0 304,89.3 308,88.5 312,87.6 316,86.6 320,85.6 324,84.7 328,83.9 332,83.2 336,82.6 340,82.4 344,82.3 348,82.6 352,83.1 356,83.9 360,85.0 364,86.2 368,87.7 372,89.3 376,90.9 380,92.6 384,94.2 388,95.7 392,97.1 396,98.2 400,99.2\"/><polyline points=\"0,107.9 4,106.4 8,104.8 12,103.1 16,101.4 20,99.9 24,98.4 28,97.1 32,96.1 36,95.3 40,94.8 44,94.5 48,94.5 52,94.8 56,95.3 60,96.0 64,96.8 68,97.7 72,98.7 76,99.6 80,100.5 84,101.3 88,101.9 92,102.4 96,102.8 100,103.0 104,103.0 108,102.9 112,102.8 116,102.6 120,102.3 124,102.1 128,102.0 132,102.0 136,102.2 140,102.5 144,103.0 148,103.7 152,104.6 156,105.6 160,106.8 164,108.0 168,109.3 172,110.5 176,111.7 180,112.7 184,113.6 188,114.3 192,114.6 196,114.7 200,114.6 204,114.1 208,113.3 212,112.3 216,111.1 220,109.7 224,108.2 228,106.6 232,105.0 236,103.5 240,102.1 244,100.9 248,99.8 252,99.0 256,98.4 260,98.0 264,97.8 268,97.9 272,98.1 276,98.5 280,98.9 284,99.4 288,99.9 292,100.3 296,100.7 300,100.9 304,101.0 308,101.0 312,100.8 316,100.5 320,100.1 324,99.6 328,99.1 332,98.6 336,98.1 340,97.8 344,97.6 348,97.6 352,97.8 356,98.3 360,98.9 364,99.9 368,101.0 372,102.3 376,103.8 380,105.3 384,106.9 388,108.5 392,110.0 396,111.3 400,112.5\"/><polyline points=\"0,118.2 4,117.1 8,115.8 12,114.4 16,112.9 20,111.5 24,110.0 28,108.7 32,107.5 36,106.5 40,105.7 44,105.2 48,105.0 52,105.1 56,105.5 60,106.2 64,107.1 68,108.2 72,109.5 76,110.8 80,112.2 84,113.6 88,114.9 92,116.1 96,117.1 100,118.0 104,118.6 108,119.1 112,119.4 116,119.4 120,119.4 124,119.2 128,118.9 132,118.7 136,118.4 140,118.2 144,118.1 148,118.1 152,118.2 156,118.5 160,118.9 164,119.5 168,120.2 172,121.0 176,121.8 180,122.5 184,123.3 188,123.9 192,124.3 196,124.6 200,124.6 204,124.4 208,123.9 212,123.1 216,122.1 220,120.9 224,119.5 228,117.9 232,116.3 236,114.6 240,113.0 244,111.4 248,110.0 252,108.8 256,107.8 260,107.1 264,106.6 268,106.5 272,106.6 276,106.9 280,107.5 284,108.2 288,109.0 292,110.0 296,110.9 300,111.8 304,112.7 308,113.5 312,114.1 316,114.5 320,114.8 324,115.0 328,115.0 332,114.9 336,114.7 340,114.5 344,114.3 348,114.1 352,114.0 356,114.1 360,114.3 364,114.7 368,115.2 372,116.0 376,116.9 380,117.9 384,119.1 388,120.4 392,121.6 396,122.9 400,124.0\"/><polyline points=\"0,127.7 4,127.3 8,126.6 12,125.8 16,124.9 20,123.8 24,122.7 28,121.6 32,120.6 36,119.6 40,118.9 44,118.3 48,117.9 52,117.8 56,118.0 60,118.5 64,119.2 68,120.2 72,121.5 76,122.9 80,124.5 84,126.1 88,127.7 92,129.3 96,130.8 100,132.2 104,133.4 108,134.3 112,135.0 116,135.4 120,135.6 124,135.6 128,135.3 132,134.9 136,134.4 140,133.8 144,133.1 148,132.5 152,131.9 156,131.4 160,131.0 164,130.8 168,130.7 172,130.8 176,130.9 180,131.2 184,131.6 188,131.9 192,132.3 196,132.6 200,132.8 204,132.8 208,132.6 212,132.3 216,131.7 220,130.9 224,129.9 228,128.8 232,127.4 236,126.0 240,124.5 244,123.0 248,121.6 252,120.3 256,119.1 260,118.2 264,117.5 268,117.1 272,117.0 276,117.2 280,117.7 284,118.4 288,119.4 292,120.6 296,121.8 300,123.2 304,124.6 308,126.0 312,127.3 316,128.4 320,129.4 324,130.2 328,130.8 332,131.2 336,131.4 340,131.5 344,131.4 348,131.1 352,130.9 356,130.6 360,130.3 364,130.1 368,130.1 372,130.1 376,130.3 380,130.6 384,131.1 388,131.7 392,132.4 396,133.2 400,134.0\"/><polyline points=\"0,136.8 4,137.1 8,137.2 12,137.1 16,137.0 20,136.6 24,136.2 28,135.7 32,135.1 36,134.4 40,133.9 44,133.3 48,132.9 52,132.7 56,132.7 60,132.9 64,133.3 68,134.0 72,134.9 76,136.1 80,137.4 84,138.9 88,140.5 92,142.1 96,143.7 100,145.3 104,146.7 108,147.9 112,148.9 116,149.7 120,150.2 124,150.3 128,150.2 132,149.9 136,149.2 140,148.4 144,147.5 148,146.4 152,145.3 156,144.1 160,143.0 164,142.1 168,141.2 172,140.5 176,140.0 180,139.6 184,139.4 188,139.4 192,139.5 196,139.6 200,139.8 204,140.0 208,140.2 212,140.2 216,140.2 220,140.0 224,139.6 228,139.1 232,138.4 236,137.5 240,136.6 244,135.5 248,134.4 252,133.3 256,132.3 260,131.4 264,130.7 268,130.1 272,129.9 276,129.8 280,130.1 284,130.7 288,131.5 292,132.6 296,133.9 300,135.3 304,136.9 308,138.6 312,140.2 316,141.8 320,143.2 324,144.5 328,145.7 332,146.5 336,147.1 340,147.5 344,147.6 348,147.5 352,147.3 356,146.8 360,146.2 364,145.6 368,144.9 372,144.3 376,143.7 380,143.3 384,142.9 388,142.8 392,142.7 396,142.8 400,143.0\"/><polyline points=\"0,146.1 4,147.0 8,147.8 12,148.5 16,149.1 20,149.6 24,150.0 28,150.2 32,150.2 36,150.1 40,149.9 44,149.7 48,149.4 52,149.2 56,149.0 60,148.9 64,149.0 68,149.3 72,149.7 76,150.3 80,151.1 84,152.1 88,153.3 92,154.6 96,155.9 100,157.3 104,158.6 108,159.8 112,160.9 116,161.8 120,162.5 124,162.8 128,162.9 132,162.7 136,162.2 140,161.5 144,160.5 148,159.2 152,157.9 156,156.4 160,154.9 164,153.4 168,151.9 172,150.6 176,149.5 180,148.5 184,147.8 188,147.2 192,146.9 196,146.8 200,146.9 204,147.1 208,147.4 212,147.8 216,148.2 220,148.6 224,148.9 228,149.1 232,149.2 236,149.1 240,148.9 244,148.5 248,148.1 252,147.5 256,146.9 260,146.3 264,145.7 268,145.2 272,144.9 276,144.7 280,144.7 284,145.0 288,145.5 292,146.2 296,147.2 300,148.4 304,149.8 308,151.4 312,153.0 316,154.6 320,156.2 324,157.7 328,159.1 332,160.2 336,161.2 340,161.9 344,162.2 348,162.3 352,162.2 356,161.7 360,161.0 364,160.2 368,159.2 372,158.1 376,156.9 380,155.8 384,154.8 388,153.8 392,153.0 396,152.3 400,151.8\"/><polyline points=\"0,156.3 4,157.5 8,158.8 12,160.1 16,161.4 20,162.6 24,163.6 28,164.5 32,165.3 36,165.8 40,166.2 44,166.3 48,166.4 52,166.3 56,166.1 60,165.8 64,165.6 68,165.4 72,165.3 76,165.3 80,165.5 84,165.8 88,166.2 92,166.8 96,167.6 100,168.4 104,169.3 108,170.2 112,171.1 116,171.9 120,172.5 124,173.0 128,173.3 132,173.3 136,173.0 140,172.5 144,171.7 148,170.6 152,169.4 156,167.9 160,166.3 164,164.7 168,163.0 172,161.4 176,159.8 180,158.5 184,157.3 188,156.4 192,155.7 196,155.3 200,155.1 204,155.2 208,155.5 212,156.1 216,156.7 220,157.5 224,158.4 228,159.2 232,160.0 236,160.7 240,161.3 244,161.7 248,162.0 252,162.2 256,162.2 260,162.1 264,161.9 268,161.6 272,161.4 276,161.2 280,161.0 284,161.0 288,161.1 292,161.4 296,161.9 300,162.5 304,163.4 308,164.5 312,165.7 316,166.9 320,168.3 324,169.7 328,171.0 332,172.1 336,173.2 340,174.0 344,174.6 348,174.9 352,174.9 356,174.6 360,174.0 364,173.2 368,172.1 372,170.9 376,169.5 380,168.0 384,166.4 388,165.0 392,163.5 396,162.3 400,161.2\"/><polyline points=\"0,168.0 4,169.2 8,170.6 12,172.2 16,173.8 20,175.4 24,176.9 28,178.4 32,179.6 36,180.7 40,181.6 44,182.2 48,182.6 52,182.8 56,182.7 60,182.5 64,182.1 68,181.6 72,181.0 76,180.5 80,180.0 84,179.5 88,179.2 92,179.0 96,179.0 100,179.1 104,179.3 108,179.6 112,180.0 116,180.5 120,180.9 124,181.3 128,181.6 132,181.8 136,181.8 140,181.6 144,181.1 148,180.5 152,179.6 156,178.5 160,177.2 164,175.8 168,174.3 172,172.8 176,171.2 180,169.8 184,168.4 188,167.3 192,166.3 196,165.7 200,165.3 204,165.2 208,165.4 212,165.8 216,166.6 220,167.5 224,168.6 228,169.9 232,171.2 236,172.5 240,173.7 244,174.9 248,175.9 252,176.8 256,177.4 260,177.9 264,178.2 268,178.4 272,178.4 276,178.2 280,178.0 284,177.8 288,177.6 292,177.4 296,177.3 300,177.4 304,177.5 308,177.9 312,178.4 316,179.0 320,179.8 324,180.6 328,181.5 332,182.4 336,183.3 340,184.1 344,184.7 348,185.1 352,185.3 356,185.2 360,184.9 364,184.3 368,183.4 372,182.3 376,181.0 380,179.5 384,177.9 388,176.2 392,174.5 396,172.9 400,171.4\"/><polyline points=\"0,181.3 4,182.3 8,183.6 12,185.0 16,186.5 20,188.1 24,189.8 28,191.4 32,193.0 36,194.4 40,195.6 44,196.6 48,197.3 52,197.7 56,197.9 60,197.8 64,197.4 68,196.8 72,196.0 76,195.1 80,194.1 84,193.1 88,192.1 92,191.2 96,190.3 100,189.6 104,189.1 108,188.7 112,188.5 116,188.4 120,188.4 124,188.6 128,188.8 132,189.0 136,189.2 140,189.3 144,189.2 148,189.1 152,188.8 156,188.3 160,187.6 164,186.8 168,185.8 172,184.7 176,183.5 180,182.3 184,181.1 188,180.0 192,179.1 196,178.3 200,177.8 204,177.5 208,177.5 212,177.8 216,178.3 220,179.2 224,180.3 228,181.6 232,183.1 236,184.6 240,186.2 244,187.8 248,189.3 252,190.7 256,192.0 260,193.0 264,193.8 268,194.4 272,194.7 276,194.8 280,194.7 284,194.4 288,194.0 292,193.5 296,192.9 300,192.4 304,191.9 308,191.5 312,191.2 316,191.0 320,191.0 324,191.1 328,191.3 332,191.7 336,192.1 340,192.6 344,193.0 348,193.4 352,193.6 356,193.8 360,193.7 364,193.5 368,193.0 372,192.2 376,191.3 380,190.2 384,188.9 388,187.4 392,185.9 396,184.3 400,182.8\"/><polyline points=\"0,196.3 4,196.9 8,197.6 12,198.6 16,199.7 20,200.9 24,202.3 28,203.8 32,205.2 36,206.6 40,207.9 44,209.0 48,209.9 52,210.5 56,210.9 60,211.0 64,210.8 68,210.3 72,209.5 76,208.5 80,207.3 84,206.0 88,204.6 92,203.1 96,201.7 100,200.4 104,199.1 108,198.1 112,197.2 116,196.6 120,196.1 124,195.9 128,195.9 132,196.0 136,196.2 140,196.5 144,196.8 148,197.1 152,197.4 156,197.5 160,197.6 164,197.5 168,197.2 172,196.8 176,196.3 180,195.7 184,195.0 188,194.3 192,193.6 196,192.9 200,192.4 204,192.0 208,191.9 212,191.9 216,192.2 220,192.8 224,193.6 228,194.7 232,195.9 236,197.4 240,199.0 244,200.6 248,202.3 252,203.9 256,205.4 260,206.7 264,207.9 268,208.8 272,209.4 276,209.8 280,209.9 284,209.7 288,209.3 292,208.6 296,207.8 300,206.9 304,205.8 308,204.8 312,203.8 316,202.9 320,202.1 324,201.4 328,200.9 332,200.6 336,200.4 340,200.4 344,200.4 348,200.6 352,200.8 356,201.0 360,201.2 364,201.2 368,201.2 372,201.0 376,200.6 380,200.1 384,199.4 388,198.5 392,197.5 396,196.3 400,195.1\"/><polyline points=\"0,212.4 4,212.4 8,212.6 12,212.8 16,213.3 20,213.9 24,214.7 28,215.6 32,216.5 36,217.6 40,218.6 44,219.5 48,220.4 52,221.1 56,221.6 60,221.8 64,221.8 68,221.5 72,221.0 76,220.1 80,219.1 84,217.8 88,216.3 92,214.7 96,213.0 100,211.4 104,209.8 108,208.3 112,207.0 116,205.8 120,205.0 124,204.3 128,204.0 132,203.8 136,203.9 140,204.3 144,204.8 148,205.4 152,206.1 156,206.8 160,207.5 164,208.2 168,208.7 172,209.1 176,209.4 180,209.6 184,209.6 188,209.4 192,209.2 196,208.9 200,208.6 204,208.3 208,208.1 212,207.9 216,207.9 220,208.1 224,208.5 228,209.1 232,209.9 236,210.9 240,212.0 244,213.3 248,214.7 252,216.2 256,217.6 260,219.0 264,220.2 268,221.3 272,222.1 276,222.7 280,223.0 284,223.0 288,222.7 292,222.1 296,221.2 300,220.2 304,218.9 308,217.6 312,216.1 316,214.7 320,213.3 324,212.0 328,210.8 332,209.8 336,209.0 340,208.4 344,208.0 348,207.9 352,207.9 356,208.0 360,208.2 364,208.5 368,208.9 372,209.2 376,209.4 380,209.5 384,209.5 388,209.4 392,209.1 396,208.7 400,208.2\"/><polyline points=\"0,228.7 4,228.3 8,227.8 12,227.5 16,227.2 20,227.0 24,227.0 28,227.1 32,227.3 36,227.7 40,228.2 44,228.7 48,229.3 52,229.8 56,230.2 60,230.6 64,230.7 68,230.7 72,230.4 76,229.9 80,229.2 84,228.2 88,227.1 92,225.7 96,224.2 100,222.6 104,221.0 108,219.5 112,218.0 116,216.6 120,215.5 124,214.5 128,213.9 132,213.5 136,213.4 140,213.6 144,214.1 148,214.8 152,215.7 156,216.8 160,218.0 164,219.2 168,220.3 172,221.5 176,222.5 180,223.4 184,224.1 188,224.7 192,225.1 196,225.3 200,225.3 204,225.2 208,225.1 212,224.9 216,224.7 220,224.5 224,224.4 228,224.5 232,224.6 236,225.0 240,225.5 244,226.1 248,226.9 252,227.8 256,228.8 260,229.8 264,230.8 268,231.8 272,232.6 276,233.2 280,233.7 284,233.9 288,233.8 292,233.4 296,232.8 300,231.9 304,230.7 308,229.3 312,227.8 316,226.2 320,224.6 324,222.9 328,221.3 332,219.9 336,218.6 340,217.6 344,216.7 348,216.2 352,215.9 356,215.8 360,216.0 364,216.4 368,216.9 372,217.6 376,218.3 380,219.0 384,219.7 388,220.3 392,220.9 396,221.2 400,221.5\"/><polyline points=\"0,244.3 4,243.5 8,242.7 12,241.8 16,240.9 20,240.0 24,239.2 28,238.5 32,238.0 36,237.6 40,237.4 44,237.3 48,237.3 52,237.5 56,237.7 60,237.9 64,238.1 68,238.3 72,238.3 76,238.3 80,238.0 84,237.6 88,236.9 92,236.1 96,235.1 100,234.0 104,232.8 108,231.5 112,230.2 116,229.0 120,227.8 124,226.8 128,226.0 132,225.5 136,225.2 140,225.2 144,225.5 148,226.1 152,227.0 156,228.1 160,229.4 164,230.8 168,232.4 172,233.9 176,235.4 180,236.9 184,238.2 188,239.4 192,240.3 196,241.0 200,241.5 204,241.8 208,241.8 212,241.7 216,241.4 220,241.1 224,240.6 228,240.2 232,239.7 236,239.4 240,239.1 244,239.0 248,239.0 252,239.1 256,239.4 260,239.8 264,240.3 268,240.9 272,241.4 276,241.9 280,242.3 284,242.6 288,242.7 292,242.6 296,242.3 300,241.8 304,241.0 308,239.9 312,238.7 316,237.3 320,235.8 324,234.2 328,232.6 332,231.0 336,229.6 340,228.3 344,227.2 348,226.3 352,225.7 356,225.5 360,225.5 364,225.7 368,226.3 372,227.1 376,228.0 380,229.1 384,230.3 388,231.5 392,232.7 396,233.8 400,234.8\"/><polyline points=\"0,258.2 4,257.4 8,256.4 12,255.3 16,254.0 20,252.7 24,251.3 28,250.0 32,248.8 36,247.7 40,246.7 44,246.0 48,245.4 52,245.1 56,244.9 60,244.9 64,245.1 68,245.3 72,245.5 76,245.8 80,246.0 84,246.2 88,246.2 92,246.1 96,245.8 100,245.4 104,244.9 108,244.2 112,243.4 116,242.6 120,241.8 124,241.0 128,240.3 132,239.7 136,239.3 140,239.1 144,239.2 148,239.6 152,240.2 156,241.0 160,242.1 164,243.5 168,245.0 172,246.6 176,248.2 180,249.9 184,251.5 188,253.0 192,254.3 196,255.4 200,256.3 204,256.9 208,257.3 212,257.3 216,257.1 220,256.7 224,256.1 228,255.3 232,254.5 236,253.6 240,252.6 244,251.8 248,251.0 252,250.4 256,249.9 260,249.5 264,249.3 268,249.3 272,249.3 276,249.5 280,249.7 284,250.0 288,250.2 292,250.3 296,250.3 300,250.2 304,249.9 308,249.4 312,248.7 316,247.9 320,246.8 324,245.7 328,244.4 332,243.1 336,241.9 340,240.6 344,239.5 348,238.6 352,237.9 356,237.4 360,237.2 364,237.3 368,237.7 372,238.3 376,239.3 380,240.4 384,241.8 388,243.2 392,244.8 396,246.4 400,247.9\"/><polyline points=\"0,270.0 4,269.4 8,268.5 12,267.4 16,266.1 20,264.6 24,263.0 28,261.4 32,259.8 36,258.2 40,256.8 44,255.5 48,254.5 52,253.6 56,253.1 60,252.7 64,252.6 68,252.8 72,253.1 76,253.5 80,254.1 84,254.7 88,255.3 92,255.9 96,256.4 100,256.8 104,257.1 108,257.2 112,257.1 116,257.0 120,256.7 124,256.4 128,256.0 132,255.6 136,255.2 140,255.0 144,254.9 148,254.9 152,255.2 156,255.6 160,256.3 164,257.2 168,258.3 172,259.6 176,261.0 180,262.5 184,264.0 188,265.5 192,266.9 196,268.1 200,269.2 204,270.1 208,270.6 212,270.9 216,270.9 220,270.6 224,270.0 228,269.2 232,268.1 236,266.9 240,265.6 244,264.3 248,262.9 252,261.6 256,260.4 260,259.4 264,258.5 268,257.8 272,257.3 276,257.0 280,256.9 284,256.9 288,257.1 292,257.3 296,257.6 300,257.8 304,258.0 308,258.2 312,258.2 316,258.0 320,257.7 324,257.3 328,256.7 332,256.0 336,255.2 340,254.4 344,253.5 348,252.8 352,252.1 356,251.6 360,251.2 364,251.1 368,251.3 372,251.7 376,252.4 380,253.3 384,254.5 388,255.9 392,257.4 396,259.0 400,260.7\"/><polyline points=\"0,279.5 4,279.2 8,278.7 12,277.9 16,276.8 20,275.6 24,274.2 28,272.6 32,271.0 36,269.3 40,267.7 44,266.2 48,264.9 52,263.8 56,262.9 60,262.2 64,261.9 68,261.8 72,262.0 76,262.5 80,263.2 84,264.0 88,265.0 92,266.1 96,267.2 100,268.3 104,269.3 108,270.2 112,270.9 116,271.5 120,271.9 124,272.2 128,272.3 132,272.2 136,272.1 140,271.9 144,271.7 148,271.5 152,271.4 156,271.4 160,271.6 164,271.9 168,272.4 172,273.0 176,273.8 180,274.8 184,275.8 188,276.9 192,278.1 196,279.2 200,280.2 204,281.0 208,281.7 212,282.1 216,282.3 220,282.2 224,281.8 228,281.2 232,280.2 236,279.0 240,277.7 244,276.2 248,274.6 252,272.9 256,271.3 260,269.8 264,268.4 268,267.2 272,266.2 276,265.4 280,264.9 284,264.7 288,264.6 292,264.8 296,265.2 300,265.7 304,266.3 308,266.9 312,267.5 316,268.0 320,268.5 324,268.9 328,269.1 332,269.2 336,269.1 340,268.9 344,268.6 348,268.3 352,267.9 356,267.5 360,267.2 364,267.0 368,266.9 372,267.0 376,267.3 380,267.8 384,268.6 388,269.5 392,270.7 396,272.0 400,273.4\"/></g></svg>";
+const OB_ICONS = ["<svg viewBox=\"0 0 24 24\"><path d=\"M3 6.5h6l2 2h10v10.5H3z\"/><path class=\"g\" d=\"M8 13h4l1 1.2h4V17H8z\"/></svg>", "<svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"5\" width=\"11\" height=\"14\" rx=\"1.5\"/><path class=\"g\" d=\"M5 16l3-3.5 2.5 2.5L12 13.5\"/><path d=\"M15 7h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7\"/><path d=\"M16 11h2M16 14h2\"/></svg>", "<svg viewBox=\"0 0 24 24\"><path d=\"M4 20h4L19 9l-4-4L4 16z\"/><path class=\"g\" d=\"M13 7l4 4\"/></svg>", "<svg viewBox=\"0 0 24 24\"><path d=\"M4 6h10M4 10h7M4 14h5\"/><circle class=\"g\" cx=\"16\" cy=\"15\" r=\"4\"/><path class=\"g\" d=\"M19 18l2.5 2.5\"/></svg>", "<svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"3\" width=\"10\" height=\"18\" rx=\"2\"/><path d=\"M7 18h2\"/><path class=\"g\" d=\"M15 8h6M18 8v9\"/></svg>", "<svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"3\" y=\"13\" width=\"7\" height=\"8\" rx=\"1\"/><path class=\"g\" d=\"M11.5 12h3m-1.5-1.5L14.5 12 13 13.5\"/><path d=\"M16 5h5v15h-5z\"/></svg>", "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4a5.5 5.5 0 0 1 5.5 5.5V14l1.5 2.5H5L6.5 14V9.5A5.5 5.5 0 0 1 12 4z\"/><path class=\"g\" d=\"M10 19.5a2 2 0 0 0 4 0\"/></svg>", "<svg viewBox=\"0 0 24 24\"><path d=\"M5 3h9l4 4v14H5z\"/><path d=\"M8 13h5M8 16h7\"/><path class=\"g\" d=\"M16 3.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z\"/></svg>", "<svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"8\" rx=\"2\"/><rect class=\"g\" x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"2\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"2\"/></svg>", "<svg viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"2\"/><path d=\"M8 10.5V8a4 4 0 0 1 8 0v2.5\"/><path class=\"g\" d=\"M12 14.5v2.5\"/></svg>", "<svg viewBox=\"0 0 24 24\"><path d=\"M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4.2 4.2 0 0 1-.5 8.5z\"/><path class=\"g\" d=\"M12 16v-5m-2 2l2-2 2 2\"/></svg>"];
 var introAfter = null;
-const INTRO_DEF = [
-/* v243: [crtež, prikaz samo u Android aplikaciji] — redom kao introSlides u prevodima */
-/* 0 dobrodošli: fotografija + dokument + znak */
-['<g transform="rotate(-10 96 104)"><rect x="50" y="46" width="92" height="112" rx="10" class="o-p1"/><rect x="60" y="56" width="72" height="62" rx="5" class="o-hl"/><polyline class="o-acc2" points="64 112 84 92 98 104 108 96 128 112"/><circle class="o-dot" cx="84" cy="72" r="6"/></g>' +
- '<rect x="96" y="26" width="92" height="124" rx="10" class="o-p"/><line class="o-ln" x1="112" y1="48" x2="172" y2="48"/><line class="o-ln" x1="112" y1="62" x2="158" y2="62"/>' +
- '<path class="o-acc" d="M142 82l22 22-22 22-22-22z"/>', 0],
-/* 1 bolje od galerije: fotografije u fascikli */
-['<path class="o-p1" d="M40 70h50l10 12h100v66a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8z"/>' +
- '<g transform="rotate(-8 92 70)"><rect x="62" y="34" width="58" height="66" rx="6" class="o-p"/><rect x="68" y="40" width="46" height="38" rx="3" class="o-hl"/><polyline class="o-acc2" points="70 74 84 60 94 68 100 64 112 74"/></g>' +
- '<g transform="rotate(7 150 70)"><rect x="122" y="32" width="58" height="66" rx="6" class="o-p"/><rect x="128" y="38" width="46" height="38" rx="3" class="o-hl"/><circle class="o-dot" cx="141" cy="51" r="5"/><polyline class="o-acc2" points="130 72 146 58 160 70 172 62"/></g>' +
- '<path class="o-p" d="M40 96h160v52a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8z"/><rect x="72" y="114" width="96" height="16" rx="8" class="o-bar"/>', 0],
-/* 2 albumi i podalbumi: putanja + fascikla sa podfasciklama */
-['<rect x="34" y="18" width="62" height="22" rx="11" class="o-p1"/><path class="o-acc" d="M106 23l7 6-7 6"/><rect x="124" y="18" width="82" height="22" rx="11" class="o-hl"/>' +
- '<path class="o-p" d="M38 58h52l10 12h102v80a8 8 0 0 1-8 8H46a8 8 0 0 1-8-8z"/>' +
- '<path class="o-p1" d="M52 92h30l6 8h46v40a5 5 0 0 1-5 5H57a5 5 0 0 1-5-5z"/><path class="o-p1" d="M144 92h20l6 8h28v40a5 5 0 0 1-5 5h-44a5 5 0 0 1-5-5z"/>', 0],
-/* 3 pretraga */
-['<rect x="50" y="20" width="104" height="140" rx="10" class="o-p"/><line class="o-ln" x1="66" y1="44" x2="138" y2="44"/><line class="o-ln" x1="66" y1="60" x2="124" y2="60"/>' +
- '<rect x="62" y="70" width="58" height="16" rx="5" class="o-hl"/><line class="o-ln" x1="66" y1="96" x2="138" y2="96"/><line class="o-ln" x1="66" y1="112" x2="112" y2="112"/>' +
- '<circle class="o-lens" cx="150" cy="104" r="28"/><line class="o-acc" x1="170" y1="124" x2="194" y2="148"/>', 0],
-/* 4 snimak ekrana → tekst */
-['<rect x="28" y="22" width="76" height="136" rx="12" class="o-p"/><rect x="38" y="40" width="56" height="62" rx="4" class="o-hl"/><polyline class="o-acc2" points="42 96 58 78 70 88 78 82 90 96"/><line class="o-ln" x1="40" y1="118" x2="92" y2="118"/><line class="o-ln" x1="40" y1="132" x2="78" y2="132"/>' +
- '<path class="o-spark" d="M120 78l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/>' +
- '<rect x="140" y="36" width="76" height="108" rx="9" class="o-p"/><line class="o-ln" x1="152" y1="58" x2="204" y2="58"/><line class="o-ln" x1="152" y1="74" x2="196" y2="74"/><line class="o-ln" x1="152" y1="90" x2="204" y2="90"/><line class="o-ln" x1="152" y1="106" x2="184" y2="106"/><line class="o-acc" x1="190" y1="98" x2="190" y2="116"/>', 0],
-/* 5 spoji, složi, pošalji */
-['<rect x="34" y="40" width="44" height="58" rx="6" class="o-p1"/><rect x="42" y="62" width="44" height="58" rx="6" class="o-p1"/><rect x="50" y="84" width="44" height="58" rx="6" class="o-p1"/>' +
- '<path class="o-acc" d="M104 92h22m-8-8l8 8-8 8"/><rect x="136" y="44" width="72" height="96" rx="9" class="o-p"/><text x="172" y="100" class="o-tx">PDF</text>' +
- '<path class="o-fill" d="M196 132l18-8-6 18-3-7z"/>', 0],
-/* 6 podsetnik: dokument i zvonce */
-['<rect x="44" y="24" width="96" height="128" rx="10" class="o-p"/><line class="o-ln" x1="60" y1="48" x2="122" y2="48"/><line class="o-ln" x1="60" y1="64" x2="110" y2="64"/><line class="o-ln" x1="60" y1="80" x2="122" y2="80"/>' +
- '<rect x="58" y="106" width="68" height="24" rx="12" class="o-hl"/>' +
- '<path class="o-bell" d="M164 70a22 22 0 0 1 22 22v18l8 10h-60l8-10V92a22 22 0 0 1 22-22z"/><path class="o-acc" d="M156 123a8 8 0 0 0 16 0"/><circle class="o-dot" cx="186" cy="72" r="8"/>', 0],
-/* 7 prečica i vidžet (Android) */
-['<rect x="62" y="8" width="116" height="168" rx="18" class="o-p"/>' +
- '<rect x="76" y="28" width="88" height="70" rx="10" class="o-p1"/><rect x="84" y="36" width="34" height="24" rx="4" class="o-hl"/><rect x="122" y="36" width="34" height="24" rx="4" class="o-hl"/><rect x="84" y="66" width="72" height="9" rx="4" class="o-bar"/><rect x="84" y="80" width="52" height="9" rx="4" class="o-ln2"/>' +
- '<rect x="78" y="112" width="22" height="22" rx="6" class="o-p1"/><rect x="109" y="112" width="22" height="22" rx="6" class="o-bar"/><rect x="140" y="112" width="22" height="22" rx="6" class="o-p1"/>' +
- '<rect x="78" y="142" width="22" height="22" rx="6" class="o-p1"/><rect x="109" y="142" width="22" height="22" rx="6" class="o-p1"/><rect x="140" y="142" width="22" height="22" rx="6" class="o-p1"/>', 1],
-/* 8 zaključano i usklađeno (Android) */
-['<rect x="34" y="78" width="72" height="62" rx="10" class="o-p"/><path class="o-acc" d="M50 78V62a20 20 0 0 1 40 0v16"/><circle class="o-dot" cx="70" cy="104" r="7"/><line class="o-acc" x1="70" y1="108" x2="70" y2="122"/>' +
- '<path class="o-p" d="M142 112a20 20 0 0 1 2-40 28 28 0 0 1 52 8 16 16 0 0 1-2 32z"/><path class="o-acc" d="M156 92a14 14 0 0 1 24-4m2 12a14 14 0 0 1-24 4"/><path class="o-fill" d="M182 82v10h-10z"/><path class="o-fill" d="M156 110v-10h10z"/>', 2],
-/* 9 tvoji podaci */
-['<rect x="78" y="16" width="84" height="148" rx="16" class="o-p"/><line class="o-ln" x1="108" y1="28" x2="132" y2="28"/>' +
- '<path class="o-shield" d="M120 56l30 11v22c0 20-13 32-30 38-17-6-30-18-30-38V67z"/><polyline class="o-acc" points="106 92 116 102 136 80"/>', 0],
-/* 10 kraj */
-['<circle cx="120" cy="90" r="56" class="o-p"/><circle cx="120" cy="90" r="40" class="o-lens"/><line class="o-acc" x1="120" y1="70" x2="120" y2="110"/><line class="o-acc" x1="100" y1="90" x2="140" y2="90"/>', 0]
-];
-/* 1 = prečica/vidžet postoji, 2 = zaključavanje/Drive postoji (samo Android aplikacija) */
-function introShowDef(f){ return !f || (f === 1 ? !!(scNative() || vzNative()) : !!(lkNative() || drNative())); }
 function introWanted(){ try{ return !localStorage.getItem(INTRO_SEEN); }catch(e){ return false; } }
 function introRunAfter(){ const f = introAfter; introAfter = null; if(f) try{ f(); }catch(e){ console.error('introAfter', e); } }
 function introBoot(){
   if(introWanted() && !items.length && !categories.length && !document.getElementById('introOv')) introOpen();
   else introRunAfter();
 }
+/* koje karakteristike i ekrani postoje na ovom uređaju: vidžet/prečica, zaključavanje i Drive samo u Android aplikaciji */
+function obFeatures(){
+  const f = tl('obFeat') || [];   /* [tekst, ikonica, grupa, uslov] */
+  const ok = (c)=>!c || (c === 'vz' ? !!(vzNative() || scNative()) : c === 'lk' ? !!lkNative() : true);
+  return f.filter(x=>ok(x[3])).map(x=>[(x[3] === 'kopija' && !drNative()) ? t('obFeatBackup') : x[0], x[1], x[2]]);
+}
+function obShots(){
+  const L = OB_SHOTS.includes(appLang()) ? appLang() : null;
+  if(!L) return [];
+  const tx = tl('obShots') || [];
+  /* dy: koliko se slika podigne (% visine), da traka ne pokrije bitno i da se ne vidi nacrtana traka telefona na slikama 4 i 5 */
+  return [[2, tx[0], 1, 0], [3, tx[1], 1, 0], [4, tx[2], vzNative(), 20.5], [5, tx[3], scNative(), 7]]
+    .filter(x=>x[1] && x[2]).map(x=>({img:'upoznavanje/' + L + '/' + x[0] + '.webp?v=' + APP_VERSION, t:x[1][0], s:x[1][1], dy:x[3]}));
+}
 function introOpen(){
-  const all = tl('introSlides') || [];
-  const pick = INTRO_DEF.map((d, i)=>i).filter(i=>all[i] && introShowDef(INTRO_DEF[i][1]));
-  const sl = pick.map(i=>all[i]), ill = pick.map(i=>INTRO_DEF[i][0]);
-  const n = sl.length;
-  const ov = document.createElement('div');
-  ov.id = 'introOv'; ov.className = 'intro-ov';
-  ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-  ov.innerHTML = '<button type="button" class="intro-skip"></button><div class="intro-track">' +
-    sl.map((x, i)=>'<section class="intro-sl"><svg class="intro-ill" viewBox="0 0 240 180" aria-hidden="true">' + ill[i] + '</svg>' +
-      '<h2 class="intro-ti"></h2><p class="intro-tx"></p>' +
-      (i === n - 1 ? '<button type="button" class="sheet-cta intro-add"></button><button type="button" class="hw-restore intro-rest"></button>' : '') + '</section>').join('') +
-    '</div><div class="intro-foot"><div class="intro-dots">' + sl.map(()=>'<i></i>').join('') + '</div><button type="button" class="sheet-cta intro-next"></button></div>';
-  ov.querySelectorAll('.intro-sl').forEach((e, i)=>{
-    e.querySelector('.intro-ti').textContent = String(sl[i][0]).replace('{app}', APP_NAME);
-    e.querySelector('.intro-tx').textContent = String(sl[i][1]).replace('{app}', APP_NAME);
+  const shots = obShots(), n = shots.length + 2;
+  const dots = (k)=>'<div class="ob-dots">' + Array.from({length:n}, (_, i)=>'<i' + (i === k ? ' class="on"' : '') + '></i>').join('') + '</div>';
+  const app = (x)=>escapeHtml(String(x).replace('{app}', APP_NAME));
+  let groups = '', g = null;
+  obFeatures().forEach(([tx, ic, gr])=>{
+    if(gr !== g){ if(g !== null) groups += '</ul>'; groups += '<ul class="ob-list">'; g = gr; }
+    groups += '<li><span class="ob-ic">' + (OB_ICONS[ic] || '') + '</span><span>' + escapeHtml(tx) + '</span></li>';
   });
-  const track = ov.querySelector('.intro-track'), next = ov.querySelector('.intro-next'), skip = ov.querySelector('.intro-skip');
-  const dots = [...ov.querySelectorAll('.intro-dots i')];
-  next.textContent = t('introNext');
-  ov.querySelector('.intro-add').textContent = t('hwAdd');
-  ov.querySelector('.intro-rest').textContent = t('hwRestore');
-  ov.querySelector('.intro-add').onclick = ()=>requestCloseThen(()=>openAddSheet());
-  ov.querySelector('.intro-rest').onclick = ()=>requestCloseThen(()=>{ openSettings(); openSettingsSub('backup'); });
-  skip.onclick = ()=>requestClose();
-  let cur = -1;
-  const show = (i)=>{
-    if(i === cur) return; cur = i;
-    dots.forEach((d, k)=>d.classList.toggle('on', k === i));
-    const last = i === n - 1;
-    ov.classList.toggle('last', last);
-    skip.textContent = last ? t('introClose') : t('introSkip');
-  };
+  if(g !== null) groups += '</ul>';
+  const mark = (id)=>'<svg class="ob-mark" viewBox="0 0 30 30" aria-hidden="true"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2DDA4"/><stop offset=".5" stop-color="#C9A961"/><stop offset="1" stop-color="#8C6A2C"/></linearGradient></defs><path d="M15 1.5l13.5 13.5L15 28.5 1.5 15z" fill="none" stroke="url(#' + id + ')" stroke-width="2"/><path d="M15 8.5l6.5 6.5-6.5 6.5-6.5-6.5z" fill="url(#' + id + ')"/></svg>';
+  const s1 = '<section class="ob-sl ob-w"><div class="ob-hero">' + OB_GIL + '<button type="button" class="ob-skip ob-top">' + escapeHtml(t('introSkip')) + '</button>' + mark('obg1') +
+    '<p class="ob-hi">' + app(t('obHi')) + '</p><h1 class="ob-name">' + escapeHtml(APP_NAME) + '</h1><p class="ob-cmp">' + escapeHtml(t('obCmp')) + '</p>' +
+    '<div class="ob-rule"></div><p class="ob-slogan">' + escapeHtml(t('obSlogan1')) + '<br>' + escapeHtml(t('obSlogan2')) + '</p></div>' +
+    '<div class="ob-body"><h2 class="ob-h">' + escapeHtml(t('obKeyT')) + '</h2>' + groups + '</div>' +
+    '<div class="ob-foot ob-foot-l">' + dots(0) + '<button type="button" class="ob-next ob-next-n">' + escapeHtml(t('introNext')) + '</button></div></section>';
+  const mid = shots.map((x, i)=>'<section class="ob-sl ob-shot"><img class="ob-img" alt="" src="' + x.img + '"' + (x.dy ? ' style="transform:translateY(-' + x.dy + '%)"' : '') + '>' +
+    '<div class="ob-band">' + OB_GIL + '<h2 class="ob-t">' + app(x.t) + '</h2><p class="ob-s">' + app(x.s) + '</p>' +
+    '<div class="ob-foot"><button type="button" class="ob-skip">' + escapeHtml(t('introSkip')) + '</button>' + dots(i + 1) +
+    '<button type="button" class="ob-next ob-next-g">' + escapeHtml(t('introNext')) + '</button></div></div></section>').join('');
+  const s6 = '<section class="ob-sl ob-end"><div class="ob-hero">' + OB_GIL + '<button type="button" class="ob-skip ob-top">' + escapeHtml(t('introClose')) + '</button>' + mark('obg6') +
+    '<h1 class="ob-name">' + escapeHtml(t('obEndT')) + '</h1><p class="ob-endsub">' + app(t('obEndS')) + '</p><div class="ob-rule"></div>' +
+    '<p class="ob-slogan">' + escapeHtml(t('obSlogan1')) + '<br>' + escapeHtml(t('obSlogan2')) + '</p></div>' +
+    '<div class="ob-act"><button type="button" class="ob-add"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M6 15l3-3.5 2.5 2.5 1.5-1.5L16 15"/><path d="M19 3v6M16 6h6"/></svg>' +
+    escapeHtml(t('hwAdd')) + '</button><button type="button" class="ob-rest">' + escapeHtml(t('hwRestore')) + '</button>' + dots(n - 1) + '</div></section>';
+  const ov = document.createElement('div');
+  ov.id = 'introOv'; ov.className = 'ob-ov';
+  ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+  ov.innerHTML = '<div class="ob-track">' + s1 + mid + s6 + '</div>';
+  const track = ov.querySelector('.ob-track');
   const idx = ()=>Math.max(0, Math.min(n - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))));
-  track.addEventListener('scroll', ()=>show(idx()), {passive:true});
-  next.onclick = ()=>track.scrollTo({left:(idx() + 1) * track.clientWidth, behavior:'smooth'});
-  dots.forEach((d, k)=>{ d.onclick = ()=>track.scrollTo({left:k * track.clientWidth, behavior:'smooth'}); });
+  ov.querySelectorAll('.ob-next').forEach(b=>{ b.onclick = ()=>track.scrollTo({left:(idx() + 1) * track.clientWidth, behavior:'smooth'}); });
+  ov.querySelectorAll('.ob-skip').forEach(b=>{ b.onclick = ()=>requestClose(); });
+  ov.querySelectorAll('.ob-dots').forEach(d=>[...d.children].forEach((e, k)=>{ e.onclick = ()=>track.scrollTo({left:k * track.clientWidth, behavior:'smooth'}); }));
+  ov.querySelector('.ob-add').onclick = ()=>requestCloseThen(()=>openAddSheet());
+  ov.querySelector('.ob-rest').onclick = ()=>requestCloseThen(()=>{ openSettings(); openSettingsSub('backup'); });
   document.body.appendChild(ov);
   document.body.classList.add('intro-on');
-  show(0);
   pushBack(()=>{
     ov.remove(); document.body.classList.remove('intro-on');
     try{ localStorage.setItem(INTRO_SEEN, '1'); }catch(e){}
