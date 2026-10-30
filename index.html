@@ -3502,14 +3502,7 @@ async function extractContentForItem(item){
       if(window.__pdfLibErr) return null;
       const bytes = new Uint8Array(await (await getFileBlob(item)).arrayBuffer());
       const pdf = await pdfOpen(bytes).promise;
-      let text = '';
-      const maxPages = Math.min(pdf.numPages, 15);
-      for(let p=1;p<=maxPages;p++){
-        const page = await pdf.getPage(p);
-        const tc = await page.getTextContent();
-        text += tc.items.map(t=>t.str).join(' ') + ' ';
-      }
-      return text.slice(0, 20000);
+      return (await pdfSearchText(pdf)).text;
     }else if(ext === 'docx' && typeof mammoth !== 'undefined'){
       const buf = await (await getFileBlob(item)).arrayBuffer();
       const result = await mammoth.extractRawText({arrayBuffer: buf});
@@ -3527,6 +3520,59 @@ async function extractContentForItem(item){
     console.error('extractContentForItem failed:', e);
   }
   return null;
+}
+/* v249: tekst PDF-a za pretragu se spaja po položaju na strani — deo koji se nastavlja bez razmaka (npr. ligatura „fi“/„fl“
+   u posebnom fontu) ostaje u istoj reči: „Brookfield“, ne „Brook fi eld“. old = stari zapis (svaki deo odvojen razmakom),
+   samo za jednokratnu popravku već sačuvanih tekstova (pdfTextFix). */
+async function pdfSearchText(pdf){
+  let text = '', old = '';
+  const maxPages = Math.min(pdf.numPages, 15);
+  for(let p = 1; p <= maxPages; p++){
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    old += tc.items.map(t=>t.str).join(' ') + ' ';
+    let prev = null;
+    tc.items.forEach(it=>{
+      if(!it || typeof it.str !== 'string') return;
+      if(prev){
+        const tr = it.transform, pt = prev.transform;
+        const fs = (tr && Math.hypot(tr[2], tr[3])) || it.height || 10;
+        const glued = !prev.hasEOL && tr && pt && Math.abs(tr[5] - pt[5]) < 0.45 * fs && Math.abs(tr[4] - (pt[4] + (prev.width || 0))) <= 0.18 * fs;
+        if(!glued) text += ' ';
+      }
+      text += it.str;
+      prev = it;
+    });
+    text += ' ';
+  }
+  return {text:text.slice(0, 20000), old:old.slice(0, 20000)};
+}
+/* v249: jednom na ovom uređaju (i ponovo posle vraćanja kopije ili preuzimanja sa Drive-a) — tekst PDF-a sačuvan starim
+   spajanjem dobija novi zapis. Menja se SAMO tekst koji je tačno stari automatski zapis (tekst koji je pročitao AI ostaje);
+   vreme izmene dokumenta se ne menja (nije izmena korisnika). */
+let _pdfFixRun = false;
+async function pdfTextFix(){
+  if(_pdfFixRun || window.__pdfLibErr || !window.pdfLibP) return;
+  try{ if(localStorage.getItem(LS_PREFIX + 'pdfTxt') === '2') return; }catch(e){ return; }
+  _pdfFixRun = true;
+  try{
+    const list = items.concat(trash).filter(i=>i.type === 'pdf' && i.hasText);
+    if(list.length) await loadTexts();
+    for(const it of list){
+      if(!it.content || (!items.includes(it) && !trash.includes(it))) continue;
+      try{
+        const pdf = await pdfOpen(new Uint8Array(await (await getFileBlob(it)).arrayBuffer())).promise;
+        const r = await pdfSearchText(pdf);
+        try{ pdf.destroy(); }catch(e){}
+        const nw = normalizeSr(r.text);
+        if(it.content === normalizeSr(r.old) && nw !== it.content){
+          it.content = nw;
+          await Skladiste.sacuvajDokument(docRecord(it), nw);
+        }
+      }catch(e){ console.error(e); }
+    }
+    try{ localStorage.setItem(LS_PREFIX + 'pdfTxt', '2'); }catch(e){}
+  }finally{ _pdfFixRun = false; }
 }
 async function backfillContent(){
   try{ await loadTexts(); }catch(e){ console.error(e); }
@@ -9882,7 +9928,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp();
+loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -10298,7 +10344,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 248;
+const APP_VERSION = 249;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11148,6 +11194,7 @@ async function mergeBackup(src, opts){
   toastHide();
   render();
   updateStorageInfo();
+  if(added || updated){ try{ localStorage.removeItem(LS_PREFIX + 'pdfTxt'); }catch(e){} setTimeout(pdfTextFix, 3000); }   /* v249: tekst iz kopije možda ima stari zapis */
   if(opts && opts.quiet) return {added, updated, skipped, bad};   /* v206: Drive daje svoju poruku */
   if(bad && replace) showNote(t('bkReplaceBad', {bad}), 9000, {warn:true});
   else if(bad) showNote(t('bkRestoredBad', {added, skipped, bad}), 9000, {warn:true});
