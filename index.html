@@ -2522,40 +2522,41 @@ body:not(.in-album) .mark-row.fit4 .mark-title{ gap:6px; }
 .ob-ov{ position:fixed; inset:0; z-index:85; background:#0A1C36; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; color:#1B2433;
   padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); box-sizing:border-box; }
 body.intro-on{ overflow:hidden; }
-.ob-track{ height:100%; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
+.ob-track{ height:100%; display:flex; gap:10px; background:#0A1C36; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
 .ob-track::-webkit-scrollbar{ display:none; }
 .ob-sl{ position:relative; flex:0 0 100%; height:100%; box-sizing:border-box; scroll-snap-align:center; scroll-snap-stop:always; overflow:hidden; display:flex; flex-direction:column; background:#F3EADB; }
 .ob-ov button{ font-family:inherit; cursor:pointer; }
-.ob-hero{ position:relative; overflow:hidden; flex:none; padding:20px 28px 26px; color:#F7F2E6; background:radial-gradient(130% 100% at 100% 0%, #1E4673 0%, #12305A 38%, #0A1C36 100%); }
+.ob-hero{ position:relative; overflow:hidden; flex:none; padding:clamp(12px, 2.4vh, 20px) 28px clamp(16px, 3vh, 26px); color:#F7F2E6; background:radial-gradient(130% 100% at 100% 0%, #1E4673 0%, #12305A 38%, #0A1C36 100%); }
 .ob-gil{ position:absolute; inset:0; width:100%; height:100%; opacity:.3; pointer-events:none;
   -webkit-mask-image:radial-gradient(120% 95% at 100% 0%, #000 0%, rgba(0,0,0,.35) 55%, transparent 85%); mask-image:radial-gradient(120% 95% at 100% 0%, #000 0%, rgba(0,0,0,.35) 55%, transparent 85%); }
 .ob-hero::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:6px; animation:obSheen 1.4s ease-in-out .35s 1 both;
   background-image:linear-gradient(100deg, #9C7735 0%, #E6C77E 22%, #C9A961 40%, #FFF3CF 50%, #C9A961 60%, #E6C77E 78%, #9C7735 100%); background-size:250% 100%; background-position:100% 0; }
 .ob-hero > :not(.ob-gil):not(.ob-top){ position:relative; }
 .ob-top{ position:absolute; top:10px; right:12px; z-index:2; min-height:44px; padding:0 10px; background:none; border:0; color:rgba(247,242,230,.72); font-size:15px; font-weight:500; }
-.ob-mark{ width:34px; height:34px; margin:12px 0 16px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+.ob-mark{ width:clamp(26px, 4vh, 34px); height:clamp(26px, 4vh, 34px); margin:clamp(2px, 1.4vh, 12px) 0 clamp(6px, 1.8vh, 16px); filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
 .ob-hi{ margin:0; font-size:15px; color:rgba(247,242,230,.72); letter-spacing:.3px; }
-.ob-name{ margin:0 0 4px; font-family:"TR Serif",serif; font-weight:700; font-size:clamp(38px, 12.6vw, 50px); line-height:1.04; letter-spacing:-.5px;
+.ob-name{ margin:0 0 4px; font-family:"TR Serif",serif; font-weight:700; font-size:min(12.6vw, clamp(34px, 5.8vh, 50px)); line-height:1.04; letter-spacing:-.5px;
   background:linear-gradient(180deg, #FFFFFF 0%, #F3E9D2 60%, #E2D2AE 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.ob-cmp{ margin:0 0 16px; font-family:"TR Serif",serif; font-style:italic; font-size:16px; color:rgba(247,242,230,.84); }
-.ob-rule{ width:64px; height:2px; margin:0 0 16px; background:linear-gradient(90deg, #E6C77E, #B8924A); }
-.ob-slogan{ display:inline-block; margin:0; font-family:"TR Serif",serif; font-size:22px; line-height:1.3; -webkit-background-clip:text; background-clip:text; color:transparent;
+.ob-cmp{ margin:0 0 clamp(8px, 1.8vh, 16px); font-family:"TR Serif",serif; font-style:italic; font-size:16px; color:rgba(247,242,230,.84); }
+.ob-rule{ width:64px; height:2px; margin:0 0 clamp(8px, 1.8vh, 16px); background:linear-gradient(90deg, #E6C77E, #B8924A); }
+.ob-slogan{ display:inline-block; margin:0; font-family:"TR Serif",serif; font-size:clamp(18px, 2.6vh, 22px); line-height:1.3; -webkit-background-clip:text; background-clip:text; color:transparent;
   background-image:linear-gradient(100deg, #D9B66A 0%, #D9B66A 40%, #FFF3CF 50%, #D9B66A 60%, #B8924A 100%); background-size:250% 100%; background-position:100% 0;
   animation:obSheen 1.4s ease-in-out .5s 1 both; }
 @keyframes obSheen{ from{ background-position:100% 0; } to{ background-position:0% 0; } }
 @media (prefers-reduced-motion:reduce){ .ob-slogan, .ob-hero::after{ animation:none; background-position:0 0; } }
-.ob-body{ flex:1 1 auto; min-height:0; padding:20px 24px 0; overflow-y:auto; }
-.ob-h{ display:flex; align-items:center; gap:12px; margin:0 0 8px; font-family:"TR Serif",serif; font-weight:700; font-size:19px; color:#0E2747; }
+.ob-body{ flex:1 1 auto; min-height:0; padding:clamp(10px, 2.2vh, 20px) 24px 0; overflow:hidden; display:flex; flex-direction:column; }
+.ob-h{ flex:none; display:flex; align-items:center; gap:12px; margin:0 0 clamp(2px, 1vh, 8px); font-family:"TR Serif",serif; font-weight:700; font-size:19px; color:#0E2747; }
 .ob-h::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(184,146,74,.55), rgba(184,146,74,0)); }
-.ob-list{ list-style:none; margin:0; padding:0; }
-.ob-list + .ob-list{ margin-top:clamp(6px, 1.3vh, 14px); }
-.ob-list li{ display:flex; align-items:center; gap:14px; min-height:clamp(32px, 4.4vh, 42px); font-size:15px; line-height:1.25; color:#1B2433; }
-.ob-ic{ flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; color:#0E2747;
+.ob-list{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; list-style:none; margin:0; padding:0; }
+.ob-list + .ob-list{ margin-top:clamp(4px, 1.2vh, 14px); }
+/* v245: red se skuplja do 26 px kad ekran nije dovoljno visok — sve karakteristike staju bez pomeranja */
+.ob-list li{ flex:0 1 clamp(30px, 4.6vh, 42px); min-height:26px; display:flex; align-items:center; gap:14px; font-size:clamp(13.5px, 1.9vh, 15px); line-height:1.25; color:#1B2433; }
+.ob-ic{ flex:none; width:clamp(24px, 3.5vh, 30px); height:clamp(24px, 3.5vh, 30px); border-radius:50%; display:grid; place-items:center; color:#0E2747;
   background:radial-gradient(circle at 35% 30%, #FFFDF7, #F1E5CC); box-shadow:inset 0 0 0 1px rgba(184,146,74,.55), 0 1px 2px rgba(14,39,71,.12); }
-.ob-ic svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.ob-ic svg{ width:clamp(15px, 2.1vh, 18px); height:clamp(15px, 2.1vh, 18px); fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .ob-ic svg .g{ stroke:#A9823C; }
 .ob-foot{ display:flex; align-items:center; gap:14px; }
-.ob-foot-l{ flex:none; padding:10px 22px 16px; }
+.ob-foot-l{ flex:none; padding:clamp(6px, 1.2vh, 10px) 22px clamp(10px, 1.8vh, 16px); }
 .ob-dots{ flex:1; display:flex; justify-content:center; gap:7px; }
 .ob-dots i{ width:7px; height:7px; border-radius:4px; background:#DCCDAF; cursor:pointer; }
 .ob-dots i.on{ width:22px; background:linear-gradient(90deg, #E6C77E, #B8924A); }
@@ -2592,11 +2593,11 @@ body.intro-on{ overflow:hidden; }
 .ob-rest{ min-height:48px; background:none; border:0; font-size:15px; font-weight:600; color:#8C6A2C; }
 .ob-act .ob-dots{ flex:none; margin-top:6px; }
 @media (max-height:780px){
-  .ob-w .ob-hero{ padding:14px 24px 20px; } .ob-w .ob-mark{ margin:4px 0 8px; width:28px; height:28px; }
-  .ob-w .ob-name{ font-size:40px; } .ob-cmp{ font-size:15px; margin-bottom:10px; } .ob-rule{ margin-bottom:10px; } .ob-w .ob-slogan{ font-size:19px; }
-  .ob-body{ padding-top:14px; } .ob-h{ font-size:17px; margin-bottom:4px; } .ob-list li{ font-size:14px; }
+  .ob-cmp{ font-size:15px; } .ob-h{ font-size:17px; }
   .ob-t{ font-size:24px; } .ob-s{ font-size:14.5px; margin-bottom:12px; } .ob-band{ padding-top:22px; }
 }
+/* v245: vrlo nizak ekran (stari mali telefoni): bez znaka gore, kraći razmaci */
+@media (max-height:660px){ .ob-w .ob-mark{ display:none; } .ob-w .ob-hero{ padding-top:14px; } .ob-cmp{ font-size:14px; margin-bottom:6px; } .ob-list li{ min-height:24px; } }
 .intro-again{ width:100%; margin:4px 0 14px; }
 /* v241: dobrodošlica (prazna Arhiva) */
 .home-welcome{ margin:12px 0 6px; padding:24px 18px 10px; border-radius:16px; background:var(--surface); border:1px solid var(--line); text-align:center; }
@@ -10289,7 +10290,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 244;
+const APP_VERSION = 245;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10583,10 +10584,12 @@ function introOpen(){
   ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
   ov.innerHTML = '<div class="ob-track">' + s1 + mid + s6 + '</div>';
   const track = ov.querySelector('.ob-track');
-  const idx = ()=>Math.max(0, Math.min(n - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))));
-  ov.querySelectorAll('.ob-next').forEach(b=>{ b.onclick = ()=>track.scrollTo({left:(idx() + 1) * track.clientWidth, behavior:'smooth'}); });
+  /* v245: između ekrana je razmak (gap na .ob-track), pa je korak širina ekrana + razmak */
+  const step = ()=>{ const sl = track.children; return sl.length > 1 ? sl[1].offsetLeft - sl[0].offsetLeft : track.clientWidth; };
+  const idx = ()=>Math.max(0, Math.min(n - 1, Math.round(track.scrollLeft / Math.max(1, step()))));
+  ov.querySelectorAll('.ob-next').forEach(b=>{ b.onclick = ()=>track.scrollTo({left:(idx() + 1) * step(), behavior:'smooth'}); });
   ov.querySelectorAll('.ob-skip').forEach(b=>{ b.onclick = ()=>requestClose(); });
-  ov.querySelectorAll('.ob-dots').forEach(d=>[...d.children].forEach((e, k)=>{ e.onclick = ()=>track.scrollTo({left:k * track.clientWidth, behavior:'smooth'}); }));
+  ov.querySelectorAll('.ob-dots').forEach(d=>[...d.children].forEach((e, k)=>{ e.onclick = ()=>track.scrollTo({left:k * step(), behavior:'smooth'}); }));
   ov.querySelector('.ob-add').onclick = ()=>requestCloseThen(()=>openAddSheet());
   ov.querySelector('.ob-rest').onclick = ()=>requestCloseThen(()=>{ openSettings(); openSettingsSub('backup'); });
   document.body.appendChild(ov);
