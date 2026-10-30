@@ -3429,7 +3429,12 @@ function itemWhen(item){
   return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '. ' + d.getHours() + ':' + two(d.getMinutes());
 }
 /* kratko, kao oznaka podsetnika: ove godine „6.10.“, druge godine „15.3.25.“ (staje i na 340 px) */
-function itemDay(item){ const d = new Date(item.ts || Date.now()); const y = d.getFullYear(); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + (y === new Date().getFullYear() ? '' : String(y).slice(-2) + '.'); }
+/* v247: na engleskom „Oct 30“ (druga godina: „Oct 30, 25“), kao fmtExpDate; srpski bez izmene */
+function itemDay(item){
+  const d = new Date(item.ts || Date.now()); const y = d.getFullYear(), cur = y === new Date().getFullYear();
+  if(appLang() === 'en') return d.toLocaleDateString('en-US', cur ? {month:'short', day:'numeric'} : {month:'short', day:'numeric', year:'2-digit'});
+  return d.getDate() + '.' + (d.getMonth() + 1) + '.' + (cur ? '' : String(y).slice(-2) + '.');
+}
 function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : 'autoDoc'); }
 /* naziv za prikaz u jednom redu (pregled, korpa, AI): „Slika · 6.10.2026. 12:34“ */
 /* v130: u pregledu naziv bez vremena (automatsko ime = samo „Slika“), datum sivo iza brojača; vreme se vidi u preimenovanju */
@@ -10293,7 +10298,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 246;
+const APP_VERSION = 247;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
