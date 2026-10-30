@@ -4121,8 +4121,8 @@ const I18N = {
     expRemoved: 'Podsetnik je uklonjen.',
     expRow: 'Podsetnik',
     expHdr: 'Podsetnici',
-    expScreenTitle: 'podsetnici',
-    expScreenHint: 'dodir na podsetnik: izmena datuma, dana i sata.',
+    expScreenTitle: 'Podsetnici',
+    expScreenHint: 'Dodir na podsetnik: izmena datuma, dana i sata.',
     expGrpGone: 'prošlo',
     expGrpSoon: 'uskoro',
     expGrpLater: 'kasnije',
@@ -4930,8 +4930,8 @@ const I18N = {
     expRemoved: 'Reminder removed.',
     expRow: 'Reminder',
     expHdr: 'Reminders',
-    expScreenTitle: 'reminders',
-    expScreenHint: 'tap a reminder to change its date, days and time.',
+    expScreenTitle: 'Reminders',
+    expScreenHint: 'Tap a reminder to change its date, days and time.',
     expGrpGone: 'past',
     expGrpSoon: 'soon',
     expGrpLater: 'later',
@@ -5110,7 +5110,7 @@ const I18N = {
 /* v183: izbor jezika, početni ekran i Podešavanja */
 Object.assign(I18N.sr, {
   trTile: 'korpa', langTile: 'jezik · language', langHint: 'promena se vidi odmah. pri prvom pokretanju Arhiva sama izabere jezik telefona.',
-  setTitle: 'podešavanja', backAria: 'nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
+  setTitle: 'Podešavanja', backAria: 'nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
   themeTile: 'tema', themeHint: 'promena se vidi odmah. izbor se pamti i čuva u rezervnoj kopiji.',
   th_banka: 'Privatno bankarstvo', th_crna: 'Crna kartica', th_ponoc: 'Ponoć', th_koza: 'Kožni rokovnik', th_klasicna: 'Klasična',
   bkTile: 'rezervna kopija', bkLast: 'poslednja rezervna kopija: {d}', bkNever: 'nikad',
@@ -5129,7 +5129,7 @@ Object.assign(I18N.sr, {
 });
 Object.assign(I18N.en, {
   trTile: 'trash', langTile: 'language', langHint: 'the change is visible right away. on first start Arhiva picks the language of your phone.',
-  setTitle: 'settings', backAria: 'back', cfOkDef: 'OK', cfCancel: 'Cancel',
+  setTitle: 'Settings', backAria: 'back', cfOkDef: 'OK', cfCancel: 'Cancel',
   themeTile: 'theme', themeHint: 'the change is visible right away. your choice is remembered and saved in the backup.',
   th_banka: 'Private banking', th_crna: 'Black card', th_ponoc: 'Midnight', th_koza: 'Leather notebook', th_klasicna: 'Classic',
   bkTile: 'backup', bkLast: 'last backup: {d}', bkNever: 'never',
@@ -10298,7 +10298,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 247;
+const APP_VERSION = 248;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
