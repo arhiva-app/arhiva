@@ -10346,7 +10346,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 252;
+const APP_VERSION = 253;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20033,10 +20033,11 @@ async function rcvFromAndroid(){
       const parts = [];
       for(let od = 0; ; ){
         const d = await n.deo({putanja:f.putanja, od});
+        if(!d || d.od !== od) throw new Error('deo: traženo ' + od + ', stiglo ' + (d && d.od));   /* v253: APK probna-44 je uvek vraćao prvi deo */
         const b = b64Bytes(d.podaci || '');
         if(b.length) parts.push(b);
         od += b.length;
-        if(d.kraj || !b.length) break;
+        if(d.kraj || !b.length || od > (f.velicina || 0)) break;
       }
       files.push(rcvFile(new Blob(parts), f.ime, f.mime));
     }catch(e){ console.error('prijem deo', e); bad++; }
