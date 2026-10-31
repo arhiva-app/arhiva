@@ -5223,7 +5223,8 @@ Object.assign(I18N.sr, {
   trMoved1: 'Premešteno u korpu.', trMovedN: 'U korpu premešteno: {n}.', addToAlb: 'Dodaj u album', newAlbRow: '+ Novi album...', rmFromAlb: 'Uklonjeno iz albuma.',
   shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.', savedPhonePart: 'Sačuvano na telefon: {a} od {b}.', savedPhoneNone: 'Nije sačuvano.', saveFailed: 'Čuvanje nije uspelo:',
   albDup: 'Album s tim imenom već postoji.', subExists: 'Podalbum "{name}" već postoji.', albExists: 'Album "{name}" već postoji.', albMade: 'Album "{name}" napravljen.',
-  procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.'
+  procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.',
+  rcvOne: 'Sačuvano: {name}', rcvN: 'Sačuvano stavki: {n}.', rcvErr: 'Neke fajlove nije bilo moguće preuzeti ({n}).'
 });
 Object.assign(I18N.en, {
   dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
@@ -5255,7 +5256,8 @@ Object.assign(I18N.en, {
   trMoved1: 'Moved to trash.', trMovedN: 'Moved to trash: {n}.', addToAlb: 'Add to album', newAlbRow: '+ New album...', rmFromAlb: 'Removed from album.',
   shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.', savedPhonePart: 'Saved to phone: {a} of {b}.', savedPhoneNone: 'Not saved.', saveFailed: 'Saving failed:',
   albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
-  procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.'
+  procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.',
+  rcvOne: 'Saved: {name}', rcvN: 'Items saved: {n}.', rcvErr: 'Some files could not be received ({n}).'
 });
 /* v186: preostali tekstovi (dugmad gore, poruke) */
 Object.assign(I18N.sr, { hdrNewAlbum: 'Novi album', hdrSearch: 'Pretraga', hdrSettings: 'Podešavanja',
@@ -9432,9 +9434,9 @@ newFolderSheet.onclick = (e)=>{ if(e.target === newFolderSheet){ requestClose();
 
 function toastPersist(msg){ showNote(msg, 0, {sticky:true}); }
 function toastHide(){ if(_note && _note.sticky) hideNote(); }
-async function addFilesWithProgress(files, category){
+async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = sopstvena poruka na kraju (Podeli → Arhiva) */
   if(files.length === 0) return;
-  if(files.length === 1){ if(await addFile(files[0], category)) toast(t('added1')); return; }   /* v250: i za jedan fajl (Zoran 31.10.) */
+  if(files.length === 1){ if(await addFile(files[0], category)) toast(msg ? msg(1) : t('added1')); return; }   /* v250: i za jedan fajl (Zoran 31.10.) */
   const total = files.length;
   let completed = 0;
   _diag = { worker: 0, fallback: 0, errors: [] };
@@ -9455,7 +9457,7 @@ async function addFilesWithProgress(files, category){
   await Promise.all(lanes);
   const secs = ((performance.now() - t0) / 1000).toFixed(1);
   toastHide();
-  toast(total===1 ? t('added1') : t('addedN', {n:total}));
+  toast(msg ? msg(total) : (total===1 ? t('added1') : t('addedN', {n:total})));
   console.log('Arhiva: obrada '+total+' fajlova za '+secs+'s (brzo:'+_diag.worker+' sporo:'+_diag.fallback+')', _diag.errors);
 }
 
@@ -9928,7 +9930,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(()=>{ itemsReady = true; scBoot(); rcvBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -10344,7 +10346,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 251;
+const APP_VERSION = 252;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -19981,6 +19983,72 @@ function scBoot(){
   scRecentPush();
   /* odlazak iz Arhive (npr. na početni ekran): spisak na ikonici usklađen (brisanja, zaključavanje) */
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') scRecentPush(); });
+}
+
+/* =====================================================================
+   PRIJEM (v252) — „Podeli → Arhiva“ iz mejla i drugih aplikacija (Zoran 31.10.).
+   Primljeni fajlovi se odmah čuvaju u „Bez albuma“ (bez ekrana za izbor); Arhiva se otvori tamo, gore „Sačuvano: …“.
+   Zaključana Arhiva: prvo PIN (scWaitOpen), pa čuvanje. Isti naziv + veličina → postojeće pitanje o duplikatu (addFile).
+   Android: dodatak Primanje (cap/arhiva-native.js → window.ARHIVA_PRIMI) — fajlovi kopirani u keš aplikacije, čitaju se u delovima.
+   Chrome (instalirana prečica): manifest share_target → sw.js ih stavi u keš 'arhiva-primljeno' i otvori Arhivu.
+   Izvor se briše tek posle čuvanja (prekid → sledeće pokretanje ponovo nudi iste fajlove).
+   ===================================================================== */
+const RCV_CACHE = 'arhiva-primljeno';
+let _rcvChain = Promise.resolve();
+function rcvQueue(fn){ _rcvChain = _rcvChain.then(fn).catch(e=>console.error('prijem', e)); return _rcvChain; }
+function rcvFile(blob, name, mime){
+  const ext = ((name || '').match(/\.([^.]+)$/) || [,''])[1].toLowerCase();
+  return new File([blob], name || 'Dokument', {type: mime || blob.type || EXT_MIME[ext] || ''});
+}
+async function rcvSave(files, done){
+  if(!files.length){ await done(); return; }
+  await scWaitOpen();
+  await new Promise(res=>navToAlbum(INBOX, res));
+  await addFilesWithProgress(files, null, n=>n === 1 ? t('rcvOne', {name:files[0].name}) : t('rcvN', {n}));
+  await done();
+}
+async function rcvFromChrome(){
+  if(!('caches' in window) || !(await caches.has(RCV_CACHE))) return;
+  const c = await caches.open(RCV_CACHE);
+  const files = [];
+  for(const req of await c.keys()){
+    const r = await c.match(req);
+    if(!r) continue;
+    let name = '';
+    try{ name = decodeURIComponent(r.headers.get('X-Ime') || ''); }catch(e){}
+    files.push(rcvFile(await r.blob(), name, r.headers.get('Content-Type')));
+  }
+  await rcvSave(files, ()=>caches.delete(RCV_CACHE));
+}
+function b64Bytes(s){ const b = atob(s), u = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+async function rcvFromAndroid(){
+  const n = window.ARHIVA_PRIMI;
+  const r = (await n.cekaj()) || {};
+  const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
+  let bad = r.greske || 0;
+  if(!list.length && !bad) return;
+  const files = [];
+  for(const f of list){
+    try{
+      const parts = [];
+      for(let od = 0; ; ){
+        const d = await n.deo({putanja:f.putanja, od});
+        const b = b64Bytes(d.podaci || '');
+        if(b.length) parts.push(b);
+        od += b.length;
+        if(d.kraj || !b.length) break;
+      }
+      files.push(rcvFile(new Blob(parts), f.ime, f.mime));
+    }catch(e){ console.error('prijem deo', e); bad++; }
+  }
+  await rcvSave(files, ()=>Promise.resolve(n.obrisi()).catch(()=>{}));
+  if(bad) showNote(t('rcvErr', {n:bad}), 6000);
+}
+function rcvBoot(){
+  if(window.ARHIVA_PRIMI){
+    window.ARHIVA_PRIMI.naPrijem(()=>rcvQueue(rcvFromAndroid));
+    rcvQueue(rcvFromAndroid);
+  }else if(!window.ARHIVA_NATIVE) rcvQueue(rcvFromChrome);
 }
 
 /* =====================================================================

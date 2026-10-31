@@ -11,7 +11,8 @@
    7) v196 prečice (dodatak Precica u novom APK-u; logika je u Arhivi, blok PREČICA)
    8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA)
    9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE)
-   10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET) */
+   10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET)
+   11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -53,6 +54,17 @@
       poslednji: function(lista){ try{ return Pr.poslednji({ lista: lista }).catch(function(e){ console.error('arhiva-native poslednji', e); }); }catch(e){ return Promise.resolve(); } },
       cekaj: function(){ return Pr.cekaj(); },
       naStavku: function(fn){ try{ Pr.addListener('stavka', fn); }catch(e){ console.error('arhiva-native stavka', e); } }
+    };
+  }
+
+  /* 11) v252 Podeli → Arhiva: primljeni fajlovi (cekaj = spisak, deo = 1 MB base64, obrisi posle čuvanja) */
+  if(C.isPluginAvailable && C.isPluginAvailable('Primanje')){
+    var Pm = reg('Primanje');
+    window.ARHIVA_PRIMI = {
+      cekaj: function(){ return Pm.cekaj(); },
+      deo: function(o){ return Pm.deo(o); },
+      obrisi: function(){ return Pm.obrisi(); },
+      naPrijem: function(fn){ try{ Pm.addListener('primljeno', fn); }catch(e){ console.error('arhiva-native primanje', e); } }
     };
   }
 
