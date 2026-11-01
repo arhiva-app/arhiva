@@ -2429,6 +2429,30 @@ body.in-album .searchbar{ margin-top:12px; }
 .alb-ico-tx{ font-size:12px; line-height:1.2; color:var(--ink-dim); text-align:center; max-width:100%; overflow-wrap:anywhere; }
 /* v105: stranica preko celog ekrana (ekran stranica i spajanje) */
 .pv-screen{ display:none; position:fixed; inset:0; z-index:54; background:var(--bg); flex-direction:column; }
+/* v257: Okreni i iseci */
+#modalBg .modal-cap-row .modal-crop{ position:absolute; left:0; right:auto; top:50%; transform:translateY(-50%); width:40px; height:40px; }
+.modal-bg.is-file .modal-crop{ display:none !important; }
+.ce-screen{ display:none; position:fixed; inset:0; z-index:60; background:#000; flex-direction:column; color:#fff;
+  padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px); }
+.ce-screen.open{ display:flex; }
+.ce-head{ flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 16px 8px; }
+.ce-head b{ font:700 17px/1.2 var(--font-ui); }
+.ce-cancel{ background:none; border:none; color:var(--brass); font:600 16px/1 var(--font-ui); padding:8px 4px; min-width:72px; text-align:left; }
+.ce-sp{ min-width:72px; }
+.ce-stage{ flex:1; position:relative; overflow:hidden; touch-action:none; }
+#ceCv{ position:absolute; }
+#ceSvg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#cePoly{ fill:rgba(226,196,138,.10); stroke:var(--brass); stroke-width:2.5; }
+.ce-h{ position:absolute; width:44px; height:44px; margin:-22px 0 0 -22px; border-radius:50%; touch-action:none; }
+.ce-h::after{ content:''; position:absolute; inset:10px; border-radius:50%; background:var(--brass); border:2px solid #000; box-shadow:0 0 0 1px rgba(255,255,255,.35); }
+.ce-h.on::after{ inset:6px; }
+.ce-hint{ flex:none; text-align:center; font:500 13.5px/1.35 var(--font-ui); color:#c9bfa9; padding:8px 18px 4px; }
+.ce-bar{ flex:none; display:flex; justify-content:space-around; padding:8px 10px 16px; }
+.ce-b{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:5px; color:#bbb; font:500 12.5px/1.2 var(--font-ui); min-width:64px; }
+.ce-b[hidden]{ display:none; }
+.ce-i{ width:52px; height:52px; border-radius:15px; background:#2a2a2e; display:flex; align-items:center; justify-content:center; color:var(--brass); }
+.ce-ok .ce-i{ background:linear-gradient(#e2c48a, #b8925a); color:#111; }
+.ce-ok{ color:#e2c48a; }
 .pv-screen.open{ display:flex; }
 .pv-head{ flex:none; display:flex; align-items:center; gap:10px; height:52px; padding:0 10px; border-bottom:1px solid var(--line); }
 .pv-close{ width:44px; height:44px; border:none; background:none; color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
@@ -2834,7 +2858,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
     <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><video id="modalVideo" controls playsinline preload="metadata" hidden></video><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
     <div class="modal-info">
       <div class="modal-count-row"><div class="modal-position" id="modalPosition"></div><span class="modal-date" id="modalDate"></span><span class="modal-page-no" id="modalPageNo"></span></div>
-      <div class="modal-cap-row"><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
+      <div class="modal-cap-row"><button class="modal-ren modal-crop" id="modalCrop" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg></button><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
       <div class="modal-exp-row is-empty" id="modalExpRow"><span class="modal-exp-line" id="modalExpLine" role="button"></span><button class="modal-ren modal-exp-edit" id="modalExpEdit" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
       <div class="modal-exp-note" id="modalExpNote"></div>
     </div>
@@ -2920,7 +2944,19 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <div class="pv-frame" id="pvFrame"><img id="pvImg" alt=""><div class="pv-cnt" id="pvCnt" hidden></div></div>
   <div class="pv-bar" id="pvBar">
     <div class="pv-row"><button type="button" class="pg-btn" id="pvPrev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg><span id="pvPrevLbl"></span></button><button type="button" class="pg-btn pv-to" id="pvTo"></button><button type="button" class="pg-btn" id="pvNext"><span id="pvNextLbl"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div>
-    <div class="pv-row pv-row2"><button type="button" class="pg-btn pv-small" id="pvExtract"></button><button type="button" class="pg-btn pv-small pv-danger" id="pvRemove"></button></div>
+    <div class="pv-row pv-row2"><button type="button" class="pg-btn pv-small" id="pvCrop"></button><button type="button" class="pg-btn pv-small" id="pvExtract"></button><button type="button" class="pg-btn pv-small pv-danger" id="pvRemove"></button></div>
+  </div>
+</div>
+<div class="ce-screen" id="cropScr">   <!-- v257: Okreni i iseci -->
+  <div class="ce-head"><button type="button" class="ce-cancel" id="ceCancel"></button><b id="ceTitle"></b><span class="ce-sp"></span></div>
+  <div class="ce-stage" id="ceStage"><canvas id="ceCv"></canvas><svg id="ceSvg"><polygon id="cePoly"></polygon></svg>
+    <div class="ce-h" data-k="0"></div><div class="ce-h" data-k="1"></div><div class="ce-h" data-k="2"></div><div class="ce-h" data-k="3"></div></div>
+  <div class="ce-hint" id="ceHint"></div>
+  <div class="ce-bar">
+    <button type="button" class="ce-b" id="ceLeft"><span class="ce-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 3 3 9 9 9"></polyline></svg></span><span id="ceLeftL"></span></button>
+    <button type="button" class="ce-b" id="ceRight"><span class="ce-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><polyline points="21 3 21 9 15 9"></polyline></svg></span><span id="ceRightL"></span></button>
+    <button type="button" class="ce-b" id="ceOrig" hidden><span class="ce-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><circle cx="9" cy="9" r="1.6"></circle><path d="M20 15l-5-5L5 20"></path></svg></span><span id="ceOrigL"></span></button>
+    <button type="button" class="ce-b ce-ok" id="ceSave"><span class="ce-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span><span id="ceSaveL"></span></button>
   </div>
 </div>
 <div class="sheet-bg" id="pvToSheet">
@@ -3640,7 +3676,10 @@ const I18N = {
     pgProcessing: 'Obrađujem stranice…',
     pgEmpty: 'Još nema stranica. Slikaj prvu stranicu ili izaberi slike iz galerije.',
     pgHint: 'Lupa u uglu (ili dodir na stranicu) otvara stranicu preko celog ekrana: tamo je čitaš i pomeraš (Ranije, Na mesto…, Kasnije). Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“.',
-    pvTitle: 'Str. {i} / {n}', pvPrev: 'Ranije', pvNext: 'Kasnije', pvTo: 'Na mesto…', pvExtract: 'Izdvoji', pvRemove: 'Ukloni', pvHead: 'Redosled stranica', pvHint: 'Ranije i Kasnije pomeraju ovu stranicu za jedno mesto, a Na mesto… odmah na izabrano mesto. Broj na slici pokazuje gde je sada. Prevuci prstom za sledeću stranicu. Sve se čuva tek na Sačuvaj.', pvRmTitle: 'Ukloniti stranicu {n}?', pvRmSaved: 'Kad sačuvaš dokument, stranica ide u korpu.', pvRmMerge: 'Stranica neće biti u novom dokumentu. Original ostaje u albumu.', pvRmNew: 'Ova stranica se briše iz dokumenta koji praviš.', pvToTitle: 'Premesti stranicu {n} na mesto', pvToHint: 'Ostale stranice se pomere za jedno mesto.',
+    ceTitle: 'Okreni i iseci', ceCancel: 'Otkaži', ceHint: 'Prevuci uglove na ivice papira — Arhiva ga ispravi u pravougaonik.', ceHintOrig: 'Prikazan je original. „Sačuvaj“ ga vraća (ili ga prvo iseci).',
+    ceLeft: 'Levo', ceRight: 'Desno', ceOrig: 'Original', ceSave: 'Sačuvaj', ceWork: 'Ispravljam sliku…', ceSaved: 'Slika je sačuvana. Original se čuva.', ceRestored: 'Vraćen je original.',
+    ceErr: 'Slika ne može da se izmeni.', ceBad: 'Uglovi su ukršteni — postavi ih redom oko papira.',
+    pvTitle: 'Str. {i} / {n}', pvPrev: 'Ranije', pvNext: 'Kasnije', pvTo: 'Na mesto…', pvCrop: 'Iseci', pvExtract: 'Izdvoji', pvRemove: 'Ukloni', pvHead: 'Redosled stranica', pvHint: 'Ranije i Kasnije pomeraju ovu stranicu za jedno mesto, a Na mesto… odmah na izabrano mesto. Broj na slici pokazuje gde je sada. Prevuci prstom za sledeću stranicu. Sve se čuva tek na Sačuvaj.', pvRmTitle: 'Ukloniti stranicu {n}?', pvRmSaved: 'Kad sačuvaš dokument, stranica ide u korpu.', pvRmMerge: 'Stranica neće biti u novom dokumentu. Original ostaje u albumu.', pvRmNew: 'Ova stranica se briše iz dokumenta koji praviš.', pvToTitle: 'Premesti stranicu {n} na mesto', pvToHint: 'Ostale stranice se pomere za jedno mesto.',
     pgCountLong: 'Stranica: {n}',
     pgCount: '{n} str.',
     pgPageNo: 'Str. {n} / {total}',
@@ -4449,7 +4488,10 @@ const I18N = {
     pgProcessing: 'Processing pages…',
     pgEmpty: 'No pages yet. Take a photo of the first page or pick images from the gallery.',
     pgHint: 'The magnifier in the corner (or a tap on the page) opens the page full screen: read it there and move it (Earlier, Move to…, Later). You can also drag the handle in the corner, and ✕ removes the page. Nothing is saved until “Save”.',
-    pvTitle: 'P. {i} / {n}', pvPrev: 'Earlier', pvNext: 'Later', pvTo: 'Move to…', pvExtract: 'Extract', pvRemove: 'Remove', pvHead: 'Page order', pvHint: 'Earlier and Later move this page by one place, Move to… straight to the chosen place. The number on the page shows where it is now. Swipe for the next page. Nothing is saved until Save.', pvRmTitle: 'Remove page {n}?', pvRmSaved: 'When you save the document, the page goes to the trash.', pvRmMerge: 'The page won’t be in the new document. The original stays in the album.', pvRmNew: 'This page is removed from the document you are making.', pvToTitle: 'Move page {n} to position', pvToHint: 'The other pages shift by one.',
+    ceTitle: 'Rotate & crop', ceCancel: 'Cancel', ceHint: 'Drag the corners to the edges of the paper — the archive straightens it.', ceHintOrig: 'The original is shown. “Save” restores it (or crop it first).',
+    ceLeft: 'Left', ceRight: 'Right', ceOrig: 'Original', ceSave: 'Save', ceWork: 'Straightening the image…', ceSaved: 'Image saved. The original is kept.', ceRestored: 'Original restored.',
+    ceErr: 'The image cannot be edited.', ceBad: 'The corners cross — place them in order around the paper.',
+    pvTitle: 'P. {i} / {n}', pvPrev: 'Earlier', pvNext: 'Later', pvTo: 'Move to…', pvCrop: 'Crop', pvExtract: 'Extract', pvRemove: 'Remove', pvHead: 'Page order', pvHint: 'Earlier and Later move this page by one place, Move to… straight to the chosen place. The number on the page shows where it is now. Swipe for the next page. Nothing is saved until Save.', pvRmTitle: 'Remove page {n}?', pvRmSaved: 'When you save the document, the page goes to the trash.', pvRmMerge: 'The page won’t be in the new document. The original stays in the album.', pvRmNew: 'This page is removed from the document you are making.', pvToTitle: 'Move page {n} to position', pvToHint: 'The other pages shift by one.',
     pgCountLong: 'Pages: {n}',
     pgCount: '{n} pp.',
     pgPageNo: 'P. {n} / {total}',
@@ -6069,7 +6111,7 @@ const Skladiste = (()=>{
         const r = st('docs').get(id);
         r.onsuccess = ()=>{
           const d = r.result;
-          if(d && Array.isArray(d.pages)) d.pages.forEach(p=>{ st('files').delete(p.file); st('thumbs').delete(p.file); });
+          if(d && Array.isArray(d.pages)) d.pages.forEach(p=>{ st('files').delete(p.file); st('thumbs').delete(p.file); if(p.orig && p.orig.file){ st('files').delete(p.orig.file); st('thumbs').delete(p.orig.file); } });
           st('texts').delete(id);
           st('docs').put({id, schema:REC_SCHEMA, purged:true, deletedAt:(d && d.deletedAt) || now, updatedAt:now});
         };
@@ -6187,12 +6229,14 @@ function newFileId(){ return 'f' + Date.now().toString(36) + Math.random().toStr
 function newItemId(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,8); }
 
 /* Zapis dokumenta u bazi (bez sadržaja, sličica i teksta) */
+/* v257: original slike pre „Okreni i iseci“ — {file, mime, size, w, h, thumb}; čuva se uz stranicu dok se ne vrati */
+function origRec(o){ return (o && o.file) ? {orig:{file:o.file, mime:o.mime || '', size:o.size || 0, w:o.w || 0, h:o.h || 0, thumb:!!o.thumb}} : {}; }
 function docRecord(it){
   return {
     id: it.id, schema: REC_SCHEMA,
     name: it.name || '', albumId: it.category || null,
     kind: it.type || 'image', ext: it.ext || null,
-    pages: (it.pages || []).map(p=>Object.assign({file:p.file, mime:p.mime||'', size:p.size||0, w:p.w||0, h:p.h||0, thumb:!!p.thumb}, p.dur ? {dur:p.dur} : {})),
+    pages: (it.pages || []).map(p=>Object.assign({file:p.file, mime:p.mime||'', size:p.size||0, w:p.w||0, h:p.h||0, thumb:!!p.thumb}, p.dur ? {dur:p.dur} : {}, origRec(p.orig))),
     createdAt: it.ts || Date.now(), updatedAt: it.updatedAt || Date.now(),
     deletedAt: it.deletedAt || null,
     validUntil: it.validUntil || null, validNote: it.validNote || null, remind: it.validUntil ? (remClean(it.remind) || null) : null, lang: it.lang || null, derivedFrom: it.derivedFrom || null,
@@ -6227,12 +6271,13 @@ async function idbPut(item){
 /* Nov dokument: podaci, fajlovi, sličice i tekst u JEDNOJ transakciji (sve ili ništa). */
 async function db2AddDoc(item, pages, text, opts){
   if(!(opts && opts.keepName)) item.name = uniqueItemName(item.name, item.id);   /* v120 */
-  item.pages = pages.map(p=>Object.assign({file:p.file || newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}, p.dur ? {dur:p.dur} : {}));   /* v254: dur = trajanje videa (s) */
+  item.pages = pages.map(p=>Object.assign({file:p.file || newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}, p.dur ? {dur:p.dur} : {},
+    (p.orig && p.orig.blob) ? {orig:{file:newFileId(), mime:p.orig.blob.type || p.orig.mime || '', size:p.orig.blob.size, w:p.orig.w || 0, h:p.orig.h || 0, thumb:false}} : {}));   /* v257: original iz kopije */   /* v254: dur = trajanje videa (s) */
   /* vraćanje kopije zadržava vreme izmene iz kopije (inače bi novija kopija izgledala starije) */
   item.updatedAt = (opts && opts.updatedAt > 0) ? opts.updatedAt : Date.now();
   if(text){ item.content = text; item.hasText = true; }
   await Skladiste.upisi({
-    files: pages.map((p, i)=>({id:item.pages[i].file, doc:item.id, blob:p.blob})),
+    files: pages.map((p, i)=>({id:item.pages[i].file, doc:item.id, blob:p.blob})).concat(pages.map((p, i)=>item.pages[i].orig ? {id:item.pages[i].orig.file, doc:item.id, blob:p.orig.blob} : null).filter(Boolean)),
     thumbs: pages.map((p, i)=>p.thumbBlob ? {id:item.pages[i].file, blob:p.thumbBlob} : null).filter(Boolean),
     texts: text ? [{id:item.id, text}] : [],
     docs: [docRecord(item)]
@@ -7251,7 +7296,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','migrateScreen','zsScr'];
+const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','migrateScreen','zsScr'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -10482,7 +10527,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 256;
+const APP_VERSION = 257;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11121,6 +11166,7 @@ async function backupManifest(bezSlicica){
     const used = new Set(['arhiva.json']);
     const fileEntries = [];
     const thumbTodo = [];
+    const origCheck = [];
     const docOut = docs.map(it=>{
       const rec = docRecord(it);
       rec.pages = rec.pages.map((p, i)=>{
@@ -11131,6 +11177,14 @@ async function backupManifest(bezSlicica){
         used.add(path.toLowerCase());
         fileEntries.push({it, i, path, file:p.file});
         const out = Object.assign({}, p, {path});
+        if(p.orig){   /* v257: original (pre sečenja) ide u kopiju kao „… (original).jpg“ — proverava se posle (origCheck) */
+          const ob = base + ' (original)', oe = (/^image\/png/i.test(p.orig.mime) ? 'png' : 'jpg');
+          let op = ob + '.' + oe, k2 = 2;
+          while(used.has(op.toLowerCase())){ op = ob + ' (' + k2 + ').' + oe; k2++; }
+          used.add(op.toLowerCase());
+          out.orig = Object.assign({}, p.orig, {path:op});
+          origCheck.push({out, fe:{it, i, path:op, file:p.orig.file, get:()=>Skladiste.fajl(p.orig.file)}});
+        }
         /* v157: sličica dokumenta koji nije slika ide u kopiju (ne može se ponovo napraviti);
            v170: i sličica slike — uvoz je samo preuzme umesto da je pravi ponovo (najsporiji deo uvoza) */
         if(p.thumb) thumbTodo.push(out);
@@ -11139,6 +11193,9 @@ async function backupManifest(bezSlicica){
       if(it.content) rec.text = it.content;
       return rec;
     });
+    for(const oc of origCheck){   /* original koga nema u ovoj Arhivi (npr. stigao sa drugog uređaja bez fajla) ne ide u kopiju */
+      if(await Skladiste.fajl(oc.fe.file).catch(()=>null)) fileEntries.push(oc.fe); else delete oc.out.orig;
+    }
     const thumbEntries = [];
     for(const pg of thumbTodo){
       if(bezSlicica){ pg.thumbPath = 'Sličice/' + pg.file + '.jpg'; thumbEntries.push({name:pg.thumbPath, file:pg.file}); continue; }
@@ -11163,7 +11220,7 @@ async function exportBackup(){
     const {manifest, docs, fileEntries, thumbEntries} = await backupManifest(false);
     const entries = [{name:'arhiva.json', blob:new Blob([JSON.stringify(manifest)], {type:'application/json'}), ts:Date.now()}];
     for(const fe of fileEntries){
-      entries.push({name:fe.path, blob:await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
+      entries.push({name:fe.path, blob:fe.get ? await fe.get() : await getFileBlob(fe.it, fe.i), ts:fe.it.ts});
     }
     thumbEntries.forEach(e=>entries.push({name:e.name, blob:e.blob, ts:e.ts}));
     /* v172: napredak u STAVKAMA (isti broj kao pri uvozu), ne u fajlovima ZIP-a (slika + sličica + spisak) */
@@ -11216,7 +11273,9 @@ async function mergeBackup(src, opts){
       if(!thumbBlob && d.kind === 'image'){
         try{ const r = await makeThumb(blob); thumbBlob = r.tblob; w = r.w; h = r.h; }catch(e){ console.error(e); }
       }
-      pages.push({blob, thumbBlob, w, h, file:fid});
+      let orig = null;
+      if(p.orig){ try{ const ob = await p.orig.get(); if(ob) orig = {blob:ob, mime:p.orig.mime, w:p.orig.w, h:p.orig.h}; }catch(e){ console.error(e); } }   /* v257: original nije obavezan */
+      pages.push({blob, thumbBlob, w, h, file:fid, orig});
     }
     return pages;
   };
@@ -11395,7 +11454,8 @@ function bkSource(liveAlbums, liveDocs, readFile, readThumb){
     derivedFrom:d.derivedFrom || null, sourceSig:d.sourceSig || null, text:d.text || null,
     sources:Array.isArray(d.sources) ? d.sources.filter(x=>typeof x === 'string') : null,
     files:(d.pages || []).map(p=>p && p.file || null),
-    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob:()=>readFile(p), getThumb: p.thumbPath ? ()=>readThumb(p) : null}))
+    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob:()=>readFile(p), getThumb: p.thumbPath ? ()=>readThumb(p) : null,
+      orig: (p.orig && p.orig.path) ? {mime:p.orig.mime, w:p.orig.w, h:p.orig.h, get:()=>readFile(p.orig)} : null}))   /* v257 */
   }));
   return {albums, docs, coverOf};
 }
@@ -11673,11 +11733,19 @@ async function pageThumbUrl(item, i){
 async function db2UpdatePages(item, newPages, name, detach, extra){
   const now = Date.now();
   const oldByFile = new Map(item.pages.map((p, i)=>[p.file, {p, i}]));
+  /* v257: {file} može biti i original neke stranice („Original“ ga vraća); orig = original uz novu (isečenu) stranicu;
+     drop = fajlovi koji se brišu trajno (međuverzija posle ponovnog sečenja, isečena slika posle vraćanja originala) */
+  const origByFile = new Map(); item.pages.forEach(p=>{ if(p.orig && p.orig.file) origByFile.set(p.orig.file, p.orig); });
   const meta = newPages.map(p=>{
-    if(p.file){ const o = oldByFile.get(p.file); return Object.assign({}, o ? o.p : {}, {file:p.file}); }
-    return {file:newFileId(), mime:(p.blob && p.blob.type) || 'image/jpeg', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob};
+    if(p.file){ const o = oldByFile.get(p.file); if(o) return Object.assign({}, o.p, {file:p.file});
+      const og = origByFile.get(p.file); return og ? Object.assign({}, og) : {file:p.file}; }
+    return Object.assign({file:newFileId(), mime:(p.blob && p.blob.type) || 'image/jpeg', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}, origRec(p.orig));
   });
+  const dropped = new Set(); newPages.forEach(p=>(p.drop || []).forEach(f=>{ if(f) dropped.add(f); }));
+  meta.forEach(p=>dropped.delete(p.file));
   const kept = new Set(meta.map(p=>p.file));
+  meta.forEach(p=>{ if(p.orig) kept.add(p.orig.file); });
+  dropped.forEach(f=>kept.add(f));
   const det = (detach || []).filter(d=>oldByFile.has(d.file) && !kept.has(d.file));
   const detSet = new Set(det.map(d=>d.file));
   item.pages.forEach((p, i)=>{
@@ -11699,6 +11767,7 @@ async function db2UpdatePages(item, newPages, name, detach, extra){
   });
   const upd = Object.assign({}, item, extra || {}, {pages:meta, name, updatedAt:now});
   await Skladiste.upisi({
+    brisi: {files:[...dropped], thumbs:[...dropped]},
     files: newPages.map((p, i)=>p.file ? null : {id:meta[i].file, doc:item.id, blob:p.blob}).filter(Boolean),
     thumbs: newPages.map((p, i)=>(!p.file && p.thumbBlob) ? {id:meta[i].file, blob:p.thumbBlob} : null).filter(Boolean),
     vlasnik: detItems.map(d=>({file:d.pages[0].file, doc:d.id})),
@@ -11737,7 +11806,7 @@ function openPageEditor(item){
     remind: (item && isYmd(item.validUntil)) ? (item.remind || null) : null};
   if(item){
     item.pages.forEach((p, i)=>{
-      const pg = {key: ++_edKey, file: p.file, url: '', w: p.w, h: p.h, pending: false, own: false};
+      const pg = {key: ++_edKey, file: p.file, url: '', w: p.w, h: p.h, pending: false, own: false, orig: p.orig || null};   /* v257: orig = original pre sečenja */
       ed.pages.push(pg);
       pageThumbUrl(item, i).then(u=>{ if(ed && ed.pages.includes(pg)){ pg.url = u; renderPageEditor(); } }).catch(()=>{});
     });
@@ -11868,7 +11937,7 @@ function pvUi(){
     if(had){ cnt.classList.remove('flash'); void cnt.offsetWidth; cnt.classList.add('flash'); }
   }
   document.getElementById('pvPrevLbl').textContent = t('pvPrev'); document.getElementById('pvNextLbl').textContent = t('pvNext');
-  document.getElementById('pvTo').textContent = t('pvTo'); document.getElementById('pvExtract').textContent = t('pvExtract'); document.getElementById('pvRemove').textContent = t('pvRemove');
+  document.getElementById('pvTo').textContent = t('pvTo'); document.getElementById('pvCrop').textContent = t('pvCrop'); document.getElementById('pvExtract').textContent = t('pvExtract'); document.getElementById('pvRemove').textContent = t('pvRemove');
   document.getElementById('pvPrev').classList.toggle('pv-off', i === 0);
   document.getElementById('pvNext').classList.toggle('pv-off', i >= n - 1);
   document.getElementById('pvTo').classList.toggle('pv-off', n < 3);
@@ -12192,7 +12261,7 @@ document.getElementById('pgSave').onclick = async ()=>{
     }else{
       const item = ed.item;
       const ext = (ed.extract || []).map(x=>({file:x.file, name:t('pgPartName', {name, n:x.n}), deleted:false}));
-      const det = await db2UpdatePages(item, ed.pages.map(p=>p.file ? {file:p.file} : {blob:p.blob, thumbBlob:p.thumbBlob, w:p.w, h:p.h}), (name === item.name ? name : uniqueItemName(name, item.id)), ext, {validUntil: ed.validUntil || null, validNote: ed.validUntil ? (ed.validNote || null) : null, remind: ed.validUntil ? (ed.remind || null) : null});
+      const det = await db2UpdatePages(item, ed.pages.map(p=>p.file ? {file:p.file, drop:p.drop} : {blob:p.blob, thumbBlob:p.thumbBlob, w:p.w, h:p.h, orig:p.orig, drop:p.drop}), (name === item.name ? name : uniqueItemName(name, item.id)), ext, {validUntil: ed.validUntil || null, validNote: ed.validUntil ? (ed.validNote || null) : null, remind: ed.validUntil ? (ed.remind || null) : null});
       markExpSeen(item);
       ed.dirty = false;
       requestClose();
@@ -12208,6 +12277,260 @@ document.getElementById('pgSave').onclick = async ()=>{
   }
 };
 /* Ako je pregled otvoren na izmenjenom dokumentu: prikaži ga ponovo (isti broj stranice ako postoji) */
+/* =====================================================================
+   v257: OKRENI I ISECI — četiri ugla na ivice papira → ispravljen pravougaonik (perspektiva); okretanje za 90°.
+   Original se čuva uz stranicu (page.orig, ide i u kopiju i na Drive); „Original“ ga vraća.
+   ===================================================================== */
+const cropScr = document.getElementById('cropScr'), ceStage = document.getElementById('ceStage');
+const ceCv = document.getElementById('ceCv'), cePoly = document.getElementById('cePoly');
+const ceHs = [...cropScr.querySelectorAll('.ce-h')];
+let _ce = null;
+const ceFull = ()=>[[0,0],[1,0],[1,1],[0,1]];
+function ceIsFull(q){ const f = ceFull(); return q.every((p, i)=>Math.abs(p[0] - f[i][0]) < 0.002 && Math.abs(p[1] - f[i][1]) < 0.002); }
+function ceConvex(q){
+  let sg = 0;
+  for(let i=0;i<4;i++){
+    const a = q[i], b = q[(i + 1) % 4], c = q[(i + 2) % 4];
+    const z = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+    if(Math.abs(z) < 1e-6) return false;
+    if(!sg) sg = Math.sign(z); else if(Math.sign(z) !== sg) return false;
+  }
+  return true;
+}
+async function ceOpen(opt){
+  let bmp;
+  try{ bmp = await createImageBitmap(opt.blob); }catch(e){ console.error(e); toast(t('ceErr')); return; }
+  _ce = {opt, bmp, rot:0, q:ceFull(), fromOrig:false, busy:false};
+  document.getElementById('ceTitle').textContent = t('ceTitle');
+  document.getElementById('ceCancel').textContent = t('ceCancel');
+  document.getElementById('ceHint').textContent = t('ceHint');
+  document.getElementById('ceLeftL').textContent = t('ceLeft');
+  document.getElementById('ceRightL').textContent = t('ceRight');
+  document.getElementById('ceOrigL').textContent = t('ceOrig');
+  document.getElementById('ceSaveL').textContent = t('ceSave');
+  document.getElementById('ceOrig').hidden = !opt.origGet;
+  if(_note) hideNote();
+  cropScr.classList.add('open');
+  pushBack(ceClose);
+  requestAnimationFrame(ceDraw);
+}
+function ceClose(){
+  cropScr.classList.remove('open');
+  if(_ce && _ce.bmp && _ce.bmp.close) _ce.bmp.close();
+  _ce = null;
+}
+function ceDims(){ const b = _ce.bmp; return _ce.rot % 180 ? [b.height, b.width] : [b.width, b.height]; }
+function ceDrawRot(ctx, W, H){
+  const r = _ce.rot % 180, dw = r ? H : W, dh = r ? W : H;
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(_ce.rot * Math.PI / 180);
+  ctx.drawImage(_ce.bmp, -dw / 2, -dh / 2, dw, dh); ctx.restore();
+}
+function ceDraw(){
+  if(!_ce) return;
+  const sw = ceStage.clientWidth, sh = ceStage.clientHeight, M = 26;
+  const [w, h] = ceDims();
+  const k = Math.min((sw - 2 * M) / w, (sh - 2 * M) / h);
+  const W = Math.max(1, Math.round(w * k)), H = Math.max(1, Math.round(h * k));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  ceCv.width = Math.round(W * dpr); ceCv.height = Math.round(H * dpr);
+  ceCv.style.width = W + 'px'; ceCv.style.height = H + 'px';
+  const x0 = Math.round((sw - W) / 2), y0 = Math.round((sh - H) / 2);
+  ceCv.style.left = x0 + 'px'; ceCv.style.top = y0 + 'px';
+  const ctx = ceCv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); ceDrawRot(ctx, W, H);
+  _ce.box = {x0, y0, W, H};
+  ceOverlay();
+}
+function ceOverlay(){
+  const {x0, y0, W, H} = _ce.box;
+  const pts = _ce.q.map(p=>[x0 + p[0] * W, y0 + p[1] * H]);
+  cePoly.setAttribute('points', pts.map(p=>p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '));
+  ceHs.forEach((h, i)=>{ h.style.left = pts[i][0] + 'px'; h.style.top = pts[i][1] + 'px'; });
+}
+ceHs.forEach((h, k)=>{
+  h.addEventListener('pointerdown', e=>{
+    if(!_ce || !_ce.box) return;
+    e.preventDefault();
+    const r = ceStage.getBoundingClientRect(), b = _ce.box;
+    _ce.drag = {k, dx:e.clientX - (r.left + b.x0 + _ce.q[k][0] * b.W), dy:e.clientY - (r.top + b.y0 + _ce.q[k][1] * b.H)};
+    try{ h.setPointerCapture(e.pointerId); }catch(er){}
+    h.classList.add('on');
+  });
+  h.addEventListener('pointermove', e=>{
+    if(!_ce || !_ce.drag || _ce.drag.k !== k) return;
+    const r = ceStage.getBoundingClientRect(), b = _ce.box;
+    _ce.q[k] = [Math.max(0, Math.min(1, (e.clientX - _ce.drag.dx - r.left - b.x0) / b.W)), Math.max(0, Math.min(1, (e.clientY - _ce.drag.dy - r.top - b.y0) / b.H))];
+    ceOverlay();
+  });
+  const up = ()=>{ if(_ce) _ce.drag = null; h.classList.remove('on'); };
+  h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+});
+/* okretanje: uglovi idu zajedno sa slikom (gornji levi ostaje gornji levi) */
+function ceRot(dir){
+  if(!_ce || _ce.busy) return;
+  const q = _ce.q;
+  if(dir > 0){ _ce.rot = (_ce.rot + 90) % 360; _ce.q = [q[3], q[0], q[1], q[2]].map(([x, y])=>[1 - y, x]); }
+  else{ _ce.rot = (_ce.rot + 270) % 360; _ce.q = [q[1], q[2], q[3], q[0]].map(([x, y])=>[y, 1 - x]); }
+  ceDraw();
+}
+document.getElementById('ceLeft').onclick = ()=>ceRot(-1);
+document.getElementById('ceRight').onclick = ()=>ceRot(1);
+document.getElementById('ceCancel').onclick = ()=>requestClose();
+document.getElementById('ceOrig').onclick = async ()=>{
+  if(!_ce || _ce.busy || !_ce.opt.origGet) return;
+  try{
+    const b = await _ce.opt.origGet();
+    const bmp = await createImageBitmap(b);
+    if(!_ce){ bmp.close(); return; }
+    if(_ce.bmp.close) _ce.bmp.close();
+    Object.assign(_ce, {bmp, rot:0, q:ceFull(), fromOrig:true});
+    document.getElementById('ceOrig').hidden = true;
+    document.getElementById('ceHint').textContent = t('ceHintOrig');
+    ceDraw();
+  }catch(e){ console.error(e); toast(t('ceErr')); }
+};
+/* homografija: (u,v) na izlazu → (x,y) na slici; 4 para tačaka, 8 nepoznatih (Gausova eliminacija) */
+function ceHomog(dst, src){
+  const A = [], B = [];
+  for(let i=0;i<4;i++){
+    const [u, v] = dst[i], [x, y] = src[i];
+    A.push([u, v, 1, 0, 0, 0, -u * x, -v * x]); B.push(x);
+    A.push([0, 0, 0, u, v, 1, -u * y, -v * y]); B.push(y);
+  }
+  for(let c=0;c<8;c++){
+    let p = c; for(let r=c+1;r<8;r++) if(Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]]; [B[c], B[p]] = [B[p], B[c]];
+    for(let r=0;r<8;r++){ if(r === c) continue; const f = A[r][c] / A[c][c]; for(let k=c;k<8;k++) A[r][k] -= f * A[c][k]; B[r] -= f * B[c]; }
+  }
+  return B.map((b, i)=>b / A[i][i]);
+}
+async function ceRender(c){
+  const [w, h] = ceDims();
+  const src = document.createElement('canvas'); src.width = w; src.height = h;
+  ceDrawRot(src.getContext('2d'), w, h);
+  const Q = c.q.map(([x, y])=>[x * w, y * h]);
+  const dist = (a, b)=>Math.hypot(a[0] - b[0], a[1] - b[1]);
+  let out;
+  const axis = Math.abs(Q[0][1] - Q[1][1]) < 1 && Math.abs(Q[3][1] - Q[2][1]) < 1 && Math.abs(Q[0][0] - Q[3][0]) < 1 && Math.abs(Q[1][0] - Q[2][0]) < 1;
+  if(axis){   /* obično sečenje: bez preračunavanja tačaka */
+    const x = Math.round(Q[0][0]), y = Math.round(Q[0][1]);
+    const ow = Math.max(1, Math.round(Q[1][0]) - x), oh = Math.max(1, Math.round(Q[3][1]) - y);
+    out = document.createElement('canvas'); out.width = ow; out.height = oh;
+    out.getContext('2d').drawImage(src, x, y, ow, oh, 0, 0, ow, oh);
+  }else{
+    let ow = Math.max(dist(Q[0], Q[1]), dist(Q[3], Q[2])), oh = Math.max(dist(Q[0], Q[3]), dist(Q[1], Q[2]));
+    const cap = Math.min(1, IMG_MAX_DIM / Math.max(ow, oh));
+    ow = Math.max(1, Math.round(ow * cap)); oh = Math.max(1, Math.round(oh * cap));
+    const m = ceHomog([[0, 0], [ow, 0], [ow, oh], [0, oh]], Q);
+    const sd = src.getContext('2d').getImageData(0, 0, w, h).data;
+    out = document.createElement('canvas'); out.width = ow; out.height = oh;
+    const octx = out.getContext('2d'), od = octx.createImageData(ow, oh), o = od.data;
+    let j = 0;
+    for(let v=0; v<oh; v++){
+      const vv = v + 0.5;
+      for(let u=0; u<ow; u++, j += 4){
+        const uu = u + 0.5, d = m[6] * uu + m[7] * vv + 1;
+        let x = (m[0] * uu + m[1] * vv + m[2]) / d - 0.5, y = (m[3] * uu + m[4] * vv + m[5]) / d - 0.5;
+        x = x < 0 ? 0 : x > w - 1 ? w - 1 : x; y = y < 0 ? 0 : y > h - 1 ? h - 1 : y;
+        const x0 = x | 0, y0 = y | 0, x1 = x0 + 1 < w ? x0 + 1 : x0, y1 = y0 + 1 < h ? y0 + 1 : y0, fx = x - x0, fy = y - y0;
+        const i00 = (y0 * w + x0) * 4, i10 = (y0 * w + x1) * 4, i01 = (y1 * w + x0) * 4, i11 = (y1 * w + x1) * 4;
+        for(let ch=0; ch<3; ch++){
+          const a = sd[i00 + ch] + (sd[i10 + ch] - sd[i00 + ch]) * fx, b = sd[i01 + ch] + (sd[i11 + ch] - sd[i01 + ch]) * fx;
+          o[j + ch] = a + (b - a) * fy;
+        }
+        o[j + 3] = 255;
+      }
+    }
+    octx.putImageData(od, 0, 0);
+  }
+  src.width = 0;
+  const blob = await canvasToBlob(out, IMG_QUALITY);
+  const r = {blob, w:out.width, h:out.height};
+  out.width = 0;
+  return r;
+}
+document.getElementById('ceSave').onclick = async ()=>{
+  const c = _ce;
+  if(!c || c.busy) return;
+  const same = ceIsFull(c.q) && c.rot === 0;
+  if(same && !c.fromOrig){ requestClose(); return; }
+  if(!same && !ceConvex(c.q)){ toast(t('ceBad')); return; }
+  c.busy = true;
+  toastPersist(t('ceWork'));
+  try{
+    await new Promise(r=>setTimeout(r, 40));   /* da se poruka „radim“ prikaže pre računanja */
+    if(same){ await c.opt.onSave({restore:true}); }
+    else{
+      const r = await ceRender(c);
+      const th = await makeThumb(r.blob);
+      await c.opt.onSave({blob:r.blob, thumbBlob:th.tblob, w:r.w, h:r.h, fromOrig:c.fromOrig});
+    }
+    toastHide();
+    if(_ce === c) requestClose();
+    toast(same ? t('ceRestored') : t('ceSaved'));
+  }catch(e){ console.error(e); toastHide(); toast(t('ceErr')); }
+  finally{ c.busy = false; }
+};
+window.addEventListener('resize', ()=>{ if(_ce) ceDraw(); });
+/* stranica sačuvane stavke (pregled): nova slika ili vraćen original — jedna transakcija (db2UpdatePages) */
+async function cePageSave(it, pi, r){
+  const cur = it.pages[pi];
+  const np = it.pages.map(p=>({file:p.file}));
+  if(r.restore) np[pi] = {file:cur.orig.file, drop:[cur.file]};
+  else np[pi] = {blob:r.blob, thumbBlob:r.thumbBlob, w:r.w, h:r.h, orig:cur.orig || cur, drop:cur.orig ? [cur.file] : []};
+  await db2UpdatePages(it, np, it.name, [], null);
+  if(_fullUrls.has(cur.file)){ try{ URL.revokeObjectURL(_fullUrls.get(cur.file)); }catch(e){} _fullUrls.delete(cur.file); }
+  render();
+  refreshModalAfterEdit(it);
+}
+async function ceOrigGetter(page){
+  if(!page || !page.orig || !page.orig.file) return null;
+  const b = await Skladiste.fajl(page.orig.file).catch(()=>null);
+  return b ? ()=>Promise.resolve(b) : null;
+}
+document.getElementById('modalCrop').setAttribute('aria-label', t('ceTitle'));
+document.getElementById('modalCrop').onclick = async (e)=>{
+  e.stopPropagation();
+  const it = items.find(i=>i.id === modalItemId);
+  if(!it || it.type !== 'image') return;
+  const pi = modalPage, pg = it.pages[pi];
+  try{
+    const blob = await getFileBlob(it, pi);
+    ceOpen({blob, origGet:await ceOrigGetter(pg), onSave:(r)=>cePageSave(it, pi, r)});
+  }catch(er){ console.error(er); toast(t('ceErr')); }
+};
+/* stranica u „Uredi stranice“: menja se tek kad se sačuva dokument (kao i ostale izmene stranica) */
+document.getElementById('pvCrop').onclick = async ()=>{
+  if(!pv || pv.mode !== 'edit' || !ed) return;
+  const pg = ed.pages[pv.idx];
+  if(!pg) return;
+  try{
+    const blob = pg.file ? await Skladiste.fajl(pg.file) : pg.blob;
+    const og = pg.orig ? await Skladiste.fajl(pg.orig.file).catch(()=>null) : null;
+    ceOpen({blob, origGet: og ? ()=>Promise.resolve(og) : null, onSave: async (r)=>{
+      if(pg.own && pg.url){ try{ URL.revokeObjectURL(pg.url); }catch(er){} }
+      if(r.restore){
+        if(pg.file && pg.file !== pg.orig.file) pg.drop = (pg.drop || []).concat([pg.file]);
+        Object.assign(pg, {file:pg.orig.file, blob:null, thumbBlob:null, w:pg.orig.w, h:pg.orig.h, orig:null, own:false, url:''});
+        (async ()=>{
+          let tb = await Skladiste.slicica(pg.file).catch(()=>null);
+          if(!tb){ const fb = await Skladiste.fajl(pg.file); tb = fb ? (await makeThumb(fb)).tblob : null; }
+          if(tb && ed && ed.pages.includes(pg) && !pg.url){ pg.url = URL.createObjectURL(tb); pg.own = true; renderPageEditor(); }
+        })().catch(e=>console.error(e));
+      }else{
+        if(pg.file){
+          if(pg.orig) pg.drop = (pg.drop || []).concat([pg.file]);
+          else{ const rec = ed.item && ed.item.pages.find(x=>x.file === pg.file); pg.orig = rec ? {file:rec.file, mime:rec.mime, size:rec.size, w:rec.w, h:rec.h, thumb:!!rec.thumb} : null; }
+        }
+        Object.assign(pg, {file:null, blob:r.blob, thumbBlob:r.thumbBlob, w:r.w, h:r.h, own:true, url:URL.createObjectURL(r.thumbBlob)});
+      }
+      ed.dirty = true;
+      renderPageEditor();
+      if(pv) pvShow();
+    }});
+  }catch(er){ console.error(er); toast(t('ceErr')); }
+};
+
 function refreshModalAfterEdit(item){
   if(!modalBg.classList.contains('open')) return;
   const cur = items.find(i=>i.id === modalItemId);
@@ -20870,7 +21193,7 @@ function drDriveBytes(){ let b = 0; Object.values(_dr.files).forEach(f=>{ b += f
 /* fajlovi koji još postoje u Arhivi (i u njenoj korpi) — samo oni koji nisu tu idu u Drive korpu */
 function drKeepSet(){
   const s = new Set();
-  [items, trash].forEach(a=>(a || []).forEach(it=>(it.pages || []).forEach(p=>{ if(p.file){ s.add(p.file); s.add('t:' + p.file); } })));
+  [items, trash].forEach(a=>(a || []).forEach(it=>(it.pages || []).forEach(p=>{ if(p.file){ s.add(p.file); s.add('t:' + p.file); } if(p.orig && p.orig.file) s.add(p.orig.file); })));
   return s;
 }
 
@@ -21111,7 +21434,7 @@ async function drApply(st){
     live.forEach(d=>{
       const l = L.get(d.id), lp = l && l.it && l.it.pages;
       if(lp && lp.length === d.pages.length && d.pages.every((p, i)=>p && lp[i].file === p.file)) return;   /* isti fajlovi: samo podaci */
-      d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); } });
+      d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); if(p.orig && p.orig.path) need.push(p.orig.file); } });
     });
     if(need.some(k=>!_dr.files[k]) && Date.now() - _drRebAt > 120000){ _drRebAt = Date.now(); await drRebuild(); }
     const pf = drPrefetch(need), big = need.length > 6;
@@ -21189,7 +21512,7 @@ function drProtected(localTs){
   const p = new Set();
   all.forEach(r=>{
     if(r.purged || (r.updatedAt || 0) < (max.get(r.id) || 0) || !Array.isArray(r.pages)) return;
-    r.pages.forEach(pg=>{ if(pg && pg.file){ p.add(pg.file); p.add('t:' + pg.file); } });
+    r.pages.forEach(pg=>{ if(pg && pg.file){ p.add(pg.file); p.add('t:' + pg.file); if(pg.orig && pg.orig.file) p.add(pg.orig.file); } });
   });
   return p;
 }
@@ -21285,7 +21608,7 @@ function drSoon(ms){
 }
 async function drPlan(){
   const b = await backupManifest(true);
-  const entries = b.fileEntries.map(fe=>({k:fe.file, path:fe.path, blob:()=>getFileBlob(fe.it, fe.i).catch(()=>null)}))
+  const entries = b.fileEntries.map(fe=>({k:fe.file, path:fe.path, blob:()=>(fe.get ? fe.get() : getFileBlob(fe.it, fe.i)).catch(()=>null)}))
     .concat(b.thumbEntries.map(te=>({k:'t:' + te.file, path:te.name, blob:()=>Skladiste.slicica(te.file).catch(()=>null)})));
   return {manifest:b.manifest, entries};
 }
@@ -21438,7 +21761,7 @@ async function drPull(data, live, albums){
   const need = [];
   live.forEach(d=>{
     if(items.some(i=>i.id === d.id) || trash.some(i=>i.id === d.id && i.pages && i.pages.length)) return;   /* već je tu: ne preuzima se */
-    d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); } });
+    d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); if(p.orig && p.orig.path) need.push(p.orig.file); } });
   });
   const pf = drPrefetch(need);
   const prog = (n, total)=>{ _drPull = {n, total}; toastPersist(t('drPullRun', {n, total}), {n, total}); drRefresh(); };
