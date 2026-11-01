@@ -1601,6 +1601,18 @@ button.trash-name{ display:block; width:100%; text-align:left; border:none; back
 .ai-spin{ width:34px; height:34px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--brass); animation:aiSpin .9s linear infinite; margin-bottom:14px; }
 @keyframes aiSpin{ to{ transform:rotate(360deg); } }
 .ai-wait-t{ font-size:15.5px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.ai-wait-bar{ position:relative; width:min(260px, 80%); height:5px; border-radius:3px; margin:14px 0 6px; overflow:hidden;
+  background:color-mix(in srgb, var(--brass) 20%, transparent); }   /* v255 */
+.ai-wait-bar i{ position:absolute; top:0; bottom:0; width:35%; border-radius:3px; background:var(--brass); animation:noteInd 1.3s ease-in-out infinite; }
+.ai-wait-sec{ font-family:var(--font-num); font-size:13px; color:var(--ink-dim); margin-bottom:8px; }
+.ws-steps{ display:flex; flex-direction:column; gap:7px; margin:12px 0 0; text-align:left; font-size:14.5px; }
+.ws-step{ display:flex; align-items:center; gap:9px; color:var(--ink-dim); opacity:.55; }
+.ws-step b{ flex:none; width:18px; height:18px; box-sizing:border-box; border-radius:50%; border:2px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1; }
+.ws-step.cur{ color:var(--brass); opacity:1; font-weight:700; }
+.ws-step.cur b{ background:currentColor; animation:wsPulse 1.1s ease-in-out infinite alternate; }
+.ws-step.done{ color:var(--ink); opacity:1; }
+.ws-step.done b{ background:var(--brass); border-color:var(--brass); color:var(--bg, #000); }
+@keyframes wsPulse{ from{ opacity:1; } to{ opacity:.35; } }
 .ai-wait-s{ font-size:12.5px; color:var(--ink-dim); line-height:1.5; overflow-wrap:anywhere; }
 .ai-row{ border:1px solid var(--line); border-radius:12px; background:var(--surface-2); margin:0 0 10px; overflow:hidden; }
 .ai-row.on{ border-color:var(--brass-soft); }
@@ -2360,6 +2372,13 @@ header .icon-btn svg{ width:24px; height:24px; }
   border:1.5px solid color-mix(in srgb, var(--brass) 55%, transparent); }
 .note-bar svg{ width:40px; height:40px; padding:7px; box-sizing:border-box; border:2px solid currentColor; border-radius:50%; }
 .note-bar.warn span{ font-size:17px; -webkit-line-clamp:3; }
+/* v255: poruka dok Arhiva radi — kružić umesto kvačice + traka (puni se kad se zna koliko je urađeno, inače klizi) */
+.note-bar.is-prog{ position:relative; }
+.note-spin{ flex:none; width:40px; height:40px; box-sizing:border-box; border-radius:50%; border:3px solid color-mix(in srgb, var(--brass) 25%, transparent); border-top-color:var(--brass); animation:aiSpin .9s linear infinite; }
+.note-prog{ position:absolute; left:14px; right:14px; bottom:9px; height:5px; border-radius:3px; background:color-mix(in srgb, var(--brass) 20%, transparent); overflow:hidden; }
+.note-prog i{ position:absolute; top:0; bottom:0; left:0; border-radius:3px; background:var(--brass); transition:width .3s; }
+.note-prog.ind i{ width:35%; animation:noteInd 1.3s ease-in-out infinite; }
+@keyframes noteInd{ 0%{ left:-35%; } 100%{ left:100%; } }
 /* v110: sve poruke na vrhu; „!“ za poruke koje nisu potvrda; dugme „Vrati“ / „Podeli“ desno */
 .note-bar.warn svg{ color:var(--ink-dim); }
 /* v153: „NIJE SAČUVANO!“ — jedina zaista crvena poruka; ceo tekst staje (do 3 reda) */
@@ -3586,7 +3605,7 @@ async function backfillContent(){
   render();
   const targets = items.filter(i=>(i.type==='pdf' || i.type==='doc') && !i.content);
   if(targets.length === 0) return;
-  toastPersist('Priprema detaljne pretrage: 0 / ' + targets.length + '...');
+  toastPersist('Priprema detaljne pretrage: 0 / ' + targets.length + '...', {n:0, total:targets.length});
   let done = 0;
   for(const it of targets){
     const content = await extractContentForItem(it);
@@ -3594,7 +3613,7 @@ async function backfillContent(){
       await saveDocText(it, normalizeSr(content)).catch(e=>console.error(e));
     }
     done++;
-    toastPersist('Priprema detaljne pretrage: ' + done + ' / ' + targets.length + '...');
+    toastPersist('Priprema detaljne pretrage: ' + done + ' / ' + targets.length + '...', {n:done, total:targets.length});
   }
   toastHide();
   render();
@@ -3838,7 +3857,7 @@ const I18N = {
     wsOrigMore: 'Prikazano je prvih {n} od {total} stranica.',
     wsOrigNoText: 'Iz ovog fajla nije izvučen tekst.',
     wsBusy: 'Šaljem: {task}',
-    wsTplProg: 'Čitam deo {i} od {n}…',
+    wsTplProg: 'Čitam deo {i} od {n}…', wsStPrep: 'Priprema dokumenta', wsStAi: 'AI radi', aiSec: 'Proteklo: {s} s',
     wsScanProg: 'Prepisujem stranicu {i} od {n}…',
     wsTplChgAdd: 'Nova polja: {x}.',
     wsTplChgRem: 'Vraćeno u tekst: {x}.',
@@ -4647,7 +4666,7 @@ const I18N = {
     wsOrigMore: 'Showing the first {n} of {total} pages.',
     wsOrigNoText: 'No text could be taken from this file.',
     wsBusy: 'Sending: {task}',
-    wsTplProg: 'Reading part {i} of {n}…',
+    wsTplProg: 'Reading part {i} of {n}…', wsStPrep: 'Preparing the document', wsStAi: 'AI is working', aiSec: 'Elapsed: {s} s',
     wsScanProg: 'Transcribing page {i} of {n}…',
     wsTplChgAdd: 'New fields: {x}.',
     wsTplChgRem: 'Back in the text: {x}.',
@@ -5230,7 +5249,7 @@ Object.assign(I18N.sr, {
   trMoved1: 'Premešteno u korpu.', trMovedN: 'U korpu premešteno: {n}.', addToAlb: 'Dodaj u album', newAlbRow: '+ Novi album...', rmFromAlb: 'Uklonjeno iz albuma.',
   shareNo: 'Deljenje nije podržano u ovom browseru.', shareFail: 'Deljenje nije uspelo.', savedPhone1: 'Sačuvano na telefon.', savedPhoneN: 'Sačuvano na telefon: {n}.', savedPhonePart: 'Sačuvano na telefon: {a} od {b}.', savedPhoneNone: 'Nije sačuvano.', saveFailed: 'Čuvanje nije uspelo:',
   albDup: 'Album s tim imenom već postoji.', subExists: 'Podalbum "{name}" već postoji.', albExists: 'Album "{name}" već postoji.', albMade: 'Album "{name}" napravljen.',
-  procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addedN: 'Dodato stavki: {n}.',
+  procN: 'Obrađujem {a} / {b}...', added1: 'Dodato 1 stavka.', addingOne: 'Dodajem: {name}', addedN: 'Dodato stavki: {n}.',
   rcvOne: 'Sačuvano: {name}', rcvN: 'Sačuvano stavki: {n}.', rcvErr: 'Neke fajlove nije bilo moguće preuzeti ({n}).'
 });
 Object.assign(I18N.en, {
@@ -5263,7 +5282,7 @@ Object.assign(I18N.en, {
   trMoved1: 'Moved to trash.', trMovedN: 'Moved to trash: {n}.', addToAlb: 'Add to album', newAlbRow: '+ New album...', rmFromAlb: 'Removed from album.',
   shareNo: 'Sharing is not supported in this browser.', shareFail: 'Sharing failed.', savedPhone1: 'Saved to phone.', savedPhoneN: 'Saved to phone: {n}.', savedPhonePart: 'Saved to phone: {a} of {b}.', savedPhoneNone: 'Not saved.', saveFailed: 'Saving failed:',
   albDup: 'An album with this name already exists.', subExists: 'Sub-album “{name}” already exists.', albExists: 'Album “{name}” already exists.', albMade: 'Album “{name}” created.',
-  procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addedN: 'Items added: {n}.',
+  procN: 'Processing {a} / {b}...', added1: 'Added 1 item.', addingOne: 'Adding: {name}', addedN: 'Items added: {n}.',
   rcvOne: 'Saved: {name}', rcvN: 'Items saved: {n}.', rcvErr: 'Some files could not be received ({n}).'
 });
 /* v186: preostali tekstovi (dugmad gore, poruke) */
@@ -6659,7 +6678,7 @@ async function legacyExportBackup(){
         parts.push((first ? '' : ',') + JSON.stringify(it));
         first = false;
       }
-      if(n % 5 === 0) toastPersist(t('bkBuilding', {n, total:keys.length}));
+      if(n % 5 === 0) toastPersist(t('bkBuilding', {n, total:keys.length}), {n, total:keys.length});
     }
     parts.push('],"settings":'+JSON.stringify({theme:getTheme(), lang:appLang()})+'}');
     const blob = new Blob(parts, {type:'application/json'});
@@ -7260,7 +7279,7 @@ function saveFailOn(){ return !!(_note && _note.saveFail && Date.now() < _note.u
 function showNote(text, ms, opt){
   opt = opt || {};
   if(!opt.saveFail && saveFailOn()) return;
-  _note = {text, sticky:!!opt.sticky, action:opt.action || null, warn: opt.warn != null ? opt.warn : noteIsWarn(String(text)),
+  _note = {text, sticky:!!opt.sticky, prog:opt.prog || null, action:opt.action || null, warn: opt.warn != null ? opt.warn : (opt.sticky ? false : noteIsWarn(String(text))),
     saveFail:!!opt.saveFail, until:opt.saveFail ? Date.now() + (ms || 4000) - 100 : 0};
   clearTimeout(_noteTimer);
   _noteHideWait = false;
@@ -7275,12 +7294,14 @@ function hideNote(){
 }
 function buildNoteBar(){
   const el = document.createElement('div');
-  el.className = 'note-bar' + (_note.warn ? ' warn' : '') + (_note.saveFail ? ' save-fail' : ''); el.setAttribute('role', 'status');
-  el.innerHTML = (_note.warn
+  const prog = _note.sticky && !_note.warn && !_note.saveFail;   /* v255: dok Arhiva radi — kružić i traka, ne kvačica */
+  el.className = 'note-bar' + (_note.warn ? ' warn' : '') + (_note.saveFail ? ' save-fail' : '') + (prog ? ' is-prog' : ''); el.setAttribute('role', 'status');
+  el.innerHTML = prog ? '<i class="note-spin"></i><span></span><div class="note-prog"><i></i></div>' : (_note.warn
     ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="6.5" x2="12" y2="13.5"></line><line x1="12" y1="17.5" x2="12.01" y2="17.5"></line></svg>'
     : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>')
     + '<span></span>';
   el.querySelector('span').textContent = _note.text;
+  if(prog) noteProgSet(el);
   if(_note.action){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'note-act'; b.textContent = _note.action.label;
@@ -7293,9 +7314,21 @@ function buildNoteBar(){
 /* Gde se obaveštenje vidi: na početnom ekranu i u albumu na mestu putanje (#pathZone);
    u pregledu na mestu putanje pregleda; u ostalim prozorima na vrhu prozora, a prozor se spusti za jedan red. */
 let _noteShown = null;
+function noteProgSet(el){
+  const box = el.querySelector('.note-prog'), p = _note && _note.prog;
+  if(!box) return;
+  const known = !!(p && p.total > 0);
+  box.classList.toggle('ind', !known);
+  box.firstChild.style.width = known ? Math.max(3, Math.min(100, p.n / p.total * 100)) + '%' : '';
+}
 function applyNote(force){
   const host = _note ? noteHost() : null;
   const key = _note ? (host ? host.id : '#path') + '|' + _note.text + '|' + _note.warn + '|' + (_note.action ? _note.action.label : '') : '';
+  /* v255: poruka o radu se menja na mestu (samo tekst i traka), da se kružić i traka ne pokreću ispočetka */
+  if(_note && _note.sticky && !_note.warn && !_note.saveFail){
+    const cur = (host ? noteTop : pathZone).querySelector('.note-bar.is-prog');
+    if(cur && cur._host === (host ? host.id : '#path')){ cur.querySelector('span').textContent = _note.text; noteProgSet(cur); _noteShown = key; return; }
+  }
   if(!force && key === _noteShown && (!_note || host || pathZone.querySelector('.note-bar'))) return;
   _noteShown = key;
   const old = pathZone.querySelector('.note-bar'); if(old) old.remove();
@@ -7305,6 +7338,7 @@ function applyNote(force){
   document.querySelectorAll('.note-pad').forEach(el=>el.classList.remove('note-pad'));
   if(!_note) return;
   const bar = buildNoteBar();
+  bar._host = host ? host.id : '#path';
   if(!host){ pathZone.appendChild(bar); pathZone.classList.add('noting'); return; }
   noteTop.appendChild(bar);
   noteTop.classList.add('on');
@@ -9491,16 +9525,22 @@ function folderUpdateState(){
 newFolderInput.addEventListener('input', folderUpdateState);
 newFolderSheet.onclick = (e)=>{ if(e.target === newFolderSheet){ requestClose(); } };
 
-function toastPersist(msg){ showNote(msg, 0, {sticky:true}); }
+function toastPersist(msg, prog){ showNote(msg, 0, {sticky:true, prog:prog || null}); }   /* v255: prog = {n, total} → traka se puni; bez toga klizi */
 function toastHide(){ if(_note && _note.sticky) hideNote(); }
 async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = sopstvena poruka na kraju (Podeli → Arhiva) */
   if(files.length === 0) return;
-  if(files.length === 1){ if(await addFile(files[0], category)) toast(msg ? msg(1) : t('added1')); return; }   /* v250: i za jedan fajl (Zoran 31.10.) */
+  if(files.length === 1){   /* v250: i za jedan fajl (Zoran 31.10.); v255: dok traje — „Dodajem: ime“ sa trakom */
+    toastPersist(t('addingOne', {name:files[0].name}));
+    const ok = await addFile(files[0], category);
+    toastHide();
+    if(ok) toast(msg ? msg(1) : t('added1'));
+    return;
+  }
   const total = files.length;
   let completed = 0;
   _diag = { worker: 0, fallback: 0, errors: [] };
   const t0 = performance.now();
-  toastPersist(t('procN', {a:0, b:total}));
+  toastPersist(t('procN', {a:0, b:total}), {n:0, total});
   const CONCURRENCY = 3;
   let nextIndex = 0;
   const lane = async ()=>{
@@ -9508,7 +9548,7 @@ async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = s
       const idx = nextIndex++;
       await addFile(files[idx], category);
       completed++;
-      toastPersist(t('procN', {a:completed, b:total}));
+      toastPersist(t('procN', {a:completed, b:total}), {n:completed, total});
     }
   };
   const lanes = [];
@@ -10442,7 +10482,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 254;
+const APP_VERSION = 255;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11119,7 +11159,7 @@ async function exportBackup(){
   _backupBusy = true;
   const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
   try{
-    toastPersist(t('bkBuilding', {n:0, total:items.length}));
+    toastPersist(t('bkBuilding', {n:0, total:items.length}), {n:0, total:items.length});
     const {manifest, docs, fileEntries, thumbEntries} = await backupManifest(false);
     const entries = [{name:'arhiva.json', blob:new Blob([JSON.stringify(manifest)], {type:'application/json'}), ts:Date.now()}];
     for(const fe of fileEntries){
@@ -11127,7 +11167,7 @@ async function exportBackup(){
     }
     thumbEntries.forEach(e=>entries.push({name:e.name, blob:e.blob, ts:e.ts}));
     /* v172: napredak u STAVKAMA (isti broj kao pri uvozu), ne u fajlovima ZIP-a (slika + sličica + spisak) */
-    const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n:Math.round(n / total * docs.length), total:docs.length})); });
+    const zip = await zipBuild(entries, (n, total)=>{ if(n % 3 === 0 || n === total) toastPersist(t('bkBuilding', {n:Math.round(n / total * docs.length), total:docs.length}), {n, total}); });
     const msg = await saveBackupFile(zip, backupFileName('zip'), dirOk);
     toastHide();
     toast(msg);
@@ -11218,7 +11258,7 @@ async function mergeBackup(src, opts){
   let added = 0, updated = 0, skipped = 0, n = 0, bad = 0;
   for(const d of src.docs){
     n++;
-    if(n % 3 === 0 || n === src.docs.length){ if(opts && opts.prog) opts.prog(n, src.docs.length); else toastPersist(t('bkRestoring', {n, total:src.docs.length})); }
+    if(n % 3 === 0 || n === src.docs.length){ if(opts && opts.prog) opts.prog(n, src.docs.length); else toastPersist(t('bkRestoring', {n, total:src.docs.length}), {n, total:src.docs.length}); }
     const catId = (d.albumKey && idMap[d.albumKey]) || null;
     const active = d.id ? items.find(i=>i.id === d.id) : null;
     const newer = (d.updatedAt || 0) > ((active && active.updatedAt) || 0);
@@ -11325,7 +11365,7 @@ async function bkCheckZip(zip, data, full, fileSize){
   let n = 0;
   for(const path of paths){
     n++;
-    if(full && (n % 5 === 0 || n === paths.length)) toastPersist(t('bkChecking', {n, total:paths.length}));
+    if(full && (n % 5 === 0 || n === paths.length)) toastPersist(t('bkChecking', {n, total:paths.length}), {n, total:paths.length});
     const e = path ? zip.get(path) : null;
     if(!e){ bad.push(path || '?'); continue; }
     if(e.method !== 0) throw new Error('PACKED');
@@ -11392,7 +11432,7 @@ async function importZipBackup(file){
       replace = true;
     }
   }
-  toastPersist(t('bkRestoring', {n:0, total:liveDocs.length}));
+  toastPersist(t('bkRestoring', {n:0, total:liveDocs.length}), {n:0, total:liveDocs.length});
   /* v171: „Zameni sve“ ne briše unapred — upisuje samo ono čega nema, pa na kraju briše višak (mergeBackup) */
   bkSettings(data);
   const src = bkSource(liveAlbums, liveDocs, (p)=>{
@@ -12291,7 +12331,7 @@ async function exportPdf(list, mode){
     imgs.forEach(it=>it.pages.forEach((p, i)=>refs.push([it, i])));
     const pages = [];
     for(const [it, i] of refs){
-      toastPersist(t('pdfBuilding', {n:pages.length + 1, total:refs.length}));
+      toastPersist(t('pdfBuilding', {n:pages.length + 1, total:refs.length}), {n:pages.length, total:refs.length});
       pages.push(await pdfPageData(await getFileBlob(it, i)));
     }
     const title = imgs[0].name || t('pgDefaultName');
@@ -12646,6 +12686,8 @@ function geminiFetch(models, body, key, signal, opt){
 async function aiRequest(parts, o){
   /* v174: svaki poziv vraća r.tm = {ai: ms do odgovora, tries, att: [[kod, ms]…]} za „poslednje obrade“ (sve AI radnje) */
   o = Object.assign({}, o || {});
+  /* v255: radionica — prvi poziv AI-ja za ovaj posao = korak „AI radi“ */
+  if(_ws && _ws.busy && o.signal && o.signal === _ws.busy.ctrl.signal && _ws.busy.phase !== 'ai'){ _ws.busy.phase = 'ai'; wsBusyStep(); }
   const own = !o.att, t0 = performance.now();
   if(own) o.att = [];
   try{
@@ -12849,7 +12891,7 @@ async function aiRunRead(item){
   aiSetTitle(t('aiReadTitle'));
   aiBody.innerHTML = '<div class="ai-wait"><span class="ai-spin"></span>' +
     '<div class="ai-wait-t">' + escapeHtml(t('aiReading')) + '</div>' +
-    '<div class="ai-wait-s">' + escapeHtml(t('aiReadingSub', {name:item.name, model:model.name})) + '</div>' +
+    '<div class="ai-wait-s">' + escapeHtml(t('aiReadingSub', {name:item.name, model:model.name})) + '</div>' + aiWaitBar(null) +
     '<div class="ai-wait-s">' + escapeHtml(t('aiReadingWait')) + '</div></div>' +
     '<button type="button" class="sheet-cta secondary" id="aiStop">' + escapeHtml(t('aiCancel')) + '</button>';
   document.getElementById('aiStop').onclick = ()=>requestClose();
@@ -13229,11 +13271,32 @@ function wsThumbHtml(it){
   return '<span class="ws-src-th">' + ((it.type === 'pdf' || it.type === 'doc') ? fileTypeIcon(fileTypeOf(it)) : pdfIconSvg()) + '</span>';
 }
 /* kartica „radim…“ i kartica greške — iste u radionici i na ekranu „Rezultat“ */
+/* v255: koraci rada u radionici — znamo samo pripremu i čekanje AI-ja (AI ne javlja procenat) */
+function wsStepsHtml(){
+  const ai = !!(_ws && _ws.busy && _ws.busy.phase === 'ai');
+  return '<div class="ws-steps"><div class="ws-step ' + (ai ? 'done' : 'cur') + '"><b>' + (ai ? '\u2713' : '') + '</b>' + escapeHtml(t('wsStPrep')) + '</div>' +
+    '<div class="ws-step' + (ai ? ' cur' : '') + '"><b></b>' + escapeHtml(t('wsStAi')) + '</div></div>';
+}
+function wsBusyStep(){ document.querySelectorAll('.ws-steps').forEach(el=>{ el.outerHTML = wsStepsHtml(); }); }
+/* v255: traka koja klizi + proteklo vreme, na svim ekranima gde se čeka AI (o = objekat posla, pamti početak) */
+let _aiTick = null;
+function aiSecTxt(t0){ return t('aiSec', {s:Math.max(0, Math.floor((Date.now() - t0) / 1000))}); }
+function aiWaitBar(o){
+  if(o && !o.t0) o.t0 = Date.now();
+  const t0 = o ? o.t0 : Date.now();
+  if(!_aiTick) _aiTick = setInterval(()=>{
+    const els = document.querySelectorAll('.ai-wait-sec');
+    if(!els.length){ clearInterval(_aiTick); _aiTick = null; return; }
+    els.forEach(el=>{ el.textContent = aiSecTxt(+el.dataset.t0); });
+  }, 1000);
+  return '<div class="ai-wait-bar"><i></i></div><div class="ai-wait-sec" data-t0="' + t0 + '">' + escapeHtml(aiSecTxt(t0)) + '</div>';
+}
 function wsBusyHtml(stopId){
   const src = _ws.src;
   return '<div class="ws-card ws-busy"><div class="ai-wait"><span class="ai-spin"></span>' +
     '<div class="ai-wait-t">' + escapeHtml(t('wsBusy', {task:_ws.busy.label})) + '</div>' +
     '<div class="ai-wait-s">' + escapeHtml(t('aiReadingSub', {name:src ? src.name : '', model:_ws.busy.model})) + '</div>' +
+    wsStepsHtml() + aiWaitBar(_ws.busy) +
     '<div class="ai-wait-s ws-prog"' + (_ws.busy.prog ? '>' + escapeHtml(t('wsTplProg', {i:_ws.busy.prog.i, n:_ws.busy.prog.n})) : ' hidden>') + '</div>' +
     '<div class="ai-wait-s">' + escapeHtml(t('wsBusyWait')) + '</div></div>' +
     '<button type="button" class="sheet-cta secondary" id="' + stopId + '">' + escapeHtml(t('aiCancel')) + '</button></div>';
@@ -16000,7 +16063,7 @@ function zsRenderBusy(){
   const b = _zs.busy;
   zsIn.innerHTML = '<div class="ws-card ws-busy"><div class="ai-wait"><span class="ai-spin"></span>' +
     '<div class="ai-wait-t" id="zsBusyT">' + escapeHtml(t('zsBusy', {i:b.i, n:b.n})) + '</div>' +
-    '<div class="ai-wait-s" id="zsBusyS">' + escapeHtml(t('aiReadingSub', {name:b.name, model:b.model})) + '</div>' +
+    '<div class="ai-wait-s" id="zsBusyS">' + escapeHtml(t('aiReadingSub', {name:b.name, model:b.model})) + '</div>' + aiWaitBar(b) +
     '<div class="ai-wait-s">' + escapeHtml(t('wsBusyWait')) + '</div></div>' +
     '<button type="button" class="sheet-cta secondary" id="zsStop">' + escapeHtml(t('aiCancel')) + '</button></div>';
   zsFoot.innerHTML = '';
@@ -18928,7 +18991,7 @@ function weAiRenderScr(){
   if(a.busy){
     h = '<div class="ws-card ws-busy"><div class="ai-wait"><span class="ai-spin"></span>' +
       '<div class="ai-wait-t">' + escapeHtml(t('weAiBusy')) + '</div>' +
-      '<div class="ai-wait-s">' + escapeHtml(t('weAiBusySub', {task:a.label, model:a.model})) + '</div>' +
+      '<div class="ai-wait-s">' + escapeHtml(t('weAiBusySub', {task:a.label, model:a.model})) + '</div>' + aiWaitBar(a) +
       '<div class="ai-wait-s">' + escapeHtml(t('wsBusyWait')) + '</div></div>' +
       '<button type="button" class="sheet-cta secondary" id="weAiStop">' + escapeHtml(t('aiCancel')) + '</button></div>';
   }else if(a.err){
@@ -19194,7 +19257,7 @@ function wfRenderBusy(){
     if(!scr.classList.contains('open')){
       box.innerHTML = '<div class="ws-card ws-busy"><div class="ai-wait"><span class="ai-spin"></span>' +
         '<div class="ai-wait-t">' + escapeHtml(t('wfAiBusy')) + '</div>' +
-        '<div class="ai-wait-s">' + escapeHtml(t('wfAiBusySub', {n:a.src.length, model:a.busy.model})) + '</div>' +
+        '<div class="ai-wait-s">' + escapeHtml(t('wfAiBusySub', {n:a.src.length, model:a.busy.model})) + '</div>' + aiWaitBar(a.busy) +
         '<div class="ai-wait-s">' + escapeHtml(t('wsBusyWait')) + '</div></div>' +
         '<button type="button" class="sheet-cta secondary" id="wfAiStop">' + escapeHtml(t('aiCancel')) + '</button></div>';
       document.getElementById('wfAiStop').onclick = ()=>{ wfAiStop(); wfBusyEnd(); };
@@ -21055,7 +21118,7 @@ async function drApply(st){
     const src = bkSource(srcAlb, live,
       (p)=>pf.get(p.file).then(b=>b.type === p.mime || !p.mime ? b : b.slice(0, b.size, p.mime)),
       (p)=>pf.get('t:' + p.file).then(b=>b.type ? b : b.slice(0, b.size, 'image/jpeg')).catch(()=>null));
-    const r = await mergeBackup(src, {quiet:true, prog:(n, total)=>{ if(big) toastPersist(t('drInRun', {n, total})); }});
+    const r = await mergeBackup(src, {quiet:true, prog:(n, total)=>{ if(big) toastPersist(t('drInRun', {n, total}), {n, total}); }});
     if(big) toastHide();
     res.added += r.added; res.updated += r.updated; res.bad += r.bad;
     live.forEach(d=>{
@@ -21378,7 +21441,7 @@ async function drPull(data, live, albums){
     d.pages.forEach(p=>{ if(p && p.file){ need.push(p.file); if(p.thumbPath) need.push('t:' + p.file); } });
   });
   const pf = drPrefetch(need);
-  const prog = (n, total)=>{ _drPull = {n, total}; toastPersist(t('drPullRun', {n, total})); drRefresh(); };
+  const prog = (n, total)=>{ _drPull = {n, total}; toastPersist(t('drPullRun', {n, total}), {n, total}); drRefresh(); };
   prog(0, live.length);
   try{
     bkSettings(data);
@@ -21507,7 +21570,7 @@ function drRefresh(){ const b = document.getElementById('drSet'); if(b){ b.inner
 function drProgress(){
   drRefresh();
   const show = !!(document.getElementById('drSet') && _drProg && _drProg.total > 3);
-  if(show){ _drNoteOn = true; toastPersist(t('drRun', {n:_drProg.n, total:_drProg.total})); }
+  if(show){ _drNoteOn = true; toastPersist(t('drRun', {n:_drProg.n, total:_drProg.total}), {n:_drProg.n, total:_drProg.total}); }
   else if(_drNoteOn){ _drNoteOn = false; toastHide(); }
 }
 function drBoot(){
