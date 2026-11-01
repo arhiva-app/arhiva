@@ -38,6 +38,7 @@
           "name": "fajlovi",
           "accept": [
             "image/*",
+            "video/*",
             ".jpg",
             ".jpeg",
             ".png",

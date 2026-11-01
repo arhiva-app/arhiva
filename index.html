@@ -1542,6 +1542,13 @@ button.trash-name{ display:block; width:100%; text-align:left; border:none; back
 /* v226: Word i Excel u samom pregledu (kao PDF): između gornjeg reda dugmadi i naziva; placeModalDoc postavlja top/bottom */
 .modal-doc{ position:absolute; left:0; right:0; top:150px; bottom:120px; display:flex; flex-direction:column; --dr-k:1; }
 .modal-doc[hidden]{ display:none; }
+/* v254: video u pregledu — placeModalDoc postavlja top/height (ispod gornjih dugmadi, iznad naziva) */
+#modalVideo{ position:absolute; left:0; width:100%; top:150px; height:calc(100% - 270px); object-fit:contain; background:#000; display:block; }
+#modalVideo[hidden]{ display:none; }
+.vid-tag{ position:absolute; left:6px; bottom:6px; z-index:2; display:flex; align-items:center; gap:4px; padding:3px 7px 3px 6px; border-radius:9px;
+  background:rgba(0,0,0,.62); color:#fff; font:600 10.5px/1.2 var(--font-num); letter-spacing:.3px; pointer-events:none; }
+.vid-tag svg{ width:9px; height:9px; fill:#fff; }
+.card.has-exp .vid-tag{ bottom:26px; }
 .modal-bg.is-docview .modal-frame{ touch-action:auto; }
 .modal-bg.is-docview .modal-info{ background:none; }
 .dr-tabs{ display:flex; gap:8px; overflow-x:auto; padding:2px 14px 10px; flex:none; scrollbar-width:none; touch-action:pan-x; }
@@ -2739,7 +2746,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
 
   <div class="toolbar" id="toolbarWrap">
     <span class="count" id="count">0 stavki</span>
-    <input id="fileInput" type="file" accept="image/*" multiple>
+    <input id="fileInput" type="file" accept="image/*,video/*" multiple>
     <input id="docInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.json,.zip,.rar,.7z,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar-compressed,application/x-7z-compressed,text/plain,text/csv,application/json" multiple>
     <input id="cameraInput" type="file" accept="image/*" capture="environment">
     <input id="wsFileIn" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
@@ -2805,7 +2812,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   </button>
   <div class="modal-inner">
     <div class="modal-frame modal-peek" id="modalPeek" hidden aria-hidden="true"><img alt=""></div>
-    <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
+    <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><video id="modalVideo" controls playsinline preload="metadata" hidden></video><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
     <div class="modal-info">
       <div class="modal-count-row"><div class="modal-position" id="modalPosition"></div><span class="modal-date" id="modalDate"></span><span class="modal-page-no" id="modalPageNo"></span></div>
       <div class="modal-cap-row"><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
@@ -3655,7 +3662,7 @@ const I18N = {
     trRestoreAlb: 'Vrati album', trRestoredAlb: 'Album „{name}“ je vraćen ({n}).', trGroupSub: 'Obrisan album · {left}', trRestoreAllN: 'Vrati ceo album ({n})',
     trRestoreN: 'Vrati ({n})', trPurgeN: 'Obriši trajno ({n})', trSortNew: 'Po datumu brisanja, najnovije prvo', trSortOld: 'Po datumu brisanja, najstarije prvo',
     trToday: 'briše se danas', trLeft1: 'još 1 dan', trLeftN: 'još {n} dana', trFrom: 'Obrisano iz', trBackTo: 'Vraća se u', trRemade: ' (napraviće se ponovo)',
-    trAdded: 'Dodato u Arhivu', trDeleted: 'Obrisano', trKind: 'Vrsta', trKindImg: 'Slika', trKindDoc: 'Dokument', trPage1: '1 strana', trPages: '{n} strana',
+    trAdded: 'Dodato u Arhivu', trDeleted: 'Obrisano', trKind: 'Vrsta', trKindImg: 'Slika', trKindVid: 'Video', trKindDoc: 'Dokument', aiNoVideo: 'AI za sada ne radi sa videom.', trPage1: '1 strana', trPages: '{n} strana',
     trSrc: 'Nastalo od', trSrcGone: 'Dokument koji više ne postoji', trValid: 'Rok važenja', trRestore1: 'Vrati', trClose: 'Zatvori', trRestored1: 'Vraćeno u „{to}“.', trRestoredNIn: 'Vraćeno u „{to}“: {n}.', trBarDone: 'Vraćeno',
     trRestoredN: 'Vraćeno: {n}.', trPurgeTitle: 'Trajno brisanje', trPurgeText: 'Trajno obrisati izabrano ({n})? Nema vraćanja.', trPurgeOk: 'Obriši trajno',
     trPurged: 'Trajno obrisano: {n}.', trTileSub: '{n} · čuva {d} dana', trTileEmpty: 'Prazna', delAlbumOk: 'Obriši',
@@ -3873,7 +3880,7 @@ const I18N = {
     wsPickDocs: 'Dokumenti',
     wsPickRecent: 'Poslednji',
     wsPickCount: 'stavki: {n}',
-    pathLabel: 'Gde se nalaziš', pathInbox: 'Bez albuma', pathAll: 'Sve', allKindAll: 'Sve', allKindImg: 'Slike', allKindDoc: 'Dokumenti', allEmpty: 'U Arhivi još nema ničega.', allBtn: 'Sve slike i dokumenti po danima',
+    pathLabel: 'Gde se nalaziš', pathInbox: 'Bez albuma', pathAll: 'Sve', allKindAll: 'Sve', allKindImg: 'Slike i video', allKindDoc: 'Dokumenti', allEmpty: 'U Arhivi još nema ničega.', allBtn: 'Sve slike i dokumenti po danima',
     wsPickAlbEmpty: 'Album je prazan.',
     wsSaveTitle: 'Sačuvaj u arhivu',
     wsSaveNameLbl: 'Naziv novog dokumenta',
@@ -4464,7 +4471,7 @@ const I18N = {
     trRestoreAlb: 'Restore album', trRestoredAlb: 'Album “{name}” was restored ({n}).', trGroupSub: 'Deleted album · {left}', trRestoreAllN: 'Restore whole album ({n})',
     trRestoreN: 'Restore ({n})', trPurgeN: 'Delete forever ({n})', trSortNew: 'By deletion date, newest first', trSortOld: 'By deletion date, oldest first',
     trToday: 'deleted today', trLeft1: '1 day left', trLeftN: '{n} days left', trFrom: 'Deleted from', trBackTo: 'Returns to', trRemade: ' (will be created again)',
-    trAdded: 'Added to Arhiva', trDeleted: 'Deleted', trKind: 'Type', trKindImg: 'Image', trKindDoc: 'Document', trPage1: '1 page', trPages: '{n} pages',
+    trAdded: 'Added to Arhiva', trDeleted: 'Deleted', trKind: 'Type', trKindImg: 'Image', trKindVid: 'Video', trKindDoc: 'Document', aiNoVideo: 'AI does not work with videos yet.', trPage1: '1 page', trPages: '{n} pages',
     trSrc: 'Made from', trSrcGone: 'A document that no longer exists', trValid: 'Valid until', trRestore1: 'Restore', trClose: 'Close', trRestored1: 'Restored to “{to}”.', trRestoredNIn: 'Restored to “{to}”: {n}.', trBarDone: 'Restored',
     trRestoredN: 'Restored: {n}.', trPurgeTitle: 'Permanent deletion', trPurgeText: 'Permanently delete the selection ({n})? This cannot be undone.', trPurgeOk: 'Delete forever',
     trPurged: 'Permanently deleted: {n}.', trTileSub: '{n} · keeps {d} days', trTileEmpty: 'Empty', delAlbumOk: 'Delete',
@@ -4682,7 +4689,7 @@ const I18N = {
     wsPickDocs: 'Documents',
     wsPickRecent: 'Recent',
     wsPickCount: 'items: {n}',
-    pathLabel: 'Where you are', pathInbox: 'No album', pathAll: 'All', allKindAll: 'All', allKindImg: 'Images', allKindDoc: 'Documents', allEmpty: 'The archive is still empty.', allBtn: 'All images and documents by day',
+    pathLabel: 'Where you are', pathInbox: 'No album', pathAll: 'All', allKindAll: 'All', allKindImg: 'Photos & videos', allKindDoc: 'Documents', allEmpty: 'The archive is still empty.', allBtn: 'All images and documents by day',
     wsPickAlbEmpty: 'The album is empty.',
     wsSaveTitle: 'Save to the archive',
     wsSaveNameLbl: 'Name of the new document',
@@ -6166,7 +6173,7 @@ function docRecord(it){
     id: it.id, schema: REC_SCHEMA,
     name: it.name || '', albumId: it.category || null,
     kind: it.type || 'image', ext: it.ext || null,
-    pages: (it.pages || []).map(p=>({file:p.file, mime:p.mime||'', size:p.size||0, w:p.w||0, h:p.h||0, thumb:!!p.thumb})),
+    pages: (it.pages || []).map(p=>Object.assign({file:p.file, mime:p.mime||'', size:p.size||0, w:p.w||0, h:p.h||0, thumb:!!p.thumb}, p.dur ? {dur:p.dur} : {})),
     createdAt: it.ts || Date.now(), updatedAt: it.updatedAt || Date.now(),
     deletedAt: it.deletedAt || null,
     validUntil: it.validUntil || null, validNote: it.validNote || null, remind: it.validUntil ? (remClean(it.remind) || null) : null, lang: it.lang || null, derivedFrom: it.derivedFrom || null,
@@ -6201,7 +6208,7 @@ async function idbPut(item){
 /* Nov dokument: podaci, fajlovi, sličice i tekst u JEDNOJ transakciji (sve ili ništa). */
 async function db2AddDoc(item, pages, text, opts){
   if(!(opts && opts.keepName)) item.name = uniqueItemName(item.name, item.id);   /* v120 */
-  item.pages = pages.map(p=>({file:p.file || newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}));
+  item.pages = pages.map(p=>Object.assign({file:p.file || newFileId(), mime:(p.blob && p.blob.type) || '', size:p.blob ? p.blob.size : 0, w:p.w||0, h:p.h||0, thumb:!!p.thumbBlob}, p.dur ? {dur:p.dur} : {}));   /* v254: dur = trajanje videa (s) */
   /* vraćanje kopije zadržava vreme izmene iz kopije (inače bi novija kopija izgledala starije) */
   item.updatedAt = (opts && opts.updatedAt > 0) ? opts.updatedAt : Date.now();
   if(text){ item.content = text; item.hasText = true; }
@@ -6404,11 +6411,13 @@ async function ensureMissingThumbs(){
   if(_thumbFixRunning) return;
   _thumbFixRunning = true;
   try{
-    const todo = items.concat(trash).filter(it=>it.type === 'image' && !it.thumb && it.pages[0] && !it._thumbFailed);
+    const todo = items.concat(trash).filter(it=>(it.type === 'image' || it.type === 'video') && !it.thumb && it.pages[0] && !it._thumbFailed);
     for(const it of todo){
       try{
         const blob = await getFileBlob(it);
-        const r = await makeThumb(blob);
+        const r = it.type === 'video' ? await videoThumb(blob) : await makeThumb(blob);
+        if(!r) throw new Error('video bez kadra');
+        if(r.dur) it.pages[0].dur = r.dur;
         it.pages[0].thumb = true;
         if(r.w){ it.pages[0].w = r.w; it.pages[0].h = r.h; }
         await Skladiste.upisi({thumbs:[{id:it.pages[0].file, blob:r.tblob}], docs:[docRecord(it)]});
@@ -6709,7 +6718,8 @@ const INBOX = '__inbox__';
 const ALL = '__all__';
 let allKind = 'all';
 function realAlbum(f){ return (f && f !== INBOX && f !== ALL) ? f : null; }
-function allKindOk(i){ return allKind === 'all' || (allKind === 'img' ? i.type === 'image' : i.type !== 'image'); }
+function isMedia(i){ return i.type === 'image' || i.type === 'video'; }   /* v254: video je u filteru „Slike i video“ */
+function allKindOk(i){ return allKind === 'all' || (allKind === 'img' ? isMedia(i) : !isMedia(i)); }
 /* Ikonica za dodavanje slika/dokumenata sa telefona (razlikuje se od ikonice "Novi album") */
 const FOLDER_PLUS_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A2 2 0 0 1 5 5.5h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><line x1="12" y1="10.5" x2="12" y2="16"></line><line x1="9.25" y1="13.25" x2="14.75" y2="13.25"></line></svg>';
 const PHOTO_PLUS_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h8"></path><polyline points="3 17 8.5 12 13 16.5 15.5 14 20 18"></polyline><circle cx="8.5" cy="9.5" r="1.3"></circle><line x1="19" y1="2.5" x2="19" y2="8.5"></line><line x1="16" y1="5.5" x2="22" y2="5.5"></line></svg>';
@@ -8048,7 +8058,17 @@ function buildCard(item, indexNumber){
   thumbBox.className = 'thumb-box' + ((isPdf || isDoc) && !pdfPic ? ' pdf-thumb' : '');
   const corner = document.createElement('div');
   corner.className = 'corner';
-  if(pdfPic){
+  if(item.type === 'video'){   /* v254: kadar + ▶ i trajanje; bez kadra ikonica */
+    thumbBox.className = 'thumb-box' + (item.thumb ? '' : ' pdf-thumb');
+    if(item.thumb){ const img = document.createElement('img'); img.src = item.thumb; img.loading = 'lazy'; thumbBox.appendChild(img); }
+    else thumbBox.innerHTML = fileTypeIcon(fileTypeOf(item));
+    const tag = document.createElement('span');
+    tag.className = 'vid-tag';
+    const d = (item.pages[0] || {}).dur;
+    tag.innerHTML = '<svg viewBox="0 0 10 10"><polygon points="1,0 10,5 1,10"></polygon></svg>' + (d ? fmtDur(d) : '');
+    thumbBox.appendChild(tag);
+    thumbBox.appendChild(corner);
+  }else if(pdfPic){
     const img = document.createElement('img');
     img.className = 'pdf-page'; img.src = item.thumb; img.loading = 'lazy';
     thumbBox.appendChild(img);
@@ -8301,6 +8321,7 @@ function showModalItem(item, page){
   docClear();
   if(item.type === 'pdf' && pdfCanView(item)){ showModalPdf(item, page); return; }
   if(fileOpensInReader(item)){ showModalDoc(item); return; }
+  if(item.type === 'video'){ showModalVideo(item); return; }
   if(item.type !== 'image'){ showModalFile(item); return; }
   modalBg.classList.remove('is-file', 'is-pdfview');
   document.getElementById('modalLoad').hidden = true;
@@ -8514,7 +8535,33 @@ function drSanitize(html){
 }
 function drMsg(txt){ document.getElementById('drBody').innerHTML = '<div class="dr-msg">' + escapeHtml(txt) + '</div>'; }
 /* v226: prikaz Word/Excel u pregledu ide i sa stavke: briše se pri svakoj drugoj stavci i pri zatvaranju pregleda */
+/* v254: video u pregledu — pušta se iz skladišta (adresa se oslobađa pri izlasku ili prelasku na drugu stavku) */
+const modalVideo = document.getElementById('modalVideo');
+let _vidUrl = '', _vidReq = 0;
+function vidClear(){
+  ++_vidReq;
+  modalBg.classList.remove('is-videoview');
+  try{ modalVideo.pause(); }catch(e){}
+  modalVideo.hidden = true;
+  if(_vidUrl){ modalVideo.removeAttribute('src'); try{ modalVideo.load(); }catch(e){} URL.revokeObjectURL(_vidUrl); _vidUrl = ''; }
+}
+function showModalVideo(item){
+  showModalFile(item);                       /* naziv, rok, strelice, broj — isto kao za ostale fajlove */
+  document.getElementById('modalFile').hidden = true;
+  modalBg.classList.add('is-videoview');
+  modalVideo.hidden = false;
+  modalVideo.poster = item.thumb || '';
+  placeModalDoc();
+  requestAnimationFrame(placeModalDoc);
+  const req = _vidReq;
+  getFileBlob(item, 0).then(b=>{
+    if(req !== _vidReq) return;
+    _vidUrl = URL.createObjectURL(b);
+    modalVideo.src = _vidUrl;
+  }).catch(e=>{ console.error(e); if(req === _vidReq){ vidClear(); showModalFile(item); } });
+}
 function docClear(){
+  vidClear();
   ++_drReq;
   modalBg.classList.remove('is-docview');
   modalDoc.hidden = true; modalDoc.classList.remove('is-sheet');
@@ -8523,13 +8570,20 @@ function docClear(){
 }
 /* gornja ivica = ispod natpisa gornjeg reda dugmadi, donja = iznad broja/naziva/roka (visina zavisi od roka i dužine naziva) */
 function placeModalDoc(){
-  if(!modalBg.classList.contains('is-docview')) return;
+  const vid = modalBg.classList.contains('is-videoview');
+  if(!vid && !modalBg.classList.contains('is-docview')) return;
   const bar = document.getElementById('modalBar');
   let top = 0;
   if(bar) bar.querySelectorAll('.back-btn, .mb-lbl').forEach(el=>{ const r = el.getBoundingClientRect(); if(r.height) top = Math.max(top, r.bottom); });
   const info = document.querySelector('#modalBg .modal-info');
   let bottom = window.innerHeight;
   if(info){ const r = info.getBoundingClientRect(); bottom = r.top + (parseFloat(getComputedStyle(info).paddingTop) || 0); }
+  if(vid){
+    const fr = modalFrame.getBoundingClientRect();
+    modalVideo.style.top = Math.round(top + 12 - fr.top) + 'px';
+    modalVideo.style.height = Math.max(120, Math.round(bottom - 8 - top - 12)) + 'px';
+    return;
+  }
   modalDoc.style.top = Math.round(top + 12) + 'px';
   modalDoc.style.bottom = Math.max(0, Math.round(window.innerHeight - bottom + 8)) + 'px';
 }
@@ -8857,6 +8911,11 @@ modalBg.addEventListener('touchstart', (e)=>{
     _zmSkip = true; _zmG = null; _zmPinched = false; return;
   }
   if(e.touches.length === 1) _zmSkip = false;
+  /* v254: donji deo videa = kontrole (traka za premotavanje) — tu prevlačenje ne lista dalje */
+  if(e.touches.length === 1 && t0 && e.target === modalVideo){
+    const r = modalVideo.getBoundingClientRect();
+    if(t0.clientY > r.bottom - 72){ _zmSkip = true; _zmG = null; _zmPinched = false; return; }
+  }
   const docv = modalBg.classList.contains('is-docview');
   if(docv && e.touches.length === 2){
     /* v226: dva prsta u Word/Excel = veličina slova (pamti se, isto kao ranije A− / A+) */
@@ -9622,11 +9681,40 @@ async function processImage(blob, resize){
   return imageMainThread(blob, resize);
 }
 function makeThumb(blob){ return processImage(blob, false); }
+/* v254: sličica videa = jedan kadar (najviše 1 s od početka) + trajanje i veličina; čita se samo početak fajla.
+   Ne uspe (nepoznat kodek, 8 s) → null: video se ipak čuva, u albumu stoji ikonica. */
+function videoThumb(blob){
+  return new Promise(resolve=>{
+    const url = URL.createObjectURL(blob);
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    let done = false;
+    const fin = r=>{ if(done) return; done = true; clearTimeout(tm); v.removeAttribute('src'); try{ v.load(); }catch(e){} URL.revokeObjectURL(url); resolve(r); };
+    const tm = setTimeout(()=>fin(null), 8000);
+    v.onerror = ()=>fin(null);
+    v.onloadedmetadata = ()=>{
+      const d = isFinite(v.duration) ? v.duration : 0;
+      v.currentTime = d > 0 ? Math.min(1, d / 10) : 0.1;
+    };
+    v.onseeked = ()=>{
+      const W = v.videoWidth, H = v.videoHeight;
+      if(!W || !H){ fin(null); return; }
+      const k = Math.min(1, THUMB_SHORT / Math.min(W, H), THUMB_LONG / Math.max(W, H));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k));
+      try{ c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); }catch(e){ fin(null); return; }
+      canvasToBlob(c, THUMB_QUALITY).then(tblob=>fin({tblob, w:W, h:H, dur:isFinite(v.duration) ? Math.round(v.duration) : 0})).catch(()=>fin(null));
+    };
+    v.src = url;
+  });
+}
+function fmtDur(sec){ sec = Math.max(0, Math.round(sec || 0)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), x = String(sec % 60).padStart(2, '0'); return h ? h + ':' + String(m).padStart(2, '0') + ':' + x : m + ':' + x; }
 
 const EXT_MIME = {pdf:'application/pdf', doc:'application/msword', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   xls:'application/vnd.ms-excel', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ppt:'application/vnd.ms-powerpoint',
   pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation', txt:'text/plain', csv:'text/csv', json:'application/json',
-  zip:'application/zip', jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', heic:'image/heic'};
+  zip:'application/zip', jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', heic:'image/heic',
+  mp4:'video/mp4', m4v:'video/x-m4v', mov:'video/quicktime', webm:'video/webm', '3gp':'video/3gpp', mkv:'video/x-matroska'};
 async function addFile(file, category, o){
   try{
     const sourceSig = file.name + '|' + file.size;
@@ -9640,13 +9728,20 @@ async function addFile(file, category, o){
       if(!again) return;
     }
     requestPersistOnce();
-    const isPdf = file.type === 'application/pdf';
-    const isImage = file.type.startsWith('image/');
-    const isDoc = !isPdf && !isImage;
     const ext = (file.name.match(/\.([^.]+)$/) || [,''])[1].toUpperCase();
-    /* sadržaj se odmah pročita (fajl sa telefona ne mora ostati dostupan kasnije) */
-    const original = new Blob([await file.arrayBuffer()], {type: file.type || EXT_MIME[ext.toLowerCase()] || 'application/octet-stream'});
+    const mime = file.type || EXT_MIME[ext.toLowerCase()] || 'application/octet-stream';
+    const isPdf = mime === 'application/pdf';
+    const isImage = mime.startsWith('image/');
+    const isVideo = mime.startsWith('video/');   /* v254 */
+    const isDoc = !isPdf && !isImage && !isVideo;
+    /* sadržaj se odmah pročita (fajl sa telefona ne mora ostati dostupan kasnije).
+       v254: video se NE čita u memoriju — fajl ide pravo u skladište (IndexedDB ga kopira pri upisu), zato je uvoz brz i za velik video */
+    const original = isVideo ? file.slice(0, file.size, mime) : new Blob([await file.arrayBuffer()], {type: mime});
     let page = {blob: original, thumbBlob: null, w: 0, h: 0};
+    if(isVideo){
+      const r = await videoThumb(original);
+      if(r) page = {blob: original, thumbBlob: r.tblob, w: r.w, h: r.h, dur: r.dur};
+    }
     if(isImage){
       try{
         const r = await processImage(original, true);
@@ -9657,13 +9752,14 @@ async function addFile(file, category, o){
     const baseName = file.name.replace(/\.[^.]+$/, '');
     const item = {
       id,
-      name: baseName || (isPdf ? 'Dokument' : (isDoc ? 'Dokument' : 'Slika')),
+      name: baseName || (isVideo ? 'Video' : isPdf ? 'Dokument' : (isDoc ? 'Dokument' : 'Slika')),
       ts: Date.now(),
       category: category || null,
-      type: isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
+      type: isVideo ? 'video' : isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
       sourceSig
     };
     if(isDoc) item.ext = ext;
+    if(isVideo) item.ext = ext || ({'video/quicktime':'MOV', 'video/3gpp':'3GP', 'video/x-matroska':'MKV', 'video/x-m4v':'M4V'}[mime] || mime.split('/')[1] || 'mp4').toUpperCase();
     await db2AddDoc(item, [page], null);
     items.push(item);
     maybeAutoCover(category, item);
@@ -9803,7 +9899,7 @@ async function askRun(){
     }
     const withText = scope.filter(i=>i.content && i.content.trim());
     const missImg = scope.filter(i=>i.type === 'image' && !(i.content && i.content.trim())).length;
-    const missDoc = scope.filter(i=>i.type !== 'image' && !(i.content && i.content.trim())).length;
+    const missDoc = scope.filter(i=>i.type !== 'image' && i.type !== 'video' && !(i.content && i.content.trim())).length;
     if(!withText.length){
       _ask.busy = null;
       _ask.res = {answer:t('askNoDocs'), src:[], miss:askMissText(missImg, missDoc, {}), none:true};
@@ -10038,14 +10134,14 @@ function trLeftTxt(left){ return left === 0 ? t('trToday') : t(left === 1 ? 'trL
 function trDate(ms){ const d = new Date(ms); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'; }
 function trFiltered(){
   const q = trSearchOn ? normalizeSr(trQ.trim()) : '';
-  return trash.filter(it=>(trKind === 'all' || (trKind === 'img' ? it.type === 'image' : it.type !== 'image')) &&
+  return trash.filter(it=>(trKind === 'all' || (trKind === 'img' ? isMedia(it) : !isMedia(it))) &&
     (!q || hitWords(normalizeSr(itemLabel(it)), q)));
 }
 function trCell(it){
   const cell = document.createElement('div');
   cell.className = 'trash-cell' + (trashSel.has(it.id) ? ' sel' : '');
-  const inner = it.type === 'image'
-    ? (it.thumb ? '<img src="'+it.thumb+'" alt="">' : pdfIconSvg() + '<span>SLIKA</span>')
+  const inner = isMedia(it)
+    ? (it.thumb ? '<img src="'+it.thumb+'" alt="">' : it.type === 'video' ? fileTypeIcon(fileTypeOf(it)) : pdfIconSvg() + '<span>SLIKA</span>')
     : fileTypeIcon(fileTypeOf(it));
   cell.innerHTML = '<div class="trash-thumb">'+inner+'<span class="trash-check">'+(trashSel.has(it.id)?'\u2713':'')+'</span></div>'+
     '<button type="button" class="trash-name"></button><div class="trash-left"></div>';
@@ -10206,7 +10302,7 @@ function trInfo(it){
   const exists = it.category && catById(it.category);
   const back = exists ? trPathTxt(trPathOf(it.category)) : (it.trashPath && it.trashPath.length ? trPathTxt(it.trashPath) + t('trRemade') : t('allImages'));
   const n = Math.max(1, pageCount(it)), ft = fileTypeOf(it);
-  const kind = it.type === 'image' ? t('trKindImg') + (n > 1 ? ' · ' + t('trPages', {n}) : '') : (ft ? ft.toUpperCase() : t('trKindDoc')) + ' · ' + t(n === 1 ? 'trPage1' : 'trPages', {n});
+  const kind = it.type === 'video' ? t('trKindVid') + ((it.pages[0] || {}).dur ? ' · ' + fmtDur(it.pages[0].dur) : '') : it.type === 'image' ? t('trKindImg') + (n > 1 ? ' · ' + t('trPages', {n}) : '') : (ft ? ft.toUpperCase() : t('trKindDoc')) + ' · ' + t(n === 1 ? 'trPage1' : 'trPages', {n});
   const src = it.derivedFrom ? (items.concat(trash).find(x=>x.id === it.derivedFrom)) : null;
   const rows = [[t('trFrom'), trPathTxt(it.trashPath || (exists ? trPathOf(it.category) : null))], [t('trBackTo'), back],
     [t('trAdded'), it.ts ? trDate(it.ts) : '—'], [t('trDeleted'), trDate(it.deletedAt) + ' · ' + trLeftTxt(trashDaysLeft(it))], [t('trKind'), kind]];
@@ -10346,7 +10442,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 253;
+const APP_VERSION = 254;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10813,6 +10909,17 @@ function crc32(bytes){
   for(let i=0;i<bytes.length;i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
   return (c ^ 0xFFFFFFFF) >>> 0;
 }
+async function crc32Blob(blob){
+  const rd = blob.stream().getReader();
+  let c = 0xFFFFFFFF;
+  for(;;){
+    const r = await rd.read();
+    if(r.done) break;
+    const b = r.value;
+    for(let i=0;i<b.length;i++) c = CRC_TABLE[(c ^ b[i]) & 0xFF] ^ (c >>> 8);
+  }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
 function dosTimeDate(ts){
   const d = new Date(ts || Date.now());
   const y = Math.max(1980, d.getFullYear());
@@ -10830,9 +10937,10 @@ async function zipBuild(entries, onProgress){
   for(let i=0;i<entries.length;i++){
     const e = entries[i];
     const nameBytes = enc.encode(e.name);
-    const bytes = new Uint8Array(await e.blob.arrayBuffer());
-    const crc = crc32(bytes);
-    const size = bytes.length;
+    /* v254: velik fajl (video) se za CRC čita u delovima — ceo nikad nije u memoriji */
+    let crc, size = e.blob.size;
+    if(size > 8 * 1024 * 1024) crc = await crc32Blob(e.blob);
+    else{ const bytes = new Uint8Array(await e.blob.arrayBuffer()); crc = crc32(bytes); size = bytes.length; }
     const dt = dosTimeDate(e.ts);
     if(offset + 30 + nameBytes.length + size > 0xFFFFFFFF) throw new Error('TOO_BIG');
     const lh = new DataView(new ArrayBuffer(30));
@@ -12939,6 +13047,7 @@ async function aiApply(item, ch){
 document.getElementById('modalAi').onclick = (e)=>{
   e.stopPropagation();
   const it = items.find(i=>i.id === modalItemId);
+  if(it && it.type === 'video'){ toast(t('aiNoVideo')); return; }   /* v254: AI ne radi sa videom */
   if(it) wsOpen(it);
 };
 document.getElementById('modalAi').setAttribute('aria-label', t('wsTitle'));
