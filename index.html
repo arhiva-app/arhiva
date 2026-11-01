@@ -1603,7 +1603,7 @@ button.trash-name{ display:block; width:100%; text-align:left; border:none; back
 .ai-wait-t{ font-size:15.5px; font-weight:700; color:var(--ink); margin-bottom:6px; }
 .ai-wait-bar{ position:relative; width:min(260px, 80%); height:5px; border-radius:3px; margin:14px 0 6px; overflow:hidden;
   background:color-mix(in srgb, var(--brass) 20%, transparent); }   /* v255 */
-.ai-wait-bar i{ position:absolute; top:0; bottom:0; width:35%; border-radius:3px; background:var(--brass); animation:noteInd 1.3s ease-in-out infinite; }
+.ai-wait-bar i{ position:absolute; top:0; bottom:0; width:35%; border-radius:3px; background:var(--brass); animation:noteInd 1.1s ease-in-out infinite alternate; }
 .ai-wait-sec{ font-family:var(--font-num); font-size:13px; color:var(--ink-dim); margin-bottom:8px; }
 .ws-steps{ display:flex; flex-direction:column; gap:7px; margin:12px 0 0; text-align:left; font-size:14.5px; }
 .ws-step{ display:flex; align-items:center; gap:9px; color:var(--ink-dim); opacity:.55; }
@@ -2377,8 +2377,8 @@ header .icon-btn svg{ width:24px; height:24px; }
 .note-spin{ flex:none; width:40px; height:40px; box-sizing:border-box; border-radius:50%; border:3px solid color-mix(in srgb, var(--brass) 25%, transparent); border-top-color:var(--brass); animation:aiSpin .9s linear infinite; }
 .note-prog{ position:absolute; left:14px; right:14px; bottom:9px; height:5px; border-radius:3px; background:color-mix(in srgb, var(--brass) 20%, transparent); overflow:hidden; }
 .note-prog i{ position:absolute; top:0; bottom:0; left:0; border-radius:3px; background:var(--brass); transition:width .3s; }
-.note-prog.ind i{ width:35%; animation:noteInd 1.3s ease-in-out infinite; }
-@keyframes noteInd{ 0%{ left:-35%; } 100%{ left:100%; } }
+.note-prog.ind i{ width:35%; animation:noteInd 1.1s ease-in-out infinite alternate; }
+@keyframes noteInd{ from{ left:0; } to{ left:65%; } }   /* v256: levo-desno, ceo deo uvek vidljiv (ranije je na krajevima nestajao) */
 /* v110: sve poruke na vrhu; „!“ za poruke koje nisu potvrda; dugme „Vrati“ / „Podeli“ desno */
 .note-bar.warn svg{ color:var(--ink-dim); }
 /* v153: „NIJE SAČUVANO!“ — jedina zaista crvena poruka; ceo tekst staje (do 3 reda) */
@@ -10482,7 +10482,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 255;
+const APP_VERSION = 256;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
