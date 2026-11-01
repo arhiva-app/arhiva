@@ -152,7 +152,7 @@ html.sc-peek #modalUnlock{ display:flex; }
     --on-brass:#1a1400;
   }
   *{box-sizing:border-box;}
-  html,body{overscroll-behavior-y:contain;}
+  html,body{overscroll-behavior-y:none;}   /* v259: bez Androidovog rastezanja na kraju liste (zaglavlje se ne pomera) */
   html{-webkit-tap-highlight-color:transparent;}
   body{
     margin:0;
@@ -160,7 +160,7 @@ html.sc-peek #modalUnlock{ display:flex; }
     color:var(--ink);
     font-family:var(--font-ui);
     min-height:100vh;
-    padding:28px 18px 70px;
+    padding:0 18px 70px;   /* v259: zaglavlje stalno na istom mestu (ranije 28px vazduha koji je odlazio skrolovanjem) */
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:900px;margin:0 auto;}
@@ -173,8 +173,8 @@ html.sc-peek #modalUnlock{ display:flex; }
   #backupReminderRow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--danger);color:var(--on-danger);font-size:12px;font-weight:600;padding:9px 11px;border-radius:11px;margin-bottom:10px;}
   #backupReminderRow button{flex:none;background:var(--on-danger-soft);color:var(--on-danger);border:1px solid var(--on-danger-line);padding:6px 11px;border-radius:8px;font-weight:700;font-size:11.5px;font-family:inherit;cursor:pointer;}
   #stickyTop{
-    position:sticky;top:-28px;z-index:20;background:var(--bg);
-    padding-top:28px;margin-top:-28px;padding-bottom:10px;
+    position:sticky;top:0;z-index:20;background:var(--bg);
+    padding-bottom:10px;
   }
   .mark-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
   .mark-title{display:flex;align-items:center;gap:10px;}
@@ -1037,7 +1037,7 @@ html[data-theme="koza"]{ --bg:#F1E9D6; --page-bg:#F1E9D6; --stitch:rgba(226,201,
 [data-theme="koza"] body, [data-theme="koza"] #stickyTop, [data-theme="koza"] .set-screen, [data-theme="koza"] .set-header,
 [data-theme="koza"] .pg-screen, [data-theme="koza"] .ws-screen, [data-theme="koza"] .sheet-bg.sheet-full{ background-color:var(--bg); background-image:var(--paper); }
 [data-theme="koza"] body:not(.in-album) #stickyTop{ background-color:#1F3A2E; background-image:var(--leather), radial-gradient(120% 90% at 50% 0%, #2A4D3C 0%, #1B3328 70%, #15291F 100%);
-  margin:-28px -18px 14px; padding:34px 18px 18px; border-radius:0 0 26px 26px; box-shadow:0 10px 22px -12px rgba(20,30,20,.7); }
+  margin:0 -18px 14px; padding:6px 18px 18px; border-radius:0 0 26px 26px; box-shadow:0 10px 22px -12px rgba(20,30,20,.7); }
 [data-theme="koza"] body:not(.in-album) #stickyTop::after{ content:""; position:absolute; left:8px; right:8px; top:0; bottom:8px; border:1.5px dashed var(--stitch); border-top:none; border-radius:0 0 20px 20px; pointer-events:none; }
 [data-theme="koza"] body:not(.in-album) header{ background:transparent; }
 [data-theme="koza"] body:not(.in-album) .mark-row{ border-top:none; border-bottom:1px solid rgba(226,201,138,.25); }
@@ -2328,8 +2328,6 @@ body:has(#aiWs.open) .toast{ bottom:calc(190px + env(safe-area-inset-bottom)); }
 .ws-top .ws-lbl-row .ws-pills > button{ flex:1 1 0; min-width:0; justify-content:center; white-space:nowrap; height:40px; border-radius:20px; font-size:14.5px; }
 @media (max-width:379px){ .ws-chip.ws-chip-pill, .ws-tpl-pill{ padding:0 9px; font-size:12.5px; gap:4px; } .ws-chip.ws-chip-pill svg, .ws-tpl-pill svg{ width:14px; height:14px; } .ws-lbl-row .ws-lbl{ margin:0 2px; } }
 /* v104: vrh albuma — putanja odmah ispod sata, iste visine kao red; jedan red ikonica sa natpisima */
-body.in-album{ padding-top:6px; }
-body.in-album #stickyTop{ top:-6px; padding-top:6px; margin-top:-6px; }
 body.in-album header{ margin-bottom:0; }
 #pathZone:empty{ display:none; }
 /* v108: putanja u pregledu (iste mere kao u albumu), dugmad pregleda se spuštaju ispod nje */
@@ -10534,7 +10532,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 258;
+const APP_VERSION = 259;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
