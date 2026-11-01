@@ -2438,7 +2438,11 @@ body.in-album .searchbar{ margin-top:12px; }
 .ce-head{ flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 16px 8px; }
 .ce-head b{ font:700 17px/1.2 var(--font-ui); }
 .ce-cancel{ background:none; border:none; color:var(--brass); font:600 16px/1 var(--font-ui); padding:8px 4px; min-width:72px; text-align:left; }
-.ce-sp{ min-width:72px; }
+.ce-undo{ min-width:72px; display:flex; align-items:center; justify-content:flex-end; gap:5px; background:none; border:none; color:var(--brass); font:600 15px/1 var(--font-ui); padding:8px 2px; }
+.ce-undo:disabled{ color:#555; }
+.ce-mid{ flex:none; display:flex; justify-content:center; padding:8px 16px 0; }
+.ce-mode{ border:1px solid var(--brass); background:none; color:var(--brass); border-radius:20px; padding:9px 16px; font:600 14px/1.1 var(--font-ui); }
+.ce-mode.on{ background:var(--brass); color:#111; }
 .ce-stage{ flex:1; position:relative; overflow:hidden; touch-action:none; }
 #ceCv{ position:absolute; }
 #ceSvg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
@@ -2948,9 +2952,10 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   </div>
 </div>
 <div class="ce-screen" id="cropScr">   <!-- v257: Okreni i iseci -->
-  <div class="ce-head"><button type="button" class="ce-cancel" id="ceCancel"></button><b id="ceTitle"></b><span class="ce-sp"></span></div>
+  <div class="ce-head"><button type="button" class="ce-cancel" id="ceCancel"></button><b id="ceTitle"></b><button type="button" class="ce-undo" id="ceUndo" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-3"></path></svg><span id="ceUndoL"></span></button></div>
   <div class="ce-stage" id="ceStage"><canvas id="ceCv"></canvas><svg id="ceSvg"><polygon id="cePoly"></polygon></svg>
     <div class="ce-h" data-k="0"></div><div class="ce-h" data-k="1"></div><div class="ce-h" data-k="2"></div><div class="ce-h" data-k="3"></div></div>
+  <div class="ce-mid"><button type="button" class="ce-mode" id="ceMode"></button></div>
   <div class="ce-hint" id="ceHint"></div>
   <div class="ce-bar">
     <button type="button" class="ce-b" id="ceLeft"><span class="ce-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 3 3 9 9 9"></polyline></svg></span><span id="ceLeftL"></span></button>
@@ -3677,6 +3682,7 @@ const I18N = {
     pgEmpty: 'Još nema stranica. Slikaj prvu stranicu ili izaberi slike iz galerije.',
     pgHint: 'Lupa u uglu (ili dodir na stranicu) otvara stranicu preko celog ekrana: tamo je čitaš i pomeraš (Ranije, Na mesto…, Kasnije). Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“.',
     ceTitle: 'Okreni i iseci', ceCancel: 'Otkaži', ceHint: 'Prevuci uglove na ivice papira — Arhiva ga ispravi u pravougaonik.', ceHintOrig: 'Prikazan je original. „Sačuvaj“ ga vraća (ili ga prvo iseci).',
+    ceUndo: 'Poništi', ceModeQuad: 'Ispravi iskošen papir', ceModeRect: 'Običan pravougaonik', ceHintRect: 'Povuci ugao, ili pomeri ceo okvir prstom.',
     ceLeft: 'Levo', ceRight: 'Desno', ceOrig: 'Original', ceSave: 'Sačuvaj', ceWork: 'Ispravljam sliku…', ceSaved: 'Slika je sačuvana. Original se čuva.', ceRestored: 'Vraćen je original.',
     ceErr: 'Slika ne može da se izmeni.', ceBad: 'Uglovi su ukršteni — postavi ih redom oko papira.',
     pvTitle: 'Str. {i} / {n}', pvPrev: 'Ranije', pvNext: 'Kasnije', pvTo: 'Na mesto…', pvCrop: 'Iseci', pvExtract: 'Izdvoji', pvRemove: 'Ukloni', pvHead: 'Redosled stranica', pvHint: 'Ranije i Kasnije pomeraju ovu stranicu za jedno mesto, a Na mesto… odmah na izabrano mesto. Broj na slici pokazuje gde je sada. Prevuci prstom za sledeću stranicu. Sve se čuva tek na Sačuvaj.', pvRmTitle: 'Ukloniti stranicu {n}?', pvRmSaved: 'Kad sačuvaš dokument, stranica ide u korpu.', pvRmMerge: 'Stranica neće biti u novom dokumentu. Original ostaje u albumu.', pvRmNew: 'Ova stranica se briše iz dokumenta koji praviš.', pvToTitle: 'Premesti stranicu {n} na mesto', pvToHint: 'Ostale stranice se pomere za jedno mesto.',
@@ -4489,6 +4495,7 @@ const I18N = {
     pgEmpty: 'No pages yet. Take a photo of the first page or pick images from the gallery.',
     pgHint: 'The magnifier in the corner (or a tap on the page) opens the page full screen: read it there and move it (Earlier, Move to…, Later). You can also drag the handle in the corner, and ✕ removes the page. Nothing is saved until “Save”.',
     ceTitle: 'Rotate & crop', ceCancel: 'Cancel', ceHint: 'Drag the corners to the edges of the paper — the archive straightens it.', ceHintOrig: 'The original is shown. “Save” restores it (or crop it first).',
+    ceUndo: 'Undo', ceModeQuad: 'Straighten tilted paper', ceModeRect: 'Plain rectangle', ceHintRect: 'Drag a corner, or move the whole frame with your finger.',
     ceLeft: 'Left', ceRight: 'Right', ceOrig: 'Original', ceSave: 'Save', ceWork: 'Straightening the image…', ceSaved: 'Image saved. The original is kept.', ceRestored: 'Original restored.',
     ceErr: 'The image cannot be edited.', ceBad: 'The corners cross — place them in order around the paper.',
     pvTitle: 'P. {i} / {n}', pvPrev: 'Earlier', pvNext: 'Later', pvTo: 'Move to…', pvCrop: 'Crop', pvExtract: 'Extract', pvRemove: 'Remove', pvHead: 'Page order', pvHint: 'Earlier and Later move this page by one place, Move to… straight to the chosen place. The number on the page shows where it is now. Swipe for the next page. Nothing is saved until Save.', pvRmTitle: 'Remove page {n}?', pvRmSaved: 'When you save the document, the page goes to the trash.', pvRmMerge: 'The page won’t be in the new document. The original stays in the album.', pvRmNew: 'This page is removed from the document you are making.', pvToTitle: 'Move page {n} to position', pvToHint: 'The other pages shift by one.',
@@ -10527,7 +10534,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 257;
+const APP_VERSION = 258;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12300,10 +12307,11 @@ function ceConvex(q){
 async function ceOpen(opt){
   let bmp;
   try{ bmp = await createImageBitmap(opt.blob); }catch(e){ console.error(e); toast(t('ceErr')); return; }
-  _ce = {opt, bmp, rot:0, q:ceFull(), fromOrig:false, busy:false};
+  _ce = {opt, bmp, bmps:[bmp], rot:0, q:ceFull(), fromOrig:false, busy:false, mode:'rect', undo:[]};   /* v258: podrazumevano pravougaonik */
   document.getElementById('ceTitle').textContent = t('ceTitle');
   document.getElementById('ceCancel').textContent = t('ceCancel');
-  document.getElementById('ceHint').textContent = t('ceHint');
+  document.getElementById('ceUndoL').textContent = t('ceUndo');
+  ceModeUi(); ceUndoUi();
   document.getElementById('ceLeftL').textContent = t('ceLeft');
   document.getElementById('ceRightL').textContent = t('ceRight');
   document.getElementById('ceOrigL').textContent = t('ceOrig');
@@ -12316,7 +12324,7 @@ async function ceOpen(opt){
 }
 function ceClose(){
   cropScr.classList.remove('open');
-  if(_ce && _ce.bmp && _ce.bmp.close) _ce.bmp.close();
+  if(_ce) _ce.bmps.forEach(b=>{ try{ b.close(); }catch(e){} });
   _ce = null;
 }
 function ceDims(){ const b = _ce.bmp; return _ce.rot % 180 ? [b.height, b.width] : [b.width, b.height]; }
@@ -12347,11 +12355,72 @@ function ceOverlay(){
   cePoly.setAttribute('points', pts.map(p=>p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '));
   ceHs.forEach((h, i)=>{ h.style.left = pts[i][0] + 'px'; h.style.top = pts[i][1] + 'px'; });
 }
+/* v258: pravougaonik (podrazumevano) ili „Ispravi papir“ (4 nezavisna ugla); „Poništi“ vraća korak po korak */
+function ceModeUi(){
+  const quad = _ce.mode === 'quad', b = document.getElementById('ceMode');
+  b.textContent = quad ? t('ceModeRect') : t('ceModeQuad');
+  b.classList.toggle('on', quad);
+  document.getElementById('ceHint').textContent = _ce.fromOrig ? t('ceHintOrig') : quad ? t('ceHint') : t('ceHintRect');
+}
+function ceUndoUi(){ document.getElementById('ceUndo').disabled = !_ce || !_ce.undo.length; }
+function ceSnap(){
+  _ce.undo.push({rot:_ce.rot, q:_ce.q.map(p=>p.slice()), mode:_ce.mode, bmp:_ce.bmp, fromOrig:_ce.fromOrig, origHidden:document.getElementById('ceOrig').hidden});
+  ceUndoUi();
+}
+const ceSameQ = (a, b)=>a.every((p, i)=>p[0] === b[i][0] && p[1] === b[i][1]);
+document.getElementById('ceUndo').onclick = ()=>{
+  if(!_ce || _ce.busy || !_ce.undo.length) return;
+  const u = _ce.undo.pop();
+  Object.assign(_ce, {rot:u.rot, q:u.q, mode:u.mode, bmp:u.bmp, fromOrig:u.fromOrig});
+  document.getElementById('ceOrig').hidden = u.origHidden;
+  ceModeUi(); ceUndoUi(); ceDraw();
+};
+document.getElementById('ceMode').onclick = ()=>{
+  if(!_ce || _ce.busy) return;
+  ceSnap();
+  if(_ce.mode === 'quad'){
+    const xs = _ce.q.map(p=>p[0]), ys = _ce.q.map(p=>p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    _ce.q = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+    _ce.mode = 'rect';
+  }else _ce.mode = 'quad';
+  ceModeUi(); ceOverlay();
+};
+/* pravougaonik: ugao vuče svoje dve ivice; najmanje 5 % širine/visine */
+function ceRectSet(k, x, y){
+  const q = _ce.q, MIN = 0.05;
+  let L = q[0][0], T = q[0][1], R = q[2][0], B = q[2][1];
+  if(k === 0 || k === 3) L = Math.min(x, R - MIN); else R = Math.max(x, L + MIN);
+  if(k === 0 || k === 1) T = Math.min(y, B - MIN); else B = Math.max(y, T + MIN);
+  _ce.q = [[L, T], [R, T], [R, B], [L, B]];
+}
+/* pravougaonik: prevlačenje unutar okvira pomera ceo okvir */
+ceStage.addEventListener('pointerdown', e=>{
+  if(!_ce || !_ce.box || _ce.mode !== 'rect' || e.target.classList.contains('ce-h')) return;
+  const r = ceStage.getBoundingClientRect(), b = _ce.box;
+  const x = (e.clientX - r.left - b.x0) / b.W, y = (e.clientY - r.top - b.y0) / b.H, q = _ce.q;
+  if(x < q[0][0] || x > q[2][0] || y < q[0][1] || y > q[2][1]) return;
+  e.preventDefault();
+  ceSnap();
+  _ce.drag = {move:true, x, y, q0:q.map(p=>p.slice())};
+  try{ ceStage.setPointerCapture(e.pointerId); }catch(er){}
+});
+ceStage.addEventListener('pointermove', e=>{
+  if(!_ce || !_ce.drag || !_ce.drag.move) return;
+  const r = ceStage.getBoundingClientRect(), b = _ce.box, d = _ce.drag, q0 = d.q0;
+  let dx = (e.clientX - r.left - b.x0) / b.W - d.x, dy = (e.clientY - r.top - b.y0) / b.H - d.y;
+  dx = Math.max(-q0[0][0], Math.min(1 - q0[2][0], dx)); dy = Math.max(-q0[0][1], Math.min(1 - q0[2][1], dy));
+  _ce.q = q0.map(([px, py])=>[px + dx, py + dy]);
+  ceOverlay();
+});
+const ceStageUp = ()=>{ if(_ce && _ce.drag && _ce.drag.move){ const u = _ce.undo[_ce.undo.length - 1]; if(u && ceSameQ(u.q, _ce.q)){ _ce.undo.pop(); ceUndoUi(); } _ce.drag = null; } };
+ceStage.addEventListener('pointerup', ceStageUp); ceStage.addEventListener('pointercancel', ceStageUp);
 ceHs.forEach((h, k)=>{
   h.addEventListener('pointerdown', e=>{
     if(!_ce || !_ce.box) return;
     e.preventDefault();
     const r = ceStage.getBoundingClientRect(), b = _ce.box;
+    ceSnap();
     _ce.drag = {k, dx:e.clientX - (r.left + b.x0 + _ce.q[k][0] * b.W), dy:e.clientY - (r.top + b.y0 + _ce.q[k][1] * b.H)};
     try{ h.setPointerCapture(e.pointerId); }catch(er){}
     h.classList.add('on');
@@ -12359,15 +12428,20 @@ ceHs.forEach((h, k)=>{
   h.addEventListener('pointermove', e=>{
     if(!_ce || !_ce.drag || _ce.drag.k !== k) return;
     const r = ceStage.getBoundingClientRect(), b = _ce.box;
-    _ce.q[k] = [Math.max(0, Math.min(1, (e.clientX - _ce.drag.dx - r.left - b.x0) / b.W)), Math.max(0, Math.min(1, (e.clientY - _ce.drag.dy - r.top - b.y0) / b.H))];
+    const x = Math.max(0, Math.min(1, (e.clientX - _ce.drag.dx - r.left - b.x0) / b.W)), y = Math.max(0, Math.min(1, (e.clientY - _ce.drag.dy - r.top - b.y0) / b.H));
+    if(_ce.mode === 'rect') ceRectSet(k, x, y); else _ce.q[k] = [x, y];
     ceOverlay();
   });
-  const up = ()=>{ if(_ce) _ce.drag = null; h.classList.remove('on'); };
+  const up = ()=>{
+    if(_ce && _ce.drag && !_ce.drag.move){ const u = _ce.undo[_ce.undo.length - 1]; if(u && ceSameQ(u.q, _ce.q)){ _ce.undo.pop(); ceUndoUi(); } _ce.drag = null; }
+    h.classList.remove('on');
+  };
   h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
 });
 /* okretanje: uglovi idu zajedno sa slikom (gornji levi ostaje gornji levi) */
 function ceRot(dir){
   if(!_ce || _ce.busy) return;
+  ceSnap();
   const q = _ce.q;
   if(dir > 0){ _ce.rot = (_ce.rot + 90) % 360; _ce.q = [q[3], q[0], q[1], q[2]].map(([x, y])=>[1 - y, x]); }
   else{ _ce.rot = (_ce.rot + 270) % 360; _ce.q = [q[1], q[2], q[3], q[0]].map(([x, y])=>[y, 1 - x]); }
@@ -12382,11 +12456,11 @@ document.getElementById('ceOrig').onclick = async ()=>{
     const b = await _ce.opt.origGet();
     const bmp = await createImageBitmap(b);
     if(!_ce){ bmp.close(); return; }
-    if(_ce.bmp.close) _ce.bmp.close();
+    ceSnap();
+    _ce.bmps.push(bmp);
     Object.assign(_ce, {bmp, rot:0, q:ceFull(), fromOrig:true});
     document.getElementById('ceOrig').hidden = true;
-    document.getElementById('ceHint').textContent = t('ceHintOrig');
-    ceDraw();
+    ceModeUi(); ceDraw();
   }catch(e){ console.error(e); toast(t('ceErr')); }
 };
 /* homografija: (u,v) na izlazu → (x,y) na slici; 4 para tačaka, 8 nepoznatih (Gausova eliminacija) */
