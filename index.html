@@ -5243,7 +5243,7 @@ Object.assign(I18N.sr, {
   wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
   wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
-  storUsed: 'Iskorišćeno: ~{mb} MB', storTrash: ' (u korpi {n})', storFree: ' · Slobodno još ~{mb} MB', buildLbl: 'Verzija',
+  storUsed: 'Iskorišćeno: ~{mb} MB', storTrash: ' (u korpi {n})', buildLbl: 'Verzija',
   viewAsList: 'Prikaži kao listu', viewAsGrid: 'Prikaži kao mrežu', selN: '{n} odabrano'
 });
 Object.assign(I18N.en, {
@@ -5262,7 +5262,7 @@ Object.assign(I18N.en, {
   wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
   wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
-  storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', storFree: ' · Free: ~{mb} MB', buildLbl: 'Version',
+  storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', buildLbl: 'Version',
   viewAsList: 'Show as list', viewAsGrid: 'Show as grid', selN: '{n} selected'
 });
 /* v185: ekran albuma */
@@ -10532,7 +10532,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 259;
+const APP_VERSION = 260;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10868,16 +10868,7 @@ function updateStorageInfo(){
   else if(pEl) Skladiste.jeTrajno().then(p=>{ if(p !== null) pEl.textContent = p ? t('persistOn') : t('persistOff'); });
   const trashPart = trash.length ? t('storTrash', {n:trash.length}) : '';
   infoEl.textContent = t('storUsed', {mb:mb.toFixed(1)}) + ' \u00B7 ' + stavkeTxt(items.length) + trashPart;
-  {
-    Skladiste.zauzece().then(est=>{
-      if(est && est.quota){
-        const usedMb = (est.usage || 0) / 1024 / 1024;
-        const quotaMb = est.quota / 1024 / 1024;
-        const freeMb = Math.max(0, quotaMb - usedMb);
-        infoEl.textContent = t('storUsed', {mb:mb.toFixed(1)}) + ' \u00B7 ' + stavkeTxt(items.length) + trashPart + t('storFree', {mb:freeMb.toFixed(0)});
-      }
-    }).catch(()=>{});
-  }
+  /* v260: bez „Slobodno još“ — Chrome prijavljuje veštačku granicu (zauzeto + 10 GiB), ne pravo slobodno mesto */
 }
 
 /* ---------- Fascikla za rezervnu kopiju ----------
