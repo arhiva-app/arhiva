@@ -480,12 +480,6 @@ html.sc-peek #modalUnlock{ display:flex; }
     height:18px;line-height:18px;
   }
   .folder-tile .fcount{display:block;font-family:var(--font-num);font-size:12px;color:var(--ink-faint);height:14px;line-height:14px;}
-  .pin-mark{
-    position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;
-    background:var(--accent);display:flex;align-items:center;justify-content:center;z-index:2;
-    font-family:var(--font-title);font-weight:600;font-size:14px;line-height:1;color:var(--on-accent);
-  }
-  .pin-mark svg{stroke:var(--on-accent);}
 
   .card{position:relative;cursor:pointer;}
   .thumb-box{
@@ -939,7 +933,6 @@ html[data-theme="ponoc"]{
 :where(html[data-theme]:not([data-theme="klasicna"])) .exit-btn.leave{ background:var(--danger); border:none; color:#fff; }
 :where(html[data-theme]:not([data-theme="klasicna"])) .modal-caption{ color:var(--ink); }
 :where(html[data-theme]:not([data-theme="klasicna"])) .sel-bar{ border-top-color:var(--line); }
-:where(html[data-theme]:not([data-theme="klasicna"])) .pin-mark{ font-family:var(--font-ui); font-size:12px; font-weight:700; }
 /* lista albuma: kao tabela stavki u Troskovima (jedna kartica, redovi odvojeni linijom) */
 
 /* =========================================================
@@ -988,8 +981,6 @@ html[data-theme="banka"] .home-inbox.home-inbox:active{ background:linear-gradie
 [data-theme="banka"] .folder-tile .nocover span{ font-size:44px; }
 [data-theme="banka"] .folder-tile-row .fname{ font-family:var(--font-title); font-size:19px; font-weight:600; color:var(--title-color); }
 [data-theme="banka"] .folder-tile-row .fcount{ font-family:var(--font-ui); font-size:11px; text-transform:uppercase; letter-spacing:1.1px; color:#9A7A3E; margin-top:4px; }
-[data-theme="banka"] .pin-mark{ top:0; right:8px; left:auto; width:12px; height:20px; padding:0; border:none; border-radius:0; background:linear-gradient(#E6C77E,#B8924A);
-  clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%); font-size:0; color:transparent; box-shadow:none; z-index:3; }
 [data-theme="banka"] .folder-tile-row .drag-handle{ color:rgba(14,39,71,.25); }
 
 /* =========================================================
@@ -1070,9 +1061,6 @@ html[data-theme="koza"] .home-inbox.home-inbox:active{ background-color:#EADFC6;
 [data-theme="koza"] .folder-tile .nocover span{ font-size:44px; }
 [data-theme="koza"] .folder-tile-row .fname{ font-family:var(--font-num); font-size:19px; font-weight:600; color:#1F3A2E; }
 [data-theme="koza"] .folder-tile-row .fcount{ font-family:var(--font-title); font-size:15px; color:#7A2331; margin-top:2px; line-height:1.2; }
-[data-theme="koza"] .pin-mark{ top:-6px; right:12px; width:10px; height:40px; padding:0; border:none; border-radius:0; font-size:0; color:transparent; z-index:4;
-  background:linear-gradient(90deg,#5E1A26,#8A2B3A 50%,#5E1A26); clip-path:polygon(0 0,100% 0,100% 100%,50% 85%,0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
-[data-theme="koza"] .folder-tile-row .pin-mark{ right:auto; left:40px; }
 [data-theme="koza"] .folder-tile-row .drag-handle{ color:rgba(31,58,46,.3); }
 /* v238 (Zoran): obaveštenje kao papirna cedulja (isto kao „Bez albuma“): papir sa zrnom, prošiven okvir, tamnozelena slova,
    ikonica kao bordo pečat. Upozorenje: pečat boje mastila; „NIJE SAČUVANO!“ ostaje crveno. */
@@ -1111,8 +1099,6 @@ html[data-theme="klasicna"] .home-inbox.home-inbox:active{ background:#2A2D32; }
 [data-theme="klasicna"] .folder-tile .nocover span{ font-size:40px; }
 [data-theme="klasicna"] .folder-tile-row .fname{ font-family:var(--font-ui); font-style:normal; font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-.2px; }
 [data-theme="klasicna"] .folder-tile-row .fcount{ font-family:var(--font-ui); font-size:12px; color:var(--ink-dim); font-weight:500; }
-[data-theme="klasicna"] .pin-mark{ top:12px; left:10px; right:auto; width:6px; height:6px; padding:0; border:none; border-radius:50%; background:var(--accent); font-size:0; color:transparent; box-shadow:none; z-index:3; }
-[data-theme="klasicna"] .folder-tile .pin-mark{ top:10px; left:auto; right:10px; width:8px; height:8px; }
 [data-theme="klasicna"] .folder-tile-row .drag-handle{ color:#C3C7CD; }
 [data-theme="klasicna"] .note-bar:not(.save-fail){ background:var(--ink); color:#fff; border:none; box-shadow:0 10px 24px -10px rgba(0,0,0,.45); }
 [data-theme="klasicna"] .note-bar:not(.save-fail) svg{ color:#fff; background:var(--accent); border:none; padding:9px; }
@@ -1140,7 +1126,7 @@ html[data-theme="klasicna"] .home-inbox.home-inbox:active{ background:#2A2D32; }
 /* Bez albuma: u skladu sa podlogom Abeceda/Datum */
 [data-theme="ponoc"] .inbox-row .folder-tile-wide{ background:#000; border:1px solid var(--line); border-radius:999px; box-shadow:none; }
 [data-theme="ponoc"] .inbox-row .folder-tile-wide .fw-icon{ background:var(--surface); }
-[data-theme="ponoc"] .pin-mark, [data-theme="ponoc"] .card.selected .select-mark, [data-theme="ponoc"] .toast-undo, [data-theme="ponoc"] .sheet-cta:not(.secondary){ background:var(--g-grad); box-shadow:var(--g-shine); }
+[data-theme="ponoc"] .card.selected .select-mark, [data-theme="ponoc"] .toast-undo, [data-theme="ponoc"] .sheet-cta:not(.secondary){ background:var(--g-grad); box-shadow:var(--g-shine); }
 [data-theme="ponoc"] .card.selected .select-mark{ border-color:#2F6B45; }
 [data-theme="ponoc"] .card.selected .thumb-box{ border-color:var(--brass); }
 [data-theme="ponoc"] .select-mark{ border-color:var(--line); }
@@ -2753,6 +2739,14 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
   transition:opacity .2s ease, transform .2s ease; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .to-top.show{ opacity:1; transform:none; pointer-events:auto; }
 .to-top:active{ background:var(--brass-glow); }
+/* v262 (Zoran): red albuma (prikaz spisak) iste visine u svim temama, slika široka 104 × 74 */
+html[data-theme] .folder-tile-row{ height:74px; padding:0 14px 0 0; gap:14px; }
+html[data-theme] .folder-tile-row .ftile-cover{ width:104px; height:74px; margin:0; }
+html[data-theme="koza"] .folder-tile-row .ftile-cover{ margin:0 0 0 -6px; }
+html[data-theme="klasicna"] .folder-tile-row .ftile-cover img{ width:100%; height:100%; margin:0; border-radius:0; }
+.pin-ic{ display:inline-flex; vertical-align:-2px; margin-right:6px; color:var(--pin-c, var(--accent)); }
+.pin-ic svg{ width:17px; height:17px; }
+html[data-theme="ponoc"]{ --pin-c:#6FC48A; } html[data-theme="crna"]{ --pin-c:var(--brass); } html[data-theme="koza"]{ --pin-c:#7A2331; } html[data-theme="banka"]{ --pin-c:#A8873F; }
 /* v262: u svetlim temama puna, u glavnoj boji teme (krem krug na krem pozadini se nije video) */
 html[data-theme="koza"] .to-top{ background:#1F3A2E; color:#EAD6A2; border:none; }
 html[data-theme="banka"] .to-top{ background:#0E2747; color:#E8CE92; border:none; }
@@ -7520,6 +7514,7 @@ function commitGroupOrder(groupCats, container){
 /* v235: boja kože za album (tema Privatno bankarstvo) — po id-ju albuma, pa ostaje ista i posle preimenovanja ili premeštanja */
 const ALBUM_SPINES = ['#14294A', '#5A1F2B', '#1F3A2E', '#6B3F1F', '#2B2E35', '#3D2340'];
 function albumSpine(id){ let h = 0; for(const c of String(id || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0; return ALBUM_SPINES[h % ALBUM_SPINES.length]; }
+const PIN_TOP_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="3.5" x2="19" y2="3.5"></line><line x1="12" y1="21" x2="12" y2="8"></line><polyline points="7 13 12 8 17 13"></polyline></svg>';
 const buildFolderTile = (cat, groupCats, onOpen)=>{
   const name = cat.name;
   const count = countDeep(cat.id);
@@ -7536,11 +7531,10 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
   }else{
     tile.innerHTML = '<div class="ftile-cover">'+coverInner+'</div><span class="fname">'+escapeHtml(name)+'</span><span class="fcount">'+stavkeTxt(count)+'</span>'+(subN ? '<span class="fcount fsub">'+podalbumiTxt(subN)+'</span>' : '');
   }
-  if(cat.pinned){
-    const pin = document.createElement('div');
-    pin.className = 'pin-mark';
-    pin.textContent = 'P';
-    tile.querySelector('.ftile-cover').appendChild(pin);
+  if(cat.pinned){   /* v262 (Zoran): jasna oznaka „zakačen na vrh“ ispred imena, ista u svim temama (ranije „P“/traka/jezičak/tačka na slici) */
+    const pin = document.createElement('span'); pin.className = 'pin-ic'; pin.title = t('acPin'); pin.setAttribute('aria-label', t('acPin'));
+    pin.innerHTML = PIN_TOP_SVG;
+    tile.querySelector('.fname').prepend(pin);
   }
 
   const handle = document.createElement('div');
