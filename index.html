@@ -2708,6 +2708,50 @@ html .home-inbox.home-inbox{ background:linear-gradient(90deg, color-mix(in srgb
 html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 /* v148: ukupan broj stavki iste veličine kao broj albuma */
 .mark-cnt-2{ font-size:1em; }
+/* v261: zakačeni deo bez viška vazduha — isti razmak iznad reda ikonica na početnom ekranu i u albumu, bez praznog reda ispod natpisa */
+header, body.in-album header{ margin-bottom:0; }
+.alb-icons{ margin-top:10px; margin-bottom:0; }
+/* v261: sistemski folderi — dva reda po tri, izgled kao raniji „Bez albuma“ (zlatna podloga sleva, tanka zlatna ivica) */
+.sys-panel{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); margin:0 0 14px; border-radius:14px; overflow:hidden; box-sizing:border-box;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--brass) 14%, var(--surface-2)), var(--surface-2) 70%);
+  border:1px solid color-mix(in srgb, var(--brass) 45%, var(--line)); --sys-sep:color-mix(in srgb, var(--line) 85%, transparent); }
+.sys-cell{ position:relative; min-width:0; height:48px; display:flex; align-items:center; justify-content:center; gap:7px; padding:0 6px; margin:0;
+  border:0; border-radius:0; background:none; color:var(--ink); font-family:var(--font-ui); font-size:13.5px; font-weight:600; line-height:1.12; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.sys-cell:not(:nth-child(3n+1)){ border-left:1px solid var(--sys-sep); }
+.sys-cell:nth-child(n+4){ border-top:1px solid var(--sys-sep); }
+.sys-cell:active{ background:var(--brass-glow); }
+.sys-ic{ position:relative; flex:none; display:flex; color:var(--brass); }
+.sys-ic svg{ width:22px; height:22px; }
+.sys-tx{ min-width:0; text-align:left; }
+.sys-cell.has-badge{ gap:11px; }
+.sys-badge{ position:absolute; top:-8px; right:-9px; min-width:17px; height:17px; padding:0 4px; box-sizing:border-box; border-radius:9px;
+  background:var(--accent); color:var(--on-accent); font-family:var(--font-ui); font-size:10.5px; font-weight:700; line-height:17px; text-align:center; }
+html[data-theme="banka"] .sys-panel{ background:linear-gradient(135deg,#163558 0%,#0B1F3A 100%); border:1px solid var(--gold); box-shadow:0 8px 20px -10px rgba(11,31,58,.6); --sys-sep:rgba(201,169,97,.35); }
+html[data-theme="banka"] .sys-cell{ color:#F7F2E6; }
+html[data-theme="banka"] .sys-ic{ color:var(--gold-hi); }
+html[data-theme="banka"] .sys-cell:active{ background:rgba(255,255,255,.08); }
+html[data-theme="banka"] .sys-badge{ background:var(--gold-hi); color:#0B1F3A; }
+html[data-theme="koza"] .sys-panel{ background-color:#F6EEDB; background-image:var(--paper); border:none; outline:1.5px dashed rgba(122,95,40,.45); outline-offset:-5px; --sys-sep:rgba(122,95,40,.28); }
+html[data-theme="koza"] .sys-cell{ color:#1F3A2E; }
+html[data-theme="koza"] .sys-ic{ color:#7A2331; }
+html[data-theme="koza"] .sys-cell:active{ background:#EADFC6; }
+html[data-theme="klasicna"] .sys-panel{ background:var(--ink); border:none; --sys-sep:rgba(255,255,255,.14); }
+html[data-theme="klasicna"] .sys-cell{ color:#fff; }
+html[data-theme="klasicna"] .sys-ic{ color:var(--accent); }
+html[data-theme="klasicna"] .sys-cell:active{ background:#2A2D32; }
+.sys-info{ margin:8px 0 2px; }
+/* v261: u sistemskom folderu ne seče se naziv: kad red putanje ne staje, prvo se skloni broj stavki */
+#pathZone .path-bar.cnt-short .path-count .pc-w{ display:none; }
+#pathZone .path-bar.cnt-off .path-count{ display:none; }
+#pathZone .path-tools{ gap:4px; }
+#pathZone .path-tool{ width:36px; height:36px; }
+/* v261: strelica na vrh */
+.to-top{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:42; width:48px; height:48px; margin:0 0 0 -24px; padding:0; box-sizing:border-box;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--line); background:color-mix(in srgb, var(--surface-2) 94%, transparent);
+  color:var(--ink); box-shadow:0 6px 18px -6px rgba(0,0,0,.55); opacity:0; transform:translateY(12px) scale(.9); pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.to-top.show{ opacity:1; transform:none; pointer-events:auto; }
+.to-top:active{ background:var(--brass-glow); }
 </style>
 <script>
 /* v227: pdf.js 6.4.299, verzija „legacy“ (zvanično Chrome 125+), u repou Arhive (radi i bez interneta, bez tuđeg servera).
@@ -2742,7 +2786,6 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
         <button class="icon-btn" id="newAlbumBtn" type="button" title="Novi album" aria-label="Novi album">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A2 2 0 0 1 5 5.5h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><line x1="12" y1="10.5" x2="12" y2="16"></line><line x1="9.25" y1="13.25" x2="14.75" y2="13.25"></line></svg>
         </button>
-        <button class="icon-btn" id="allBtn" type="button" style="display:none;" aria-label="Sve"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3 16 8.5 11 13 15.5 15.5 13 21 17.5"></polyline><circle cx="9" cy="9.5" r="1.6"></circle></svg></button>
         <button class="icon-btn" id="viewToggleBtn" type="button" style="display:none;"></button>
         <button class="icon-btn" id="searchBtn" title="Pretraga">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
@@ -2803,6 +2846,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <div id="contentArea"></div>
 </div>
 
+<button type="button" class="to-top" id="toTopBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></button>
 <div class="sel-bar" id="selBar">
   <button id="btnSend">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"></path><path d="M21 3l-6.5 18-3.5-7-7-3.5z"></path></svg>
@@ -3942,7 +3986,7 @@ const I18N = {
     wsPickDocs: 'Dokumenti',
     wsPickRecent: 'Poslednji',
     wsPickCount: 'stavki: {n}',
-    pathLabel: 'Gde se nalaziš', pathInbox: 'Bez albuma', pathAll: 'Sve', allKindAll: 'Sve', allKindImg: 'Slike i video', allKindDoc: 'Dokumenti', allEmpty: 'U Arhivi još nema ničega.', allBtn: 'Sve slike i dokumenti po danima',
+    pathLabel: 'Gde se nalaziš', pathInbox: 'Bez albuma', pathAll: 'Sve', allKindAll: 'Sve', allKindImg: 'Slike i video', allKindDoc: 'Dokumenti', allEmpty: 'U Arhivi još nema ničega.', sysLbl: 'Vrste stavki', sysAll: 'Sve', sysImg: 'Slike', sysVid: 'Video', sysShot: 'Snimci ekrana', sysDoc: 'Dokumenti', sysEmpty: 'Ovde još nema ničega.', sysDocInfo: 'Ovde su dokumenti: PDF, Word, Excel i ostali fajlovi. Papir koji si uslikao kamerom čuva se kao slika, pa je u „Slike“; nalazi ga i pretraga po tekstu.', sysShotInfo: 'Ovde su snimci ekrana: slike veličine ekrana ovog telefona i slike koje je telefon nazvao „Screenshot…“. Isti snimak je i u „Slike“, „Sve“ i u svom albumu (ili u „Bez albuma“).', toTop: 'Na vrh',
     wsPickAlbEmpty: 'Album je prazan.',
     wsSaveTitle: 'Sačuvaj u arhivu',
     wsSaveNameLbl: 'Naziv novog dokumenta',
@@ -4143,7 +4187,7 @@ const I18N = {
     guideTileSub: 'Kako se koristi Arhiva',
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
-      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili po datumu) i AI (radionica). Desno gore su Sve (slika: sve slike i dokumenti iz cele Arhive po danima, najnovije prvo, sa izborom Sve · Slike · Dokumenti; desno gore lupa za pretragu i Sortiraj: po datumu ili po abecedi), prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (po datumu, najnovije ili najstarije prvo, ili po abecedi; krug pokazuje koji je uključen) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
+      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili po datumu) i AI (radionica). Ispod reda ikonica su sistemski folderi, dva reda po tri: Sve, Slike, Video, Snimci ekrana, Dokumenti i Bez albuma (broj na ikonici Bez albuma kaže koliko stavki tamo čeka). Svaki otvara sve stavke te vrste iz cele Arhive po danima, najnovije prvo; desno gore su lupa za pretragu i Sortiraj (po datumu ili po abecedi), a kod Dokumenata i Snimaka ekrana ⓘ objašnjava šta je tu. Snimci ekrana su slike veličine ekrana ovog telefona i slike koje je telefon nazvao „Screenshot…“; isti snimak je i u Slikama i u svom albumu. Folderi se ne brišu, ne preimenuju i ne pomeraju. Pri skrolovanju se povlače gore sa albumima, a red ikonica ostaje; posle skrolovanja dole na sredini se pojavi okrugla strelica ↑, koja jednim dodirom vraća na vrh (isto u albumima, folderima i pretrazi). Desno gore su prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (po datumu, najnovije ili najstarije prvo, ili po abecedi; krug pokazuje koji je uključen) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
       ['Donji red u albumu', 'U albumu je dole uvek red: Pošalji · U album · Prečica · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije izabrano otvara izbor (isti kao dugi pritisak na stavku): putanja gore i donji red ostaju, dugmad su bleda dok ne izabereš bar jednu stavku. Dodiruješ stavke, pa radnju koju hoćeš. ✕ ili korak nazad prekida izbor. Kod dugog pritiska na stavku gore je „Izaberi sve“; kad je sve izabrano, isto dugme piše „Poništi sve“ i jednim dodirom poništava izbor.', 'Pošalji nudi „Podeli“ ili „Sačuvaj na telefon“; za slike i dokumente od više stranica i „kao jedan PDF“ ili „svaku posebno“. „Više“ radi sa jednom stavkom: Preimenuj, Podsetnik i AI radionica; kad je izabrano više stavki, bledo je.', 'Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu ide odmah na označeno.', 'Premeštanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premesti ovde“. Jedan dodir na podalbum premešta označeno i ostaješ u albumu. Na vrhu se pojavi obaveštenje sa dugmetom „Vrati“, koje za par sekundi vraća stavke na staro mesto. Za premeštanje u bilo koji drugi album služi „U album“. Posle premeštanja ili kopiranja u drugi album, desno u redu putanje stoji dugme sa nazivom tog albuma (npr. „Stoja ›“): dodir vodi pravo tamo, a prebačeni dokumenti su nakratko uokvireni. Dugme stoji dok si u albumu odakle si slao.', 'Nov podalbum se ne otvara sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.', 'Obaveštenja (šta je sačuvano, premešteno ili šta nije uspelo) uvek izlaze na vrhu ekrana, na mestu putanje. Kvačica znači da je urađeno, znak „!“ da nešto treba proveriti. Obaveštenje posle par sekundi samo nestane, a za to vreme možeš normalno da radiš.'],
       ['Dodavanje', 'Ikonica slike sa plusom dodaje sa telefona: iz galerije (više slika odjednom), slikanjem ili kao dokument (PDF, Word, Excel…). Svaka izabrana slika postaje posebna stavka.', 'Ono što dodaš dok si u albumu (iz galerije, slikanjem ili kao dokument) ide pravo u taj album. Kad slika ima samo automatsko ime iz telefona (niz brojeva, IMG_…), Arhiva ga ne prikazuje, nego piše „Slika“. Pored rednog broja na kartici je datum kad je stavka dodata. Dodir na naziv otvara prozor sa tri polja: naziv, datum i vreme; datum i vreme se retko menjaju (npr. račun iz marta slikan danas), a po njima se stavke ređaju.'],
       ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
@@ -4755,7 +4799,7 @@ const I18N = {
     wsPickDocs: 'Documents',
     wsPickRecent: 'Recent',
     wsPickCount: 'items: {n}',
-    pathLabel: 'Where you are', pathInbox: 'No album', pathAll: 'All', allKindAll: 'All', allKindImg: 'Photos & videos', allKindDoc: 'Documents', allEmpty: 'The archive is still empty.', allBtn: 'All images and documents by day',
+    pathLabel: 'Where you are', pathInbox: 'No album', pathAll: 'All', allKindAll: 'All', allKindImg: 'Photos & videos', allKindDoc: 'Documents', allEmpty: 'The archive is still empty.', sysLbl: 'Item types', sysAll: 'All', sysImg: 'Photos', sysVid: 'Videos', sysShot: 'Screenshots', sysDoc: 'Documents', sysEmpty: 'Nothing here yet.', sysDocInfo: 'Documents are here: PDF, Word, Excel and other files. A paper you photographed with the camera is saved as a photo, so it is in “Photos”; text search finds it too.', sysShotInfo: 'Screenshots are here: images the size of this phone’s screen and images the phone named “Screenshot…”. The same screenshot is also in “Photos”, “All” and in its album (or in “No album”).', toTop: 'To the top',
     wsPickAlbEmpty: 'The album is empty.',
     wsSaveTitle: 'Save to the archive',
     wsSaveNameLbl: 'Name of the new document',
@@ -4956,7 +5000,7 @@ const I18N = {
     guideTileSub: 'How to use Arhiva',
     guideIntro: 'Tap a title to open the explanation.',
     guide: [
-      ['Albums and sub-albums', 'On the home screen, next to the name “Arhiva”, you see how many albums there are, and below that how many items are in the whole Arhiva (all images and documents, not counting the trash). Below the name “Arhiva” there is a row of icons: Add (into “No album”), Search, Album (a new album), Sort (my order, by name or by date) and AI (the workshop). At the top right are All (picture icon: every image and document in the whole archive by day, newest first, with All · Images · Documents; at the top right a magnifier to search and Sort: by date or alphabetically), the view (tiles or list), the bell and settings. Inside an album, below the path, is a row of icons: Add (camera, gallery or a document into this album), Search, Subalbum (a new sub-album, only in a main album; an album card shows how many sub-albums it has next to the number of items) Sort (by date, newest or oldest first, or by name; the circle shows which is on) and Merge (several images into one document).', 'When you open an image or document, the same path is at the top (Arhiva › album › sub-album): tap any part to go to that album, or “Arhiva” for the home screen. In search results the path is shown below the name, and a document opened from search opens in its own album: Back takes you to that album. The buttons on an open document have labels: Back, AI, Reminder, PDF (or Share / Save), Pages and Delete.', 'The same name cannot be used twice anywhere in Arhiva (neither for albums nor for images and documents; capitals and accents do not count). When a name is taken, the line below the field says where it already exists and the button stays dimmed until you change it. When Arhiva names something itself (merge, adding, copy), it adds “(2)”, and a copy gets “– copy”. Camera images with an automatic name do not count.', 'In the “list” view you can also delete an album by swiping it to the left: a red “Delete” appears, and tapping it asks for confirmation. Swiping back to the right or tapping anywhere else puts the album back without deleting.', 'Long-press an album for options: pin to top, rename, cover image, move or delete. Drag the handle in the corner to change the album order. You can also rename an album inside it with the pencil next to its name in the path (or by tapping the name).', 'At the top of an album is the path, e.g. “Arhiva › Album › Sub-album”, so you always see where you are; the number of items is on the right. Tap “Arhiva” to go to the home screen, or the parent album name to go to that album. Back goes up one level.'],
+      ['Albums and sub-albums', 'On the home screen, next to the name “Arhiva”, you see how many albums there are, and below that how many items are in the whole Arhiva (all images and documents, not counting the trash). Below the name “Arhiva” there is a row of icons: Add (into “No album”), Search, Album (a new album), Sort (my order, by name or by date) and AI (the workshop). Below the row of icons are the system folders, two rows of three: All, Photos, Videos, Screenshots, Documents and No album (the number on the No album icon shows how many items are waiting there). Each opens every item of that kind in the whole archive by day, newest first; at the top right are a magnifier to search and Sort (by date or alphabetically), and in Documents and Screenshots ⓘ explains what is there. Screenshots are images the size of this phone’s screen and images the phone named “Screenshot…”; the same screenshot is also in Photos and in its album. The folders cannot be deleted, renamed or moved. When you scroll they move up with the albums while the row of icons stays; after scrolling, a round ↑ arrow appears at the bottom centre and takes you back to the top with one tap (also in albums, folders and search). At the top right are the view (tiles or list), the bell and settings. Inside an album, below the path, is a row of icons: Add (camera, gallery or a document into this album), Search, Subalbum (a new sub-album, only in a main album; an album card shows how many sub-albums it has next to the number of items) Sort (by date, newest or oldest first, or by name; the circle shows which is on) and Merge (several images into one document).', 'When you open an image or document, the same path is at the top (Arhiva › album › sub-album): tap any part to go to that album, or “Arhiva” for the home screen. In search results the path is shown below the name, and a document opened from search opens in its own album: Back takes you to that album. The buttons on an open document have labels: Back, AI, Reminder, PDF (or Share / Save), Pages and Delete.', 'The same name cannot be used twice anywhere in Arhiva (neither for albums nor for images and documents; capitals and accents do not count). When a name is taken, the line below the field says where it already exists and the button stays dimmed until you change it. When Arhiva names something itself (merge, adding, copy), it adds “(2)”, and a copy gets “– copy”. Camera images with an automatic name do not count.', 'In the “list” view you can also delete an album by swiping it to the left: a red “Delete” appears, and tapping it asks for confirmation. Swiping back to the right or tapping anywhere else puts the album back without deleting.', 'Long-press an album for options: pin to top, rename, cover image, move or delete. Drag the handle in the corner to change the album order. You can also rename an album inside it with the pencil next to its name in the path (or by tapping the name).', 'At the top of an album is the path, e.g. “Arhiva › Album › Sub-album”, so you always see where you are; the number of items is on the right. Tap “Arhiva” to go to the home screen, or the parent album name to go to that album. Back goes up one level.'],
       ['Bottom row in an album', 'At the bottom of an album there is always a row: Send · To album · Shortcut · More · Delete. Tapping any action when nothing is selected opens the selection (the same as a long press on an item): the path at the top and the bottom row stay, and the buttons are dimmed until you pick at least one item. Tap the items, then the action you want. ✕ or Back cancels the selection. After a long press on an item, “Select all” is at the top; when everything is selected the same button reads “Clear all” and clears the selection with one tap.', '“Send” offers “Share” or “Save to phone”; for images and multi-page documents also “as one PDF” or “each separately”. “More” works with one item: Rename, Reminder and the AI workshop; when more items are selected it is dimmed.', 'Long-press still works: select items, and an action in the bottom row then applies to them right away.', 'Moving into a sub-album: while items are selected, sub-albums get a frame and the label “move here”. One tap on a sub-album moves the selection and you stay in the album. A notice with an “Undo” button appears at the top and puts the items back for a few seconds. To move to any other album, use “To album”. After moving or copying to another album, a button with that album’s name (e.g. “Stoja ›”) sits on the right of the path row: one tap takes you there, and the items you sent are briefly outlined. The button stays while you are in the album you sent from.', 'A new sub-album does not open by itself: you stay in the album and the sub-album appears among the sub-albums.', 'Notices (what was saved, moved or what did not work) always appear at the top of the screen, in place of the path. A check mark means it is done, a “!” sign that something needs checking. A notice disappears by itself after a few seconds, and you can keep working meanwhile.'],
       ['Adding', 'The image-plus icon adds from the phone: from the gallery (several images at once), by taking a photo, or as a document (PDF, Word, Excel…). Every picked image becomes a separate item.', 'What you add while inside an album (from the gallery, by taking a photo or as a document) goes straight into that album. When an image has only an automatic phone name (a string of digits, IMG_…), Arhiva does not show it but writes “Image”. Next to the item number on the card is the date it was added. Tapping the name opens a window with three fields: name, date and time; date and time rarely change (e.g. a March receipt photographed today), and items are ordered by them.'],
       ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
@@ -6785,10 +6829,37 @@ function pdfIconSvg(){
 const INBOX = '__inbox__';
 /* v126: pregled svega iz cele Arhive po danima (ikonica gore na početnom ekranu); allKind = 'all' | 'img' | 'doc' */
 const ALL = '__all__';
-let allKind = 'all';
+let allKind = 'all';   /* v261: sistemski folderi — 'all' | 'img' | 'vid' | 'shot' | 'doc' */
 function realAlbum(f){ return (f && f !== INBOX && f !== ALL) ? f : null; }
-function isMedia(i){ return i.type === 'image' || i.type === 'video'; }   /* v254: video je u filteru „Slike i video“ */
-function allKindOk(i){ return allKind === 'all' || (allKind === 'img' ? isMedia(i) : !isMedia(i)); }
+function isMedia(i){ return i.type === 'image' || i.type === 'video'; }   /* v254 */
+/* v261: snimak ekrana = slika (jedna stranica) koju je telefon nazvao „Screenshot…“ ili je tačno veličine ekrana ovog
+   telefona (i smanjena na IMG_MAX_DIM, iste razmere). Računa se iz zapisa, ne čuva se: važi i za stare stavke i posle preimenovanja. */
+const SHOT_NAME_RE = /^(?:screenshot|screen[ _-]shot|snimak[ _-]ekrana)/i;
+function shotDims(w, h){
+  if(!(w > 0 && h > 0)) return false;
+  const dpr = window.devicePixelRatio || 1;
+  const s1 = Math.round(Math.min(screen.width, screen.height) * dpr), s2 = Math.round(Math.max(screen.width, screen.height) * dpr);
+  const a = Math.min(w, h), b = Math.max(w, h);
+  if(s1 < 200 || s2 < 200) return false;
+  if(Math.abs(a - s1) <= 3 && Math.abs(b - s2) <= 3) return true;
+  return s2 > IMG_MAX_DIM && b === IMG_MAX_DIM && Math.abs(a - s1 * IMG_MAX_DIM / s2) <= 2;
+}
+function isShot(i){
+  if(i.type !== 'image' || (i.pages || []).length !== 1) return false;
+  const p = i.pages[0], o = p.orig || p;
+  return SHOT_NAME_RE.test(i.name || '') || shotDims(o.w, o.h) || shotDims(p.w, p.h);
+}
+function allKindOk(i){
+  switch(allKind){
+    case 'img': return i.type === 'image';
+    case 'vid': return i.type === 'video';
+    case 'shot': return isShot(i);
+    case 'doc': return !isMedia(i);
+    default: return true;
+  }
+}
+const SYS_KEYS = {all:'sysAll', img:'sysImg', vid:'sysVid', shot:'sysShot', doc:'sysDoc'};
+function sysLabel(){ return t(SYS_KEYS[allKind] || 'sysAll'); }
 /* Ikonica za dodavanje slika/dokumenata sa telefona (razlikuje se od ikonice "Novi album") */
 const FOLDER_PLUS_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A2 2 0 0 1 5 5.5h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><line x1="12" y1="10.5" x2="12" y2="16"></line><line x1="9.25" y1="13.25" x2="14.75" y2="13.25"></line></svg>';
 const PHOTO_PLUS_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h8"></path><polyline points="3 17 8.5 12 13 16.5 15.5 14 20 18"></polyline><circle cx="8.5" cy="9.5" r="1.3"></circle><line x1="19" y1="2.5" x2="19" y2="8.5"></line><line x1="16" y1="5.5" x2="22" y2="5.5"></line></svg>';
@@ -7097,7 +7168,7 @@ function buildPathBar(curCat, total){
   bar.setAttribute('aria-label', t('pathLabel'));
   const parts = [{label:'Arhiva', target:null}];
   if(currentFolder === INBOX) parts.push({label:t('pathInbox'), target:INBOX});
-  else if(currentFolder === ALL) parts.push({label:t('pathAll'), target:ALL});
+  else if(currentFolder === ALL) parts.push({label:sysLabel(), target:ALL});
   else if(curCat){
     const par = curCat.parent ? catById(curCat.parent) : null;
     if(par) parts.push({label:par.name, target:par.id});
@@ -7134,12 +7205,19 @@ function buildPathBar(curCat, total){
     bar.appendChild(b);
   }else if(typeof total === 'number'){
     const c = document.createElement('span');
-    c.className = 'path-count'; c.textContent = stavkeTxt(total);
+    c.className = 'path-count'; c.innerHTML = '<span class="pc-n"></span><span class="pc-w"></span>';
+    { const w = stavkeTxt(total), n = String(total); c.firstChild.textContent = n; c.lastChild.textContent = w.startsWith(n) ? w.slice(n.length) : ' ' + w; }   /* v261: „24“ + „ stavke“ */
     bar.appendChild(c);
   }
   /* v127: u „Sve“ Pretraži i Sortiraj desno u redu putanje */
   if(currentFolder === ALL && !selectionMode){
     const tl = document.createElement('span'); tl.className = 'path-tools';
+    if(allKind === 'doc' || allKind === 'shot'){   /* v261: objašnjenje foldera iza ⓘ (pri ulasku zatvoreno) */
+      const ib = document.createElement('button'); ib.type = 'button'; ib.className = 'icon-btn path-tool pt-info';
+      ib.innerHTML = IBOX_I_SVG.replace('width="18" height="18"', 'width="20" height="20"');
+      ib.onclick = (e)=>{ e.stopPropagation(); };
+      tl.appendChild(ib);
+    }
     [['pt-search', SEARCH_SVG, 'icoSearch', ()=>document.getElementById('searchBtn').onclick()],
      ['pt-sort', SORT_SVG, 'icoSort', ()=>openSortChoice()]].forEach(([cls, svg, key, fn])=>{
       const b = document.createElement('button');
@@ -7181,8 +7259,11 @@ function openAlbumFromHome(target){
 function fitPathBar(bar){
   bar = bar || pathZone.querySelector('.path-bar');
   if(!bar || !bar.offsetParent) return;
-  bar.classList.remove('tight');
+  bar.classList.remove('tight', 'cnt-short', 'cnt-off');
   if(bar.scrollWidth > bar.clientWidth + 1) bar.classList.add('tight');
+  /* v261: u sistemskom folderu naziv se ne seče — broj stavki se prvo skrati na sam broj („· 24“), pa tek onda skloni */
+  const cur = bar.classList.contains('has-tools') && bar.querySelector('.path-cur');
+  if(cur){ for(const k of ['cnt-short', 'cnt-off']){ if(cur.scrollWidth <= cur.clientWidth + 1) break; bar.classList.add(k); } }
 }
 window.addEventListener('resize', ()=>fitPathBar());
 /* v113: font se ucitava posle prvog crtanja (font-display:swap) i menja sirinu teksta: ponovo uklopi putanju */
@@ -7686,12 +7767,13 @@ function _renderView(){
   pathZone.innerHTML = '';
   pathZone.classList.toggle('sel-lock', selectionMode);
   applyNote();
-  if(currentFolder){ crumbName.textContent = currentFolder === INBOX ? t('pathInbox') : currentFolder === ALL ? t('pathAll') : catLabel(currentFolder); }
+  if(currentFolder){ crumbName.textContent = currentFolder === INBOX ? t('pathInbox') : currentFolder === ALL ? sysLabel() : catLabel(currentFolder); }
   crumbRename.classList.toggle('show', !!realAlbum(currentFolder) && !selectionMode);
   selHeader.classList.toggle('show', selectionMode);
   /* v106: donji red stoji u albumu i bez izbora; u spajanju i u izboru za jednu radnju umesto njega je jedno dugme */
   const actOn = mergeMode || !!actMode;
   selBar.classList.toggle('show', (selectionMode || !!currentFolder) && !actOn);
+  if(window._toTopSync) window._toTopSync();   /* v261 */
   const renB = document.getElementById('btnShortcut');
   renB.classList.toggle('bar-off', selectionMode && !actOn && selectedIds.size !== 1);
   document.getElementById('btnMore').classList.toggle('bar-off', selectionMode && !actOn && selectedIds.size !== 1);   /* v156 */
@@ -7723,7 +7805,6 @@ function _renderView(){
       const sp = document.createElement('span'); sp.className = k ? 'mark-cnt-2' : 'mark-cnt-1'; sp.textContent = '\u00b7 ' + tx; el.appendChild(sp);
     }); }
   document.getElementById('viewToggleBtn').style.display = 'none';
-  document.getElementById('allBtn').style.display = 'none';
   if(selectionMode){
     selCount.textContent = mergeMode ? t('mergeTitle') : actMode ? t('act_' + actMode + '_title') : (selectedIds.size ? t('selN', {n:selectedIds.size}) : t('selPick'));
   }
@@ -7745,18 +7826,16 @@ function _renderView(){
     { const pb = buildPathBar(curCat, totalHere); pathZone.appendChild(pb); fitPathBar(pb); }
     const albumHead = document.createElement('div');
     albumHead.className = 'alb-head';
-    if(currentFolder === ALL && !selectionMode){
-      /* v126: umesto reda ikonica izbor vrste: Sve · Slike · Dokumenti */
-      const row = document.createElement('div');
-      row.className = 'all-chips';
-      [['all','allKindAll'],['img','allKindImg'],['doc','allKindDoc']].forEach(([k, key])=>{
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'all-chip' + (allKind === k ? ' on' : ''); b.dataset.kind = k;
-        b.textContent = t(key);
-        b.onclick = ()=>{ if(allKind === k) return; allKind = k; render(); window.scrollTo(0, 0); };
-        row.appendChild(b);
-      });
-      albumHead.appendChild(row);
+    if(currentFolder === ALL){
+      /* v261: sistemski folder (Sve, Slike, Video, Snimci ekrana, Dokumenti) — vrsta se bira na početnom ekranu;
+         ovde samo putanja, a kod Dokumenata i Snimaka objašnjenje iza ⓘ */
+      const ib = pathZone.querySelector('.pt-info');
+      if(ib && !selectionMode){
+        const box = document.createElement('div'); box.className = 'ibox sys-info';
+        iboxSet(box, t(allKind === 'doc' ? 'sysDocInfo' : 'sysShotInfo'));
+        iboxAttach(box, ib);
+        albumHead.appendChild(box);
+      }
     }else if(!selectionMode && !searchOpen){
       const row = document.createElement('div');
       row.className = 'alb-icons';
@@ -7796,7 +7875,7 @@ function _renderView(){
     if(filtered.length === 0 && q && !selectionMode){ contentArea.appendChild(searchEmptyAlt(true)); currentGalleryItems = []; return; }   /* v161 */
     if(filtered.length === 0){
       if(!q && !selectionMode) selBar.classList.remove('show');   /* v241: prazan album — nema na šta da se primeni donja traka */
-      const msg = q ? escapeHtml(t('emptyNoResX', {q:searchEl.value})) : currentFolder === ALL ? t('allEmpty') : t('albEmptyX');
+      const msg = q ? escapeHtml(t('emptyNoResX', {q:searchEl.value})) : currentFolder === ALL ? t(allKind === 'all' ? 'allEmpty' : 'sysEmpty') : t('albEmptyX');
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty';
       emptyDiv.innerHTML = '<b>'+escapeHtml(q ? t('emptyNoRes') : t('albEmpty'))+'</b><span>'+msg+'</span>';
@@ -7913,17 +7992,9 @@ function _renderView(){
     ico('alb-ico-ai', wsSparkSvg().replace('width="16" height="16"', 'width="28" height="28"'), t('icoAi'), ()=>wsOpen(null));
     homeHead.appendChild(row);
   }
-  const inboxCount = items.filter(i=>!i.category).length;
-  const inboxTile = document.createElement('button');
-  inboxTile.type = 'button';
-  inboxTile.className = 'home-inbox';
-  inboxTile.innerHTML = INBOX_SVG_HOME + '<span class="hi-nm"></span><span class="hi-ct"></span>';
-  inboxTile.querySelector('.hi-nm').textContent = t('allImages');
-  inboxTile.querySelector('.hi-ct').textContent = stavkeTxt(inboxCount) + ' \u203a';
-  inboxTile.onclick = ()=>{ currentFolder = INBOX; searchEl.value=''; pushBack(closeAlbumView); render(); };
-  /* v241: prazna Arhiva (nema stavki ni albuma) — dobrodošlica umesto „Bez albuma · 0“; nestaje sa prvom stavkom */
-  if(!items.length && !categories.length && !selectionMode && !searchOpen) homeHead.appendChild(homeWelcome());
-  else homeHead.appendChild(inboxTile);
+  /* v241: prazna Arhiva (nema stavki ni albuma) — dobrodošlica; nestaje sa prvom stavkom */
+  const welcome = !items.length && !categories.length && !selectionMode && !searchOpen;
+  if(welcome) homeHead.appendChild(homeWelcome());
   albumHeaderZone.appendChild(homeHead);
 
 
@@ -7941,17 +8012,43 @@ function _renderView(){
     btn.style.display = selectionMode ? 'none' : 'flex';
   };
   setupViewToggleBtn();
-  /* v126: Sve — sve slike i dokumenti iz cele Arhive po danima */
-  { const ab = document.getElementById('allBtn');
-    ab.title = t('allBtn'); ab.setAttribute('aria-label', t('allBtn'));
-    ab.style.display = selectionMode ? 'none' : 'flex';
-    ab.onclick = ()=>{ currentFolder = ALL; allKind = 'all'; searchEl.value = ''; pushBack(closeAlbumView); render(); window.scrollTo(0, 0); }; }
   fitMarkRow();   /* v175: meri se tek kad su sva dugmad gornjeg reda prikazana (ranije pre Sve i prikaza → broj odsečen posle kopije) */
 
   /* Pocetni ekran: samo albumi prvog nivoa (podalbumi su unutar svog albuma) */
   appendAlbumGroups(contentArea, categories.filter(c=>!c.parent), cat=>{
     currentFolder = cat.id; searchEl.value=''; pushBack(closeAlbumView); render();
   });
+  /* v261: sistemski folderi na vrhu spiska (ne u zakačenom delu): skrolovanjem odlaze gore sa albumima */
+  if(!welcome) contentArea.prepend(buildSysPanel(closeAlbumView));
+}
+/* v261: Sve · Slike · Video / Snimci ekrana · Dokumenti · Bez albuma — dva reda po tri; ne brišu se, ne preimenuju, ne pomeraju */
+const SYS_ICO = {
+  all:'<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>',
+  img:'<rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3 16 8.5 11 13 15.5 15.5 13 21 17.5"></polyline><circle cx="9" cy="9.5" r="1.6"></circle>',
+  vid:'<rect x="3" y="6" width="13" height="12" rx="2"></rect><path d="M16 10l5-3v10l-5-3z"></path>',
+  shot:'<rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M9 8V6.5h1.5M13.5 6.5H15V8M15 16v1.5h-1.5M10.5 17.5H9V16"></path>',
+  doc:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="14 3 14 9 20 9"></polyline>'};
+function buildSysPanel(closer){
+  const nav = document.createElement('nav'); nav.className = 'sys-panel'; nav.setAttribute('aria-label', t('sysLbl'));
+  const inboxCount = items.filter(i=>!i.category).length;
+  [['all'],['img'],['vid'],['shot'],['doc'],['inbox']].forEach(([k])=>{
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'sys-cell'; b.dataset.sys = k;
+    const ico = k === 'inbox' ? INBOX_SVG_HOME : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + SYS_ICO[k] + '</svg>';
+    b.innerHTML = '<span class="sys-ic">' + ico + '</span><span class="sys-tx"></span>';
+    b.querySelector('.sys-tx').textContent = k === 'inbox' ? t('pathInbox') : t(SYS_KEYS[k]);
+    if(k === 'inbox' && inboxCount){   /* broj samo kad u „Bez albuma“ nešto čeka */
+      const n = document.createElement('span'); n.className = 'sys-badge'; n.textContent = inboxCount > 999 ? '999+' : String(inboxCount);
+      b.querySelector('.sys-ic').appendChild(n);
+      b.classList.add('has-badge');
+      b.setAttribute('aria-label', t('pathInbox') + ' · ' + stavkeTxt(inboxCount));
+    }
+    b.onclick = ()=>{
+      if(k === 'inbox') currentFolder = INBOX; else { currentFolder = ALL; allKind = k; }
+      searchEl.value = ''; pushBack(closer); render(); window.scrollTo(0, 0);
+    };
+    nav.appendChild(b);
+  });
+  return nav;
 }
 
 function openAlbumContext(catId){
@@ -8322,7 +8419,23 @@ function openModal(item, page){
 }
 window.addEventListener('scroll', ()=>{
   document.body.classList.toggle('scrolled', window.scrollY > 4);
+  toTopSync();
 }, {passive:true});
+/* v261: okrugla strelica ↑ — pojavi se posle otprilike jednog ekrana skrolovanja, dodir glatko vraća na vrh.
+   Ista na svim spiskovima glavnog ekrana (početni, album, sistemski folder, pretraga); stoji iznad donjeg reda.
+   Prozori i ekrani preko glavnog (slojevi 48+) je pokrivaju sami. */
+const toTopBtn = document.getElementById('toTopBtn');
+toTopBtn.setAttribute('aria-label', t('toTop')); toTopBtn.title = t('toTop');
+toTopBtn.onclick = ()=>{ toTopBtn.classList.remove('show'); window.scrollTo({top:0, behavior:'smooth'}); };
+const toTopSync = window._toTopSync = rafOnce(()=>{
+  const on = window.scrollY > window.innerHeight * 0.75;
+  if(on){
+    const bars = [selBar, document.getElementById('mergeBar')].filter(b=>b && b.classList.contains('show') && b.offsetHeight);
+    const h = bars.reduce((m, b)=>Math.max(m, window.innerHeight - b.getBoundingClientRect().top), 0);
+    toTopBtn.style.bottom = h ? (Math.round(h) + 14) + 'px' : '';
+  }
+  toTopBtn.classList.toggle('show', on);
+});
 /* ---------- Ceo ekran (Fullscreen API) ----------
    album i slika -> jedan isti potpuni ceo ekran (navigationUI:'hide'), da bi se Chrome-ova
    poruka o celom ekranu pojavila samo jednom (pri ulasku u album), a ne pri svakoj slici
@@ -9934,7 +10047,7 @@ const ASK_SCHEMA = {type:'OBJECT', properties:{
 }, required:['answer','found','sources']};
 function askScopeItems(){
   if(currentFolder === INBOX) return items.filter(i=>!i.category);
-  if(currentFolder === ALL) return items.slice();
+  if(currentFolder === ALL) return items.filter(allKindOk);   /* v261: samo vrsta otvorenog foldera */
   if(currentFolder && realAlbum(currentFolder)){ const ids = albumIdSet(currentFolder); return items.filter(i=>ids.has(i.category)); }
   return items.slice();
 }
@@ -10532,7 +10645,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 260;
+const APP_VERSION = 261;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
