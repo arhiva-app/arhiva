@@ -2713,10 +2713,10 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 header, body.in-album header{ margin-bottom:0; }
 .alb-icons{ margin-top:10px; margin-bottom:0; }
 /* v261: sistemski folderi — dva reda po tri, izgled kao raniji „Bez albuma“ (zlatna podloga sleva, tanka zlatna ivica) */
-.sys-panel{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); margin:0 0 14px; border-radius:14px; overflow:hidden; box-sizing:border-box;
+.sys-panel{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); margin:12px 0 0; border-radius:14px; overflow:hidden; box-sizing:border-box;
   background:linear-gradient(90deg, color-mix(in srgb, var(--brass) 14%, var(--surface-2)), var(--surface-2) 70%);
   border:1px solid color-mix(in srgb, var(--brass) 45%, var(--line)); --sys-sep:color-mix(in srgb, var(--line) 85%, transparent); }
-.sys-cell{ position:relative; min-width:0; height:48px; display:flex; align-items:center; justify-content:center; gap:7px; padding:0 6px; margin:0;
+.sys-cell{ position:relative; min-width:0; height:48px; display:flex; align-items:center; justify-content:flex-start; gap:7px; padding:0 4px 0 14px; margin:0;   /* v262: ikonice u kolonama, jedna ispod druge */
   border:0; border-radius:0; background:none; color:var(--ink); font-family:var(--font-ui); font-size:13.5px; font-weight:600; line-height:1.12; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .sys-cell:not(:nth-child(3n+1)){ border-left:1px solid var(--sys-sep); }
 .sys-cell:nth-child(n+4){ border-top:1px solid var(--sys-sep); }
@@ -2734,7 +2734,7 @@ html[data-theme="banka"] .sys-cell:active{ background:var(--brass-glow); }
 html[data-theme="banka"] .sys-badge{ background:#0B1F3A; color:#F7F2E6; }
 html[data-theme="koza"] .sys-panel{ background-color:#F6EEDB; background-image:var(--paper); border:none; outline:1.5px dashed rgba(122,95,40,.45); outline-offset:-5px; --sys-sep:rgba(122,95,40,.28); }
 html[data-theme="koza"] .sys-cell{ color:#1F3A2E; }
-html[data-theme="koza"] .sys-ic{ color:#7A2331; }
+html[data-theme="koza"] .sys-ic{ color:#1F3A2E; }   /* v262: zelene, kao ikonice zaglavlja */
 html[data-theme="koza"] .sys-cell:active{ background:#EADFC6; }
 html[data-theme="klasicna"] .sys-panel{ background:#fff; border:1px solid var(--line); --sys-sep:var(--line); }   /* v261: diskretno, kao pločice */
 html[data-theme="klasicna"] .sys-cell{ color:var(--ink); }
@@ -2753,6 +2753,11 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
   transition:opacity .2s ease, transform .2s ease; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .to-top.show{ opacity:1; transform:none; pointer-events:auto; }
 .to-top:active{ background:var(--brass-glow); }
+/* v262: u svetlim temama puna, u glavnoj boji teme (krem krug na krem pozadini se nije video) */
+html[data-theme="koza"] .to-top{ background:#1F3A2E; color:#EAD6A2; border:none; }
+html[data-theme="banka"] .to-top{ background:#0E2747; color:#E8CE92; border:none; }
+html[data-theme="klasicna"] .to-top{ background:var(--ink); color:#fff; border:none; }
+html[data-theme="koza"] .to-top:active, html[data-theme="banka"] .to-top:active, html[data-theme="klasicna"] .to-top:active{ filter:brightness(1.25); }
 </style>
 <script>
 /* v227: pdf.js 6.4.299, verzija „legacy“ (zvanično Chrome 125+), u repou Arhive (radi i bez interneta, bez tuđeg servera).
@@ -7996,6 +8001,7 @@ function _renderView(){
   /* v241: prazna Arhiva (nema stavki ni albuma) — dobrodošlica; nestaje sa prvom stavkom */
   const welcome = !items.length && !categories.length && !selectionMode && !searchOpen;
   if(welcome) homeHead.appendChild(homeWelcome());
+  else homeHead.appendChild(buildSysPanel(closeAlbumView));   /* v262 (Zoran): sistemski folderi zamrznuti — u zakačenom delu, ispod reda ikonica */
   albumHeaderZone.appendChild(homeHead);
 
 
@@ -8019,8 +8025,6 @@ function _renderView(){
   appendAlbumGroups(contentArea, categories.filter(c=>!c.parent), cat=>{
     currentFolder = cat.id; searchEl.value=''; pushBack(closeAlbumView); render();
   });
-  /* v261: sistemski folderi na vrhu spiska (ne u zakačenom delu): skrolovanjem odlaze gore sa albumima */
-  if(!welcome) contentArea.prepend(buildSysPanel(closeAlbumView));
 }
 /* v261: Sve · Slike · Video / Snimci ekrana · Dokumenti · Bez albuma — dva reda po tri; ne brišu se, ne preimenuju, ne pomeraju */
 const SYS_ICO = {
@@ -8422,14 +8426,14 @@ window.addEventListener('scroll', ()=>{
   document.body.classList.toggle('scrolled', window.scrollY > 4);
   toTopSync();
 }, {passive:true});
-/* v261: okrugla strelica ↑ — pojavi se posle otprilike jednog ekrana skrolovanja, dodir glatko vraća na vrh.
+/* v261: okrugla strelica ↑ — pojavi se posle trećine ekrana skrolovanja (v262), dodir glatko vraća na vrh.
    Ista na svim spiskovima glavnog ekrana (početni, album, sistemski folder, pretraga); stoji iznad donjeg reda.
    Prozori i ekrani preko glavnog (slojevi 48+) je pokrivaju sami. */
 const toTopBtn = document.getElementById('toTopBtn');
 toTopBtn.setAttribute('aria-label', t('toTop')); toTopBtn.title = t('toTop');
 toTopBtn.onclick = ()=>{ toTopBtn.classList.remove('show'); window.scrollTo({top:0, behavior:'smooth'}); };
 const toTopSync = window._toTopSync = rafOnce(()=>{
-  const on = window.scrollY > window.innerHeight * 0.75;
+  const on = window.scrollY > window.innerHeight / 3;   /* v262: posle trećine ekrana (ranije ¾ — kratak spisak je nikad nije pokazao) */
   if(on){
     const bars = [selBar, document.getElementById('mergeBar')].filter(b=>b && b.classList.contains('show') && b.offsetHeight);
     const h = bars.reduce((m, b)=>Math.max(m, window.innerHeight - b.getBoundingClientRect().top), 0);
