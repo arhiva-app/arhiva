@@ -130,13 +130,19 @@
     red = p.catch(function(){});
     return p;
   }
-  async function sacuvajKaoJedan(blob, name, mime){
-    var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
+  /* v262: upis u keš deo po deo — zajedničko za „Sačuvaj kao“ i deljenje (video od više MB odjednom kroz most nije prolazio) */
+  async function uKes(blob, putanja){
+    var r;
     for(var off = 0; off === 0 || off < blob.size; off += DEO){
       var data = await b64(blob.slice(off, off + DEO));
-      if(off === 0) await Filesystem.writeFile({ path: putanja, data: data, directory: 'CACHE', recursive: true });
+      if(off === 0) r = await Filesystem.writeFile({ path: putanja, data: data, directory: 'CACHE', recursive: true });
       else await Filesystem.appendFile({ path: putanja, data: data, directory: 'CACHE' });
     }
+    return r;
+  }
+  async function sacuvajKaoJedan(blob, name, mime){
+    var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
+    await uKes(blob, putanja);
     return await SacuvajKao.sacuvaj({ putanja: putanja, ime: fn, mime: mime || blob.type || 'application/octet-stream' });
   }
   if(imaSacuvajKao) window.ARHIVA_SACUVAJ_KAO = sacuvajKao;
@@ -174,9 +180,11 @@
     d = d || {};
     var uris = [];
     var list = d.files || [];
+    var ukupno = 0; for(var j = 0; j < list.length; j++) ukupno += list[j].size || 0;
+    if(ukupno > 8 * 1024 * 1024) say('Pripremam za deljenje…', 'Preparing to share…');   /* v262: veći video traje par sekundi — vidljiv odgovor */
     for(var i = 0; i < list.length; i++){
       var f = list[i];
-      var r = await Filesystem.writeFile({ path: 'deljenje/' + Date.now() + '-' + i + '/' + safe(f.name), data: await b64(f), directory: 'CACHE', recursive: true });
+      var r = await uKes(f, 'deljenje/' + Date.now() + '-' + i + '/' + safe(f.name));
       uris.push(r.uri);
     }
     try{
