@@ -2726,19 +2726,19 @@ header, body.in-album header{ margin-bottom:0; }
 .sys-cell.has-badge{ gap:11px; }
 .sys-badge{ position:absolute; top:-8px; right:-9px; min-width:17px; height:17px; padding:0 4px; box-sizing:border-box; border-radius:9px;
   background:var(--accent); color:var(--on-accent); font-family:var(--font-ui); font-size:10.5px; font-weight:700; line-height:17px; text-align:center; }
-html[data-theme="banka"] .sys-panel{ background:linear-gradient(135deg,#163558 0%,#0B1F3A 100%); border:1px solid var(--gold); box-shadow:0 8px 20px -10px rgba(11,31,58,.6); --sys-sep:rgba(201,169,97,.35); }
-html[data-theme="banka"] .sys-cell{ color:#F7F2E6; }
-html[data-theme="banka"] .sys-ic{ color:var(--gold-hi); }
-html[data-theme="banka"] .sys-cell:active{ background:rgba(255,255,255,.08); }
-html[data-theme="banka"] .sys-badge{ background:var(--gold-hi); color:#0B1F3A; }
+html[data-theme="banka"] .sys-panel{ background:#FFFBF2; border:1px solid rgba(201,169,97,.55); box-shadow:none; --sys-sep:rgba(201,169,97,.35); }   /* v261: diskretno, u tonu dugmića (Zoran) */
+html[data-theme="banka"] .sys-cell{ color:#0B1F3A; }
+html[data-theme="banka"] .sys-ic{ color:#A8873F; }
+html[data-theme="banka"] .sys-cell:active{ background:var(--brass-glow); }
+html[data-theme="banka"] .sys-badge{ background:#0B1F3A; color:#F7F2E6; }
 html[data-theme="koza"] .sys-panel{ background-color:#F6EEDB; background-image:var(--paper); border:none; outline:1.5px dashed rgba(122,95,40,.45); outline-offset:-5px; --sys-sep:rgba(122,95,40,.28); }
 html[data-theme="koza"] .sys-cell{ color:#1F3A2E; }
 html[data-theme="koza"] .sys-ic{ color:#7A2331; }
 html[data-theme="koza"] .sys-cell:active{ background:#EADFC6; }
-html[data-theme="klasicna"] .sys-panel{ background:var(--ink); border:none; --sys-sep:rgba(255,255,255,.14); }
-html[data-theme="klasicna"] .sys-cell{ color:#fff; }
+html[data-theme="klasicna"] .sys-panel{ background:#fff; border:1px solid var(--line); --sys-sep:var(--line); }   /* v261: diskretno, kao pločice */
+html[data-theme="klasicna"] .sys-cell{ color:var(--ink); }
 html[data-theme="klasicna"] .sys-ic{ color:var(--accent); }
-html[data-theme="klasicna"] .sys-cell:active{ background:#2A2D32; }
+html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
 .sys-info{ margin:8px 0 2px; }
 /* v261: u sistemskom folderu ne seče se naziv: kad red putanje ne staje, prvo se skloni broj stavki */
 #pathZone .path-bar.cnt-short .path-count .pc-w{ display:none; }
