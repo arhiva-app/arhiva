@@ -2744,6 +2744,8 @@ html[data-theme] .folder-tile-row{ height:74px; padding:0 14px 0 0; gap:14px; }
 html[data-theme] .folder-tile-row .ftile-cover{ width:104px; height:74px; margin:0; }
 html[data-theme="koza"] .folder-tile-row .ftile-cover{ margin:0 0 0 -6px; }
 html[data-theme="klasicna"] .folder-tile-row .ftile-cover img{ width:100%; height:100%; margin:0; border-radius:0; }
+html[data-theme="klasicna"] .folder-tile-row .ftile-cover{ background:#F1F3F5; }   /* v262: album bez slike — sivo polje iza slova */
+html[data-theme="klasicna"] .grid.folders-grid.folders-list{ gap:0; }   /* v262: redovi se dodiruju, samo linija između (ranije je opšte pravilo od 8px nadjačavalo gap:0 teme) */
 .pin-ic{ display:inline-flex; vertical-align:-2px; margin-right:6px; color:var(--pin-c, var(--accent)); }
 .pin-ic svg{ width:17px; height:17px; }
 html[data-theme="ponoc"]{ --pin-c:#6FC48A; } html[data-theme="crna"]{ --pin-c:var(--brass); } html[data-theme="koza"]{ --pin-c:#7A2331; } html[data-theme="banka"]{ --pin-c:#A8873F; }
