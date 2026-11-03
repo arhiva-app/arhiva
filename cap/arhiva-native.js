@@ -12,7 +12,8 @@
    8) v199 obaveštenja za rokove (dodatak LocalNotifications; logika je u Arhivi, blok OBAVEŠTENJA)
    9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE)
    10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET)
-   11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM) */
+   11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM)
+   12) v272 praćene fascikle (dodatak Fascikle; blok FASCIKLE u Arhivi) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -65,6 +66,19 @@
       deo: function(o){ return Pm.deo(o); },
       obrisi: function(){ return Pm.obrisi(); },
       naPrijem: function(fn){ try{ Pm.addListener('primljeno', fn); }catch(e){ console.error('arhiva-native primanje', e); } }
+    };
+  }
+
+  /* 12) v272 praćene fascikle (dodatak Fascikle u novom APK-u; logika je u Arhivi, blok FASCIKLE) */
+  if(C.isPluginAvailable && C.isPluginAvailable('Fascikle')){
+    var Fk = reg('Fascikle');
+    window.ARHIVA_FASCIKLE = {
+      izaberi: function(o){ return Fk.izaberi(o || {}); },
+      proveri: function(o){ return Fk.proveri(o); },
+      novi: function(o){ return Fk.novi(o); },
+      deo: function(o){ return Fk.deo(o); },
+      obrisi: function(){ return Fk.obrisi(); },
+      otpusti: function(o){ return Fk.otpusti(o); }
     };
   }
 

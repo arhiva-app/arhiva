@@ -3758,7 +3758,11 @@ const I18N = {
     pgExtractHint: 'Odmah postaje posebna slika u istom albumu',
     pgExtractNo: 'Moguće kod sačuvanog dokumenta sa bar dve stranice',
     pgRemove: 'Ukloni iz dokumenta',
-    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
+    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', fzTile: 'Praćene fascikle', fzShots: 'Snimci ekrana', fzTileOn: 'Snimci ekrana: uključeno', fzTileOff: 'Isključeno',
+    fzOffSub: 'Novi snimci ekrana sami stižu u Arhivu', fzOnSub: 'Uključeno · fascikla {ime}', fzOn: 'Praćenje uključeno: {ime}', fzOffT: 'Praćenje isključeno.',
+    fzHint: 'Arhiva vidi samo izabranu fasciklu, ništa drugo na telefonu. Uvoze se samo snimci nastali posle uključivanja; original ostaje u galeriji. Novi snimci stižu kad otvoriš Arhivu ili se vratiš u nju.',
+    fzHint2: 'Kad uključiš, Android jednom pita koju fasciklu Arhiva sme da vidi — izaberi fasciklu sa snimcima ekrana (najčešće DCIM › Screenshots) i dodirni „Koristi ovu fasciklu“.',
+    fzDone: 'Novi snimci ekrana u Arhivi: {n}', fzLost: 'Arhiva više nema pristup fascikli snimaka ekrana. Uključi praćenje ponovo u Podešavanjima → Praćene fascikle.', fzErr: 'Izbor fascikle nije uspeo.', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
     pgPartName: '{name} – str. {n}',
     pgNeedOne: 'Dokument mora imati bar jednu stranicu.',
     pgWait: 'Sačekaj da se sve stranice obrade.',
@@ -4571,7 +4575,11 @@ const I18N = {
     pgExtractHint: 'Becomes a separate image in the same album right away',
     pgExtractNo: 'Possible for a saved document with at least two pages',
     pgRemove: 'Remove from document',
-    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
+    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', fzTile: 'Watched folders', fzShots: 'Screenshots', fzTileOn: 'Screenshots: on', fzTileOff: 'Off',
+    fzOffSub: 'New screenshots arrive in Arhiva on their own', fzOnSub: 'On · folder {ime}', fzOn: 'Watching: {ime}', fzOffT: 'Watching turned off.',
+    fzHint: 'Arhiva sees only the folder you choose, nothing else on the phone. Only screenshots taken after turning this on are imported; the original stays in the gallery. New ones arrive when you open Arhiva or come back to it.',
+    fzHint2: 'When you turn it on, Android asks once which folder Arhiva may see — choose the screenshots folder (usually DCIM › Screenshots) and tap “Use this folder”.',
+    fzDone: 'New screenshots in Arhiva: {n}', fzLost: 'Arhiva no longer has access to the screenshots folder. Turn watching on again in Settings → Watched folders.', fzErr: 'Choosing the folder failed.', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
     pgPartName: '{name} – p. {n}',
     pgNeedOne: 'A document needs at least one page.',
     pgWait: 'Wait until all pages are processed.',
@@ -10302,7 +10310,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); rcvBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(()=>{ itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -10718,7 +10726,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 271;
+const APP_VERSION = 272;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -10840,6 +10848,7 @@ function renderSettingsTiles(){
     settingsTile('🎨', t('themeTile'), themeName(getTheme()), "openSettingsSub('theme')")+
     (lkNative() ? settingsTile('🔒', t('lkTile'), lkTileSub(), "openSettingsSub('lock')") : '')+   /* v190: samo Android aplikacija */
     (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
+    (fzNative() ? settingsTile('📱', t('fzTile'), fzTileSub(), "openSettingsSub('folders')") : '')+   /* v272: samo Android aplikacija */
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
@@ -10929,6 +10938,10 @@ function openSettingsSub(which){
     if(!drNative()) return;
     title = t('drTile');
     body = '<div id="drSet">'+drSettingsHtml()+'</div>';
+  }else if(which === 'folders'){
+    if(!fzNative()) return;
+    title = t('fzTile');
+    body = '<div id="fzSet">'+fzSettingsHtml()+'</div>';
   }else if(which === 'errlog'){
     title = t('errTitle');
     body = errLogBodyHtml();
@@ -10941,6 +10954,7 @@ function openSettingsSub(which){
   if(which === 'ai') aiWireSettings();
   if(which === 'lock') lkOpenSettings();
   if(which === 'drive') drWire();
+  if(which === 'folders') fzWire();
   if(which === 'old') oldDataCount().then(n=>{ const el = document.getElementById('oldCountHint'); if(el) el.textContent = t('oldCount', {n}); });
   settingsScreen.scrollTop = 0;
   if(!settingsSubOpen){
@@ -20765,6 +20779,19 @@ async function rcvFromChrome(){
   await rcvSave(files, ()=>caches.delete(RCV_CACHE));
 }
 function b64Bytes(s){ const b = atob(s), u = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+/* kopija fajla u kešu Android aplikacije → Blob, deo po deo (Primanje i Fascikle imaju isto deo({putanja, od})) */
+async function nativeCopyBlob(api, f){
+  const parts = [];
+  for(let od = 0; ; ){
+    const d = await api.deo({putanja:f.putanja, od});
+    if(!d || d.od !== od) throw new Error('deo: traženo ' + od + ', stiglo ' + (d && d.od));   /* v253: APK probna-44 je uvek vraćao prvi deo */
+    const b = b64Bytes(d.podaci || '');
+    if(b.length) parts.push(b);
+    od += b.length;
+    if(d.kraj || !b.length || od > (f.velicina || 0)) break;
+  }
+  return new Blob(parts);
+}
 async function rcvFromAndroid(){
   const n = window.ARHIVA_PRIMI;
   const r = (await n.cekaj()) || {};
@@ -20773,18 +20800,8 @@ async function rcvFromAndroid(){
   if(!list.length && !bad) return;
   const files = [];
   for(const f of list){
-    try{
-      const parts = [];
-      for(let od = 0; ; ){
-        const d = await n.deo({putanja:f.putanja, od});
-        if(!d || d.od !== od) throw new Error('deo: traženo ' + od + ', stiglo ' + (d && d.od));   /* v253: APK probna-44 je uvek vraćao prvi deo */
-        const b = b64Bytes(d.podaci || '');
-        if(b.length) parts.push(b);
-        od += b.length;
-        if(d.kraj || !b.length || od > (f.velicina || 0)) break;
-      }
-      files.push(rcvFile(new Blob(parts), f.ime, f.mime));
-    }catch(e){ console.error('prijem deo', e); bad++; }
+    try{ files.push(rcvFile(await nativeCopyBlob(n, f), f.ime, f.mime)); }
+    catch(e){ console.error('prijem deo', e); bad++; }
   }
   await rcvSave(files, ()=>Promise.resolve(n.obrisi()).catch(()=>{}));
   if(bad) showNote(t('rcvErr', {n:bad}), 6000);
@@ -20794,6 +20811,88 @@ function rcvBoot(){
     window.ARHIVA_PRIMI.naPrijem(()=>rcvQueue(rcvFromAndroid));
     rcvQueue(rcvFromAndroid);
   }else if(!window.ARHIVA_NATIVE) rcvQueue(rcvFromChrome);
+}
+
+/* =====================================================================
+   FASCIKLE (v272, Zoran 3.11.) — praćene fascikle, samo Android aplikacija sa dodatkom Fascikle (cap/arhiva-native.js →
+   window.ARHIVA_FASCIKLE). Za sada jedna: „Snimci ekrana“. Korisnik jednom izabere fasciklu u Androidovom prozoru;
+   Arhiva vidi samo nju (bez dozvole za sve slike, bez Play prijave). Uvoze se samo snimci nastali POSLE uključivanja
+   (Zoran: samo novi; original ostaje u galeriji), pri pokretanju i pri svakom povratku u Arhivu, posle otključavanja.
+   Idu u „Bez albuma“ (vide se i u sistemskom folderu „Snimci ekrana“). Isti fajl nikad dvaput: vreme poslednjeg uvoza
+   (od, sa 2 s rezerve) + spisak već uvezenih (vec, poslednjih 200 id-jeva). galerija:fascikle — samo ovaj telefon (ne ide u kopiju).
+   ===================================================================== */
+const FZ_KEY = LS_PREFIX + 'fascikle', FZ_START = 'DCIM/Screenshots';
+let _fzLast = 0;
+function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
+function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
+function fzSave(c){ try{ localStorage.setItem(FZ_KEY, JSON.stringify(c)); }catch(e){} }
+async function fzCheck(){
+  const n = fzNative(); if(!n || !(fzCfg().snimci || {}).uri) return;
+  await scWaitOpen();
+  const c = fzCfg(), f = c.snimci; if(!f || !f.uri) return;
+  _fzLast = Date.now();
+  let r;
+  try{ r = (await n.novi({uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
+  catch(e){ logError(t('fzTile'), (e && e.message) || e); return; }
+  if(r.nemaPrava){ delete c.snimci; fzSave(c); showNote(t('fzLost'), 9000); fzRefresh(); return; }
+  const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
+  let bad = r.greske || 0;
+  if(!list.length){ if(bad) showNote(t('rcvErr', {n:bad}), 6000); return; }
+  const files = [], got = [];
+  for(const x of list){
+    try{
+      const file = rcvFile(await nativeCopyBlob(n, x), x.ime, x.mime);
+      got.push(x);
+      if(!items.some(i=>i.sourceSig === file.name + '|' + file.size)) files.push(file);   /* već ručno dodat → bez pitanja, preskače se */
+    }catch(e){ console.error('fascikle deo', e); bad++; }
+  }
+  try{ await n.obrisi(); }catch(e){}
+  if(files.length) await addFilesWithProgress(files, null, k=>t('fzDone', {n:k}));
+  const c2 = fzCfg();
+  if(c2.snimci && c2.snimci.uri === f.uri){
+    c2.snimci.od = Math.max(c2.snimci.od || 0, ...got.map(x=>x.vreme || 0));
+    c2.snimci.vec = (c2.snimci.vec || []).concat(got.map(x=>x.id)).slice(-200);
+    fzSave(c2);
+  }
+  if(bad) showNote(t('rcvErr', {n:bad}), 6000);
+  if(r.jos) rcvQueue(fzCheck);
+}
+function fzBoot(){
+  if(!fzNative()) return;
+  rcvQueue(fzCheck);
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState === 'visible' && Date.now() - _fzLast > 1500) rcvQueue(fzCheck);
+  });
+}
+/* ---- Podešavanja → Praćene fascikle ---- */
+function fzTileSub(){ const f = fzCfg().snimci; return f && f.uri ? t('fzTileOn') : t('fzTileOff'); }
+function fzSettingsHtml(){
+  const f = fzCfg().snimci, on = !!(f && f.uri);
+  return '<div class="settings-card"><button type="button" class="settings-row" id="fzShotRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'">'+
+    '<span class="row-icon">📱</span><span class="row-label">'+escapeHtml(t('fzShots'))+'<span class="lk-row-sub">'+escapeHtml(on ? t('fzOnSub', {ime:f.ime || 'Screenshots'}) : t('fzOffSub'))+'</span></span>'+
+    '<span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button></div>'+
+    '<div class="settings-hint">'+escapeHtml(t('fzHint'))+'</div>'+
+    '<div class="settings-hint">'+escapeHtml(t('fzHint2'))+'</div>';
+}
+function fzRefresh(){ const b = document.getElementById('fzSet'); if(b){ b.innerHTML = fzSettingsHtml(); fzWire(); } }
+function fzWire(){ const r = document.getElementById('fzShotRow'); if(r) r.onclick = fzToggleShots; }
+let _fzBusy = false;
+async function fzToggleShots(){
+  const n = fzNative(); if(!n || _fzBusy) return;
+  _fzBusy = true;
+  try{
+    const c = fzCfg();
+    if(c.snimci && c.snimci.uri){
+      try{ await n.otpusti({uri:c.snimci.uri}); }catch(e){}
+      delete c.snimci; fzSave(c); fzRefresh(); toast(t('fzOffT'));
+      return;
+    }
+    let r = {};
+    try{ r = (await n.izaberi({pocetna:FZ_START})) || {}; }catch(e){ logError(t('fzTile'), (e && e.message) || e); toast(t('fzErr')); return; }
+    if(r.otkazano || !r.uri) return;
+    const c2 = fzCfg(); c2.snimci = {uri:r.uri, ime:r.ime || '', od:Date.now(), vec:[]}; fzSave(c2);
+    fzRefresh(); toast(t('fzOn', {ime:r.ime || 'Screenshots'}));
+  }finally{ _fzBusy = false; }
 }
 
 /* =====================================================================
