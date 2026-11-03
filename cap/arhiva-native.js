@@ -130,19 +130,32 @@
     red = p.catch(function(){});
     return p;
   }
-  /* v262: upis u keš deo po deo — zajedničko za „Sačuvaj kao“ i deljenje (video od više MB odjednom kroz most nije prolazio) */
-  async function uKes(blob, putanja){
-    var r;
-    for(var off = 0; off === 0 || off < blob.size; off += DEO){
-      var data = await b64(blob.slice(off, off + DEO));
-      if(off === 0) r = await Filesystem.writeFile({ path: putanja, data: data, directory: 'CACHE', recursive: true });
+  /* v262: upis u keš deo po deo — zajedničko za „Sačuvaj kao“ i deljenje (video od više MB odjednom kroz most nije prolazio).
+     v264: dok telefon upisuje deo, sledeći se već priprema (brže); napredak(bajtova) posle svakog dela. */
+  async function uKes(blob, putanja, napredak){
+    var r, n = Math.max(1, Math.ceil(blob.size / DEO));
+    var sledeci = b64(blob.slice(0, DEO));
+    for(var i = 0; i < n; i++){
+      var data = await sledeci;
+      if(i + 1 < n) sledeci = b64(blob.slice((i + 1) * DEO, (i + 2) * DEO));
+      if(i === 0) r = await Filesystem.writeFile({ path: putanja, data: data, directory: 'CACHE', recursive: true });
       else await Filesystem.appendFile({ path: putanja, data: data, directory: 'CACHE' });
+      if(napredak) napredak(Math.min(blob.size, (i + 1) * DEO));
     }
     return r;
   }
+  /* v264 (Zoran): rad koji traje (više od jednog dela) se vidi — obaveštenje sa kružićem, procentom i trakom dok traje */
+  function radPocni(sr, eng, ukupno){
+    if(ukupno <= DEO || typeof window.toastPersist !== 'function') return null;
+    var tx = en() ? eng : sr;
+    var f = function(gotovo){ window.toastPersist(tx + ' ' + Math.floor(gotovo / ukupno * 100) + '%', { n: gotovo, total: ukupno }); };
+    f(0); return f;
+  }
+  function radKraj(f){ if(f && typeof window.toastHide === 'function') window.toastHide(); }
   async function sacuvajKaoJedan(blob, name, mime){
     var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
-    await uKes(blob, putanja);
+    var rad = radPocni('Pripremam za čuvanje…', 'Preparing to save…', blob.size);
+    try{ await uKes(blob, putanja, rad); } finally { radKraj(rad); }
     return await SacuvajKao.sacuvaj({ putanja: putanja, ime: fn, mime: mime || blob.type || 'application/octet-stream' });
   }
   if(imaSacuvajKao) window.ARHIVA_SACUVAJ_KAO = sacuvajKao;
@@ -181,12 +194,15 @@
     var uris = [];
     var list = d.files || [];
     var ukupno = 0; for(var j = 0; j < list.length; j++) ukupno += list[j].size || 0;
-    if(ukupno > 8 * 1024 * 1024) say('Pripremam za deljenje…', 'Preparing to share…');   /* v262: veći video traje par sekundi — vidljiv odgovor */
-    for(var i = 0; i < list.length; i++){
-      var f = list[i];
-      var r = await uKes(f, 'deljenje/' + Date.now() + '-' + i + '/' + safe(f.name));
-      uris.push(r.uri);
-    }
+    var rad = radPocni('Pripremam za deljenje…', 'Preparing to share…', ukupno), pre = 0;
+    try{
+      for(var i = 0; i < list.length; i++){
+        var f = list[i];
+        var r = await uKes(f, 'deljenje/' + Date.now() + '-' + i + '/' + safe(f.name), rad && function(g){ rad(pre + g); });
+        pre += f.size || 0;
+        uris.push(r.uri);
+      }
+    } finally { radKraj(rad); }
     try{
       var o = {};
       if(d.title) o.title = d.title;
