@@ -2748,6 +2748,7 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
 /* v274: pretraga u izboru albuma */
 .pick-search{ position:sticky; top:0; z-index:1; padding:10px 12px; background:var(--surface); border-bottom:1px solid var(--line); }
 .pick-search input{ width:100%; box-sizing:border-box; height:42px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:16px var(--font-ui); }
+.pick-row[hidden]{ display:none; }   /* .pick-row ima display:flex, koji bi inače nadjačao hidden */
 .pick-none{ padding:18px 16px; color:var(--ink-dim); text-align:center; }
 .settings-row .row-label.fz-add{ color:var(--accent); font-weight:600; }
 .fz-mrow{ display:flex; align-items:center; gap:12px; text-align:left; }
