@@ -2739,6 +2739,15 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
   transition:opacity .2s ease, transform .2s ease; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .to-top.show{ opacity:1; transform:none; pointer-events:auto; }
 .to-top:active{ background:var(--brass-glow); }
+/* v269: „Ceo dan“ u redu datuma (samo u izboru) */
+.date-label:has(.day-sel){ display:flex; align-items:center; gap:10px; }
+.date-label:has(.day-sel)::after{ order:1; }
+.day-sel{ order:2; margin-left:auto; flex:none; display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 12px 0 5px; border-radius:16px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink); font:600 13px/1 var(--font-ui); font-style:normal; letter-spacing:0; text-transform:none; cursor:pointer; }
+.day-sel i{ width:22px; height:22px; border-radius:50%; border:1.5px solid var(--brass-soft); background:var(--mark-bg); display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; }
+.day-sel i svg{ width:13px; height:13px; fill:none; stroke:var(--on-accent); stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; }
+.day-sel.on i, .day-sel.part i{ background:var(--accent); border-color:var(--accent); }
+.day-sel:active{ filter:brightness(1.15); }
 /* v262 (Zoran): red albuma (prikaz spisak) iste visine u svim temama, slika široka 104 × 74 */
 html[data-theme] .folder-tile-row{ height:74px; padding:0 14px 0 0; gap:14px; }
 html[data-theme] .folder-tile-row .ftile-cover{ width:104px; height:74px; margin:0; }
@@ -3745,7 +3754,7 @@ const I18N = {
     pgExtractHint: 'Odmah postaje posebna slika u istom albumu',
     pgExtractNo: 'Moguće kod sačuvanog dokumenta sa bar dve stranice',
     pgRemove: 'Ukloni iz dokumenta',
-    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
+    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
     pgPartName: '{name} – str. {n}',
     pgNeedOne: 'Dokument mora imati bar jednu stranicu.',
     pgWait: 'Sačekaj da se sve stranice obrade.',
@@ -4558,7 +4567,7 @@ const I18N = {
     pgExtractHint: 'Becomes a separate image in the same album right away',
     pgExtractNo: 'Possible for a saved document with at least two pages',
     pgRemove: 'Remove from document',
-    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
+    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
     pgPartName: '{name} – p. {n}',
     pgNeedOne: 'A document needs at least one page.',
     pgWait: 'Wait until all pages are processed.',
@@ -8369,14 +8378,20 @@ function buildDatedPhotoSections(list, oldFirst){
   let lastKey = null;
   let currentGrid = null;
   let idx = 0;
+  const daySel = selectionMode && !mergeMode && !actMode;   /* v269: „Ceo dan“ kad i „Izaberi sve“ */
+  const pool = daySel ? new Set(selPool().map(i=>i.id)) : null;
+  const dayKey = it=>{ const d = new Date(it.ts); return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); };
   sorted.forEach(item=>{
-    const d = new Date(item.ts);
-    const key = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+    const key = dayKey(item);
     if(key !== lastKey){
       lastKey = key;
       const label = document.createElement('p');
       label.className = 'date-label';
       label.textContent = formatDateLabel(item.ts);
+      if(daySel){
+        const ids = sorted.filter(i=>dayKey(i) === key && pool.has(i.id)).map(i=>i.id);
+        if(ids.length) label.appendChild(buildDaySel(ids));
+      }
       frag.appendChild(label);
       currentGrid = document.createElement('div');
       currentGrid.className = 'grid photos-grid';
@@ -8388,6 +8403,24 @@ function buildDatedPhotoSections(list, oldFirst){
   return frag;
 }
 
+/* v269 (Zoran 3.11.): u izboru, desno od datuma „Ceo dan“ — dodir izabere sve stavke tog dana, drugi dodir (kad je ceo dan izabran) poništi;
+   krug kao na stavci: prazan / crtica (deo dana) / kvačica (ceo dan) */
+function buildDaySel(ids){
+  const n = ids.filter(id=>selectedIds.has(id)).length, all = n === ids.length;
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'day-sel' + (all ? ' on' : n ? ' part' : '');
+  b.innerHTML = '<i>' + (all ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>' : n ? '<svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="18" y2="12"></line></svg>' : '') + '</i><span></span>';
+  b.querySelector('span').textContent = t('selDay');
+  b.setAttribute('aria-pressed', all ? 'true' : 'false');
+  b.onclick = e=>{
+    e.stopPropagation();
+    if(all) ids.forEach(id=>selectedIds.delete(id)); else ids.forEach(id=>selectedIds.add(id));
+    if(selectedIds.size === 0 && !selKeep){ selectionMode = false; }
+    render();
+  };
+  return b;
+}
 function enterSelectionMode(){
   selectionMode = true;
   selectedIds = new Set();
@@ -10674,7 +10707,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 268;
+const APP_VERSION = 269;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
