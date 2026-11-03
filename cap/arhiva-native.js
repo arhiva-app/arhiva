@@ -132,7 +132,48 @@
   }
   /* v262: upis u keš deo po deo — zajedničko za „Sačuvaj kao“ i deljenje (video od više MB odjednom kroz most nije prolazio).
      v264: dok telefon upisuje deo, sledeći se već priprema (brže); napredak(bajtova) posle svakog dela. */
+  /* v266: brz put — nov APK ubacuje window.arhivaBajtovi (BajtoviPlugin, androidx.webkit addWebMessageListener):
+     delovi idu kao čisti bajtovi (ArrayBuffer), bez base64. Stari APK ili telefon bez podrške → stari put ispod.
+     Jedan prenos u isto vreme (red); odgovor na svaku poruku pre sledeće; bez odgovora 30 s → greška → stari put. */
+  var BAJT_DEO = 4 * 1024 * 1024, bajtOk = !!(window.arhivaBajtovi && typeof window.arhivaBajtovi.postMessage === 'function');
+  var bajtRed = Promise.resolve(), bajtCeka = null;
+  if(bajtOk) window.arhivaBajtovi.onmessage = function(e){
+    var c = bajtCeka; bajtCeka = null; if(!c) return;
+    clearTimeout(c.t);
+    var d; try{ d = JSON.parse(e.data); }catch(x){ d = { k: 'greska', poruka: String(e.data) }; }
+    if(d.k === 'greska') c.rej(new Error('Bajtovi: ' + d.poruka)); else c.res(d);
+  };
+  function bajtPosalji(m){
+    return new Promise(function(res, rej){
+      bajtCeka = { res: res, rej: rej, t: setTimeout(function(){ bajtCeka = null; rej(new Error('Bajtovi: nema odgovora')); }, 30000) };
+      window.arhivaBajtovi.postMessage(m);
+    });
+  }
+  function uKesBajtovi(blob, putanja, napredak){
+    var p = bajtRed.then(async function(){
+      await bajtPosalji(JSON.stringify({ k: 'pocni', putanja: putanja }));
+      var n = Math.ceil(blob.size / BAJT_DEO);
+      var sledeci = n ? blob.slice(0, BAJT_DEO).arrayBuffer() : null;
+      for(var i = 0; i < n; i++){
+        var ab = await sledeci;
+        if(i + 1 < n) sledeci = blob.slice((i + 1) * BAJT_DEO, (i + 2) * BAJT_DEO).arrayBuffer();   /* sledeći se čita dok telefon upisuje */
+        await bajtPosalji(ab);
+        if(napredak) napredak(Math.min(blob.size, (i + 1) * BAJT_DEO));
+      }
+      var d = await bajtPosalji(JSON.stringify({ k: 'kraj' }));
+      return { uri: d.uri };
+    });
+    bajtRed = p.catch(function(){});
+    return p;
+  }
   async function uKes(blob, putanja, napredak){
+    if(bajtOk){
+      try{ return await uKesBajtovi(blob, putanja, napredak); }
+      catch(e){ console.warn('brz prenos nije uspeo, stari put', e); bajtOk = false; if(napredak) napredak(0); }
+    }
+    return await uKesTekst(blob, putanja, napredak);
+  }
+  async function uKesTekst(blob, putanja, napredak){
     var r, n = Math.max(1, Math.ceil(blob.size / DEO));
     var sledeci = b64(blob.slice(0, DEO));
     for(var i = 0; i < n; i++){
@@ -158,7 +199,8 @@
     if(!f || typeof window.showNote !== 'function') return;
     var s = (Date.now() - f.t0) / 1000, sr = !en();
     var broj = function(x){ var v = x.toFixed(1); return sr ? v.replace('.', ',') : v; };
-    window.showNote(sr ? 'Pripremljeno ' + broj(f.mb) + ' MB za ' + broj(s) + ' s' : 'Prepared ' + broj(f.mb) + ' MB in ' + broj(s) + ' s', 10000);
+    var put = bajtOk ? (sr ? ' · brzi put' : ' · fast path') : '';   /* v266: da se vidi koji put je radio */
+    window.showNote((sr ? 'Pripremljeno ' + broj(f.mb) + ' MB za ' + broj(s) + ' s' : 'Prepared ' + broj(f.mb) + ' MB in ' + broj(s) + ' s') + put, 10000);
   }
   async function sacuvajKaoJedan(blob, name, mime){
     var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
