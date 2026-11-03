@@ -228,12 +228,27 @@
     return origClick.call(this);
   };
 
+  /* v268: kopije za deljenje (cacheDir/deljenje/<vreme>-<i>/) se ranije nisu brisale — svaki poslat video ostajao je u kešu.
+     Briše se ono starije od 1 sata (aplikacija koja prima, npr. Viber, možda još čita skoriju kopiju); pri pokretanju i pre svakog deljenja.
+     Zvanično: @capacitor/filesystem readdir (FileInfo.name, type) i rmdir({recursive:true}). */
+  async function ocistiDeljenje(){
+    try{
+      var r = await Filesystem.readdir({ path: 'deljenje', directory: 'CACHE' });
+      var granica = Date.now() - 3600 * 1000;
+      for(var i = 0; i < (r.files || []).length; i++){
+        var f = r.files[i], t = parseInt(String(f.name).split('-')[0], 10);
+        if(f.type === 'directory' && t > 0 && t < granica) await Filesystem.rmdir({ path: 'deljenje/' + f.name, directory: 'CACHE', recursive: true });
+      }
+    }catch(e){ /* nema fascikle — nema šta da se briše */ }
+  }
+  setTimeout(ocistiDeljenje, 5000);
   /* 2) deljenje fajlova → Android „Podeli“ */
   navigator.canShare = function(d){ return !!(d && ((d.files && d.files.length) || d.text || d.url)); };
   navigator.share = async function(d){
     d = d || {};
     var uris = [];
     var list = d.files || [];
+    await ocistiDeljenje();
     var ukupno = 0; for(var j = 0; j < list.length; j++) ukupno += list[j].size || 0;
     var rad = radPocni('Pripremam za deljenje…', 'Preparing to share…', ukupno), pre = 0;
     try{

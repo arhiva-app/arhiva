@@ -3546,7 +3546,7 @@ function itemDay(item){
   if(appLang() === 'en') return d.toLocaleDateString('en-US', cur ? {month:'short', day:'numeric'} : {month:'short', day:'numeric', year:'2-digit'});
   return d.getDate() + '.' + (d.getMonth() + 1) + '.' + (cur ? '' : String(y).slice(-2) + '.');
 }
-function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : 'autoDoc'); }
+function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : item.type === 'video' ? 'autoVid' : 'autoDoc'); }   /* v268: video sa imenom iz telefona = „Video“ (ranije „Dokument“) */
 /* naziv za prikaz u jednom redu (pregled, korpa, AI): „Slika · 6.10.2026. 12:34“ */
 /* v130: u pregledu naziv bez vremena (automatsko ime = samo „Slika“), datum sivo iza brojača; vreme se vidi u preimenovanju */
 function setModalCaption(item){
@@ -3745,7 +3745,7 @@ const I18N = {
     pgExtractHint: 'Odmah postaje posebna slika u istom albumu',
     pgExtractNo: 'Moguće kod sačuvanog dokumenta sa bar dve stranice',
     pgRemove: 'Ukloni iz dokumenta',
-    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
+    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
     pgPartName: '{name} – str. {n}',
     pgNeedOne: 'Dokument mora imati bar jednu stranicu.',
     pgWait: 'Sačekaj da se sve stranice obrade.',
@@ -4558,7 +4558,7 @@ const I18N = {
     pgExtractHint: 'Becomes a separate image in the same album right away',
     pgExtractNo: 'Possible for a saved document with at least two pages',
     pgRemove: 'Remove from document',
-    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
+    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
     pgPartName: '{name} – p. {n}',
     pgNeedOne: 'A document needs at least one page.',
     pgWait: 'Wait until all pages are processed.',
@@ -6522,6 +6522,7 @@ async function loadAll(){
 }
 /* Slika bez sličice (npr. posle vraćanja): sličica se pravi u pozadini, jedna po jedna */
 let _thumbFixRunning = false;
+const _vtChecked = new Set();
 async function ensureMissingThumbs(){
   if(_thumbFixRunning) return;
   _thumbFixRunning = true;
@@ -6540,6 +6541,19 @@ async function ensureMissingThumbs(){
       }catch(e){ it._thumbFailed = true; console.error(e); }
     }
     if(todo.length) render();
+    /* v268: postojeće crne sličice videa (napravljene pre v268) — jednom po pokretanju se provere i, ako ima svetlijeg kadra, zamene */
+    let fixed = 0;
+    for(const it of items.filter(i=>i.type === 'video' && i.thumb && !_vtChecked.has(i.id))){
+      _vtChecked.add(it.id);
+      try{
+        if(!(await blobDark(await (await fetch(it.thumb)).blob()))) continue;
+        const r = await videoThumb(await getFileBlob(it));
+        if(!r || r.dark) continue;
+        await Skladiste.upisi({thumbs:[{id:it.pages[0].file, blob:r.tblob}]});
+        setThumbUrl(it, r.tblob); fixed++;
+      }catch(e){ console.error('sličica videa', e); }
+    }
+    if(fixed) render();
     await pdfThumbsMissing(pdfDelay);
   }finally{ _thumbFixRunning = false; }
 }
@@ -9887,18 +9901,30 @@ async function processImage(blob, resize){
 function makeThumb(blob){ return processImage(blob, false); }
 /* v254: sličica videa = jedan kadar (najviše 1 s od početka) + trajanje i veličina; čita se samo početak fajla.
    Ne uspe (nepoznat kodek, 8 s) → null: video se ipak čuva, u albumu stoji ikonica. */
+/* v268: sličica videa ne sme biti crn kadar (početak snimka u mraku ili zatamnjenje): probaju se do tri trenutka
+   (~1 s, 25 %, 50 % trajanja) i uzima se prvi koji nije skoro crn; ako su svi tamni, ostaje poslednji (dark:true). */
+function frameDark(src){
+  const c = document.createElement('canvas'); c.width = 16; c.height = 16;
+  const x = c.getContext('2d', {willReadFrequently:true});
+  x.drawImage(src, 0, 0, 16, 16);
+  const d = x.getImageData(0, 0, 16, 16).data; let sum = 0;
+  for(let i = 0; i < d.length; i += 4) sum += d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+  return sum / (d.length / 4) < 16;
+}
+async function blobDark(blob){ try{ const b = await createImageBitmap(blob); const r = frameDark(b); b.close && b.close(); return r; }catch(e){ return false; } }
 function videoThumb(blob){
   return new Promise(resolve=>{
     const url = URL.createObjectURL(blob);
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true; v.preload = 'auto';
-    let done = false;
+    let done = false, times = [0.1], ti = 0;
     const fin = r=>{ if(done) return; done = true; clearTimeout(tm); v.removeAttribute('src'); try{ v.load(); }catch(e){} URL.revokeObjectURL(url); resolve(r); };
-    const tm = setTimeout(()=>fin(null), 8000);
+    const tm = setTimeout(()=>fin(null), 12000);
     v.onerror = ()=>fin(null);
     v.onloadedmetadata = ()=>{
       const d = isFinite(v.duration) ? v.duration : 0;
-      v.currentTime = d > 0 ? Math.min(1, d / 10) : 0.1;
+      if(d > 0) times = [Math.min(1, d / 10), d * 0.25, d * 0.5];
+      v.currentTime = times[0];
     };
     v.onseeked = ()=>{
       const W = v.videoWidth, H = v.videoHeight;
@@ -9906,8 +9932,10 @@ function videoThumb(blob){
       const k = Math.min(1, THUMB_SHORT / Math.min(W, H), THUMB_LONG / Math.max(W, H));
       const c = document.createElement('canvas');
       c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k));
-      try{ c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); }catch(e){ fin(null); return; }
-      canvasToBlob(c, THUMB_QUALITY).then(tblob=>fin({tblob, w:W, h:H, dur:isFinite(v.duration) ? Math.round(v.duration) : 0})).catch(()=>fin(null));
+      let dark = false;
+      try{ c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); dark = frameDark(c); }catch(e){ fin(null); return; }
+      if(dark && ++ti < times.length){ v.currentTime = times[ti]; return; }
+      canvasToBlob(c, THUMB_QUALITY).then(tblob=>fin({tblob, w:W, h:H, dur:isFinite(v.duration) ? Math.round(v.duration) : 0, dark})).catch(()=>fin(null));
     };
     v.src = url;
   });
@@ -10646,7 +10674,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 267;
+const APP_VERSION = 268;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
