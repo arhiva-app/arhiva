@@ -10745,7 +10745,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 278;
+const APP_VERSION = 279;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22365,7 +22365,10 @@ async function drDisconnect(){
   clearTimeout(_drTimer); clearTimeout(_drRetry); _drTok = null;
   drRefresh(); checkBackupReminder();
   toast(t('drOffDone'));
-  try{ await drNative().prekini({nalog:email || ''}); }catch(e){}   /* Google zaboravi dozvolu: sledeće povezivanje opet nudi izbor naloga */
+  /* v279: dozvola se NE opoziva. Sa drive.file opoziv Arhivi oduzima i pristup fajlovima koje je sama poslala (4.11.: posle ponovnog
+     povezivanja istog naloga Arhiva ih nije videla i krenula je da šalje ponovo). Izbor naloga pri sledećem povezivanju daje
+     Prompt.SELECT_ACCOUNT (v278), pa opoziv više nije potreban. */
+  void email;
 }
 async function infoBox(text){ await lkChoice(t('drTile'), text, [['ok', t('lkOk')]], 'ok'); if(lkState === 'open') lkHide(); }   /* prozor sa jednim dugmetom (isti kao kod zaključavanja) */
 
