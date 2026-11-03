@@ -20959,7 +20959,7 @@ async function fzAddFolder(){
   }finally{ _fzBusy = false; }
   /* v275 (Zoran 3.11.): album se bira ODMAH posle fascikle, pre ijednog uvoza (v274 je prvo uvozio u „Bez albuma“) */
   const ime = r.ime || fzPath({uri:r.uri});
-  fzAlbumSheet(ime, null, ime, alb=>{
+  fzAlbumSheet(ime, undefined, ime, alb=>{   /* nov: ništa nije unapred označeno */
     const c = fzCfg();
     if((c.moje || []).some(x=>x.uri === r.uri)) return;
     c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:alb, on:true, vid:[]}]);
