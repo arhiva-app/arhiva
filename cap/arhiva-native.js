@@ -101,7 +101,8 @@
     var GD = reg('GoogleDrive');
     window.ARHIVA_DRIVE = {
       dozvola: function(o){ return GD.dozvola(o || {}); },
-      prekini: function(o){ return GD.prekini(o || {}); }
+      prekini: function(o){ return GD.prekini(o || {}); },
+      proba: function(o){ return GD.proba(o || {}); }   /* proba deljenja (privremeno, 3.11.2026); stariji APK odbije poziv */
     };
   }
 
