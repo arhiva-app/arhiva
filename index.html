@@ -10745,7 +10745,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 276;
+const APP_VERSION = 277;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22475,14 +22475,26 @@ async function prbRun(fn){
   _prbBusy = false; drRefresh();
   const l = document.getElementById('prbLog'); if(l) l.scrollIntoView({block:'nearest'});
 }
+/* v277: Google je vratio 8 [28405] — načini prozora se probaju redom dok jedan ne prođe; uspešan se pamti i prvi je sledeći put.
+   Ako korisnik sam zatvori prozor (kod 0 bez Google greške), staje se. */
+const PRB_VAR = [['pristanak', true, 'pristanak'], ['nalog', true, 'izbor naloga'], ['bez', true, 'bez upita'], ['bez', false, 'kao „Poveži Drive“'], ['oba', true, 'pristanak + izbor naloga']];
 async function prbAuth(birac){
-  let r = {};
-  try{ r = (await drNative().proba({birac:!!birac})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
-  if(!r.ok || !r.token){
-    if(/not implemented|nije/i.test(r.poruka || '')) throw new Error('Potreban je nov APK (proba deljenja).');
-    throw new Error('Google prozor: ' + (r.razlog === 'otkazano' ? 'otkazano' : (r.razlog || 'greška')) + (r.poruka ? ' — ' + r.poruka : ''));
+  const c = prbCfg(), first = PRB_VAR.findIndex(v=>v[2] === c.var);
+  const order = first > 0 ? [PRB_VAR[first]].concat(PRB_VAR.filter((_, i)=>i !== first)) : PRB_VAR.slice();
+  let last = '';
+  for(const [prompt, optout, ime] of order){
+    let r = {};
+    try{ r = (await drNative().proba({birac:!!birac, prompt, optout})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
+    if(r.ok && r.token){
+      prbAdd('✔ Google prozor: ' + ime); const k = prbCfg(); k.var = ime; prbSet(k);
+      return {tok:r.token, ids:Array.isArray(r.ids) ? r.ids : []};
+    }
+    if(/not implemented/i.test(r.poruka || '')) throw new Error('Potreban je nov APK (proba deljenja).');
+    last = (r.razlog || 'greška') + (r.poruka ? ' — ' + r.poruka : '');
+    prbAdd('✖ Google prozor (' + ime + '): ' + last);
+    if(r.razlog === 'otkazano' && !/Google \d/.test(r.poruka || '')) throw new Error('Prozor je zatvoren bez izbora.');
   }
-  return {tok:r.token, ids:Array.isArray(r.ids) ? r.ids : []};
+  throw new Error('Nijedan način Google prozora nije prošao.');
 }
 async function prbF(tok, url, opt){
   opt = opt || {};
@@ -22513,7 +22525,7 @@ async function prbStep1(){
   prbAdd('✔ Fascikla i 2 fajla napravljeni');
   const p = await prbF(a.tok, DR_API + '/' + f.j.id + '/permissions?sendNotificationEmail=true', {method:'POST', headers:DR_JSON, body:JSON.stringify({type:'user', role:'writer', emailAddress:to})});
   prbAdd((p.ok ? '✔' : '✖') + ' Podeljeno sa ' + to + ' (urednik)' + prbWhy(p));
-  prbSet({owner:me, to, folder:f.j.id, files, at:Date.now()});
+  prbSet(Object.assign(prbCfg(), {owner:me, to, folder:f.j.id, files, at:Date.now()}));   /* zapamćen način prozora (var) ostaje */
   if(p.ok) prbAdd('Sledeće: korak 2, u Google prozoru izaberi nalog ' + to + ', pa „Deljeno sa mnom“ → fasciklu.');
 }
 async function prbStep2(fajlovi){
