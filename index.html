@@ -2741,6 +2741,18 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
   transition:opacity .2s ease, transform .2s ease; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .to-top.show{ opacity:1; transform:none; pointer-events:auto; }
 .to-top:active{ background:var(--brass-glow); }
+/* v273: praćene fascikle — „Moje fascikle“ */
+.fz-lbl{ margin:20px 6px 8px; font:700 12.5px var(--font-ui); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); }
+.fz-row{ cursor:pointer; }
+.fz-sw{ flex:none; background:none; border:0; padding:6px 0 6px 10px; margin:0; cursor:pointer; display:flex; align-items:center; }
+.fz-add{ color:var(--accent); font-weight:600; }
+.fz-mrow{ display:flex; align-items:center; gap:12px; text-align:left; }
+.fz-mic{ font-size:20px; width:26px; text-align:center; flex:none; }
+.fz-mrow .pick-tx{ flex:1; display:flex; flex-direction:column; }
+.fz-ma{ font-weight:600; }
+.fz-mb{ font-size:12.5px; color:var(--ink-dim); margin-top:2px; }
+.fz-mrow.danger .fz-ma{ color:var(--danger); }
+.fz-mrow .chevron{ color:var(--ink-dim); }
 /* v269: „Ceo dan“ u redu datuma (samo u izboru) */
 .date-label:has(.day-sel){ display:flex; align-items:center; gap:10px; }
 .date-label:has(.day-sel)::after{ order:1; }
@@ -3758,8 +3770,8 @@ const I18N = {
     pgExtractHint: 'Odmah postaje posebna slika u istom albumu',
     pgExtractNo: 'Moguće kod sačuvanog dokumenta sa bar dve stranice',
     pgRemove: 'Ukloni iz dokumenta',
-    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', fzTile: 'Praćene fascikle', fzShots: 'Snimci ekrana', fzTileOn: 'Snimci ekrana: uključeno', fzTileOff: 'Isključeno',
-    fzOffSub: 'Novi snimci ekrana sami stižu u Arhivu', fzOnSub: 'Uključeno · fascikla {ime}', fzOn: 'Praćenje uključeno: {ime}', fzOffT: 'Praćenje isključeno.',
+    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', fzTile: 'Praćene fascikle', fzShots: 'Snimci ekrana', fzTileN: 'Praćeno: {n}', fzTileOff: 'Isključeno', fzMine: 'Moje fascikle', fzAdd: 'Dodaj fasciklu', fzOnOff: 'Uključi ili isključi', fzToAlb: 'Fajlovi idu u album', fzStop: 'Prestani da pratiš', fzStopped: 'Više se ne prati: {ime}', fzAlbSet: 'Novi fajlovi idu u: {alb}', fzDup: 'Ta fascikla se već prati.', fzDoneF: 'Novo iz fascikle {ime}: {n}', fzLostF: 'Arhiva više nema pristup fascikli {ime}. Dodaj je ponovo u Podešavanjima → Praćene fascikle.', fzHintMine: 'Dodir na fasciklu: u koji album idu fajlovi, ili prestani da pratiš. Prekidač: privremeno isključi. Uvoze se svi fajlovi (slike, video, PDF, Word…) nastali posle dodavanja; original ostaje na telefonu. Fasciklu „Download“ Android ne dozvoljava.',
+    fzOffSub: 'Novi snimci ekrana sami stižu u Arhivu', fzOn: 'Praćenje uključeno: {ime}', fzOffT: 'Praćenje isključeno.',
     fzHint: 'Arhiva vidi samo izabranu fasciklu, ništa drugo na telefonu. Uvoze se samo snimci nastali posle uključivanja; original ostaje u galeriji. Novi snimci stižu kad otvoriš Arhivu ili se vratiš u nju.',
     fzHint2: 'Kad uključiš, Android jednom pita koju fasciklu Arhiva sme da vidi — izaberi fasciklu sa snimcima ekrana (najčešće DCIM › Screenshots) i potvrdi izbor dugmetom na dnu.',
     fzDone: 'Novi snimci ekrana u Arhivi: {n}', fzLost: 'Arhiva više nema pristup fascikli snimaka ekrana. Uključi praćenje ponovo u Podešavanjima → Praćene fascikle.', fzErr: 'Izbor fascikle nije uspeo.', selNone: 'Poništi sve', selPick: 'Izaberi stavke', renDate: 'Datum', renTime: 'Vreme', autoImg: 'Slika', autoVid: 'Video', autoDoc: 'Dokument', pgExtractLater: 'Stranica će biti posebna slika kad dodirneš „Sačuvaj“.', pgSavedExt: 'Sačuvano. Izdvojene stranice su posebne slike u istom albumu.', pgSavedBoth: 'Sačuvano. Izdvojene stranice su posebne slike u albumu, a uklonjene su u korpi.',
@@ -4575,8 +4587,8 @@ const I18N = {
     pgExtractHint: 'Becomes a separate image in the same album right away',
     pgExtractNo: 'Possible for a saved document with at least two pages',
     pgRemove: 'Remove from document',
-    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', fzTile: 'Watched folders', fzShots: 'Screenshots', fzTileOn: 'Screenshots: on', fzTileOff: 'Off',
-    fzOffSub: 'New screenshots arrive in Arhiva on their own', fzOnSub: 'On · folder {ime}', fzOn: 'Watching: {ime}', fzOffT: 'Watching turned off.',
+    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', fzTile: 'Watched folders', fzShots: 'Screenshots', fzTileN: 'Watching: {n}', fzTileOff: 'Off', fzMine: 'My folders', fzAdd: 'Add folder', fzOnOff: 'Turn on or off', fzToAlb: 'Files go to album', fzStop: 'Stop watching', fzStopped: 'No longer watched: {ime}', fzAlbSet: 'New files go to: {alb}', fzDup: 'That folder is already watched.', fzDoneF: 'New from folder {ime}: {n}', fzLostF: 'Arhiva no longer has access to folder {ime}. Add it again in Settings → Watched folders.', fzHintMine: 'Tap a folder to choose its album or stop watching it. The switch pauses it. All files (images, video, PDF, Word…) created after adding are imported; the original stays on the phone. Android does not allow the Download folder.',
+    fzOffSub: 'New screenshots arrive in Arhiva on their own', fzOn: 'Watching: {ime}', fzOffT: 'Watching turned off.',
     fzHint: 'Arhiva sees only the folder you choose, nothing else on the phone. Only screenshots taken after turning this on are imported; the original stays in the gallery. New ones arrive when you open Arhiva or come back to it.',
     fzHint2: 'When you turn it on, Android asks once which folder Arhiva may see — choose the screenshots folder (usually DCIM › Screenshots) and confirm with the button at the bottom.',
     fzDone: 'New screenshots in Arhiva: {n}', fzLost: 'Arhiva no longer has access to the screenshots folder. Turn watching on again in Settings → Watched folders.', fzErr: 'Choosing the folder failed.', selNone: 'Clear all', selPick: 'Choose items', renDate: 'Date', renTime: 'Time', autoImg: 'Image', autoVid: 'Video', autoDoc: 'Document', pgExtractLater: 'The page becomes a separate image when you tap “Save”.', pgSavedExt: 'Saved. Extracted pages are separate images in the same album.', pgSavedBoth: 'Saved. Extracted pages are separate images in the album; removed ones are in the trash.',
@@ -10726,7 +10738,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 272;
+const APP_VERSION = 273;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20826,36 +20838,54 @@ let _fzLast = 0;
 function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
 function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
 function fzSave(c){ try{ localStorage.setItem(FZ_KEY, JSON.stringify(c)); }catch(e){} }
+/* v273: osim „Snimci ekrana“ (c.snimci) i „Moje fascikle“ (c.moje: [{uri, ime, album, on, od, vec}]) — Zoran bira jednu ili više,
+   uvoze se svi fajlovi nastali posle dodavanja, u izabrani album (ili „Bez albuma“). Isti dodatak, ista pravila. */
+function fzList(c){ return (c.snimci && c.snimci.uri ? [Object.assign({kind:'shots'}, c.snimci)] : []).concat((c.moje || []).filter(f=>f.uri && f.on !== false)); }
+function fzPath(f){
+  const m = /\/tree\/([^/?#]+)/.exec(f.uri || ''); let id = '';
+  try{ id = m ? decodeURIComponent(m[1]) : ''; }catch(e){}
+  const k = id.indexOf(':');
+  return (k > 0 && id.slice(k + 1)) ? id.slice(k + 1).split('/').filter(Boolean).join(' › ') : (f.ime || '');
+}
+function fzUpdate(uri, fn){
+  const c = fzCfg();
+  if(c.snimci && c.snimci.uri === uri) fn(c.snimci);
+  (c.moje || []).forEach(x=>{ if(x.uri === uri) fn(x); });
+  fzSave(c);
+}
 async function fzCheck(){
-  const n = fzNative(); if(!n || !(fzCfg().snimci || {}).uri) return;
+  const n = fzNative(); if(!n || !fzList(fzCfg()).length) return;
   await scWaitOpen();
-  const c = fzCfg(), f = c.snimci; if(!f || !f.uri) return;
   _fzLast = Date.now();
-  let r;
-  try{ r = (await n.novi({uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
-  catch(e){ logError(t('fzTile'), (e && e.message) || e); return; }
-  if(r.nemaPrava){ delete c.snimci; fzSave(c); showNote(t('fzLost'), 9000); fzRefresh(); return; }
-  const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
-  let bad = r.greske || 0;
-  if(!list.length){ if(bad) showNote(t('rcvErr', {n:bad}), 6000); return; }
-  const files = [], got = [];
-  for(const x of list){
-    try{
-      const file = rcvFile(await nativeCopyBlob(n, x), x.ime, x.mime);
-      got.push(x);
-      if(!items.some(i=>i.sourceSig === file.name + '|' + file.size)) files.push(file);   /* već ručno dodat → bez pitanja, preskače se */
-    }catch(e){ console.error('fascikle deo', e); bad++; }
+  let again = false;
+  for(const f of fzList(fzCfg())){
+    let r;
+    try{ r = (await n.novi({uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
+    catch(e){ logError(t('fzTile'), (e && e.message) || e); continue; }
+    if(r.nemaPrava){
+      const c = fzCfg();
+      if(f.kind === 'shots') delete c.snimci; else c.moje = (c.moje || []).filter(x=>x.uri !== f.uri);
+      fzSave(c); showNote(f.kind === 'shots' ? t('fzLost') : t('fzLostF', {ime:f.ime || fzPath(f)}), 9000); fzRefresh();
+      continue;
+    }
+    const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
+    let bad = r.greske || 0;
+    const files = [], got = [];
+    for(const x of list){
+      try{
+        const file = rcvFile(await nativeCopyBlob(n, x), x.ime, x.mime);
+        got.push(x);
+        if(!items.some(i=>i.sourceSig === file.name + '|' + file.size)) files.push(file);   /* već ručno dodat → bez pitanja, preskače se */
+      }catch(e){ console.error('fascikle deo', e); bad++; }
+    }
+    try{ await n.obrisi(); }catch(e){}
+    const alb = f.kind === 'shots' ? null : (f.album && catById(f.album) ? f.album : null);
+    if(files.length) await addFilesWithProgress(files, alb, k=>f.kind === 'shots' ? t('fzDone', {n:k}) : t('fzDoneF', {n:k, ime:f.ime || fzPath(f)}));
+    if(got.length) fzUpdate(f.uri, x=>{ x.od = Math.max(x.od || 0, ...got.map(g=>g.vreme || 0)); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200); });
+    if(bad) showNote(t('rcvErr', {n:bad}), 6000);
+    if(r.jos) again = true;
   }
-  try{ await n.obrisi(); }catch(e){}
-  if(files.length) await addFilesWithProgress(files, null, k=>t('fzDone', {n:k}));
-  const c2 = fzCfg();
-  if(c2.snimci && c2.snimci.uri === f.uri){
-    c2.snimci.od = Math.max(c2.snimci.od || 0, ...got.map(x=>x.vreme || 0));
-    c2.snimci.vec = (c2.snimci.vec || []).concat(got.map(x=>x.id)).slice(-200);
-    fzSave(c2);
-  }
-  if(bad) showNote(t('rcvErr', {n:bad}), 6000);
-  if(r.jos) rcvQueue(fzCheck);
+  if(again) rcvQueue(fzCheck);
 }
 function fzBoot(){
   if(!fzNative()) return;
@@ -20865,17 +20895,94 @@ function fzBoot(){
   });
 }
 /* ---- Podešavanja → Praćene fascikle ---- */
-function fzTileSub(){ const f = fzCfg().snimci; return f && f.uri ? t('fzTileOn') : t('fzTileOff'); }
+function fzTileSub(){
+  const c = fzCfg(), n = fzList(c).length;
+  return n ? t('fzTileN', {n}) : t('fzTileOff');
+}
+function fzAlbName(f){ const c = f.album && catById(f.album); return c ? c.name : t('pathInbox'); }
 function fzSettingsHtml(){
-  const f = fzCfg().snimci, on = !!(f && f.uri);
-  return '<div class="settings-card"><button type="button" class="settings-row" id="fzShotRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'">'+
-    '<span class="row-icon">📱</span><span class="row-label">'+escapeHtml(t('fzShots'))+'<span class="lk-row-sub">'+escapeHtml(on ? t('fzOnSub', {ime:f.ime || 'Screenshots'}) : t('fzOffSub'))+'</span></span>'+
-    '<span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button></div>'+
+  const c = fzCfg(), f = c.snimci, on = !!(f && f.uri);
+  const sw = v=>'<span class="lk-sw-t'+(v ? ' on' : '')+'"></span>';
+  let h = '<div class="settings-card"><button type="button" class="settings-row" id="fzShotRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'">'+
+    '<span class="row-icon">📱</span><span class="row-label">'+escapeHtml(t('fzShots'))+'<span class="lk-row-sub">'+escapeHtml(on ? fzPath(f) + ' → ' + t('fzShots') : t('fzOffSub'))+'</span></span>'+sw(on)+'</button></div>';
+  h += '<div class="fz-lbl">'+escapeHtml(t('fzMine'))+'</div><div class="settings-card">';
+  (c.moje || []).forEach((x, i)=>{
+    const v = x.on !== false;
+    h += '<div class="settings-row fz-row" data-i="'+i+'"><span class="row-icon">📁</span><span class="row-label">'+escapeHtml(x.ime || fzPath(x))+
+      '<span class="lk-row-sub">'+escapeHtml(fzPath(x) + ' → ' + fzAlbName(x))+'</span></span>'+
+      '<button type="button" class="fz-sw" role="switch" aria-checked="'+(v ? 'true' : 'false')+'" aria-label="'+escapeHtml(t('fzOnOff'))+'">'+sw(v)+'</button></div>';
+  });
+  h += '<button type="button" class="settings-row" id="fzAddRow"><span class="row-icon">➕</span><span class="row-label fz-add">'+escapeHtml(t('fzAdd'))+'</span><span class="chevron">›</span></button></div>';
+  h += '<div class="settings-hint">'+escapeHtml(t('fzHintMine'))+'</div>'+
     '<div class="settings-hint">'+escapeHtml(t('fzHint'))+'</div>'+
     '<div class="settings-hint">'+escapeHtml(t('fzHint2'))+'</div>';
+  return h;
 }
 function fzRefresh(){ const b = document.getElementById('fzSet'); if(b){ b.innerHTML = fzSettingsHtml(); fzWire(); } }
-function fzWire(){ const r = document.getElementById('fzShotRow'); if(r) r.onclick = fzToggleShots; }
+function fzWire(){
+  const r = document.getElementById('fzShotRow'); if(r) r.onclick = fzToggleShots;
+  const a = document.getElementById('fzAddRow'); if(a) a.onclick = fzAddFolder;
+  document.querySelectorAll('#fzSet .fz-row').forEach(row=>{
+    const i = +row.dataset.i;
+    row.onclick = ()=>fzFolderMenu(i);
+    row.querySelector('.fz-sw').onclick = e=>{
+      e.stopPropagation();
+      const c = fzCfg(), x = (c.moje || [])[i]; if(!x) return;
+      x.on = x.on === false;
+      if(x.on) x.od = Date.now();   /* ponovo uključena: samo ono što nastane od sada */
+      fzSave(c); fzRefresh(); toast(x.on ? t('fzOn', {ime:x.ime || fzPath(x)}) : t('fzOffT'));
+    };
+  });
+}
+async function fzAddFolder(){
+  const n = fzNative(); if(!n || _fzBusy) return;
+  _fzBusy = true;
+  try{
+    let r = {};
+    try{ r = (await n.izaberi({pocetna:''})) || {}; }catch(e){ logError(t('fzTile'), (e && e.message) || e); toast(t('fzErr')); return; }
+    if(r.otkazano || !r.uri) return;
+    const c = fzCfg();
+    if((c.moje || []).some(x=>x.uri === r.uri) || (c.snimci && c.snimci.uri === r.uri)){ toast(t('fzDup')); return; }
+    c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:null, on:true, od:Date.now(), vec:[]}]);
+    fzSave(c); fzRefresh(); toast(t('fzOn', {ime:r.ime || fzPath({uri:r.uri})}));
+  }finally{ _fzBusy = false; }
+}
+/* dodir na fasciklu: mali meni (album / prestani da pratiš) — isti prozor na dnu kao izbor u podešavanjima (pickSheet, iznad podešavanja) */
+function fzFolderMenu(i){
+  const x = (fzCfg().moje || [])[i]; if(!x) return;
+  const bg = document.getElementById('pickSheet'), list = document.getElementById('pickList');
+  document.getElementById('pickTitle').textContent = x.ime || fzPath(x);
+  list.innerHTML = '';
+  const row = (ic, a, b, cls, fn)=>{
+    const r = document.createElement('button'); r.type = 'button'; r.className = 'pick-row fz-mrow' + (cls ? ' ' + cls : '');
+    r.innerHTML = '<span class="fz-mic"></span><span class="pick-tx"><span class="fz-ma"></span>'+(b ? '<span class="fz-mb"></span>' : '')+'</span><span class="chevron">›</span>';
+    r.querySelector('.fz-mic').textContent = ic; r.querySelector('.fz-ma').textContent = a; if(b) r.querySelector('.fz-mb').textContent = b;
+    r.onclick = fn; list.appendChild(r);
+  };
+  row('🗂️', t('fzToAlb'), fzAlbName(x), '', ()=>requestCloseThen(()=>fzPickAlbum(i)));
+  row('🗑️', t('fzStop'), '', 'danger', ()=>requestCloseThen(()=>fzStop(i)));
+  bg.classList.add('open');
+  pushBack(()=>bg.classList.remove('open'));
+}
+function fzPickAlbum(i){
+  const x = (fzCfg().moje || [])[i]; if(!x) return;
+  const sel = document.createElement('select');
+  const add = (v, txt)=>{ const o = document.createElement('option'); o.value = v; o.textContent = txt; if(v === (x.album && catById(x.album) ? x.album : '')) o.selected = true; sel.appendChild(o); };
+  add('', t('pathInbox'));
+  categories.filter(c=>!c.parent).forEach(c=>{ add(c.id, c.name); childrenOf(c.id).forEach(s=>add(s.id, c.name + ' › ' + s.name)); });
+  sel.addEventListener('change', ()=>{
+    const c = fzCfg(), y = (c.moje || [])[i]; if(!y) return;
+    y.album = sel.value || null; fzSave(c); fzRefresh(); toast(t('fzAlbSet', {alb:fzAlbName(y)}));
+  });
+  sel.id = 'fzAlbSel';
+  openPicker(sel);
+  document.getElementById('pickTitle').textContent = t('fzToAlb');
+}
+async function fzStop(i){
+  const n = fzNative(), c = fzCfg(), x = (c.moje || [])[i]; if(!x) return;
+  try{ if(n) await n.otpusti({uri:x.uri}); }catch(e){}
+  c.moje.splice(i, 1); fzSave(c); fzRefresh(); toast(t('fzStopped', {ime:x.ime || fzPath(x)}));
+}
 let _fzBusy = false;
 async function fzToggleShots(){
   const n = fzNative(); if(!n || _fzBusy) return;
