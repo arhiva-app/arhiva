@@ -190,23 +190,13 @@
     if(ukupno <= DEO || typeof window.toastPersist !== 'function') return null;
     var tx = en() ? eng : sr;
     var f = function(gotovo){ window.toastPersist(tx + ' ' + Math.floor(gotovo / ukupno * 100) + '%', { n: gotovo, total: ukupno }); };
-    f.t0 = Date.now(); f.mb = ukupno / 1048576;
     f(0); return f;
   }
   function radKraj(f){ if(f && typeof window.toastHide === 'function') window.toastHide(); }
-  /* v265 PRIVREMENO (Zoran 3.11.): merenje pripreme — „Pripremljeno 48 MB za 2,1 s“, 10 s; ukloniti posle merenja */
-  function radMera(f){
-    if(!f || typeof window.showNote !== 'function') return;
-    var s = (Date.now() - f.t0) / 1000, sr = !en();
-    var broj = function(x){ var v = x.toFixed(1); return sr ? v.replace('.', ',') : v; };
-    var put = bajtOk ? (sr ? ' · brzi put' : ' · fast path') : '';   /* v266: da se vidi koji put je radio */
-    window.showNote((sr ? 'Pripremljeno ' + broj(f.mb) + ' MB za ' + broj(s) + ' s' : 'Prepared ' + broj(f.mb) + ' MB in ' + broj(s) + ' s') + put, 10000);
-  }
   async function sacuvajKaoJedan(blob, name, mime){
     var fn = safe(name), putanja = 'izvoz/' + Date.now() + '/' + fn;
     var rad = radPocni('Pripremam za čuvanje…', 'Preparing to save…', blob.size);
     try{ await uKes(blob, putanja, rad); } finally { radKraj(rad); }
-    radMera(rad);
     return await SacuvajKao.sacuvaj({ putanja: putanja, ime: fn, mime: mime || blob.type || 'application/octet-stream' });
   }
   if(imaSacuvajKao) window.ARHIVA_SACUVAJ_KAO = sacuvajKao;
@@ -254,7 +244,6 @@
         uris.push(r.uri);
       }
     } finally { radKraj(rad); }
-    radMera(rad);
     try{
       var o = {};
       if(d.title) o.title = d.title;
