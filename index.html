@@ -2745,6 +2745,10 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
 .fz-lbl{ margin:20px 6px 8px; font:700 12.5px var(--font-ui); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); }
 .fz-row{ cursor:pointer; }
 .fz-sw{ flex:none; background:none; border:0; padding:6px 0 6px 10px; margin:0; cursor:pointer; display:flex; align-items:center; }
+/* v274: pretraga u izboru albuma */
+.pick-search{ position:sticky; top:0; z-index:1; padding:10px 12px; background:var(--surface); border-bottom:1px solid var(--line); }
+.pick-search input{ width:100%; box-sizing:border-box; height:42px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:16px var(--font-ui); }
+.pick-none{ padding:18px 16px; color:var(--ink-dim); text-align:center; }
 .settings-row .row-label.fz-add{ color:var(--accent); font-weight:600; }
 .fz-mrow{ display:flex; align-items:center; gap:12px; text-align:left; }
 .fz-mic{ font-size:20px; width:26px; text-align:center; flex:none; }
@@ -3770,7 +3774,7 @@ const I18N = {
     pgExtractHint: 'Odmah postaje posebna slika u istom albumu',
     pgExtractNo: 'Moguće kod sačuvanog dokumenta sa bar dve stranice',
     pgRemove: 'Ukloni iz dokumenta',
-    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', fzTile: 'Praćene fascikle', fzShots: 'Snimci ekrana', fzTileN: 'Praćeno: {n}', fzTileOff: 'Isključeno', fzMine: 'Moje fascikle', fzAdd: 'Dodaj fasciklu', fzOnOff: 'Uključi ili isključi', fzToAlb: 'Fajlovi idu u album', fzStop: 'Prestani da pratiš', fzStopped: 'Više se ne prati: {ime}', fzAlbSet: 'Novi fajlovi idu u: {alb}', fzDup: 'Ta fascikla se već prati.', fzDoneF: 'Novo iz fascikle {ime}: {n}', fzLostF: 'Arhiva više nema pristup fascikli {ime}. Dodaj je ponovo u Podešavanjima → Praćene fascikle.', fzHintMine: 'Dodir na fasciklu: u koji album idu fajlovi, ili prestani da pratiš. Prekidač: privremeno isključi. Uvoze se svi fajlovi (slike, video, PDF, Word…) nastali posle dodavanja; original ostaje na telefonu. Fasciklu „Download“ Android ne dozvoljava.',
+    pgExtracted: 'Stranica je izdvojena kao posebna slika u istom albumu.', selAll: 'Izaberi sve', selDay: 'Ceo dan', fzTile: 'Praćene fascikle', fzShots: 'Snimci ekrana', fzTileN: 'Praćeno: {n}', fzTileOff: 'Isključeno', fzMine: 'Moje fascikle', fzAdd: 'Dodaj fasciklu', fzOnOff: 'Uključi ili isključi', fzToAlb: 'Fajlovi idu u album', fzAlbSearch: 'Pretraži albume', fzAlbNone: 'Nema albuma sa tim imenom.', fzStop: 'Prestani da pratiš', fzStopped: 'Više se ne prati: {ime}', fzAlbSet: 'Novi fajlovi idu u: {alb}', fzDup: 'Ta fascikla se već prati.', fzDoneF: 'Novo iz fascikle {ime}: {n}', fzLostF: 'Arhiva više nema pristup fascikli {ime}. Dodaj je ponovo u Podešavanjima → Praćene fascikle.', fzHintMine: 'Dodir na fasciklu: u koji album idu fajlovi, ili prestani da pratiš. Prekidač: privremeno isključi. Pri dodavanju se uveze sve što je u fascikli, a posle sve što se u njoj pojavi (slike, video, PDF, Word…); original ostaje na telefonu, a brisanje iz fascikle ne briše iz Arhive. Fasciklu „Download“ Android ne dozvoljava.',
     fzOffSub: 'Novi snimci ekrana sami stižu u Arhivu', fzOn: 'Praćenje uključeno: {ime}', fzOffT: 'Praćenje isključeno.',
     fzHint: 'Arhiva vidi samo izabranu fasciklu, ništa drugo na telefonu. Uvoze se samo snimci nastali posle uključivanja; original ostaje u galeriji. Novi snimci stižu kad otvoriš Arhivu ili se vratiš u nju.',
     fzHint2: 'Kad uključiš, Android jednom pita koju fasciklu Arhiva sme da vidi — izaberi fasciklu sa snimcima ekrana (najčešće DCIM › Screenshots) i potvrdi izbor dugmetom na dnu.',
@@ -4587,7 +4591,7 @@ const I18N = {
     pgExtractHint: 'Becomes a separate image in the same album right away',
     pgExtractNo: 'Possible for a saved document with at least two pages',
     pgRemove: 'Remove from document',
-    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', fzTile: 'Watched folders', fzShots: 'Screenshots', fzTileN: 'Watching: {n}', fzTileOff: 'Off', fzMine: 'My folders', fzAdd: 'Add folder', fzOnOff: 'Turn on or off', fzToAlb: 'Files go to album', fzStop: 'Stop watching', fzStopped: 'No longer watched: {ime}', fzAlbSet: 'New files go to: {alb}', fzDup: 'That folder is already watched.', fzDoneF: 'New from folder {ime}: {n}', fzLostF: 'Arhiva no longer has access to folder {ime}. Add it again in Settings → Watched folders.', fzHintMine: 'Tap a folder to choose its album or stop watching it. The switch pauses it. All files (images, video, PDF, Word…) created after adding are imported; the original stays on the phone. Android does not allow the Download folder.',
+    pgExtracted: 'The page is now a separate image in the same album.', selAll: 'Select all', selDay: 'Whole day', fzTile: 'Watched folders', fzShots: 'Screenshots', fzTileN: 'Watching: {n}', fzTileOff: 'Off', fzMine: 'My folders', fzAdd: 'Add folder', fzOnOff: 'Turn on or off', fzToAlb: 'Files go to album', fzAlbSearch: 'Search albums', fzAlbNone: 'No album with that name.', fzStop: 'Stop watching', fzStopped: 'No longer watched: {ime}', fzAlbSet: 'New files go to: {alb}', fzDup: 'That folder is already watched.', fzDoneF: 'New from folder {ime}: {n}', fzLostF: 'Arhiva no longer has access to folder {ime}. Add it again in Settings → Watched folders.', fzHintMine: 'Tap a folder to choose its album or stop watching it. The switch pauses it. When added, everything in the folder is imported, then everything that appears in it (images, video, PDF, Word…); the original stays on the phone, and deleting from the folder does not delete from Arhiva. Android does not allow the Download folder.',
     fzOffSub: 'New screenshots arrive in Arhiva on their own', fzOn: 'Watching: {ime}', fzOffT: 'Watching turned off.',
     fzHint: 'Arhiva sees only the folder you choose, nothing else on the phone. Only screenshots taken after turning this on are imported; the original stays in the gallery. New ones arrive when you open Arhiva or come back to it.',
     fzHint2: 'When you turn it on, Android asks once which folder Arhiva may see — choose the screenshots folder (usually DCIM › Screenshots) and confirm with the button at the bottom.',
@@ -10738,7 +10742,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 273;
+const APP_VERSION = 274;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20860,7 +20864,11 @@ async function fzCheck(){
   let again = false;
   for(const f of fzList(fzCfg())){
     let r;
-    try{ r = (await n.novi({uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
+    /* v274 (Zoran 3.11.): „Moje fascikle“ — pri povezivanju uveze se SVE iz fascikle, posle sve što se pojavi; novo = id koji još nije
+       viđen (f.vid, bez ograničenja). Vreme izmene se ne koristi: slika premeštena/kopirana u fasciklu (npr. iz Galerije) zadrži staro
+       vreme, pa je v273 nije uvozio. Snimci ekrana ostaju „samo novi od uključivanja“ (po vremenu — novi snimak uvek ima novo vreme). */
+    const mine = f.kind !== 'shots';
+    try{ r = (await n.novi(mine ? {uri:f.uri, posle:0, vec:f.vid || [], max:50} : {uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
     catch(e){ logError(t('fzTile'), (e && e.message) || e); continue; }
     if(r.nemaPrava){
       const c = fzCfg();
@@ -20881,7 +20889,10 @@ async function fzCheck(){
     try{ await n.obrisi(); }catch(e){}
     const alb = f.kind === 'shots' ? null : (f.album && catById(f.album) ? f.album : null);
     if(files.length) await addFilesWithProgress(files, alb, k=>f.kind === 'shots' ? t('fzDone', {n:k}) : t('fzDoneF', {n:k, ime:f.ime || fzPath(f)}));
-    if(got.length) fzUpdate(f.uri, x=>{ x.od = Math.max(x.od || 0, ...got.map(g=>g.vreme || 0)); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200); });
+    if(got.length) fzUpdate(f.uri, x=>{
+      if(mine){ x.vid = (x.vid || []).concat(got.map(g=>g.id)); return; }
+      x.od = Math.max(x.od || 0, ...got.map(g=>g.vreme || 0)); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200);
+    });
     if(bad) showNote(t('rcvErr', {n:bad}), 6000);
     if(r.jos) again = true;
   }
@@ -20905,6 +20916,7 @@ function fzSettingsHtml(){
   const sw = v=>'<span class="lk-sw-t'+(v ? ' on' : '')+'"></span>';
   let h = '<div class="settings-card"><button type="button" class="settings-row" id="fzShotRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'">'+
     '<span class="row-icon">📱</span><span class="row-label">'+escapeHtml(t('fzShots'))+'<span class="lk-row-sub">'+escapeHtml(on ? fzPath(f) + ' → ' + t('fzShots') : t('fzOffSub'))+'</span></span>'+sw(on)+'</button></div>';
+  h += '<div class="settings-hint">'+escapeHtml(t('fzHint'))+' '+escapeHtml(t('fzHint2'))+'</div>';
   h += '<div class="fz-lbl">'+escapeHtml(t('fzMine'))+'</div><div class="settings-card">';
   (c.moje || []).forEach((x, i)=>{
     const v = x.on !== false;
@@ -20913,9 +20925,7 @@ function fzSettingsHtml(){
       '<button type="button" class="fz-sw" role="switch" aria-checked="'+(v ? 'true' : 'false')+'" aria-label="'+escapeHtml(t('fzOnOff'))+'">'+sw(v)+'</button></div>';
   });
   h += '<button type="button" class="settings-row" id="fzAddRow"><span class="row-icon">➕</span><span class="row-label fz-add">'+escapeHtml(t('fzAdd'))+'</span><span class="chevron">›</span></button></div>';
-  h += '<div class="settings-hint">'+escapeHtml(t('fzHintMine'))+'</div>'+
-    '<div class="settings-hint">'+escapeHtml(t('fzHint'))+'</div>'+
-    '<div class="settings-hint">'+escapeHtml(t('fzHint2'))+'</div>';
+  h += '<div class="settings-hint">'+escapeHtml(t('fzHintMine'))+'</div>';
   return h;
 }
 function fzRefresh(){ const b = document.getElementById('fzSet'); if(b){ b.innerHTML = fzSettingsHtml(); fzWire(); } }
@@ -20929,8 +20939,8 @@ function fzWire(){
       e.stopPropagation();
       const c = fzCfg(), x = (c.moje || [])[i]; if(!x) return;
       x.on = x.on === false;
-      if(x.on) x.od = Date.now();   /* ponovo uključena: samo ono što nastane od sada */
       fzSave(c); fzRefresh(); toast(x.on ? t('fzOn', {ime:x.ime || fzPath(x)}) : t('fzOffT'));
+      if(x.on) rcvQueue(fzCheck);   /* v274: ponovo uključena → odmah sustigne sve što je stiglo u međuvremenu */
     };
   });
 }
@@ -20943,8 +20953,9 @@ async function fzAddFolder(){
     if(r.otkazano || !r.uri) return;
     const c = fzCfg();
     if((c.moje || []).some(x=>x.uri === r.uri) || (c.snimci && c.snimci.uri === r.uri)){ toast(t('fzDup')); return; }
-    c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:null, on:true, od:Date.now(), vec:[]}]);
+    c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:null, on:true, vid:[]}]);
     fzSave(c); fzRefresh(); toast(t('fzOn', {ime:r.ime || fzPath({uri:r.uri})}));
+    rcvQueue(fzCheck);   /* v274: odmah uveze sve što je već u fascikli */
   }finally{ _fzBusy = false; }
 }
 /* dodir na fasciklu: mali meni (album / prestani da pratiš) — isti prozor na dnu kao izbor u podešavanjima (pickSheet, iznad podešavanja) */
@@ -20977,6 +20988,25 @@ function fzPickAlbum(i){
   sel.id = 'fzAlbSel';
   openPicker(sel);
   document.getElementById('pickTitle').textContent = t('fzToAlb');
+  pickSearch();
+}
+/* v274 (Zoran): pretraga u izboru albuma — polje na vrhu spiska; filtrira redove po nazivu (bez obzira na č/ć/š/ž i velika slova) */
+function pickSearch(){
+  const list = document.getElementById('pickList'); if(!list || list.querySelector('.pick-search')) return;
+  const rows = [...list.querySelectorAll('.pick-row')];
+  if(rows.length < 8) return;
+  const wrap = document.createElement('div'); wrap.className = 'pick-search';
+  wrap.innerHTML = '<input type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">';
+  const inp = wrap.querySelector('input'); inp.placeholder = t('fzAlbSearch');
+  const none = document.createElement('div'); none.className = 'pick-none'; none.textContent = t('fzAlbNone'); none.hidden = true;
+  const run = ()=>{
+    const q = normalizeSr(inp.value.trim()); let n = 0;
+    rows.forEach(r=>{ const ok = !q || normalizeSr(r.textContent).indexOf(q) >= 0; r.hidden = !ok; if(ok) n++; });
+    none.hidden = n > 0;
+  };
+  inp.addEventListener('input', run);
+  wireBackspace(inp, run);
+  list.prepend(wrap); list.appendChild(none);
 }
 async function fzStop(i){
   const n = fzNative(), c = fzCfg(), x = (c.moje || [])[i]; if(!x) return;
