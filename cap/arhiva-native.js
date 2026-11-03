@@ -96,13 +96,12 @@
     };
   }
 
-  /* 9) v203 Google Drive: dozvola({interaktivno}) → {ok, token} | {ok:false, razlog:'potrebna'|'otkazano'|'greska'}; prekini({nalog}) */
+  /* 9) v203 Google Drive: dozvola({interaktivno, izbor, nalog}) → {ok, token} | {ok:false, razlog:'potrebna'|'otkazano'|'greska'}; prekini({nalog}) */
   if(C.isPluginAvailable && C.isPluginAvailable('GoogleDrive')){
     var GD = reg('GoogleDrive');
     window.ARHIVA_DRIVE = {
       dozvola: function(o){ return GD.dozvola(o || {}); },
-      prekini: function(o){ return GD.prekini(o || {}); },
-      proba: function(o){ return GD.proba(o || {}); }   /* proba deljenja (privremeno, 3.11.2026); stariji APK odbije poziv */
+      prekini: function(o){ return GD.prekini(o || {}); }
     };
   }
 

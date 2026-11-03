@@ -10745,7 +10745,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 277;
+const APP_VERSION = 278;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21725,7 +21725,9 @@ function drKeepSet(){
 async function drToken(interaktivno){
   if(!interaktivno && _drTok && Date.now() < _drTokExp) return _drTok;
   let r = {};
-  try{ r = (await drNative().dozvola({interaktivno:!!interaktivno})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
+  /* v278: Poveži → Google uvek pita za nalog (izbor); slanje u pozadini → token samo za povezani nalog (nalog), nikad za drugi
+     nalog na telefonu (4.11.: posle drugog naloga u Google prozoru Poveži je tiho dobio taj nalog i počeo ceo prenos na njega) */
+  try{ r = (await drNative().dozvola(interaktivno ? {interaktivno:true, izbor:true} : {interaktivno:false, nalog:_dr.email || ''})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
   if(!r.ok || !r.token){ const e = new Error('dozvola: ' + (r.razlog || 'greska') + (r.poruka ? ' ' + r.poruka : '')); e.drAuth = r.razlog || 'greska'; throw e; }
   _drTok = r.token; _drTokExp = Date.now() + 45 * 60000;   /* Google-ov token važi sat vremena */
   return _drTok;
@@ -22379,6 +22381,7 @@ function drTileSub(){
 function drSettingsHtml(){
   const btn = (id, txt, two, dis)=>'<button type="button" class="dr-btn' + (two ? ' dr-btn2' : '') + '" id="' + id + '"' + (dis ? ' disabled' : '') + '>' + escapeHtml(txt) + '</button>';
   const hint = (k, v)=>'<div class="settings-hint">' + escapeHtml(t(k, v)) + '</div>';
+  const row = (k, v)=>'<div class="dr-row"><span>' + escapeHtml(t(k)) + '</span><b>' + escapeHtml(v) + '</b></div>';
   if(_drPull){
     const pc = _drPull.total ? Math.round(_drPull.n / _drPull.total * 100) : 0;
     return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drPullRun', {n:_drPull.n, total:_drPull.total})) + '</div>' +
@@ -22388,7 +22391,7 @@ function drSettingsHtml(){
     const step = (ic, k)=>'<div class="dr-step"><span class="ic">' + ic + '</span><span>' + escapeHtml(t(k)) + '</span></div>';
     return '<div class="dr-card">' + step('📱', 'drStep1') + step('☁️', 'drStep2') + step('🔄', 'drStep3') + step('💻', 'drStep4') + '</div>' +
       btn('drConnBtn', _drConnecting ? t('drWaiting') : '☁️ ' + t('drConnect'), false, _drConnecting) +
-      hint('drHintAsk', {mb:drMb(drLocalBytes())}) + hint('drHintSafe') + prbHtml();   /* proba deljenja (privremeno) */
+      hint('drHintAsk', {mb:drMb(drLocalBytes())}) + hint('drHintSafe');
   }
   if(_dr.need){
     return '<div class="dr-card"><div class="dr-ok warn">' + escapeHtml(t('drNeedTxt')) + '</div></div>' +
@@ -22397,9 +22400,9 @@ function drSettingsHtml(){
   if(_drProg && _drProg.total > 3){
     const pc = Math.round(_drProg.n / _drProg.total * 100);
     return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drRun', {n:_drProg.n, total:_drProg.total})) + '</div>' +
-      '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drRunHint')) + '</div></div>' + hint('drHintSafe');
+      '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drRunHint')) + '</div>' +
+      row('drAcc', _dr.email || '—') + '</div>' + btn('drOffBtn', t('drOff'), true) + hint('drHintSafe');   /* v278: vidi se nalog i prenos može da se prekine */
   }
-  const row = (k, v)=>'<div class="dr-row"><span>' + escapeHtml(t(k)) + '</span><b>' + escapeHtml(v) + '</b></div>';
   const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErr' : null;
   return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drOk')) + '</div>' +
     row('drAcc', _dr.email || '—') + row('drLast', _dr.last ? drAgo(_dr.last) : t('drNever')) +
@@ -22411,7 +22414,6 @@ function drSettingsHtml(){
 function drWire(){
   const a = document.getElementById('drConnBtn'); if(a) a.onclick = drConnect;
   const b = document.getElementById('drOffBtn'); if(b) b.onclick = drDisconnect;
-  prbWire();
 }
 function drRefresh(){ const b = document.getElementById('drSet'); if(b){ b.innerHTML = drSettingsHtml(); drWire(); } }
 /* tok prvog prenosa: kartica, a dok je ekran Drive-a otvoren i obaveštenje gore */
@@ -22431,127 +22433,6 @@ function drBoot(){
   clearInterval(_drTick); _drTick = setInterval(()=>{ if(document.visibilityState === 'visible' && drOn() && !_drBusy) drSoon(0); }, 60000);
   if(_dr.on) drSoon(3000);
 }
-/* ================= PROBA DELJENJA (privremeno, 3.11.2026 — briše se posle probe) =================
-   Pitanje: može li deljeni album da radi samo sa uskim pristupom drive.file (Arhiva vidi samo svoje fajlove)?
-   Samo kad je slanje na Drive ISKLJUČENO (drugi nalog ne sme da dobije Arhivine podatke). Sopstveni Google prozor sa izborom
-   naloga (dodatak GoogleDrive.proba), ne dira dozvolu i mapu slanja (galerija:drive). Stanje probe: galerija:probaDeljenja.
-   1. Vlasnik: fascikla „Arhiva – proba deljenja“ + 2 mala fajla, podeljena drugom nalogu kao urednik (writer).
-   2. Drugi nalog bira FASCIKLU u Google-ovom biraču → da li vidi fajlove u njoj, može li da ih otvori i doda nov.
-   3. Drugi nalog bira FAJLOVE → da li ih tada otvara.
-   Tekst je samo srpski (privremeni alat za probu, ne ide korisnicima). */
-const PRB_KEY = 'galerija:probaDeljenja';
-let _prbOpen = false, _prbBusy = false, _prbLog = [];
-function prbCfg(){ try{ const c = JSON.parse(localStorage.getItem(PRB_KEY) || 'null'); return c && typeof c === 'object' ? c : {}; }catch(e){ return {}; } }
-function prbSet(c){ try{ localStorage.setItem(PRB_KEY, JSON.stringify(c)); }catch(e){} }
-function prbHtml(){
-  if(!(drNative() && drNative().proba)) return '';
-  const b = (id, txt, two)=>'<button type="button" class="dr-btn' + (two ? ' dr-btn2' : '') + '" id="' + id + '"' + (_prbBusy ? ' disabled' : '') + '>' + escapeHtml(txt) + '</button>';
-  if(!_prbOpen) return '<div style="height:18px"></div>' + b('prbOpen', '🧪 Proba deljenja (privremeno)', true);
-  const c = prbCfg();
-  const log = _prbLog.length ? '<div class="dr-card" id="prbLog">' + _prbLog.map(l=>'<div class="dr-row"><span>' + escapeHtml(l) + '</span></div>').join('') + '</div>' : '';
-  return '<div style="height:18px"></div><div class="dr-card"><div class="dr-ok">🧪 Proba deljenja</div>' +
-    '<div class="dr-row"><span>Vlasnik</span><b>' + escapeHtml(c.owner || '—') + '</b></div>' +
-    '<div class="dr-row"><span>Podeljeno sa</span><b>' + escapeHtml(c.to || '—') + '</b></div></div>' +
-    '<div class="settings-card"><div class="settings-field"><label for="prbTo">Drugi Google nalog (e-adresa)</label>' +
-    '<input id="prbTo" type="email" inputmode="email" enterkeyhint="done" value="' + escapeHtml(c.to || '') + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div></div>' +
-    b('prbS1', '1. Vlasnik: napravi i podeli') +
-    b('prbS2', '2. Drugi nalog: izaberi FASCIKLU', true) +
-    b('prbS3', '3. Drugi nalog: izaberi FAJLOVE', true) +
-    (_prbBusy ? '<div class="settings-hint">Radi se… (Google prozor može da se otvori)</div>' : '') + log +
-    '<div class="settings-hint">Posle probe pošalji snimak ovog ekrana.</div>';
-}
-function prbWire(){
-  const o = document.getElementById('prbOpen'); if(o) o.onclick = ()=>{ _prbOpen = true; drRefresh(); };
-  const i = document.getElementById('prbTo');
-  if(i){ try{ wireBackspace(i); }catch(e){} i.oninput = ()=>{ const c = prbCfg(); c.to = i.value.trim(); prbSet(c); }; }
-  [['prbS1', prbStep1], ['prbS2', ()=>prbStep2(false)], ['prbS3', ()=>prbStep2(true)]].forEach(([id, fn])=>{ const e = document.getElementById(id); if(e) e.onclick = ()=>prbRun(fn); });
-}
-function prbAdd(l){ _prbLog.push(l); }
-async function prbRun(fn){
-  if(_prbBusy) return;
-  if(drOn()){ _prbLog = ['✖ Prvo isključi slanje na Google Drive.']; drRefresh(); return; }
-  _prbBusy = true; _prbLog = []; drRefresh();
-  try{ await fn(); }catch(e){ prbAdd('✖ ' + String(e && e.message || e).slice(0, 300)); console.error('proba deljenja', e); }
-  _prbBusy = false; drRefresh();
-  const l = document.getElementById('prbLog'); if(l) l.scrollIntoView({block:'nearest'});
-}
-/* v277: Google je vratio 8 [28405] — načini prozora se probaju redom dok jedan ne prođe; uspešan se pamti i prvi je sledeći put.
-   Ako korisnik sam zatvori prozor (kod 0 bez Google greške), staje se. */
-const PRB_VAR = [['pristanak', true, 'pristanak'], ['nalog', true, 'izbor naloga'], ['bez', true, 'bez upita'], ['bez', false, 'kao „Poveži Drive“'], ['oba', true, 'pristanak + izbor naloga']];
-async function prbAuth(birac){
-  const c = prbCfg(), first = PRB_VAR.findIndex(v=>v[2] === c.var);
-  const order = first > 0 ? [PRB_VAR[first]].concat(PRB_VAR.filter((_, i)=>i !== first)) : PRB_VAR.slice();
-  let last = '';
-  for(const [prompt, optout, ime] of order){
-    let r = {};
-    try{ r = (await drNative().proba({birac:!!birac, prompt, optout})) || {}; }catch(e){ r = {razlog:'greska', poruka:String(e && e.message || e)}; }
-    if(r.ok && r.token){
-      prbAdd('✔ Google prozor: ' + ime); const k = prbCfg(); k.var = ime; prbSet(k);
-      return {tok:r.token, ids:Array.isArray(r.ids) ? r.ids : []};
-    }
-    if(/not implemented/i.test(r.poruka || '')) throw new Error('Potreban je nov APK (proba deljenja).');
-    last = (r.razlog || 'greška') + (r.poruka ? ' — ' + r.poruka : '');
-    prbAdd('✖ Google prozor (' + ime + '): ' + last);
-    if(r.razlog === 'otkazano' && !/Google \d/.test(r.poruka || '')) throw new Error('Prozor je zatvoren bez izbora.');
-  }
-  throw new Error('Nijedan način Google prozora nije prošao.');
-}
-async function prbF(tok, url, opt){
-  opt = opt || {};
-  const r = await fetch(url, Object.assign({}, opt, {headers:Object.assign({}, opt.headers || {}, {Authorization:'Bearer ' + tok})}));
-  let body = null; try{ body = await r.text(); }catch(e){}
-  let j = null; try{ j = JSON.parse(body); }catch(e){}
-  return {st:r.status, ok:r.ok, j, body:body || ''};
-}
-const prbWhy = (r)=>r.ok ? '' : ' (' + r.st + (r.j && r.j.error && r.j.error.message ? ': ' + r.j.error.message : '') + ')';
-async function prbEmail(tok){ const r = await prbF(tok, DR_ABOUT + '?fields=' + encodeURIComponent('user(emailAddress)')); return (r.j && r.j.user && r.j.user.emailAddress) || '?'; }
-async function prbStep1(){
-  const c = prbCfg(), to = (document.getElementById('prbTo') || {}).value ? document.getElementById('prbTo').value.trim() : (c.to || '');
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) throw new Error('Upiši ispravnu e-adresu drugog naloga.');
-  const a = await prbAuth(false), me = await prbEmail(a.tok);
-  if(me.toLowerCase() === to.toLowerCase()) throw new Error('Izabran je isti nalog kao drugi. Za korak 1 izaberi SVOJ nalog.');
-  prbAdd('Vlasnik: ' + me);
-  const f = await prbF(a.tok, DR_API + '?fields=id', {method:'POST', headers:DR_JSON, body:JSON.stringify({name:'Arhiva – proba deljenja', mimeType:DR_FOLDER, appProperties:{arhiva:'proba'}})});
-  if(!f.ok) throw new Error('Fascikla nije napravljena' + prbWhy(f));
-  const files = [];
-  for(const n of ['proba-1.txt', 'proba-2.txt']){
-    const b = 'prb' + Math.random().toString(36).slice(2);
-    const body = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify({name:n, parents:[f.j.id], appProperties:{arhiva:'proba'}}) +
-      '\r\n--' + b + '\r\nContent-Type: text/plain\r\n\r\nArhiva proba deljenja: ' + n + '\r\n--' + b + '--';
-    const u = await prbF(a.tok, DR_UP + '?uploadType=multipart&fields=id', {method:'POST', headers:{'Content-Type':'multipart/related; boundary=' + b}, body});
-    if(!u.ok) throw new Error('Fajl ' + n + ' nije poslat' + prbWhy(u));
-    files.push(u.j.id);
-  }
-  prbAdd('✔ Fascikla i 2 fajla napravljeni');
-  const p = await prbF(a.tok, DR_API + '/' + f.j.id + '/permissions?sendNotificationEmail=true', {method:'POST', headers:DR_JSON, body:JSON.stringify({type:'user', role:'writer', emailAddress:to})});
-  prbAdd((p.ok ? '✔' : '✖') + ' Podeljeno sa ' + to + ' (urednik)' + prbWhy(p));
-  prbSet(Object.assign(prbCfg(), {owner:me, to, folder:f.j.id, files, at:Date.now()}));   /* zapamćen način prozora (var) ostaje */
-  if(p.ok) prbAdd('Sledeće: korak 2, u Google prozoru izaberi nalog ' + to + ', pa „Deljeno sa mnom“ → fasciklu.');
-}
-async function prbStep2(fajlovi){
-  const c = prbCfg();
-  if(!c.folder) throw new Error('Prvo uradi korak 1.');
-  const a = await prbAuth(true), me = await prbEmail(a.tok);
-  prbAdd('Drugi nalog: ' + me + (me.toLowerCase() === String(c.to || '').toLowerCase() ? '' : '  ⚠ nije ' + c.to));
-  const pickF = a.ids.includes(c.folder), pickN = c.files.filter(id=>a.ids.includes(id)).length;
-  prbAdd('Izabrano u biraču: ' + a.ids.length + (pickF ? ' · fascikla ✔' : '') + (pickN ? ' · fajlova ' + pickN : ''));
-  const g = await prbF(a.tok, DR_API + '/' + c.folder + '?fields=id,name');
-  prbAdd((g.ok ? '✔' : '✖') + ' Vidi fasciklu' + prbWhy(g));
-  const l = await prbF(a.tok, DR_API + '?q=' + encodeURIComponent("'" + c.folder + "' in parents and trashed=false") + '&fields=files(id,name)&includeItemsFromAllDrives=true&supportsAllDrives=true');
-  const n = l.ok && l.j && Array.isArray(l.j.files) ? l.j.files.length : -1;
-  prbAdd((n === 2 ? '✔' : '✖') + ' Vidi fajlove u fascikli: ' + (n < 0 ? 'greška' + prbWhy(l) : n + ' od 2'));
-  let ok = 0;
-  for(const id of c.files){ const r = await prbF(a.tok, DR_API + '/' + id + '?alt=media'); if(r.ok) ok++; else if(ok === 0 && id === c.files[0]) prbAdd('  otvaranje: ' + prbWhy(r).trim()); }
-  prbAdd((ok === 2 ? '✔' : '✖') + ' Otvara fajlove vlasnika: ' + ok + ' od 2');
-  if(!fajlovi){
-    const b = 'prb' + Math.random().toString(36).slice(2);
-    const body = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify({name:'dodao-drugi.txt', parents:[c.folder], appProperties:{arhiva:'proba'}}) +
-      '\r\n--' + b + '\r\nContent-Type: text/plain\r\n\r\nDodao drugi nalog\r\n--' + b + '--';
-    const u = await prbF(a.tok, DR_UP + '?uploadType=multipart&fields=id', {method:'POST', headers:{'Content-Type':'multipart/related; boundary=' + b}, body});
-    prbAdd((u.ok ? '✔' : '✖') + ' Dodaje nov fajl u fasciklu' + prbWhy(u));
-  }
-}
-/* ================= kraj PROBE DELJENJA ================= */
 /* ================= kraj GOOGLE DRIVE ================= */
 
 function checkDeepLink(){
