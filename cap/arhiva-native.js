@@ -80,7 +80,8 @@
       obrisi: function(){ return Fk.obrisi(); },
       otpusti: function(o){ return Fk.otpusti(o); },
       lokacija: function(){ return Fk.dozvolaLokacije(); },   /* v286: ACCESS_MEDIA_LOCATION (APK probna-66+) */
-      mesto: function(o){ return Fk.mesto(o); }   /* v287: naziv mesta iz koordinata (Geocoder, APK probna-67+) */
+      mesto: function(o){ return Fk.mesto(o); },   /* v287: naziv mesta iz koordinata (Geocoder, APK probna-67+) */
+      stanjeLokacije: function(){ return Fk.checkPermissions().then(function(r){ return (r && r.lokacija) || 'prompt'; }); }   /* v290: ugrađeno u Capacitor */
     };
   }
 

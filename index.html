@@ -5382,6 +5382,8 @@ Object.assign(I18N.en, {
 /* v185: ekran albuma */
 Object.assign(I18N.sr, {
   dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi', gpsWhy: 'Dozvola za lokaciju služi da Arhiva upiše gde je slika nastala.',
+  gpsTile: 'Lokacija u slikama', gpsOn: 'Uključena', gpsOff: 'Isključena — dodirni da uključiš', gpsOnToast: 'Lokacija je uključena. Nove slike dobijaju mesto nastanka.',
+  gpsOffTitle: 'Lokacija je isključena', gpsOffText: 'Android više ne nudi prozor za dozvolu. Otvori podešavanja telefona za Arhivu, pa u Dozvolama dozvoli pristup lokaciji u medijima (fotografijama).', gpsOpenSet: 'Otvori podešavanja',
   introSkip: 'Preskoči', introClose: 'Zatvori', introNext: 'Dalje', introAgain: '▶ Pogledaj upoznavanje sa aplikacijom',
   obHi: 'Dobrodošli u aplikaciju', obCmp: 'Bolja od galerije. Efikasnija od fascikle.', obSlogan1: 'Pronađi u sekundi.', obSlogan2: 'Sredi jednim dodirom.',
   obKeyT: 'Ključne karakteristike', obFeatBackup: 'Rezervna kopija',
@@ -5421,6 +5423,8 @@ Object.assign(I18N.sr, {
 });
 Object.assign(I18N.en, {
   dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums', gpsWhy: 'Location access lets Arhiva record where each photo was taken.',
+  gpsTile: 'Photo location', gpsOn: 'On', gpsOff: 'Off — tap to turn on', gpsOnToast: 'Location is on. New photos get the place they were taken.',
+  gpsOffTitle: 'Location is off', gpsOffText: 'Android no longer shows the permission prompt. Open the phone settings for Arhiva and, under Permissions, allow access to location in media (photos).', gpsOpenSet: 'Open settings',
   introSkip: 'Skip', introClose: 'Close', introNext: 'Next', introAgain: '▶ Watch the app introduction',
   obHi: 'Welcome to', obCmp: 'Better than a gallery. Smarter than a folder.', obSlogan1: 'Find it in seconds.', obSlogan2: 'Organize with one tap.',
   obKeyT: 'Key features', obFeatBackup: 'Backup',
@@ -10991,7 +10995,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 289;
+const APP_VERSION = 290;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11114,6 +11118,7 @@ function renderSettingsTiles(){
     (lkNative() ? settingsTile('🔒', t('lkTile'), lkTileSub(), "openSettingsSub('lock')") : '')+   /* v190: samo Android aplikacija */
     (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
     (fzNative() ? settingsTile('📱', t('fzTile'), fzTileSub(), "openSettingsSub('folders')") : '')+   /* v272: samo Android aplikacija */
+    (fzNative() && fzNative().lokacija ? settingsTile('📍', t('gpsTile'), gpsTileSub(), 'gpsTileTap()') : '')+   /* v290 */
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
@@ -21093,6 +21098,28 @@ function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
    Pita se jednom; oznaka se upiše tek kad APK odgovori (stari APK nema metodu → pita se posle novog APK-a). */
 /* v289 (Zoran 4.11.): ne pri otvaranju aplikacije, nego kad se prvi put dodaju slike — otvaranje menija Dodaj ili izbor
    praćene fascikle — uz jednu rečenicu objašnjenja. Androidov prozor se javi preko menija; izbor izvora ostaje sledeći dodir. */
+/* v290 (Zoran 4.11.): Podešavanja → „Lokacija u slikama“ — uključena/isključena; dodir: ponovo Androidov prozor, a ako ga Android
+   više ne nudi (posle odbijanja), stranica Arhive u podešavanjima telefona (Precica.dozvole) → Dozvole. Stanje se osveži i po povratku. */
+const GPS_KEY = 'arhiva:gpsDozvola';
+function gpsTileSub(){ return localStorage.getItem(GPS_KEY) === 'granted' ? t('gpsOn') : t('gpsOff'); }
+async function gpsStanje(){
+  const n = fzNative(); if(!n || !n.stanjeLokacije) return null;
+  try{ const st = await n.stanjeLokacije(); if(localStorage.getItem(GPS_KEY) || st === 'granted') localStorage.setItem(GPS_KEY, st); return st; }catch(e){ return null; }
+}
+async function gpsTileTap(){
+  const n = fzNative(); if(!n || !n.lokacija) return;
+  let st = await gpsStanje();
+  if(st !== 'granted'){ try{ const r = await n.lokacija(); st = r && r.stanje; localStorage.setItem(GPS_KEY, st || 'denied'); }catch(e){} }
+  if(st === 'granted') toast(t('gpsOnToast'));
+  else if(window.ARHIVA_PRECICA && ARHIVA_PRECICA.dozvole && await askConfirm({icon:'📍', title:t('gpsOffTitle'), text:t('gpsOffText'), okLabel:t('gpsOpenSet'), danger:false}))
+    try{ await ARHIVA_PRECICA.dozvole(); }catch(e){}
+  if(settingsScreen.classList.contains('open')) renderSettingsTiles();
+}
+document.addEventListener('visibilitychange', async ()=>{
+  if(document.visibilityState !== 'visible' || !localStorage.getItem(GPS_KEY)) return;
+  const pre = localStorage.getItem(GPS_KEY), st = await gpsStanje();
+  if(st && st !== pre && settingsScreen.classList.contains('open')) renderSettingsTiles();
+});
 async function gpsDozvola(){
   const n = fzNative(); if(!n || !n.lokacija) return;
   try{
