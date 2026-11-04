@@ -10788,7 +10788,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 281;
+const APP_VERSION = 282;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22201,6 +22201,7 @@ async function drSync(){
     await drRenameAlbums();   /* v281: preimenovan/premešten album = ista fascikla na Drive-u (deljenje ostaje) */
     if(!drOn()) return;
     const {manifest, entries} = await drPlan();
+    drTrashEntries().forEach(e=>entries.push(e));   /* v282: stavke u korpi → fascikla „Korpa“ (nije deljena) */
     const want = new Set(entries.map(e=>e.k));
     const todo = entries.filter(e=>!_dr.files[e.k] || _dr.files[e.k].p !== e.path);
     _drProg = {n:0, total:todo.length}; drProgress();
@@ -22310,8 +22311,23 @@ async function drRenameAlbums(){
     _dr.cats[c.id] = {p:path}; drSave();
   }
 }
+/* v282: stavka prebačena u korpu odmah se na Drive-u premesti iz fascikle albuma u „Korpa“ (koja se nikome ne deli), da je
+   osoba sa kojom je album podeljen (v280) više ne vidi. Vraćena iz korpe → drPlan je vraća u album (drMove). Samo premeštanje:
+   fajl koji Drive još nema se ne šalje (blob null). Trajno brisanje ide kao i do sada (drKeepSet). Sličice (Sličice/) se ne diraju. */
+function drTrashEntries(){
+  const out = [], seen = new Set();
+  (trash || []).forEach(it=>(it.pages || []).forEach(p=>[p.file, p.orig && p.orig.file].forEach(k=>{
+    if(!k || seen.has(k)) return; seen.add(k);
+    const f = _dr.files[k]; if(!f || !f.p) return;
+    const path = f.p.startsWith('Korpa/') ? f.p : 'Korpa/' + f.p.slice(f.p.lastIndexOf('/') + 1);
+    out.push({k, path, blob:()=>Promise.resolve(null)});
+  })));
+  return out;
+}
 async function drCleanDirs(){
   const used = new Set();
+  /* v282: fascikla postojećeg albuma (i njeni roditelji) ostaje i kad je prazna — na njoj je deljenje (Podeli album) */
+  categories.forEach(c=>{ let p = 'Dokumenti/' + albumPath(c.id), i; used.add(p.toLowerCase()); while((i = p.lastIndexOf('/')) > 0){ p = p.slice(0, i); used.add(p.toLowerCase()); } });
   Object.values(_dr.files).forEach(f=>{ let p = f.p, i; while((i = p.lastIndexOf('/')) > 0){ p = p.slice(0, i); used.add(p.toLowerCase()); } });
   for(const k of Object.keys(_dr.dirs)){
     if(used.has(k)) continue;
