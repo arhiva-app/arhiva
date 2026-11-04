@@ -5381,9 +5381,15 @@ Object.assign(I18N.en, {
 });
 /* v185: ekran albuma */
 Object.assign(I18N.sr, {
-  dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi', gpsWhy: 'Dozvola za lokaciju služi da Arhiva upiše gde je slika nastala.',
-  gpsTile: 'Lokacija u slikama', gpsOn: 'Uključena', gpsOff: 'Isključena — dodirni da uključiš', gpsOnToast: 'Lokacija je uključena. Nove slike dobijaju mesto nastanka.',
-  gpsOffTitle: 'Lokacija je isključena', gpsOffText: 'Android više ne nudi prozor za dozvolu. Otvori podešavanja telefona za Arhivu, pa u Dozvolama dozvoli pristup lokaciji u medijima (fotografijama).', gpsOpenSet: 'Otvori podešavanja',
+  dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi', gpsWhy: 'Dozvola za lokaciju služi da Arhiva sačuva lokaciju slike.',
+  gpsTile: 'Lokacija', gpsOn: 'Uključena', gpsOff: 'Isključena', gpsNoPerm: 'Uključena · nije dozvoljeno',
+  gpsSave: 'Sačuvaj lokaciju', gpsSaveSub: 'Uz sliku i video, kao u kameri telefona',
+  gpsHintOn: 'Kada je uključeno, Arhiva uz sliku i video sačuva gde su snimljeni i prikaže to pored datuma, npr. „6. jul · Kalamici, Grčka“.',
+  gpsHintOff: 'Kada je isključeno, nove slike i video se uvoze bez lokacije. Lokacije koje već postoje ostaju.',
+  gpsPerm: 'Dozvola za lokaciju', gpsPermYes: 'Dozvoljeno', gpsPermNo: 'Nije dozvoljeno — lokacija se ne može pročitati',
+  gpsPermHintYes: 'Dozvolu može da ukloni samo telefon, u svojim podešavanjima za Arhivu.',
+  gpsPermHintNo: 'Ako Android više ne nudi prozor za dozvolu: u podešavanjima telefona za Arhivu, u Dozvolama, dozvolite lokaciju za fotografije.',
+  gpsOpenSet: 'Otvori podešavanja telefona',
   introSkip: 'Preskoči', introClose: 'Zatvori', introNext: 'Dalje', introAgain: '▶ Pogledaj upoznavanje sa aplikacijom',
   obHi: 'Dobrodošli u aplikaciju', obCmp: 'Bolja od galerije. Efikasnija od fascikle.', obSlogan1: 'Pronađi u sekundi.', obSlogan2: 'Sredi jednim dodirom.',
   obKeyT: 'Ključne karakteristike', obFeatBackup: 'Rezervna kopija',
@@ -5422,9 +5428,15 @@ Object.assign(I18N.sr, {
   rcvOne: 'Sačuvano: {name}', rcvN: 'Sačuvano stavki: {n}.', rcvErr: 'Neke fajlove nije bilo moguće preuzeti ({n}).'
 });
 Object.assign(I18N.en, {
-  dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums', gpsWhy: 'Location access lets Arhiva record where each photo was taken.',
-  gpsTile: 'Photo location', gpsOn: 'On', gpsOff: 'Off — tap to turn on', gpsOnToast: 'Location is on. New photos get the place they were taken.',
-  gpsOffTitle: 'Location is off', gpsOffText: 'Android no longer shows the permission prompt. Open the phone settings for Arhiva and, under Permissions, allow access to location in media (photos).', gpsOpenSet: 'Open settings',
+  dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums', gpsWhy: 'Location permission lets Arhiva save where each photo was taken.',
+  gpsTile: 'Location', gpsOn: 'On', gpsOff: 'Off', gpsNoPerm: 'On · not allowed',
+  gpsSave: 'Save location', gpsSaveSub: 'With photos and videos, like your phone camera',
+  gpsHintOn: 'When on, Arhiva saves where each photo and video was taken and shows it next to the date, e.g. “July 6 · Kalamitsi, Greece”.',
+  gpsHintOff: 'When off, new photos and videos are imported without location. Existing locations stay.',
+  gpsPerm: 'Location permission', gpsPermYes: 'Allowed', gpsPermNo: 'Not allowed — location can’t be read',
+  gpsPermHintYes: 'Only the phone can remove this permission, in its settings for Arhiva.',
+  gpsPermHintNo: 'If Android no longer shows the permission prompt: in the phone settings for Arhiva, under Permissions, allow location for photos.',
+  gpsOpenSet: 'Open phone settings',
   introSkip: 'Skip', introClose: 'Close', introNext: 'Next', introAgain: '▶ Watch the app introduction',
   obHi: 'Welcome to', obCmp: 'Better than a gallery. Smarter than a folder.', obSlogan1: 'Find it in seconds.', obSlogan2: 'Organize with one tap.',
   obKeyT: 'Key features', obFeatBackup: 'Backup',
@@ -10310,7 +10322,7 @@ async function addFile(file, category, o){
       type: isVideo ? 'video' : isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
       sourceSig
     };
-    if((isImage || isVideo) && tkInfo.gps && typeof tkInfo.gps === 'object'){ item.gps = tkInfo.gps; setTimeout(mestaPopuni, 800); }   /* v285/v287: {lat, lon}; mesto se dopuni posle */
+    if((isImage || isVideo) && gpsOn() && tkInfo.gps && typeof tkInfo.gps === 'object'){ item.gps = tkInfo.gps; setTimeout(mestaPopuni, 800); }   /* v285/v287: {lat, lon}; mesto se dopuni posle */
     if(isDoc) item.ext = ext;
     if(isVideo) item.ext = ext || ({'video/quicktime':'MOV', 'video/3gpp':'3GP', 'video/x-matroska':'MKV', 'video/x-m4v':'M4V'}[mime] || mime.split('/')[1] || 'mp4').toUpperCase();
     await db2AddDoc(item, [page], null);
@@ -10995,7 +11007,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 290;
+const APP_VERSION = 291;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11118,7 +11130,7 @@ function renderSettingsTiles(){
     (lkNative() ? settingsTile('🔒', t('lkTile'), lkTileSub(), "openSettingsSub('lock')") : '')+   /* v190: samo Android aplikacija */
     (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
     (fzNative() ? settingsTile('📱', t('fzTile'), fzTileSub(), "openSettingsSub('folders')") : '')+   /* v272: samo Android aplikacija */
-    (fzNative() && fzNative().lokacija ? settingsTile('📍', t('gpsTile'), gpsTileSub(), 'gpsTileTap()') : '')+   /* v290 */
+    (fzNative() && fzNative().lokacija ? settingsTile('📍', t('gpsTile'), gpsTileSub(), "openSettingsSub('gps')") : '')+   /* v290 */
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
@@ -11212,6 +11224,10 @@ function openSettingsSub(which){
     if(!fzNative()) return;
     title = t('fzTile');
     body = '<div id="fzSet">'+fzSettingsHtml()+'</div>';
+  }else if(which === 'gps'){
+    if(!fzNative() || !fzNative().lokacija) return;
+    title = t('gpsTile');
+    body = '<div id="gpsSet">'+gpsSettingsHtml()+'</div>';
   }else if(which === 'errlog'){
     title = t('errTitle');
     body = errLogBodyHtml();
@@ -11225,6 +11241,7 @@ function openSettingsSub(which){
   if(which === 'lock') lkOpenSettings();
   if(which === 'drive') drWire();
   if(which === 'folders') fzWire();
+  if(which === 'gps'){ gpsWire(); gpsStanje().then(gpsRefresh); }
   if(which === 'old') oldDataCount().then(n=>{ const el = document.getElementById('oldCountHint'); if(el) el.textContent = t('oldCount', {n}); });
   settingsScreen.scrollTop = 0;
   if(!settingsSubOpen){
@@ -21098,32 +21115,56 @@ function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
    Pita se jednom; oznaka se upiše tek kad APK odgovori (stari APK nema metodu → pita se posle novog APK-a). */
 /* v289 (Zoran 4.11.): ne pri otvaranju aplikacije, nego kad se prvi put dodaju slike — otvaranje menija Dodaj ili izbor
    praćene fascikle — uz jednu rečenicu objašnjenja. Androidov prozor se javi preko menija; izbor izvora ostaje sledeći dodir. */
-/* v290 (Zoran 4.11.): Podešavanja → „Lokacija u slikama“ — uključena/isključena; dodir: ponovo Androidov prozor, a ako ga Android
-   više ne nudi (posle odbijanja), stranica Arhive u podešavanjima telefona (Precica.dozvole) → Dozvole. Stanje se osveži i po povratku. */
-const GPS_KEY = 'arhiva:gpsDozvola';
-function gpsTileSub(){ return localStorage.getItem(GPS_KEY) === 'granted' ? t('gpsOn') : t('gpsOff'); }
+/* v291 (Zoran 4.11.): Podešavanja → „Lokacija“ — ekran kao ostali (slika „Sada / Predlog“ odobrena 4.11.), nazivi po Google kameri
+   („Save location“ = „Sačuvaj lokaciju“). Prekidač je podešavanje Arhive (GPS_ON_KEY, podrazumevano uključeno): isključeno → uvoz bez
+   lokacije, postojeće ostaju. Androidovu dozvolu Arhiva ne može da ukloni; red „Dozvola za lokaciju“ pokazuje njeno stanje, a kad je
+   Android više ne nudi — „Otvori podešavanja telefona“ (Precica.dozvole). Stanje se osveži i po povratku u Arhivu. */
+const GPS_KEY = 'arhiva:gpsDozvola', GPS_ON_KEY = 'arhiva:gpsCuvaj';
+function gpsOn(){ return localStorage.getItem(GPS_ON_KEY) !== '0'; }
+function gpsOk(){ return localStorage.getItem(GPS_KEY) === 'granted'; }
+function gpsTileSub(){ return !gpsOn() ? t('gpsOff') : gpsOk() ? t('gpsOn') : t('gpsNoPerm'); }
 async function gpsStanje(){
   const n = fzNative(); if(!n || !n.stanjeLokacije) return null;
   try{ const st = await n.stanjeLokacije(); if(localStorage.getItem(GPS_KEY) || st === 'granted') localStorage.setItem(GPS_KEY, st); return st; }catch(e){ return null; }
 }
-async function gpsTileTap(){
-  const n = fzNative(); if(!n || !n.lokacija) return;
-  let st = await gpsStanje();
-  if(st !== 'granted'){ try{ const r = await n.lokacija(); st = r && r.stanje; localStorage.setItem(GPS_KEY, st || 'denied'); }catch(e){} }
-  if(st === 'granted') toast(t('gpsOnToast'));
-  else if(window.ARHIVA_PRECICA && ARHIVA_PRECICA.dozvole && await askConfirm({icon:'📍', title:t('gpsOffTitle'), text:t('gpsOffText'), okLabel:t('gpsOpenSet'), danger:false}))
-    try{ await ARHIVA_PRECICA.dozvole(); }catch(e){}
-  if(settingsScreen.classList.contains('open')) renderSettingsTiles();
+function gpsSettingsHtml(){
+  const on = gpsOn(), ok = gpsOk(), pr = !!(window.ARHIVA_PRECICA && ARHIVA_PRECICA.dozvole);
+  return '<div class="settings-card"><button type="button" class="settings-row" id="gpsSwRow" role="switch" aria-checked="'+(on ? 'true' : 'false')+'">'+
+      '<span class="row-icon">📍</span><span class="row-label">'+escapeHtml(t('gpsSave'))+'<span class="lk-row-sub">'+escapeHtml(t('gpsSaveSub'))+'</span></span>'+
+      '<span class="lk-sw-t'+(on ? ' on' : '')+'"></span></button></div>'+
+    '<div class="settings-hint">'+escapeHtml(t('gpsHintOn'))+'</div>'+
+    '<div class="settings-hint">'+escapeHtml(t('gpsHintOff'))+'</div>'+
+    '<div class="settings-card" style="margin-top:14px"><div class="settings-row"><span class="row-icon">'+(ok ? '✅' : '⚠️')+'</span>'+
+      '<span class="row-label">'+escapeHtml(t('gpsPerm'))+'<span class="lk-row-sub">'+escapeHtml(ok ? t('gpsPermYes') : t('gpsPermNo'))+'</span></span></div>'+
+      (!ok && pr ? '<button type="button" class="settings-row" id="gpsOpenSet"><span class="row-icon">⚙️</span><span class="row-label">'+escapeHtml(t('gpsOpenSet'))+'</span><span class="chevron">›</span></button>' : '')+
+    '</div>'+
+    '<div class="settings-hint">'+escapeHtml(ok ? t('gpsPermHintYes') : t('gpsPermHintNo'))+'</div>';
+}
+function gpsRefresh(){ const b = document.getElementById('gpsSet'); if(b){ b.innerHTML = gpsSettingsHtml(); gpsWire(); } }
+function gpsWire(){
+  const sw = document.getElementById('gpsSwRow');
+  if(sw) sw.onclick = async ()=>{
+    const on = !gpsOn();
+    try{ localStorage.setItem(GPS_ON_KEY, on ? '1' : '0'); }catch(e){}
+    gpsRefresh();
+    if(on && !gpsOk()){
+      const n = fzNative();
+      try{ const r = await n.lokacija(); localStorage.setItem(GPS_KEY, (r && r.stanje) || 'denied'); }catch(e){}
+      gpsRefresh();
+    }
+  };
+  const os = document.getElementById('gpsOpenSet');
+  if(os) os.onclick = async ()=>{ try{ await ARHIVA_PRECICA.dozvole(); }catch(e){} };
 }
 document.addEventListener('visibilitychange', async ()=>{
   if(document.visibilityState !== 'visible' || !localStorage.getItem(GPS_KEY)) return;
   const pre = localStorage.getItem(GPS_KEY), st = await gpsStanje();
-  if(st && st !== pre && settingsScreen.classList.contains('open')) renderSettingsTiles();
+  if(st && st !== pre){ gpsRefresh(); if(settingsScreen.classList.contains('open') && !settingsSubOpen) renderSettingsTiles(); }
 });
 async function gpsDozvola(){
   const n = fzNative(); if(!n || !n.lokacija) return;
   try{
-    if(localStorage.getItem('arhiva:gpsDozvola')) return;
+    if(localStorage.getItem('arhiva:gpsDozvola') || !gpsOn()) return;
     toast(t('gpsWhy'));
     const r = await n.lokacija(); localStorage.setItem('arhiva:gpsDozvola', (r && r.stanje) || '?');
   }catch(e){}
