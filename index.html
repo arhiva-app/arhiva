@@ -5381,7 +5381,7 @@ Object.assign(I18N.en, {
 });
 /* v185: ekran albuma */
 Object.assign(I18N.sr, {
-  dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi',
+  dateToday: 'Danas', dateYday: 'Juče', subAlbums: 'Podalbumi', gpsWhy: 'Dozvola za lokaciju služi da Arhiva upiše gde je slika nastala.',
   introSkip: 'Preskoči', introClose: 'Zatvori', introNext: 'Dalje', introAgain: '▶ Pogledaj upoznavanje sa aplikacijom',
   obHi: 'Dobrodošli u aplikaciju', obCmp: 'Bolja od galerije. Efikasnija od fascikle.', obSlogan1: 'Pronađi u sekundi.', obSlogan2: 'Sredi jednim dodirom.',
   obKeyT: 'Ključne karakteristike', obFeatBackup: 'Rezervna kopija',
@@ -5420,7 +5420,7 @@ Object.assign(I18N.sr, {
   rcvOne: 'Sačuvano: {name}', rcvN: 'Sačuvano stavki: {n}.', rcvErr: 'Neke fajlove nije bilo moguće preuzeti ({n}).'
 });
 Object.assign(I18N.en, {
-  dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums',
+  dateToday: 'Today', dateYday: 'Yesterday', subAlbums: 'Sub-albums', gpsWhy: 'Location access lets Arhiva record where each photo was taken.',
   introSkip: 'Skip', introClose: 'Close', introNext: 'Next', introAgain: '▶ Watch the app introduction',
   obHi: 'Welcome to', obCmp: 'Better than a gallery. Smarter than a folder.', obSlogan1: 'Find it in seconds.', obSlogan2: 'Organize with one tap.',
   obKeyT: 'Key features', obFeatBackup: 'Backup',
@@ -9884,6 +9884,7 @@ const closeAddSheet = ()=>addSheet.classList.remove('open');
 function openAddSheet(){
   addSheet.classList.add('open');
   pushBack(closeAddSheet);
+  gpsDozvola();   /* v289 */
 }
 document.getElementById('addSheetBack').onclick = ()=>requestClose();
 addSheet.onclick = (e)=>{ if(e.target === addSheet) requestClose(); };
@@ -10180,7 +10181,7 @@ function tkExifAll(b){
   }
   return {t, gps};
 }
-async function tkVideo(blob){
+async function tkVideo(blob, info){
   const rd = async (o, l)=>new DataView(await blob.slice(o, o + l).arrayBuffer());
   const box = async (o, end)=>{
     if(o + 8 > end) return null;
@@ -10194,6 +10195,12 @@ async function tkVideo(blob){
   for(let o = 0, k = 0; k < 64; k++){
     const b = await box(o, blob.size); if(!b) return 0;
     if(b.type === 'moov'){
+      if(info && b.size <= 8388608){   /* v289: lokacija videa — ISO 6709 tekst u moov (©xyz ili ključ …location.ISO6709) */
+        const u = new Uint8Array(await blob.slice(o, o + b.size).arrayBuffer());
+        let txt = ''; for(let i = 0; i < u.length; i += 8192) txt += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+        const g = /([+-]\d{1,2}\.\d{2,})([+-]\d{1,3}\.\d{2,})(?:[+-]\d+(?:\.\d+)?)?\//.exec(txt);
+        if(g){ const la = +g[1], lo = +g[2]; if(Math.abs(la) <= 90 && Math.abs(lo) <= 180) info.gps = (la || lo) ? {lat:Math.round(la * 1e6) / 1e6, lon:Math.round(lo * 1e6) / 1e6} : 'nula'; }
+      }
       for(let q = o + b.hdr, j = 0; j < 64; j++){
         const c = await box(q, o + b.size); if(!c) return 0;
         if(c.type === 'mvhd'){
@@ -10247,7 +10254,7 @@ async function takenTs(file, blob, mime, ext, info){
   let t = 0;
   try{
     if(mime.startsWith('image/')){ const x = tkExifAll(new Uint8Array(await blob.slice(0, 1048576).arrayBuffer())); t = x.t; if(info) info.gps = x.gps; }
-    else if(mime.startsWith('video/')) t = await tkVideo(blob);
+    else if(mime.startsWith('video/')) t = await tkVideo(blob, info);
     else if(mime === 'application/pdf') t = await tkPdf(blob);
     else if(/^(DOCX|XLSX|PPTX|DOCM|XLSM|PPTM)$/.test(ext)) t = await tkOffice(blob);
   }catch(e){ console.warn('datum iz fajla', e); }
@@ -10299,7 +10306,7 @@ async function addFile(file, category, o){
       type: isVideo ? 'video' : isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
       sourceSig
     };
-    if(isImage && tkInfo.gps && typeof tkInfo.gps === 'object'){ item.gps = tkInfo.gps; setTimeout(mestaPopuni, 800); }   /* v285/v287: {lat, lon}; mesto se dopuni posle */
+    if((isImage || isVideo) && tkInfo.gps && typeof tkInfo.gps === 'object'){ item.gps = tkInfo.gps; setTimeout(mestaPopuni, 800); }   /* v285/v287: {lat, lon}; mesto se dopuni posle */
     if(isDoc) item.ext = ext;
     if(isVideo) item.ext = ext || ({'video/quicktime':'MOV', 'video/3gpp':'3GP', 'video/x-matroska':'MKV', 'video/x-m4v':'M4V'}[mime] || mime.split('/')[1] || 'mp4').toUpperCase();
     await db2AddDoc(item, [page], null);
@@ -10984,7 +10991,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 288;
+const APP_VERSION = 289;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21084,10 +21091,16 @@ let _fzLast = 0;
 function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
 /* v286 (Zoran 4.11.): dozvola „pristup lokaciji u medijima“ — bez nje Android u slikama daje nule umesto GPS-a (proba v285).
    Pita se jednom; oznaka se upiše tek kad APK odgovori (stari APK nema metodu → pita se posle novog APK-a). */
-setTimeout(async ()=>{
+/* v289 (Zoran 4.11.): ne pri otvaranju aplikacije, nego kad se prvi put dodaju slike — otvaranje menija Dodaj ili izbor
+   praćene fascikle — uz jednu rečenicu objašnjenja. Androidov prozor se javi preko menija; izbor izvora ostaje sledeći dodir. */
+async function gpsDozvola(){
   const n = fzNative(); if(!n || !n.lokacija) return;
-  try{ if(localStorage.getItem('arhiva:gpsDozvola')) return; const r = await n.lokacija(); localStorage.setItem('arhiva:gpsDozvola', (r && r.stanje) || '?'); }catch(e){}
-}, 2500);
+  try{
+    if(localStorage.getItem('arhiva:gpsDozvola')) return;
+    toast(t('gpsWhy'));
+    const r = await n.lokacija(); localStorage.setItem('arhiva:gpsDozvola', (r && r.stanje) || '?');
+  }catch(e){}
+}
 function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
 function fzSave(c){ try{ localStorage.setItem(FZ_KEY, JSON.stringify(c)); }catch(e){} }
 /* v273: osim „Snimci ekrana“ (c.snimci) i „Moje fascikle“ (c.moje: [{uri, ime, album, on, od, vec}]) — Zoran bira jednu ili više,
@@ -21197,6 +21210,7 @@ async function fzAddFolder(){
   _fzBusy = true;
   let r = {};
   try{
+    await gpsDozvola();   /* v289 */
     try{ r = (await n.izaberi({pocetna:''})) || {}; }catch(e){ logError(t('fzTile'), (e && e.message) || e); toast(t('fzErr')); return; }
     if(r.otkazano || !r.uri) return;
     const c = fzCfg();
@@ -21309,6 +21323,7 @@ async function fzToggleShots(){
       return;
     }
     let r = {};
+    await gpsDozvola();   /* v289 */
     try{ r = (await n.izaberi({pocetna:FZ_START})) || {}; }catch(e){ logError(t('fzTile'), (e && e.message) || e); toast(t('fzErr')); return; }
     if(r.otkazano || !r.uri) return;
     const c2 = fzCfg(); c2.snimci = {uri:r.uri, ime:r.ime || '', od:Date.now(), vec:[]}; fzSave(c2);
