@@ -5351,6 +5351,10 @@ Object.assign(I18N.sr, {
   bkHint1: 'Rezervna kopija čuva sve slike, dokumente i albume odjednom - sačuvaj je povremeno (npr. u Google Drive) da ne izgubiš podatke.',
   bkDir: 'Fascikla za kopiju', bkDirNone: 'Nije izabrana (preuzimanje)', bkDirForget: 'Ne koristi fasciklu (preuzimanje)',
   bkDirHint: 'Kad je fascikla izabrana, izvoz ide pravo u nju (Chrome jednom pita „Dozvoli“). Čuvaju se poslednje {n} kopije, starije se same brišu.',
+  bkDirNotChosen: 'Fascikla nije izabrana.', bkDirNoneApp: 'Nije izabrana (telefon pita svaki put)', bkDirForgetApp: 'Ne koristi fasciklu (telefon pita svaki put)',
+  bkDirHintApp: 'Kad je fascikla izabrana, izvoz ide pravo u nju, bez pitanja. Čuvaju se poslednje {n} kopije, starije se same brišu. Bez fascikle telefon pita gde da sačuva.',
+  bkDirSet: 'Fascikla izabrana: {name}', bkDirOff: 'Rezervnu kopiju telefon ponovo čuva gde izabereš.', bkDirWritten: 'Rezervna kopija upisana u „{name}“.',
+  bkDirGone: 'Fascikla „{name}“ nije dostupna. Izaberi gde da se sačuva kopija.',
   bkEvery: 'Podseti me na svakih (dana)', bkEveryHint: 'Kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.',
   bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
   wipeTile: 'Obriši sve podatke', wipeSub: 'Trajno briše sve slike, dokumente i albume',
@@ -5370,6 +5374,10 @@ Object.assign(I18N.en, {
   bkHint1: 'The backup keeps all images, documents and albums at once - save it now and then (e.g. to Google Drive) so you don’t lose your data.',
   bkDir: 'Backup folder', bkDirNone: 'Not chosen (download)', bkDirForget: 'Don’t use a folder (download)',
   bkDirHint: 'When a folder is chosen, the export goes straight into it (Chrome asks “Allow” once). The last {n} backups are kept, older ones are deleted automatically.',
+  bkDirNotChosen: 'Folder not chosen.', bkDirNoneApp: 'Not chosen (the phone asks every time)', bkDirForgetApp: 'Don’t use a folder (the phone asks every time)',
+  bkDirHintApp: 'When a folder is chosen, the export goes straight into it, without asking. The last {n} backups are kept, older ones are deleted automatically. Without a folder the phone asks where to save.',
+  bkDirSet: 'Folder chosen: {name}', bkDirOff: 'The phone will again ask where to save the backup.', bkDirWritten: 'Backup saved in “{name}”.',
+  bkDirGone: 'Folder “{name}” is not available. Choose where to save the backup.',
   bkEvery: 'Remind me every (days)', bkEveryHint: 'When this many days have passed since the last backup, a reminder appears at the top.',
   bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
   wipeTile: 'Delete all data', wipeSub: 'Permanently deletes all images, documents and albums',
@@ -11024,7 +11032,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 292;
+const APP_VERSION = 293;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11192,9 +11200,9 @@ function openSettingsSub(which){
       (backupDirSupported() ?
         '<div class="settings-card" style="margin-top:14px;">'+
         '<button type="button" class="settings-row" onclick="chooseBackupDir()"><span class="row-icon">📁</span><span class="row-label">'+escapeHtml(t('bkDir'))+'<span id="backupDirName" style="display:block;font-size:12px;font-weight:500;color:var(--ink-dim);margin-top:2px;"></span></span><span class="chevron">›</span></button>'+
-        '<button type="button" class="settings-row" id="backupDirForget" onclick="forgetBackupDir()"><span class="row-icon">↩️</span><span class="row-label">'+escapeHtml(t('bkDirForget'))+'</span><span class="chevron">›</span></button>'+
+        '<button type="button" class="settings-row" id="backupDirForget" onclick="forgetBackupDir()"><span class="row-icon">↩️</span><span class="row-label">'+escapeHtml(t(bkApp() ? 'bkDirForgetApp' : 'bkDirForget'))+'</span><span class="chevron">›</span></button>'+
         '</div>'+
-        '<div class="settings-hint">'+escapeHtml(t('bkDirHint', {n:BACKUP_KEEP}))+'</div>'
+        '<div class="settings-hint">'+escapeHtml(t(bkApp() ? 'bkDirHintApp' : 'bkDirHint', {n:BACKUP_KEEP}))+'</div>'
       : '')+
       '<div class="settings-card set-num-card" style="margin-top:14px;">'+
       '<div class="settings-field"><label for="backupIntervalInput">'+escapeHtml(t('bkEvery'))+'</label><input type="number" inputmode="numeric" min="1" id="backupIntervalInput" value="'+getBackupIntervalDays()+'" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>'+
@@ -11382,15 +11390,34 @@ function updateStorageInfo(){
 const BACKUP_KEEP = 3;
 const BACKUP_NAME_RE = /^arhiva-backup-\d{4}-\d{2}-\d{2}\.(json|zip)$/;
 let backupDirHandle = null;
-function backupDirSupported(){ return 'showDirectoryPicker' in window; }
+/* v293: u Android aplikaciji fascikla ide preko telefona (ARHIVA_KOPIJA_FASCIKLA, nov APK) — showDirectoryPicker tamo ne radi
+   (WebView ga ne prikaže bez posebne obrade u aplikaciji). Stari APK: nema fascikle, telefon pita svaki put. */
+const BK_APP_KEY = LS_PREFIX + 'bkFascikla';   /* {uri, ime} — samo na ovom telefonu, ne ide u kopiju */
+function bkApp(){ return !!window.ARHIVA_SACUVAJ_KAO; }
+function bkAppDir(){ try{ const o = JSON.parse(localStorage.getItem(BK_APP_KEY) || 'null'); return o && o.uri ? o : null; }catch(e){ return null; } }
+function bkAppDirSet(o){ try{ if(o) localStorage.setItem(BK_APP_KEY, JSON.stringify(o)); else localStorage.removeItem(BK_APP_KEY); }catch(e){} }
+function backupDirSupported(){ return bkApp() ? !!window.ARHIVA_KOPIJA_FASCIKLA : ('showDirectoryPicker' in window); }
 async function backupDirSave(h){ await Skladiste.uredjaj.sacuvajFasciklu(h); }
 async function backupDirLoad(){
-  if(!backupDirSupported()) return;
+  if(bkApp() || !backupDirSupported()) return;
   try{ backupDirHandle = await Skladiste.uredjaj.fascikla(); }
   catch(e){ console.error(e); backupDirHandle = null; }
 }
 backupDirLoad();
 async function chooseBackupDir(){
+  if(bkApp()){   /* v293 */
+    try{
+      const r = await window.ARHIVA_KOPIJA_FASCIKLA.izaberi();
+      if(r && r.uri){
+        const old = bkAppDir();
+        if(old && old.uri !== r.uri) window.ARHIVA_KOPIJA_FASCIKLA.otpusti(old.uri).catch(()=>{});
+        bkAppDirSet({uri: r.uri, ime: r.ime || ''});
+        toast(t('bkDirSet', {name: r.ime || ''}));
+      }
+    }catch(e){ console.error(e); toast(t('bkDirNotChosen')); }
+    refreshBackupDirRow();
+    return;
+  }
   try{
     const h = await window.showDirectoryPicker({ mode:'readwrite', id:'arhiva-backup' });
     backupDirHandle = h;
@@ -11402,17 +11429,24 @@ async function chooseBackupDir(){
   refreshBackupDirRow();
 }
 async function forgetBackupDir(){
+  if(bkApp()){   /* v293 */
+    const old = bkAppDir();
+    if(old && window.ARHIVA_KOPIJA_FASCIKLA) window.ARHIVA_KOPIJA_FASCIKLA.otpusti(old.uri).catch(()=>{});
+    bkAppDirSet(null); toast(t('bkDirOff')); refreshBackupDirRow(); return;
+  }
   backupDirHandle = null;
   try{ await backupDirSave(null); }catch(e){ console.error(e); }
   toast('Rezervna kopija ide ponovo preko preuzimanja.');
   refreshBackupDirRow();
 }
 function refreshBackupDirRow(){
+  const app = bkApp(), ad = app ? bkAppDir() : null, ima = app ? !!ad : !!backupDirHandle;
   const el = document.getElementById('backupDirName');
-  if(el) el.textContent = backupDirHandle ? backupDirHandle.name : t('bkDirNone');
+  if(el) el.textContent = ima ? (app ? (ad.ime || '') : backupDirHandle.name) : t(app ? 'bkDirNoneApp' : 'bkDirNone');
   const f = document.getElementById('backupDirForget');
-  if(f) f.style.display = backupDirHandle ? 'flex' : 'none';
+  if(f) f.style.display = ima ? 'flex' : 'none';
 }
+window.refreshBackupDirRow = refreshBackupDirRow;
 /* Upis u fasciklu + brisanje starijih (samo nasi fajlovi, cuva se poslednjih BACKUP_KEEP). */
 async function writeBackupToDir(dir, blob, fileName){
   let perm = 'prompt';
@@ -11457,6 +11491,17 @@ function backupFileName(ext){
 /* Upis u izabranu fasciklu (ako je dozvoljeno), inače preuzimanje. Vraća poruku za korisnika. */
 async function saveBackupFile(blob, fileName, dirOk){
   let msg = 'Rezervna kopija sačuvana.';
+  const ad = (window.ARHIVA_SACUVAJ_KAO && window.ARHIVA_KOPIJA_FASCIKLA) ? bkAppDir() : null;
+  let gone = '';
+  if(ad){   /* v293: izabrana fascikla — upis bez pitanja; ne može → telefon pita (kopija ne propada) */
+    try{
+      const r = await window.ARHIVA_KOPIJA_FASCIKLA.upisi(blob, fileName, ad.uri, BACKUP_KEEP);
+      markBackupDone();
+      const hintEl = document.getElementById('lastBackupHint');
+      if(hintEl) hintEl.textContent = lastBackupDisplay();
+      return t('bkDirWritten', {name: (r && r.ime) || ad.ime || ''});
+    }catch(e){ console.error(e); gone = t('bkDirGone', {name: ad.ime || ''}); showNote(gone, 5000); }
+  }
   if(window.ARHIVA_SACUVAJ_KAO){
     /* v189: Android aplikacija — telefon pita gde i pod kojim imenom (otkazano = kopija nije napravljena) */
     const r = await window.ARHIVA_SACUVAJ_KAO(blob, fileName, 'application/zip');

@@ -217,6 +217,25 @@
     return await SacuvajKao.sacuvaj({ putanja: putanja, ime: fn, mime: mime || blob.type || 'application/octet-stream' });
   }
   if(imaSacuvajKao) window.ARHIVA_SACUVAJ_KAO = sacuvajKao;
+  /* v293: fascikla za rezervnu kopiju (nov APK: SacuvajKao.izaberiFasciklu/uFasciklu). Stari APK nema metode → nema ni objekta,
+     pa Arhiva ne nudi fasciklu (telefon pita svaki put). Probna provera je asinhrona; Arhiva osveži ekran ako je otvoren. */
+  if(imaSacuvajKao) SacuvajKao.proveriFasciklu({ uri: '' }).then(function(){
+    window.ARHIVA_KOPIJA_FASCIKLA = {
+      izaberi: function(){ return SacuvajKao.izaberiFasciklu(); },
+      proveri: function(uri){ return SacuvajKao.proveriFasciklu({ uri: uri }).then(function(r){ return !!(r && r.ok); }); },
+      otpusti: function(uri){ return SacuvajKao.otpustiFasciklu({ uri: uri }); },
+      upisi: function(blob, ime, uri, zadrzi){
+        var p = red.then(async function(){
+          var fn = safe(ime), putanja = 'izvoz/' + Date.now() + '/' + fn;
+          var rad = radPocni('Upisujem kopiju…', 'Writing backup…', blob.size);
+          try{ await uKes(blob, putanja, rad); } finally { radKraj(rad); }
+          return await SacuvajKao.uFasciklu({ putanja: putanja, uri: uri, ime: fn, mime: blob.type || 'application/zip', zadrzi: zadrzi || 3 });
+        });
+        red = p.catch(function(){});
+        return p;
+      }
+    };
+  }).catch(function(){ /* stari APK */ });
 
   /* 1) preuzimanje → „Sačuvaj kao“ (ili Documents/Arhiva/<ime> u starijem APK-u) */
   async function saveDownload(href, name){
