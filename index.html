@@ -2774,6 +2774,9 @@ html[data-theme="klasicna"] .sys-cell:active{ background:var(--brass-glow); }
 .fz-mrow .chevron{ color:var(--ink-dim); }
 /* v269: „Ceo dan“ u redu datuma (samo u izboru) */
 .date-label:has(.day-sel){ display:flex; align-items:center; gap:10px; }
+/* v287: mesto pored datuma — tiše slovo, skraćuje se tačkicama kad ne stane */
+.date-label:has(.date-place){ display:flex; align-items:center; gap:10px; }
+.date-place{ min-width:0; flex:0 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 13px var(--font-ui); font-style:normal; letter-spacing:0; color:var(--ink-dim); }
 .date-label:has(.day-sel)::after{ order:1; }
 .day-sel{ order:2; margin-left:auto; flex:none; display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 12px 0 5px; border-radius:16px;
   border:1px solid var(--line); background:var(--surface); color:var(--ink); font:600 13px/1 var(--font-ui); font-style:normal; letter-spacing:0; text-transform:none; cursor:pointer; }
@@ -3609,7 +3612,7 @@ function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : item.t
 function setModalCaption(item){
   const a = autoNameParts(item.name);
   modalCaption.textContent = a ? itemAutoWord(item) + a.tail : item.name;
-  const d = document.getElementById('modalDate'); if(d) d.textContent = itemDay(item) + gpsProba(item);
+  const d = document.getElementById('modalDate'); if(d) d.textContent = itemDay(item) + (item.mesto && item.mesto.m ? ' · ' + mestoTekst(item.mesto) : '');
   requestAnimationFrame(placeModalInfo);
 }
 /* v130: red sa brojačem i nazivom stoji odmah ispod stvarne donje ivice slike, kad ima mesta; inače dole kao ranije */
@@ -3658,7 +3661,7 @@ function matchItemQuery(item, q){
     if(!m || m.src !== item.content){ m = {src:item.content, lat:srLat(item.content)}; _latCache.set(item, m); }
     c = '\n' + m.lat;
   }
-  return hitWords(normalizeSr(item.name) + c, q);
+  return hitWords(normalizeSr(item.name) + (item.mesto && item.mesto.m ? ' ' + normalizeSr(mestoTekst(item.mesto)) : '') + c, q);   /* v287: i po mestu */
 }
 
 /* ---------- Izvlačenje teksta iz dokumenata (za detaljnu pretragu) ---------- */
@@ -6371,7 +6374,8 @@ function docRecord(it){
     sourceSig: it.sourceSig || null, hasText: !!it.hasText,
     trashPath: it.trashPath || null, trashGroup: it.trashGroup || null,
     sources: (Array.isArray(it.sources) && it.sources.length) ? it.sources.slice() : null,   /* v157: izvori Zbirnog spiska */
-    gps: it.gps || null   /* v285 */
+    gps: it.gps || null,   /* v285 */
+    mesto: it.mesto === undefined ? null : it.mesto   /* v287 */
   };
 }
 function itemFromRecord(r){
@@ -6383,6 +6387,7 @@ function itemFromRecord(r){
   };
   if(r.ext) it.ext = r.ext;
   if(r.gps) it.gps = r.gps;
+  if(r.mesto !== null && r.mesto !== undefined) it.mesto = r.mesto;
   if(r.deletedAt) it.deletedAt = r.deletedAt;
   if(r.trashPath) it.trashPath = r.trashPath;
   if(r.trashGroup) it.trashGroup = r.trashGroup;
@@ -8471,6 +8476,8 @@ function buildDatedPhotoSections(list, oldFirst){
       const label = document.createElement('p');
       label.className = 'date-label';
       label.textContent = formatDateLabel(item.ts);
+      const mt = mestaDana(sorted.filter(i=>dayKey(i) === key));   /* v287: mesta tog dana */
+      if(mt){ const sp = document.createElement('span'); sp.className = 'date-place'; sp.textContent = mt; label.appendChild(sp); }
       if(daySel){
         const ids = sorted.filter(i=>dayKey(i) === key && pool.has(i.id)).map(i=>i.id);
         if(ids.length) label.appendChild(buildDaySel(ids));
@@ -10070,11 +10077,44 @@ const EXT_MIME = {pdf:'application/pdf', doc:'application/msword', docx:'applica
    2) datum u imenu fajla (IMG_20250907_143012, Screenshot_2025-09-07-14-30-12, VID-20250907-WA0001);
    3) vreme fajla (lastModified, ako je starije od trenutka uvoza);  4) sada.
    Čita se iz ORIGINALA pre obrade slike (obrada ne čuva EXIF). Nemoguć datum (pre 1990, u budućnosti) se ne uzima. */
-/* v285 PROBA (privremeno): u pregledu slike piše šta je uvoz našao od lokacije */
-function gpsProba(it){
-  if(!it || it.type !== 'image' || !it.gps) return '';
-  return it.gps === 'nula' ? ' · GPS skriven' : it.gps === 'nema' ? ' · bez GPS' : ' · 📍 ' + it.gps.lat.toFixed(4) + ', ' + it.gps.lon.toFixed(4);
+/* v287 (Zoran 4.11.): MESTO NASTANKA — kao u galeriji. GPS iz slike (v285) → naziv mesta preko Androidovog Geocoder-a
+   (dodatak Fascikle.mesto, APK probna-67+; na vebu nema → samo se ne prikazuje). item.mesto = {m:'Dassia', d:'Grčka'};
+   '' = Android nije našao mesto (ne pita se ponovo). Keš po koordinatama zaokruženim na ~100 m. Prikaz: naslov dana
+   („7. septembar · Ioannina, Igoumenitsa, Grčka“), pregled slike, pretraga. */
+const MESTA_KEY = 'arhiva:mesta';
+function mestoTekst(x){ return x && x.m ? x.m + (x.d ? ', ' + x.d : '') : ''; }
+function mestaDana(list){
+  const m = [], d = [];
+  list.forEach(i=>{ const x = i.mesto; if(x && x.m){ if(!m.includes(x.m)) m.push(x.m); if(x.d && !d.includes(x.d)) d.push(x.d); } });
+  return m.length ? m.join(', ') + (d.length ? ', ' + d.join(', ') : '') : '';
 }
+let _mestaRadi = false, _mestaJos = false;
+async function mestaPopuni(){
+  const n = fzNative(); if(!n || !n.mesto) return;
+  if(_mestaRadi){ _mestaJos = true; return; }
+  _mestaRadi = true; _mestaJos = false;
+  let kes = {}; try{ kes = JSON.parse(localStorage.getItem(MESTA_KEY) || '{}') || {}; }catch(e){}
+  let promena = 0;
+  try{
+    for(const it of items.filter(i=>i.gps && typeof i.gps === 'object' && i.mesto === undefined).slice(0, 60)){
+      const k = it.gps.lat.toFixed(3) + ',' + it.gps.lon.toFixed(3);
+      let x = kes[k];
+      if(x === undefined){
+        let r; try{ r = await n.mesto({lat:it.gps.lat, lon:it.gps.lon, jezik:appLang() === 'en' ? 'en' : 'sr-Latn-RS'}); }catch(e){ break; }   /* bez mreže: pokušaj kasnije */
+        const m = r && (r.mesto || r.okrug || r.oblast);
+        x = m ? {m, d:r.drzava || ''} : '';
+        kes[k] = x;
+      }
+      it.mesto = x; await idbPut(it); promena++;
+    }
+  }finally{
+    _mestaRadi = false;
+    try{ localStorage.setItem(MESTA_KEY, JSON.stringify(kes)); }catch(e){}
+    if(promena) render();
+    if(_mestaJos) setTimeout(mestaPopuni, 300);
+  }
+}
+setTimeout(mestaPopuni, 4000);
 function tkOk(t){ return isFinite(t) && t > 631152000000 && t < Date.now() + 864e5 ? t : 0; }
 function tkLocal(y, mo, d, h, mi, se){
   if(!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && h <= 23 && mi <= 59 && se <= 59)) return 0;
@@ -10251,7 +10291,7 @@ async function addFile(file, category, o){
       type: isVideo ? 'video' : isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
       sourceSig
     };
-    if(isImage && tkInfo.gps) item.gps = tkInfo.gps;   /* v285 proba: {lat, lon} | 'nula' (skriveno) | 'nema' */
+    if(isImage && tkInfo.gps && typeof tkInfo.gps === 'object'){ item.gps = tkInfo.gps; setTimeout(mestaPopuni, 800); }   /* v285/v287: {lat, lon}; mesto se dopuni posle */
     if(isDoc) item.ext = ext;
     if(isVideo) item.ext = ext || ({'video/quicktime':'MOV', 'video/3gpp':'3GP', 'video/x-matroska':'MKV', 'video/x-m4v':'M4V'}[mime] || mime.split('/')[1] || 'mp4').toUpperCase();
     await db2AddDoc(item, [page], null);
@@ -10936,7 +10976,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 286;
+const APP_VERSION = 287;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
