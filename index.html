@@ -10082,10 +10082,18 @@ const EXT_MIME = {pdf:'application/pdf', doc:'application/msword', docx:'applica
    '' = Android nije našao mesto (ne pita se ponovo). Keš po koordinatama zaokruženim na ~100 m. Prikaz: naslov dana
    („7. septembar · Ioannina, Igoumenitsa, Grčka“), pregled slike, pretraga. */
 const MESTA_KEY = 'arhiva:mesta';
-function mestoTekst(x){ return x && x.m ? x.m + (x.d ? ', ' + x.d : '') : ''; }
+/* v288: Geocoder za srpski vraća ćirilicu i kad se traži latinica (proba 4.11.: „Нови Сад, Србија“) → prikaz u latinici, sa velikim slovima */
+const CYR_LAT = {'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'đ','е':'e','ж':'ž','з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n','њ':'nj',
+  'о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'ć','у':'u','ф':'f','х':'h','ц':'c','ч':'č','џ':'dž','ш':'š'};   /* srpska azbuka → latinica (sa kvačicama) */
+function cyrLat(s){
+  s = String(s || '');
+  if(!/[\u0400-\u04ff]/.test(s) || appLang() === 'en') return s;
+  return s.replace(/[\u0400-\u04ff]/g, c=>{ const l = c.toLowerCase(), t = CYR_LAT[l]; if(!t) return c; return c === l ? t : t.charAt(0).toUpperCase() + t.slice(1); });
+}
+function mestoTekst(x){ return x && x.m ? cyrLat(x.m) + (x.d ? ', ' + cyrLat(x.d) : '') : ''; }
 function mestaDana(list){
   const m = [], d = [];
-  list.forEach(i=>{ const x = i.mesto; if(x && x.m){ if(!m.includes(x.m)) m.push(x.m); if(x.d && !d.includes(x.d)) d.push(x.d); } });
+  list.forEach(i=>{ const x = i.mesto; if(x && x.m){ const a = cyrLat(x.m), b = cyrLat(x.d); if(!m.includes(a)) m.push(a); if(b && !d.includes(b)) d.push(b); } });
   return m.length ? m.join(', ') + (d.length ? ', ' + d.join(', ') : '') : '';
 }
 let _mestaRadi = false, _mestaJos = false;
@@ -10976,7 +10984,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 287;
+const APP_VERSION = 288;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
