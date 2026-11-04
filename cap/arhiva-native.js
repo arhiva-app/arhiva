@@ -78,7 +78,8 @@
       novi: function(o){ return Fk.novi(o); },
       deo: function(o){ return Fk.deo(o); },
       obrisi: function(){ return Fk.obrisi(); },
-      otpusti: function(o){ return Fk.otpusti(o); }
+      otpusti: function(o){ return Fk.otpusti(o); },
+      lokacija: function(){ return Fk.dozvolaLokacije(); }   /* v286: ACCESS_MEDIA_LOCATION (APK probna-65+) */
     };
   }
 

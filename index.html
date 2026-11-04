@@ -10936,7 +10936,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 285;
+const APP_VERSION = 286;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21034,6 +21034,12 @@ function rcvBoot(){
 const FZ_KEY = LS_PREFIX + 'fascikle', FZ_START = 'DCIM/Screenshots';
 let _fzLast = 0;
 function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
+/* v286 (Zoran 4.11.): dozvola „pristup lokaciji u medijima“ — bez nje Android u slikama daje nule umesto GPS-a (proba v285).
+   Pita se jednom; oznaka se upiše tek kad APK odgovori (stari APK nema metodu → pita se posle novog APK-a). */
+setTimeout(async ()=>{
+  const n = fzNative(); if(!n || !n.lokacija) return;
+  try{ if(localStorage.getItem('arhiva:gpsDozvola')) return; const r = await n.lokacija(); localStorage.setItem('arhiva:gpsDozvola', (r && r.stanje) || '?'); }catch(e){}
+}, 2500);
 function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
 function fzSave(c){ try{ localStorage.setItem(FZ_KEY, JSON.stringify(c)); }catch(e){} }
 /* v273: osim „Snimci ekrana“ (c.snimci) i „Moje fascikle“ (c.moje: [{uri, ime, album, on, od, vec}]) — Zoran bira jednu ili više,
