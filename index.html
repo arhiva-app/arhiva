@@ -10788,7 +10788,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 280;
+const APP_VERSION = 281;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22198,6 +22198,8 @@ async function drSync(){
     if(!drOn()) return;
     if(!_drDirty && !first){ _dr.last = Date.now(); _dr.err = null; drSave(); return; }   /* ovde ništa novo: nema slanja */
     _drDirty = false;
+    await drRenameAlbums();   /* v281: preimenovan/premešten album = ista fascikla na Drive-u (deljenje ostaje) */
+    if(!drOn()) return;
     const {manifest, entries} = await drPlan();
     const want = new Set(entries.map(e=>e.k));
     const todo = entries.filter(e=>!_dr.files[e.k] || _dr.files[e.k].p !== e.path);
@@ -22276,6 +22278,38 @@ async function drSync(){
   }
 }
 /* prazne fascikle posle premeštanja (preimenovan album) idu u Drive korpu; Arhiva vidi samo svoje fajlove */
+/* v281: preimenovan ili premešten album → na Drive-u se menja ime (i roditelj) POSTOJEĆE fascikle, umesto da se pravi nova
+   i fajlovi sele u nju. Fascikla zadržava deljenje (Podeli album, v280) i sve što je u njoj. _dr.cats: {catId: {p}} — putanja
+   pri poslednjem usklađivanju; prvi put se samo zapamti. Roditelji pre podalbuma: posle preimenovanja roditelja putanje
+   podalbuma su već prepisane, pa se za njih samo zapamti nova. */
+async function drRenameAlbums(){
+  if(!_dr.cats) _dr.cats = {};
+  const live = categories.filter(c=>catById(c.id));
+  live.sort((a, b)=>(a.parent ? 1 : 0) - (b.parent ? 1 : 0));
+  for(const c of live){
+    if(!drOn()) return;
+    const path = 'Dokumenti/' + albumPath(c.id), rec = _dr.cats[c.id];
+    if(rec && rec.p !== path){
+      const oldK = rec.p.toLowerCase(), newK = path.toLowerCase(), id = _dr.dirs[oldK];
+      if(id && (oldK === newK || !_dr.dirs[newK])){
+        const oi = rec.p.lastIndexOf('/'), ni = path.lastIndexOf('/');
+        const oldPar = await drDir(rec.p.slice(0, oi)), newPar = await drDir(path.slice(0, ni));
+        let u = DR_API + '/' + id + '?fields=id';
+        if(oldPar !== newPar) u += '&addParents=' + newPar + '&removeParents=' + oldPar;
+        try{
+          await drFetch(u, {method:'PATCH', headers:DR_JSON, body:JSON.stringify({name:path.slice(ni + 1)})});
+        }catch(e){ if(e.status !== 404) throw e; _dr.cats[c.id] = {p:path}; drSave(); continue; }   /* nestala: pravi se nova uobičajeno */
+        /* putanje u mapi: fascikla, njene podfascikle i fajlovi dobijaju novi početak */
+        const pre = rec.p + '/', preK = oldK + '/';
+        for(const k of Object.keys(_dr.dirs)){
+          if(k === oldK || k.startsWith(preK)){ const v = _dr.dirs[k]; delete _dr.dirs[k]; _dr.dirs[newK + k.slice(oldK.length)] = v; }
+        }
+        Object.values(_dr.files).forEach(f=>{ if(f.p && f.p.toLowerCase().startsWith(preK)) f.p = path + '/' + f.p.slice(pre.length); });
+      }
+    }
+    _dr.cats[c.id] = {p:path}; drSave();
+  }
+}
 async function drCleanDirs(){
   const used = new Set();
   Object.values(_dr.files).forEach(f=>{ let p = f.p, i; while((i = p.lastIndexOf('/')) > 0){ p = p.slice(0, i); used.add(p.toLowerCase()); } });
