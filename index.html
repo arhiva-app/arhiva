@@ -755,6 +755,18 @@ html.vw-wait #vzWin, html.vw-wait #lockScr{ visibility:visible; }
 .dr-row{ display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font:500 14px var(--font-ui); color:var(--ink-dim); }
 .dr-row b{ color:var(--ink); font-weight:700; text-align:right; overflow-wrap:anywhere; }
 .dr-row:last-child{ border-bottom:0; }
+/* v280 deljenje albuma (Drive) */
+.sh-hint{ font:500 13.5px/1.45 var(--font-ui); color:var(--ink-dim); margin:0 4px 10px; }
+.sh-seg{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0 4px; }
+.sh-seg button{ min-height:48px; border-radius:12px; border:1.5px solid var(--line); background:transparent; color:var(--ink); font:600 14.5px var(--font-ui); cursor:pointer; padding:6px; }
+.sh-seg button.on{ border-color:var(--accent); color:var(--accent); }
+.sh-err{ font:600 13.5px/1.4 var(--font-ui); color:var(--danger); margin:8px 4px 0; }
+.sh-list{ margin-top:6px; }
+.sh-cap{ font:600 13px var(--font-ui); color:var(--ink-dim); margin:14px 4px 4px; }
+.sh-row{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid var(--line); font:500 14.5px var(--font-ui); color:var(--ink); }
+.sh-row .em{ flex:1; min-width:0; overflow-wrap:anywhere; }
+.sh-row .lv{ color:var(--ink-dim); font-size:13px; }
+.sh-row button{ width:40px; height:40px; border:0; background:transparent; color:var(--ink-dim); font-size:20px; cursor:pointer; }
 .dr-ok{ font:700 15px/1.4 var(--font-ui); color:var(--ink); padding:12px 0 6px; }
 .dr-ok.warn{ color:var(--danger); }
 .dr-bar{ height:8px; border-radius:5px; background:var(--line); overflow:hidden; margin:4px 0 12px; }
@@ -2986,11 +2998,24 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <div class="sheet">
     <div class="sheet-head"><button class="back-btn" id="acBack"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h3 id="albumContextTitle">Album</h3></div>
     <div class="sheet-row" id="acPin"><span>Zakači na vrh</span></div>
+    <div class="sheet-row" id="acShare"><span>Podeli album</span></div>
     <div class="sheet-row" id="acRename"><span>Preimenuj album</span></div>
     <div class="sheet-row" id="acCover"><span>Promeni naslovnu sliku</span></div>
     <div class="sheet-row" id="acMove"><span>Premesti u album</span></div>
     <div class="sheet-row" id="acUnnest"><span>Vrati na početni ekran</span></div>
     <div class="sheet-row" id="acDelete" style="color:var(--danger);"><span>Izbriši album</span></div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="shareSheet">
+  <div class="sheet">
+    <div class="sheet-head"><button class="back-btn" id="shBack"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h3 id="shTitle"></h3></div>
+    <div class="sh-hint" id="shHint"></div>
+    <input id="shEmail" type="email" inputmode="email" enterkeyhint="done" class="sheet-input" placeholder="ime@gmail.com" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div class="sh-seg" id="shSeg"><button type="button" data-r="reader"></button><button type="button" data-r="commenter"></button></div>
+    <div class="sh-err" id="shErr" hidden></div>
+    <button type="button" id="shGo" class="sheet-cta"></button>
+    <div class="sh-list" id="shList"></div>
   </div>
 </div>
 
@@ -5373,6 +5398,12 @@ Object.assign(I18N.sr, {
   mcMove: 'Premesti', mcCopy: 'Kopiraj', mcTitle: 'Album „{name}“',
   acPin: 'Zakači na vrh', acUnpin: 'Otkači sa vrha', acRename: 'Preimenuj album', acCover: 'Promeni naslovnu sliku', acMove: 'Premesti u album',
   acUnnest: 'Vrati na početni ekran', acDelete: 'Izbriši album', coverTitle: 'Izaberi naslovnu sliku',
+  shMenu: 'Podeli album', shTitle: 'Podeli „{n}“', shHint: 'Osoba dobija e-poruku sa linkom i album gleda u Google Drive-u (pregledač ili aplikacija), bez Arhive.',
+  shReader: 'Samo gleda', shCommenter: 'Gleda i komentariše', shGo: 'Podeli', shBusy: 'Delim…', shCap: 'Ima pristup', shLoading: 'Učitavam…',
+  shLvReader: 'gleda', shLvCommenter: 'komentariše', shLvOther: 'menja', shBadEmail: 'Upiši ispravnu e-adresu.',
+  shDone: 'Podeljeno sa {e}.', shRemoveT: 'Ukloni pristup', shRemoveQ: 'Da {e} više ne vidi album „{n}“?', shRemoveOk: 'Ukloni', shRemoveNo: 'Otkaži',
+  shRemoved: 'Pristup uklonjen.', shErrNet: 'Nema veze sa internetom. Pokušaj ponovo.', shErrAuth: 'Google traži ponovnu dozvolu: Podešavanja → Google Drive.',
+  shErr: 'Deljenje nije uspelo. Pokušaj ponovo.', shSelf: 'To je tvoj nalog.',
   srPh: 'Pretraži po nazivu...', srDeep: 'Detaljno', srDeepT: 'Detaljna pretraga — uključi i sadržaj dokumenata',
   srAsk: '✨ Pitaj', srAskT: 'Pitaj Arhivu — odgovor iz tvojih dokumenata', srClose: 'Zatvori pretragu',
   itemsLbl: 'Slike i dokumenti', acRenameSub: 'Preimenuj podalbum', acDeleteSub: 'Izbriši podalbum',
@@ -5406,6 +5437,12 @@ Object.assign(I18N.en, {
   mcMove: 'Move', mcCopy: 'Copy', mcTitle: 'Album “{name}”',
   acPin: 'Pin to top', acUnpin: 'Unpin', acRename: 'Rename album', acCover: 'Change cover image', acMove: 'Move to album',
   acUnnest: 'Move to home screen', acDelete: 'Delete album', coverTitle: 'Choose cover image',
+  shMenu: 'Share album', shTitle: 'Share “{n}”', shHint: 'The person gets an email with a link and views the album in Google Drive (browser or app), without Arhiva.',
+  shReader: 'View only', shCommenter: 'View and comment', shGo: 'Share', shBusy: 'Sharing…', shCap: 'Has access', shLoading: 'Loading…',
+  shLvReader: 'views', shLvCommenter: 'comments', shLvOther: 'edits', shBadEmail: 'Enter a valid email address.',
+  shDone: 'Shared with {e}.', shRemoveT: 'Remove access', shRemoveQ: 'Stop {e} from seeing the album “{n}”?', shRemoveOk: 'Remove', shRemoveNo: 'Cancel',
+  shRemoved: 'Access removed.', shErrNet: 'No internet connection. Try again.', shErrAuth: 'Google needs permission again: Settings → Google Drive.',
+  shErr: 'Sharing failed. Try again.', shSelf: 'That is your account.',
   srPh: 'Search by name...', srDeep: 'Detailed', srDeepT: 'Detailed search — also include document contents',
   srAsk: '✨ Ask', srAskT: 'Ask Arhiva — an answer from your documents', srClose: 'Close search',
   itemsLbl: 'Images and documents', acRenameSub: 'Rename sub-album', acDeleteSub: 'Delete sub-album',
@@ -8124,6 +8161,8 @@ function openAlbumContext(catId){
   /* album sa podalbumima ne moze postati podalbum */
   document.getElementById('acMove').style.display = cat && childrenOf(cat.id).length === 0 && moveTargetsFor(cat).length > 0 ? 'flex' : 'none';
   document.getElementById('acUnnest').style.display = isSub ? 'flex' : 'none';
+  document.getElementById('acShare').style.display = drOn() ? 'flex' : 'none';   /* v280: samo Android sa povezanim Drive-om */
+  document.getElementById('acShare').querySelector('span').textContent = t('shMenu');
   document.getElementById('albumContextSheet').classList.add('open');
   pushBack(closeAlbumContext);
 }
@@ -8137,6 +8176,10 @@ document.getElementById('acPin').onclick = ()=>{
 document.getElementById('acRename').onclick = ()=>{
   const target = albumContextTarget;
   requestCloseThen(()=>openRenameSheet(target));
+};
+document.getElementById('acShare').onclick = ()=>{
+  const target = albumContextTarget;
+  requestCloseThen(()=>openShareSheet(target));
 };
 document.getElementById('acCover').onclick = ()=>{
   const target = albumContextTarget;
@@ -10745,7 +10788,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 279;
+const APP_VERSION = 280;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22437,6 +22480,82 @@ function drBoot(){
   if(_dr.on) drSoon(3000);
 }
 /* ================= kraj GOOGLE DRIVE ================= */
+
+/* ================= DELJENJE ALBUMA (v280, Zoran 4.11.2026: put 1 — link preko Google Drive-a) =================
+   Fascikla albuma na Drive-u (Dokumenti/<album>[/<podalbum>], isti raspored kao kopija) deli se imenovanoj osobi; Google joj
+   pošalje e-poruku sa linkom, album gleda u Drive-u bez Arhive. Nivoi: reader (samo gleda) i commenter (gleda i komentariše);
+   writer namerno NE (Arhiva vlasnika ne bi videla dodato, a brisanje bi poremetilo usklađivanje — proba 4.11.).
+   Samo uz povezan Drive (drOn). Fascikla albuma se pravi ako je još nema (prazan album). */
+let shCat = null, shRole = 'reader', shBusy = false;
+const shEl = (id)=>document.getElementById(id);
+async function shFolder(catId){ await drToken(false); return drDir('Dokumenti/' + albumPath(catId)); }
+function shErrTxt(e){ return e && e.drNet ? t('shErrNet') : e && e.drAuth ? t('shErrAuth') : t('shErr'); }
+function shShowErr(txt){ const b = shEl('shErr'); b.textContent = txt || ''; b.hidden = !txt; }
+function shPaint(){
+  shEl('shSeg').querySelectorAll('button').forEach(b=>{ b.textContent = t(b.dataset.r === 'reader' ? 'shReader' : 'shCommenter'); b.classList.toggle('on', b.dataset.r === shRole); });
+  const go = shEl('shGo'); go.textContent = shBusy ? t('shBusy') : t('shGo'); go.disabled = shBusy;
+}
+function openShareSheet(catId){
+  const cat = catById(catId); if(!cat || !drOn()) return;
+  shCat = catId; shRole = 'reader'; shBusy = false;
+  shEl('shTitle').textContent = t('shTitle', {n:cat.name});
+  shEl('shHint').textContent = t('shHint');
+  shEl('shEmail').value = ''; shShowErr(''); shPaint();
+  shEl('shList').innerHTML = '<div class="sh-cap">' + escapeHtml(t('shLoading')) + '</div>';
+  shEl('shareSheet').classList.add('open');
+  pushBack(closeShareSheet);
+  shLoad();
+}
+const closeShareSheet = ()=>{ shEl('shareSheet').classList.remove('open'); shCat = null; };
+async function shLoad(){
+  const cat = shCat; if(!cat) return;
+  let list = [];
+  try{
+    const id = await shFolder(cat);
+    const r = await drJson(DR_API + '/' + id + '/permissions?fields=' + encodeURIComponent('permissions(id,emailAddress,role,type)'));
+    list = (r.permissions || []).filter(p=>p.type === 'user' && p.role !== 'owner');
+  }catch(e){ if(shCat === cat){ shEl('shList').innerHTML = ''; shShowErr(shErrTxt(e)); } console.error('deljenje', e); return; }
+  if(shCat !== cat) return;
+  const lv = (r)=>t(r === 'reader' ? 'shLvReader' : r === 'commenter' ? 'shLvCommenter' : 'shLvOther');
+  shEl('shList').innerHTML = list.length ? '<div class="sh-cap">' + escapeHtml(t('shCap')) + '</div>' + list.map(p=>
+    '<div class="sh-row"><span class="em">' + escapeHtml(p.emailAddress || '—') + '</span><span class="lv">' + escapeHtml(lv(p.role)) + '</span>' +
+    '<button type="button" data-p="' + escapeHtml(p.id) + '" data-e="' + escapeHtml(p.emailAddress || '') + '" aria-label="' + escapeHtml(t('shRemoveT')) + '">✕</button></div>').join('') : '';
+  shEl('shList').querySelectorAll('button[data-p]').forEach(b=>b.onclick = ()=>shRemove(b.dataset.p, b.dataset.e));
+}
+async function shShare(){
+  if(shBusy || !shCat) return;
+  const em = shEl('shEmail').value.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ shShowErr(t('shBadEmail')); return; }
+  if(_dr.email && em.toLowerCase() === _dr.email.toLowerCase()){ shShowErr(t('shSelf')); return; }
+  shShowErr(''); shBusy = true; shPaint();
+  const cat = shCat;
+  try{
+    const id = await shFolder(cat);
+    await drJson(DR_API + '/' + id + '/permissions?sendNotificationEmail=true&fields=id', {method:'POST', headers:DR_JSON, body:JSON.stringify({type:'user', role:shRole, emailAddress:em})});
+    if(shCat === cat){ shEl('shEmail').value = ''; showNote(t('shDone', {e:em}), 4000); }
+  }catch(e){ if(shCat === cat) shShowErr(shErrTxt(e)); console.error('deljenje', e); }
+  shBusy = false; if(shCat === cat){ shPaint(); shLoad(); }
+}
+async function shRemove(pid, em){
+  const cat = shCat, c = catById(cat); if(!cat || !c) return;
+  const ch = await lkChoice(t('shRemoveT'), t('shRemoveQ', {e:em || '—', n:c.name}), [['ok', t('shRemoveOk')], ['no', t('shRemoveNo'), true]], 'no');
+  if(lkState === 'open') lkHide();
+  if(ch !== 'ok' || shCat !== cat) return;
+  try{
+    const id = await shFolder(cat);
+    await drFetch(DR_API + '/' + id + '/permissions/' + encodeURIComponent(pid), {method:'DELETE'});
+    showNote(t('shRemoved'), 3000);
+  }catch(e){ shShowErr(shErrTxt(e)); console.error('deljenje', e); }
+  shLoad();
+}
+shEl('shBack').onclick = ()=>requestClose();
+shEl('shGo').onclick = shShare;
+shEl('shSeg').querySelectorAll('button').forEach(b=>b.onclick = ()=>{ shRole = b.dataset.r; shPaint(); });
+shEl('shEmail').addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); shShare(); } });
+shEl('shEmail').addEventListener('input', ()=>shShowErr(''));
+try{ wireBackspace(shEl('shEmail')); }catch(e){}
+shEl('shareSheet').addEventListener('click', e=>{ if(e.target.id === 'shareSheet') requestClose(); });
+/* ================= kraj DELJENJA ALBUMA ================= */
 
 function checkDeepLink(){
   const hashMatch = location.hash.match(/^#p=(.+)$/);
