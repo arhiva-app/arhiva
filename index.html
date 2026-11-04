@@ -3609,7 +3609,7 @@ function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : item.t
 function setModalCaption(item){
   const a = autoNameParts(item.name);
   modalCaption.textContent = a ? itemAutoWord(item) + a.tail : item.name;
-  const d = document.getElementById('modalDate'); if(d) d.textContent = itemDay(item);
+  const d = document.getElementById('modalDate'); if(d) d.textContent = itemDay(item) + gpsProba(item);
   requestAnimationFrame(placeModalInfo);
 }
 /* v130: red sa brojačem i nazivom stoji odmah ispod stvarne donje ivice slike, kad ima mesta; inače dole kao ranije */
@@ -6370,7 +6370,8 @@ function docRecord(it){
     validUntil: it.validUntil || null, validNote: it.validNote || null, remind: it.validUntil ? (remClean(it.remind) || null) : null, lang: it.lang || null, derivedFrom: it.derivedFrom || null,
     sourceSig: it.sourceSig || null, hasText: !!it.hasText,
     trashPath: it.trashPath || null, trashGroup: it.trashGroup || null,
-    sources: (Array.isArray(it.sources) && it.sources.length) ? it.sources.slice() : null   /* v157: izvori Zbirnog spiska */
+    sources: (Array.isArray(it.sources) && it.sources.length) ? it.sources.slice() : null,   /* v157: izvori Zbirnog spiska */
+    gps: it.gps || null   /* v285 */
   };
 }
 function itemFromRecord(r){
@@ -6381,6 +6382,7 @@ function itemFromRecord(r){
     sourceSig: r.sourceSig || null, hasText: !!r.hasText, thumb: ''
   };
   if(r.ext) it.ext = r.ext;
+  if(r.gps) it.gps = r.gps;
   if(r.deletedAt) it.deletedAt = r.deletedAt;
   if(r.trashPath) it.trashPath = r.trashPath;
   if(r.trashGroup) it.trashGroup = r.trashGroup;
@@ -10068,18 +10070,25 @@ const EXT_MIME = {pdf:'application/pdf', doc:'application/msword', docx:'applica
    2) datum u imenu fajla (IMG_20250907_143012, Screenshot_2025-09-07-14-30-12, VID-20250907-WA0001);
    3) vreme fajla (lastModified, ako je starije od trenutka uvoza);  4) sada.
    Čita se iz ORIGINALA pre obrade slike (obrada ne čuva EXIF). Nemoguć datum (pre 1990, u budućnosti) se ne uzima. */
+/* v285 PROBA (privremeno): u pregledu slike piše šta je uvoz našao od lokacije */
+function gpsProba(it){
+  if(!it || it.type !== 'image' || !it.gps) return '';
+  return it.gps === 'nula' ? ' · GPS skriven' : it.gps === 'nema' ? ' · bez GPS' : ' · 📍 ' + it.gps.lat.toFixed(4) + ', ' + it.gps.lon.toFixed(4);
+}
 function tkOk(t){ return isFinite(t) && t > 631152000000 && t < Date.now() + 864e5 ? t : 0; }
 function tkLocal(y, mo, d, h, mi, se){
   if(!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && h <= 23 && mi <= 59 && se <= 59)) return 0;
   return tkOk(new Date(y, mo - 1, d, h, mi, se).getTime());
 }
-function tkExif(b){
+function tkExif(b){ return tkExifAll(b).t; }
+/* v285: isto čitanje EXIF-a vraća i GPS (proba: da li Android pušta lokaciju iz slike) */
+function tkExifAll(b){
   let s = -1;
   for(let i = 0; i + 10 < b.length; i++){
     if(b[i] === 0x45 && b[i+1] === 0x78 && b[i+2] === 0x69 && b[i+3] === 0x66 && b[i+4] === 0 && b[i+5] === 0 &&
        ((b[i+6] === 0x49 && b[i+7] === 0x49) || (b[i+6] === 0x4D && b[i+7] === 0x4D))){ s = i + 6; break; }
   }
-  if(s < 0) return 0;
+  if(s < 0) return {t:0, gps:'nema'};
   const le = b[s] === 0x49, dv = new DataView(b.buffer, b.byteOffset + s, b.length - s), n = dv.byteLength;
   const u16 = o=>o + 2 <= n ? dv.getUint16(o, le) : -1, u32 = o=>o + 4 <= n ? dv.getUint32(o, le) : -1;
   const tags = off=>{
@@ -10090,6 +10099,7 @@ function tkExif(b){
       if(tag < 0 || c < 0) break;
       if(type === 2){ const at = c <= 4 ? e + 8 : u32(e + 8); let str = ''; for(let j = 0; j < c && at + j < n; j++){ const ch = dv.getUint8(at + j); if(!ch) break; str += String.fromCharCode(ch); } r[tag] = str; }
       else if(type === 4) r[tag] = u32(e + 8);
+      else if(type === 5 && c >= 1 && c <= 3){ const at = u32(e + 8), a = []; for(let j = 0; j < c; j++){ const nu = u32(at + j * 8), de = u32(at + j * 8 + 4); a.push(nu >= 0 && de > 0 ? nu / de : 0); } r[tag] = a; }
     }
     return r;
   };
@@ -10101,7 +10111,18 @@ function tkExif(b){
     if(z){ const u = Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]) - (z[1] === '-' ? -1 : 1) * (z[2] * 60 + +z[3]) * 60000; return tkOk(u); }
     return tkLocal(+m[1], +m[2], +m[3], +m[4], +m[5], +m[6]);
   };
-  return one(ex[0x9003], ex[0x9011]) || one(ex[0x9004], ex[0x9012]) || one(ifd0[0x0132], ex[0x9010]);
+  const t = one(ex[0x9003], ex[0x9011]) || one(ex[0x9004], ex[0x9012]) || one(ifd0[0x0132], ex[0x9010]);
+  /* GPS IFD (0x8825): 1/3 = N|S / E|W, 2/4 = stepeni, minuti, sekunde. Android bez dozvole za lokaciju u medijima upisuje nule. */
+  let gps = 'nema';
+  if(ifd0[0x8825] > 0){
+    const g = tags(ifd0[0x8825]), dd = a=>Array.isArray(a) ? (a[0] || 0) + (a[1] || 0) / 60 + (a[2] || 0) / 3600 : NaN;
+    let lat = dd(g[2]), lon = dd(g[4]);
+    if(/^S/i.test(g[1] || '')) lat = -lat;
+    if(/^W/i.test(g[3] || '')) lon = -lon;
+    if(isFinite(lat) && isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) gps = (lat || lon) ? {lat:Math.round(lat * 1e6) / 1e6, lon:Math.round(lon * 1e6) / 1e6} : 'nula';
+    else gps = 'nula';
+  }
+  return {t, gps};
 }
 async function tkVideo(blob){
   const rd = async (o, l)=>new DataView(await blob.slice(o, o + l).arrayBuffer());
@@ -10165,11 +10186,11 @@ function tkName(name){
   m = /(?:^|\D)((?:19|20)\d{2})[-_.]?(\d{2})[-_.]?(\d{2})(?!\d)/.exec(n);
   return m ? tkLocal(+m[1], +m[2], +m[3], 12, 0, 0) : 0;
 }
-async function takenTs(file, blob, mime, ext){
+async function takenTs(file, blob, mime, ext, info){
   const now = Date.now();
   let t = 0;
   try{
-    if(mime.startsWith('image/')) t = tkExif(new Uint8Array(await blob.slice(0, 1048576).arrayBuffer()));
+    if(mime.startsWith('image/')){ const x = tkExifAll(new Uint8Array(await blob.slice(0, 1048576).arrayBuffer())); t = x.t; if(info) info.gps = x.gps; }
     else if(mime.startsWith('video/')) t = await tkVideo(blob);
     else if(mime === 'application/pdf') t = await tkPdf(blob);
     else if(/^(DOCX|XLSX|PPTX|DOCM|XLSM|PPTM)$/.test(ext)) t = await tkOffice(blob);
@@ -10211,16 +10232,18 @@ async function addFile(file, category, o){
         page = {blob: r.blob, thumbBlob: r.tblob, w: r.w, h: r.h};
       }catch(e){ console.error('slika se ne može obraditi, čuva se original', e); }
     }
-    const id = newItemId();
+    const id = newItemId(), tkInfo = {};
+    const takenAt = await takenTs(file, original, mime, ext, tkInfo);   /* v284/v285: pre obrade slike (obrada ne čuva EXIF) */
     const baseName = file.name.replace(/\.[^.]+$/, '');
     const item = {
       id,
       name: baseName || (isVideo ? 'Video' : isPdf ? 'Dokument' : (isDoc ? 'Dokument' : 'Slika')),
-      ts: await takenTs(file, original, mime, ext),   /* v284: datum nastanka */
+      ts: takenAt,   /* v284: datum nastanka */
       category: category || null,
       type: isVideo ? 'video' : isPdf ? 'pdf' : (isDoc ? 'doc' : 'image'),
       sourceSig
     };
+    if(isImage && tkInfo.gps) item.gps = tkInfo.gps;   /* v285 proba: {lat, lon} | 'nula' (skriveno) | 'nema' */
     if(isDoc) item.ext = ext;
     if(isVideo) item.ext = ext || ({'video/quicktime':'MOV', 'video/3gpp':'3GP', 'video/x-matroska':'MKV', 'video/x-m4v':'M4V'}[mime] || mime.split('/')[1] || 'mp4').toUpperCase();
     await db2AddDoc(item, [page], null);
@@ -10905,7 +10928,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 284;
+const APP_VERSION = 285;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
