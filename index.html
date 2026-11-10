@@ -57,6 +57,12 @@
 html.lk-boot body{ visibility:hidden; }
 #bootCover{ position:fixed; inset:0; z-index:2147483000; background:#0D0E10; display:flex; align-items:center; justify-content:center; transition:opacity .18s ease; }
 #bootCover.off{ opacity:0; pointer-events:none; }
+/* v295 (K1): podaci nisu učitani — ceo ekran, ništa iza njega ne radi */
+#loadFail{ position:fixed; inset:0; z-index:2147482000; background:var(--bg,#0D0E10); color:var(--ink,#EDE6D6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:32px 28px calc(32px + env(safe-area-inset-bottom,0px)); text-align:center; font-family:var(--font-ui,sans-serif); }
+#loadFail .lf-t{ font-family:var(--font-title,serif); font-size:22px; font-weight:600; }
+#loadFail .lf-s{ font-size:15px; line-height:1.45; color:var(--ink-dim,#A9A190); max-width:340px; }
+#loadFail .lf-code{ font-size:12px; color:var(--ink-faint,#7A7468); max-width:340px; word-break:break-word; }
+#loadFail .sheet-cta{ width:100%; max-width:320px; margin-top:10px; }
 /* v196: stavka iz prečice dok je Arhiva zaključana — samo gledanje i slanje */
 html.sc-peek #modalPath, html.sc-peek #modalAi, html.sc-peek #modalExp, html.sc-peek #modalPages, html.sc-peek #modalDelete,
 html.sc-peek #modalRename, html.sc-peek #modalExpEdit, html.sc-peek #modalPrev, html.sc-peek #modalNext{ display:none !important; }
@@ -5371,6 +5377,7 @@ Object.assign(I18N.sr, {
   wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
   wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
+  loadFailT: 'Podaci nisu učitani', loadFailS: 'Arhiva trenutno ne može da pročita svoje podatke. Ništa nije obrisano. Pokušaj ponovo; ako se ponavlja, zatvori Arhivu i ponovo je otvori.', loadFailBtn: 'Pokušaj ponovo', loadFailWhere: 'Učitavanje', loadFailWait: 'Podaci se još učitavaju.',
   storUsed: 'Iskorišćeno: ~{mb} MB', storTrash: ' (u korpi {n})', buildLbl: 'Verzija',
   viewAsList: 'Prikaži kao listu', viewAsGrid: 'Prikaži kao mrežu', selN: '{n} odabrano'
 });
@@ -5394,6 +5401,7 @@ Object.assign(I18N.en, {
   wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
   wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
+  loadFailT: 'Data not loaded', loadFailS: 'Arhiva can’t read its data right now. Nothing has been deleted. Try again; if it keeps happening, close Arhiva and open it again.', loadFailBtn: 'Try again', loadFailWhere: 'Loading', loadFailWait: 'Your data is still loading.',
   storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', buildLbl: 'Version',
   viewAsList: 'Show as list', viewAsGrid: 'Show as grid', selN: '{n} selected'
 });
@@ -6630,14 +6638,31 @@ async function loadAll(){
       toast(recovered === 1 ? t('albRec1') : t('albRecN', {n:recovered}));
     }
   }catch(e){
+    /* v295 (K1): neuspelo čitanje NIJE prazna Arhiva — prazan spisak bi Drive, vidžet i podsetnici shvatili kao „sve obrisano“ */
     console.error(e);
-    toast('Greška pri učitavanju.');
-    items = [];
+    loadFailed = true;
+    try{ logError(t('loadFailWhere'), ((e && e.name) || 'Error') + ': ' + ((e && e.message) || '')); }catch(_){}
+    showLoadFail(e);
+    bootCoverOff();
+    return false;
   }
+  loadFailed = false;
   render();
   bootCoverOff();
   checkBackupReminder();
   ensureMissingThumbs();
+  return true;
+}
+let loadFailed = false;
+function showLoadFail(e){
+  let d = document.getElementById('loadFail');
+  if(!d){ d = document.createElement('div'); d.id = 'loadFail'; d.setAttribute('role', 'alertdialog'); document.body.appendChild(d); }
+  const code = ((e && e.name) || '') + ((e && e.message) ? ': ' + e.message : '');
+  d.innerHTML = '<div class="lf-t">' + escapeHtml(t('loadFailT')) + '</div><div class="lf-s">' + escapeHtml(t('loadFailS')) + '</div>' +
+    (code ? '<div class="lf-code">' + escapeHtml(code.slice(0, 160)) + '</div>' : '') +
+    '<button type="button" class="sheet-cta" id="loadFailBtn">' + escapeHtml(t('loadFailBtn')) + '</button>';
+  /* Ponovo = novo pokretanje stranice (sveža veza sa bazom; sve ostalo kreće ispočetka kao i inače) */
+  document.getElementById('loadFailBtn').onclick = ()=>{ try{ location.reload(); }catch(_){} };
 }
 /* v270: pokrivač se skloni posle prvog pravog crtanja (dva okvira — da je ekran stvarno nacrtan); najkasnije posle 5 s */
 function bootCoverOff(){
@@ -10626,7 +10651,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(()=>{ itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   if(ol){ openSettings(); openSettingsSub('lang'); } });
@@ -11042,7 +11067,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 294;
+const APP_VERSION = 295;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11768,6 +11793,7 @@ async function backupManifest(bezSlicica){
 }
 async function exportBackup(){
   if(_backupBusy) return;
+  if(!itemsReady){ toast(t('loadFailWait')); return; }   /* v295 (K1): kopija dok podaci nisu učitani bila bi prazna */
   _backupBusy = true;
   const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
   try{
