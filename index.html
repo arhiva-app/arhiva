@@ -6457,7 +6457,8 @@ async function db2AddDoc(item, pages, text, opts){
     files: pages.map((p, i)=>({id:item.pages[i].file, doc:item.id, blob:p.blob})).concat(pages.map((p, i)=>item.pages[i].orig ? {id:item.pages[i].orig.file, doc:item.id, blob:p.orig.blob} : null).filter(Boolean)),
     thumbs: pages.map((p, i)=>p.thumbBlob ? {id:item.pages[i].file, blob:p.thumbBlob} : null).filter(Boolean),
     texts: text ? [{id:item.id, text}] : [],
-    docs: [docRecord(item)]
+    docs: [docRecord(item)],
+    brisi: (opts && opts.brisi) || null
   });
   if(!(opts && opts.noUrl)){
     const tb = pages[0] && pages[0].thumbBlob;
@@ -6472,6 +6473,12 @@ async function saveDocText(item, text){
 }
 /* Trajno brisanje: sadržaj, sličice i tekst nestaju, ostaje samo oznaka da je obrisano. */
 async function idbDelete(id){ await Skladiste.obrisiTrajno(id); }
+/* v296 (K2): šta od stare stavke treba obrisati kad je nova zamenjuje (fajlovi, sličice, originali, tekst; ako se ID promenio i zapis) */
+function brisiStranice(old, newId){
+  const f = [];
+  (old.pages || []).forEach(p=>{ if(p.file) f.push(p.file); if(p.orig && p.orig.file) f.push(p.orig.file); });
+  return {files:f, thumbs:f.slice(), texts:[old.id], docs: newId === old.id ? [] : [old.id]};
+}
 async function getFileBlob(item, pageIndex){
   const p = (item.pages || [])[pageIndex || 0];
   if(!p) throw new Error('nema fajla');
@@ -11067,7 +11074,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 295;
+const APP_VERSION = 296;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11640,7 +11647,11 @@ function zipSeqReader(file){
   const direct = async (start, len)=>new Uint8Array(await file.slice(start, start + len).arrayBuffer());
   return async (start, len)=>{
     if(start < (chunk ? cStart : pos)) return direct(start, len);
-    if(!rd) rd = file.stream().getReader();
+    /* v296 (K2): prvo čitanje ili skok preko velikog dela (npr. preskočen velik video) — čitanje kreće od tog mesta */
+    if(!rd || start > (chunk ? cStart + chunk.length : pos) + 1048576){
+      if(rd) try{ rd.cancel(); }catch(_){}
+      rd = file.slice(start).stream().getReader(); pos = start; chunk = null; cStart = start;
+    }
     const out = new Uint8Array(len);
     let got = 0;
     while(got < len){
@@ -11662,6 +11673,7 @@ function zipSeqReader(file){
 /* Čitanje ZIP-a: vraća Map(ime -> {size, crc, read()}); read() daje Blob posle provere CRC-a.
    v189: sadržaj se čita redom (zipSeqReader); zip.preload(imena) — ti fajlovi (sličice su zajedno na kraju kopije)
    učitaju se jednim čitanjem kad zatreba prvi od njih, da ne prekidaju čitanje redom. */
+const ZIP_BIG = 8 * 1048576;
 async function zipRead(file){
   const tailLen = Math.min(file.size, 65557);
   const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
@@ -11701,6 +11713,12 @@ async function zipRead(file){
         const lh = new DataView(lhb.buffer, lhb.byteOffset, 30);
         if(lh.getUint32(0, true) !== 0x04034b50) throw new Error('NOT_ZIP');
         const start = lho + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+        /* v296 (K2): velik fajl (video) ostaje deo izabranog fajla — CRC se računa čitanjem u delovima, bez celog fajla u memoriji */
+        if(csize > ZIP_BIG){
+          const part = file.slice(start, start + csize, mime || '');
+          if(await crc32Blob(part) !== crc){ const err = new Error('CRC'); err.fileName = name; throw err; }
+          return part;
+        }
         const bytes = await readRange(start, csize);
         if(crc32(bytes) !== crc){ const err = new Error('CRC'); err.fileName = name; throw err; }
         return new Blob([bytes], {type: mime || ''});
@@ -11795,8 +11813,9 @@ async function exportBackup(){
   if(_backupBusy) return;
   if(!itemsReady){ toast(t('loadFailWait')); return; }   /* v295 (K1): kopija dok podaci nisu učitani bila bi prazna */
   _backupBusy = true;
-  const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
+  let dirOk = false;
   try{
+    dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;   /* v296 (K2): unutar try — zastavica se uvek oslobodi */
     toastPersist(t('bkBuilding', {n:0, total:items.length}), {n:0, total:items.length});
     const {manifest, docs, fileEntries, thumbEntries} = await backupManifest(false);
     const entries = [{name:'arhiva.json', blob:new Blob([JSON.stringify(manifest)], {type:'application/json'}), ts:Date.now()}];
@@ -11914,10 +11933,10 @@ async function mergeBackup(src, opts){
       try{
         const pages = await readPages(d);
         if(!pages.length){ skipped++; continue; }
-        await idbDelete(active.id);
-        items = items.filter(x=>x !== active); setThumbUrl(active, null);
+        /* v296 (K2): stari fajlovi se brišu u ISTOJ transakciji u kojoj se upisuje novo — ako upis ne uspe, stara stavka ostaje cela */
         const item = newItem(d, catId);
-        await db2AddDoc(item, pages, d.text || null, {updatedAt: d.updatedAt || 0, keepName:true});
+        await db2AddDoc(item, pages, d.text || null, {updatedAt: d.updatedAt || 0, keepName:true, brisi: brisiStranice(active, item.id)});
+        items = items.filter(x=>x !== active); setThumbUrl(active, null);
         items.push(item);
         updated++;
       }catch(e){
