@@ -4455,7 +4455,7 @@ const I18N = {
     drConnFail: 'Povezivanje nije uspelo. Proveri internet i pokušaj ponovo.',
     drErrNet: 'Poslednje slanje nije uspelo: nema interneta. Arhiva pokušava ponovo sama.',
     drErrFull: 'Google Drive je pun. Oslobodi prostor na Drive-u; Arhiva posle nastavlja sama.',
-    drErr: 'Poslednje slanje nije uspelo. Arhiva pokušava ponovo sama.',
+    drErrSend: 'Poslednje slanje nije uspelo. Arhiva pokušava ponovo sama.',   /* v298 (K4): bio je drugi „drErr“ i prepisivao poruku pregleda dokumenta */
     drNeedTxt: 'Google traži da ponovo dozvoliš pristup Drive-u. Dok to ne uradiš, ništa se ne šalje.', drAgain: 'Ponovo poveži',
     drOther: 'Na ovom Google nalogu postoji Arhiva koja nije do kraja poslata, pa ne može da se preuzme. Ništa nije promenjeno.',
     drPullT: 'Na Drive-u je tvoja Arhiva', drPullAsk: 'Nalog {email}: {docs}, {albums} ({mb}), poslednje slanje {d}. Preuzmi ih na ovaj telefon? Ono što je već na telefonu ostaje, a ništa se ne duplira.',
@@ -5245,7 +5245,7 @@ const I18N = {
     drConnFail: 'Connecting failed. Check the internet and try again.',
     drErrNet: 'The last upload failed: no internet. Arhiva will retry on its own.',
     drErrFull: 'Google Drive is full. Free up space on Drive; Arhiva then continues on its own.',
-    drErr: 'The last upload failed. Arhiva will retry on its own.',
+    drErrSend: 'The last upload failed. Arhiva will retry on its own.',
     drNeedTxt: 'Google asks you to allow Drive access again. Nothing is uploaded until you do.', drAgain: 'Connect again',
     drOther: 'This Google account has an Arhiva that was not fully uploaded, so it cannot be downloaded. Nothing was changed.',
     drPullT: 'Your Arhiva is on Drive', drPullAsk: 'Account {email}: {docs}, {albums} ({mb}), last upload {d}. Download them to this phone? What is already on the phone stays, and nothing is duplicated.',
@@ -11076,7 +11076,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 297;
+const APP_VERSION = 298;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22913,7 +22913,7 @@ function drSettingsHtml(){
       '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drRunHint')) + '</div>' +
       row('drAcc', _dr.email || '—') + '</div>' + btn('drOffBtn', t('drOff'), true) + hint('drHintSafe');   /* v278: vidi se nalog i prenos može da se prekine */
   }
-  const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErr' : null;
+  const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErrSend' : null;
   return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drOk')) + '</div>' +
     row('drAcc', _dr.email || '—') + row('drLast', _dr.last ? drAgo(_dr.last) : t('drNever')) +
     row('drOnDrive', (_dr.docs || 0) + ' · ' + drMb(drDriveBytes())) +
