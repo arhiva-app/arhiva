@@ -5375,6 +5375,7 @@ Object.assign(I18N.sr, {
   bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
   wipeTile: 'Obriši sve podatke', wipeSub: 'Trajno briše sve slike, dokumente i albume',
   wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
+  wipeDrKeep: ' Kopija na Google Drive-u ostaje, a Drive se na ovom uređaju isključuje — kopiju kasnije možeš vratiti.', wipeDoneDr: 'Sve je obrisano sa uređaja. Kopija na Google Drive-u je sačuvana.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
   wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
   loadFailT: 'Podaci nisu učitani', loadFailS: 'Arhiva trenutno ne može da pročita svoje podatke. Ništa nije obrisano. Pokušaj ponovo; ako se ponavlja, zatvori Arhivu i ponovo je otvori.', loadFailBtn: 'Pokušaj ponovo', loadFailWhere: 'Učitavanje', loadFailWait: 'Podaci se još učitavaju.',
@@ -5399,6 +5400,7 @@ Object.assign(I18N.en, {
   bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
   wipeTile: 'Delete all data', wipeSub: 'Permanently deletes all images, documents and albums',
   wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
+  wipeDrKeep: ' The copy on Google Drive stays, and Drive is turned off on this device — you can restore the copy later.', wipeDoneDr: 'Everything has been deleted from this device. The copy on Google Drive is kept.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
   wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
   loadFailT: 'Data not loaded', loadFailS: 'Arhiva can’t read its data right now. Nothing has been deleted. Try again; if it keeps happening, close Arhiva and open it again.', loadFailBtn: 'Try again', loadFailWhere: 'Loading', loadFailWait: 'Your data is still loading.',
@@ -11074,7 +11076,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 296;
+const APP_VERSION = 297;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12171,7 +12173,7 @@ async function storeWipeAll(){
 async function wipeAllData(){
   /* v183: prvi prozor nudi i „Prvo napravi kopiju“ — napravi kopiju i ništa ne briše */
   const a1 = await askConfirm({
-    icon:'⚠️', title:t('wipeT1'), text:t('wipeX1'),
+    icon:'⚠️', title:t('wipeT1'), text:t('wipeX1') + (_dr.on ? t('wipeDrKeep') : ''),
     okIcon:'🗑️', okLabel:t('wipeOk1'), altIcon:'💾', altLabel:t('wipeBk')
   });
   if(a1 === 'alt'){ exportBackup(); return; }
@@ -12180,6 +12182,16 @@ async function wipeAllData(){
     icon:'🛑', title:t('wipeT2'), text:t('wipeX2'),
     okIcon:'🗑️', okLabel:t('wipeOk2')
   })) return;
+  /* v297 (K3, Zoran 10.11.: opcija 1): brisanje važi samo za ovaj uređaj — Drive se ovde isključi PRE brisanja, kopija na Drive-u ostaje.
+     Inače bi usklađivanje prazan spisak shvatilo kao „sve obrisano“ i poslalo kopiju u Drive korpu. Čeka se kraj usklađivanja koje je u toku. */
+  const drWas = !!_dr.on;
+  if(drWas){
+    _dr.on = false; _dr.need = false; drSave();
+    clearTimeout(_drTimer); clearTimeout(_drRetry); _drTok = null;
+    for(let i = 0; i < 600 && _drBusy; i++) await new Promise(r=>setTimeout(r, 100));
+    drRefresh();
+    if(_drBusy){ _dr.on = true; drSave(); drRefresh(); toast(t('wipeErr')); return; }
+  }
   try{
     await storeWipeAll();
     /* i stari podaci od pre prelaska, da se ništa ne bi vratilo samo */
@@ -12187,7 +12199,7 @@ async function wipeAllData(){
     currentFolder = null;
     render();
     updateStorageInfo();
-    toast(t('wipeDone'));
+    toast(t(drWas ? 'wipeDoneDr' : 'wipeDone'));
     requestClose();
   }catch(e){
     console.error(e);
