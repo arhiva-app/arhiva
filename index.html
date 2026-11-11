@@ -3756,7 +3756,7 @@ async function backfillContent(){
   render();
   const targets = items.filter(i=>(i.type==='pdf' || i.type==='doc') && !i.content);
   if(targets.length === 0) return;
-  toastPersist('Priprema detaljne pretrage: 0 / ' + targets.length + '...', {n:0, total:targets.length});
+  toastPersist(t('deepPrep', {n:0, total:targets.length}), {n:0, total:targets.length});
   let done = 0;
   for(const it of targets){
     const content = await extractContentForItem(it);
@@ -3764,7 +3764,7 @@ async function backfillContent(){
       await saveDocText(it, normalizeSr(content)).catch(e=>console.error(e));
     }
     done++;
-    toastPersist('Priprema detaljne pretrage: ' + done + ' / ' + targets.length + '...', {n:done, total:targets.length});
+    toastPersist(t('deepPrep', {n:done, total:targets.length}), {n:done, total:targets.length});
   }
   toastHide();
   render();
@@ -5358,6 +5358,10 @@ const I18N = {
 };
 /* v183: izbor jezika, početni ekran i Podešavanja */
 Object.assign(I18N.sr, {
+  /* v300 (K6): poruke koje su postojale samo na srpskom */
+  deepPrep: 'Priprema detaljne pretrage: {n} / {total}...', albRenamed: 'Album preimenovan.', addErr: 'Greška pri dodavanju.',
+  copiedTo: 'Kopirano u „{name}“.', bkSaved: 'Rezervna kopija sačuvana.', bkDirFallback: 'Fascikla nije dostupna — kopija sačuvana preuzimanjem.',
+  inTrashImg: 'Ova slika je u korpi (Podešavanja → korpa).', bkDirOffWeb: 'Rezervna kopija ide ponovo preko preuzimanja.', restoredAlbum: 'Vraćeni album', itemDefault: 'Stavka',
   trTile: 'Korpa', langTile: 'Jezik · language', langHint: 'Promena se vidi odmah. Pri prvom pokretanju Arhiva sama izabere jezik telefona.',
   setTitle: 'Podešavanja', backAria: 'Nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
   themeTile: 'Tema', themeHint: 'Promena se vidi odmah. Izbor se pamti i čuva u rezervnoj kopiji.',
@@ -5383,6 +5387,9 @@ Object.assign(I18N.sr, {
   viewAsList: 'Prikaži kao listu', viewAsGrid: 'Prikaži kao mrežu', selN: '{n} odabrano'
 });
 Object.assign(I18N.en, {
+  deepPrep: 'Preparing detailed search: {n} / {total}...', albRenamed: 'Album renamed.', addErr: 'Error while adding.',
+  copiedTo: 'Copied to “{name}”.', bkSaved: 'Backup saved.', bkDirFallback: 'Folder not available — backup saved as a download.',
+  inTrashImg: 'This image is in the trash (Settings → trash).', bkDirOffWeb: 'The backup is saved as a download again.', restoredAlbum: 'Restored album', itemDefault: 'Item',
   trTile: 'Trash', langTile: 'Language', langHint: 'The change is visible right away. On first start Arhiva picks the language of your phone.',
   setTitle: 'Settings', backAria: 'Back', cfOkDef: 'OK', cfCancel: 'Cancel',
   themeTile: 'Theme', themeHint: 'The change is visible right away. Your choice is remembered and saved in the backup.',
@@ -6635,7 +6642,7 @@ async function loadAll(){
       if(!it.category || categories.some(c=>c.id===it.category)) continue;
       let cat = categories.find(c=>!c.parent && c.name===it.category);
       if(!cat){
-        cat = {id:newCatId(), name: /^alb_/.test(it.category) ? 'Vraćeni album' : it.category, pinned:false, cover:null, parent:null};
+        cat = {id:newCatId(), name: /^alb_/.test(it.category) ? t('restoredAlbum') : it.category, pinned:false, cover:null, parent:null};
         categories.push(cat);
         saveCategories();
         recovered++;
@@ -6918,7 +6925,7 @@ async function migrateOneItem(it){
   if(kind === 'image'){
     try{ const r = await makeThumb(blob); thumbBlob = r.tblob; w = r.w; h = r.h; }catch(e){ console.error(e); }
   }
-  const item = {id:it.id, name:it.name || 'Stavka', category:it.category || null, type:kind, ts:it.ts || Date.now(), sourceSig:it.sourceSig || null};
+  const item = {id:it.id, name:it.name || t('itemDefault'), category:it.category || null, type:kind, ts:it.ts || Date.now(), sourceSig:it.sourceSig || null};
   if(it.ext) item.ext = it.ext;
   if(it.deletedAt) item.deletedAt = it.deletedAt;
   await db2AddDoc(item, [{blob, thumbBlob, w, h}], it.content || null, {noUrl:true, keepName:true});
@@ -9643,7 +9650,7 @@ async function copySelectedToFolder(catId){
   }
   if(newIds.length && currentFolder === from) jumpSet(catId || INBOX, newIds);
   render();
-  toast(ok === chosen.length ? 'Kopirano u "'+catLabel(catId)+'".' : t('saveErr'));
+  toast(ok === chosen.length ? t('copiedTo', {name: catLabel(catId)}) : t('saveErr'));
 }
 
 async function deleteSelected(){
@@ -9880,7 +9887,7 @@ function createFolder(){
       saveCategories();
     }
     render();
-    toast('Album preimenovan.');
+    toast(t('albRenamed'));
     requestClose();
     return;
   }
@@ -10431,8 +10438,8 @@ async function addFile(file, category, o){
     return item;
   }catch(e){
     console.error(e);
-    if(e && (e.name === 'QuotaExceededError' || (e.target && e.target.error && e.target.error.name === 'QuotaExceededError'))){ toast('Nema više prostora za nove stavke u browseru.'); }
-    else{ toast('Greška pri dodavanju.'); }
+    if(e && (e.name === 'QuotaExceededError' || (e.target && e.target.error && e.target.error.name === 'QuotaExceededError'))){ toast(t('noSpace')); }
+    else{ toast(t('addErr')); }
   }
 }
 searchEl.addEventListener('input', ()=>{ if(_ask && !_ask.busy && searchEl.value !== _ask.q) _ask = null; render(); });
@@ -11100,7 +11107,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 299;
+const APP_VERSION = 300;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11490,9 +11497,9 @@ async function chooseBackupDir(){
     const h = await window.showDirectoryPicker({ mode:'readwrite', id:'arhiva-backup' });
     backupDirHandle = h;
     await backupDirSave(h);
-    toast('Fascikla izabrana: ' + h.name);
+    toast(t('bkDirSet', {name: h.name}));
   }catch(e){
-    if(e && e.name !== 'AbortError'){ console.error(e); toast('Fascikla nije izabrana.'); }
+    if(e && e.name !== 'AbortError'){ console.error(e); toast(t('bkDirNotChosen')); }
   }
   refreshBackupDirRow();
 }
@@ -11504,7 +11511,7 @@ async function forgetBackupDir(){
   }
   backupDirHandle = null;
   try{ await backupDirSave(null); }catch(e){ console.error(e); }
-  toast('Rezervna kopija ide ponovo preko preuzimanja.');
+  toast(t('bkDirOffWeb'));
   refreshBackupDirRow();
 }
 function refreshBackupDirRow(){
@@ -11558,7 +11565,7 @@ function backupFileName(ext){
 }
 /* Upis u izabranu fasciklu (ako je dozvoljeno), inače preuzimanje. Vraća poruku za korisnika. */
 async function saveBackupFile(blob, fileName, dirOk){
-  let msg = 'Rezervna kopija sačuvana.';
+  let msg = t('bkSaved');
   const ad = (window.ARHIVA_SACUVAJ_KAO && window.ARHIVA_KOPIJA_FASCIKLA) ? bkAppDir() : null;
   let gone = '';
   if(ad){   /* v293: izabrana fascikla — upis bez pitanja; ne može → telefon pita (kopija ne propada) */
@@ -11578,14 +11585,14 @@ async function saveBackupFile(blob, fileName, dirOk){
   }else if(backupDirHandle && dirOk){
     try{
       await writeBackupToDir(backupDirHandle, blob, fileName);
-      msg = 'Rezervna kopija upisana u \u201E' + backupDirHandle.name + '\u201C.';
+      msg = t('bkDirWritten', {name: backupDirHandle.name});
     }catch(e){
       console.error(e);
       downloadBackup(blob, fileName);
-      msg = 'Fascikla nije dostupna \u2014 kopija sačuvana preuzimanjem.';
+      msg = t('bkDirFallback');
     }
   }else{
-    if(backupDirHandle) msg = 'Fascikla nije dostupna \u2014 kopija sačuvana preuzimanjem.';
+    if(backupDirHandle) msg = t('bkDirFallback');
     downloadBackup(blob, fileName);
   }
   markBackupDone();
@@ -11906,7 +11913,7 @@ async function mergeBackup(src, opts){
     return pages;
   };
   const newItem = (d, catId)=>{
-    const item = {id: d.id || newItemId(), name: d.name || 'Stavka', category: catId, type: normKind(d.kind),
+    const item = {id: d.id || newItemId(), name: d.name || t('itemDefault'), category: catId, type: normKind(d.kind),
       ts: d.createdAt || Date.now(), sourceSig: d.sourceSig || null, validUntil: d.validUntil || null, validNote: d.validNote || null, remind: remClean(d.remind),
       lang: d.lang || null, derivedFrom: d.derivedFrom || null};
     if(d.ext) item.ext = d.ext;
@@ -12146,7 +12153,7 @@ function importJsonBackup(data){
     return {key, id: isV2 ? c.id : null, name:c.name, parentKey: isV2 ? (c.parent || null) : null, pinned:!!c.pinned, updatedAt:0};
   });
   const docs = data.items.filter(it=>it && it.dataUrl && !it.deletedAt).map(it=>({
-    id: it.id || null, name: it.name || 'Stavka', albumKey: it.category || null, kind: normKind(it.type), ext: it.ext || null,
+    id: it.id || null, name: it.name || t('itemDefault'), albumKey: it.category || null, kind: normKind(it.type), ext: it.ext || null,
     createdAt: it.ts || Date.now(), updatedAt: 0, sourceSig: it.sourceSig || null, text: it.content || null,
     pages:[{getBlob: async ()=>{ try{ return dataUrlToBlob(it.dataUrl); }catch(e){ return await (await fetch(it.dataUrl)).blob(); } }}]
   }));
@@ -12252,7 +12259,7 @@ async function confirmDeleteOldData(){
     requestClose();
   }catch(e){
     console.error(e);
-    toast(e && e.message === 'BLOCKED' ? t('oldBlocked') : 'Greška pri brisanju.');
+    toast(e && e.message === 'BLOCKED' ? t('oldBlocked') : t('wipeErr'));
   }
 }
 
@@ -23052,7 +23059,7 @@ function checkDeepLink(){
   if(m){
     const id = decodeURIComponent(m[1]);
     const item = items.find(i=>i.id === id);
-    if(!item && trash.some(t=>t.id === id)){ toast('Ova slika je u korpi (Podešavanja \u2192 korpa).'); }
+    if(!item && trash.some(t=>t.id === id)){ toast(t('inTrashImg')); }
     if(item){
       document.title = item.name;
       openModal(item);
