@@ -24,6 +24,11 @@ self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(k => k !== CACHE && k !== PRIMLJENO).map(k => caches.delete(k)));
+    /* v302 (K16): do v301 svaka adresa sa ?v=N čuvala se posebno (ceo index.html po otvorenom linku) — jednom se brišu */
+    try {
+      const c = await caches.open(CACHE);
+      for (const r of await c.keys()) { if (new URL(r.url).search) await c.delete(r); }
+    } catch (err) { /* nije presudno */ }
     await self.clients.claim();
   })());
 });
@@ -40,7 +45,8 @@ self.addEventListener('fetch', (e) => {
       const res = await fetch(req, { cache: 'no-cache' });
       if (res && res.ok) {
         const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        /* v302 (K16): ključ bez ?v=… — jedan primerak po fajlu (keš se podudara i sa upitom, MDN: ignoreSearch je podrazumevano false) */
+        caches.open(CACHE).then(c => c.put(url.origin + url.pathname, copy)).catch(() => {});
       }
       return res;
     } catch (err) {
