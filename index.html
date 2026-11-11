@@ -57,6 +57,8 @@
 html.lk-boot body{ visibility:hidden; }
 #bootCover{ position:fixed; inset:0; z-index:2147483000; background:#0D0E10; display:flex; align-items:center; justify-content:center; transition:opacity .18s ease; }
 #bootCover.off{ opacity:0; pointer-events:none; }
+.lz-wrap{ display:contents; } .lz-sent{ height:1px; }   /* v303 (K9) */
+.lz-wrap:not(:first-child) > .date-label:first-child{ margin-top:26px; }   /* isto kao ranije kad su dani bili direktno u sadržaju */
 /* v295 (K1): podaci nisu učitani — ceo ekran, ništa iza njega ne radi */
 #loadFail{ position:fixed; inset:0; z-index:2147482000; background:var(--bg,#0D0E10); color:var(--ink,#EDE6D6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:32px 28px calc(32px + env(safe-area-inset-bottom,0px)); text-align:center; font-family:var(--font-ui,sans-serif); }
 #loadFail .lf-t{ font-family:var(--font-title,serif); font-size:22px; font-weight:600; }
@@ -7256,6 +7258,7 @@ function showDup(box, input, text){
 function revealItem(id){ setTimeout(()=>revealItemNow(id), 120); }   /* posle koraka nazad Chrome sam vrati ekran; zato malo kasnije */
 function revealItemNow(id){
   if(modalBg.classList.contains('open')) return;
+  lzAll();   /* v303 (K9) */
   const c = contentArea.querySelector('.card[data-id="' + CSS.escape(id) + '"]'); if(!c) return;
   const r = c.getBoundingClientRect(), top = (document.getElementById('stickyTop') || {}).offsetHeight || 0;
   if(r.top >= top && r.bottom <= innerHeight) return;
@@ -7477,7 +7480,7 @@ function albumFlashGo(to, ids){
     _flash = {ids:new Set(ids)};
     render();
     /* posle otvaranja albuma ekran se vraća na vrh; zato se do stavke pomera trenutak kasnije */
-    setTimeout(()=>{ const first = contentArea.querySelector('.card.just-moved'); if(first) first.scrollIntoView({block:'center'}); }, 80);
+    setTimeout(()=>{ if(!contentArea.querySelector('.card.just-moved')) lzAll(); const first = contentArea.querySelector('.card.just-moved'); if(first) first.scrollIntoView({block:'center'}); }, 80);
     setTimeout(()=>{ _flash = null; contentArea.querySelectorAll('.card.just-moved').forEach(c=>c.classList.remove('just-moved')); }, 2500);
   });
 }
@@ -7938,6 +7941,8 @@ function render(){
   const y = window.scrollY, view = String(currentFolder) + '|' + (searchOpen ? 1 : 0);
   _renderView();
   const now = String(currentFolder) + '|' + (searchOpen ? 1 : 0);
+  /* v303 (K9): isti ekran — nacrtaj bar do mesta gde je bio ekran, da bi se vratio na isto mesto */
+  if(view === _rView && now === view){ const need = y + window.innerHeight * 2; for(let k = 0; k < 200 && _lz && !_lz.done && document.documentElement.scrollHeight < need; k++) lzRun(LZ_STEP); }
   /* v299 (K5): isti ekran posle osvežavanja — ponovo otvori „Izbriši“ na istom albumu (ako ga još ima i nije izbor) */
   if(_swKeep && view === now && !selectionMode){
     const tl = Array.from(document.querySelectorAll('.folder-tile-row')).find(x=>x._swCat === _swKeep && x._swReopen);
@@ -7948,6 +7953,7 @@ function render(){
   _rView = now;
 }
 function _renderView(){
+  lzStop();   /* v303 (K9) */
   _swKeep = (_swOpen && _swOpen.tile._swBase === -SW_W) ? _swOpen.tile._swCat : null;   /* v299 (K5) */
   if(_swOpen){ _swOpen.del.remove(); _swOpen = null; }   /* v122 */
   if(realAlbum(currentFolder) && !catById(currentFolder)) currentFolder = null;
@@ -8081,7 +8087,7 @@ function _renderView(){
       currentGalleryItems = sorted.slice();   /* 68d: sve vrste, isti redosled kao u mreži */
       const grid = document.createElement('div');
       grid.className = 'grid photos-grid';
-      sorted.forEach((item,i)=>grid.appendChild(buildCard(item, i+1)));
+      lzStart(grid, (function*(){ for(let i = 0; i < sorted.length; i++){ grid.appendChild(buildCard(sorted[i], i+1)); yield; } })());   /* v303 (K9) */
       contentArea.appendChild(grid);
     }else if(sortMode === 'added'){   /* v292: po danu dodavanja, poslednje dodato prvo */
       currentGalleryItems = filtered.slice().sort((a,b)=>addedTs(b)-addedTs(a));
@@ -8560,38 +8566,67 @@ function buildCard(item, indexNumber){
   return card;
 }
 
+/* v303 (K9): veliki spisak (album, pretraga) crta se u delovima — prvih LZ_FIRST kartica odmah, ostalo kad se lista približi kraju
+   (IntersectionObserver). Ranije se crtalo sve odjednom: 5.000 stavki, pretraga jednog slova ~12 s na sporijem telefonu.
+   Ko traži karticu koje još nema (otkrij stavku, istakni premeštene, dug pritisak) zove lzAll(). currentGalleryItems je uvek ceo spisak. */
+const LZ_FIRST = 120, LZ_STEP = 120;
+let _lz = null;
+function lzStop(){ if(_lz && _lz.io) _lz.io.disconnect(); if(_lz && _lz.sent) _lz.sent.remove(); _lz = null; }
+function lzStart(wrap, gen){
+  lzStop();
+  const sent = document.createElement('div'); sent.className = 'lz-sent'; sent.setAttribute('aria-hidden', 'true');
+  _lz = {gen, wrap, sent, io:null, done:false};
+  lzRun(LZ_FIRST);
+  if(!_lz.done && 'IntersectionObserver' in window){
+    const me = _lz;
+    me.io = new IntersectionObserver(es=>{ if(_lz === me && es.some(e=>e.isIntersecting)) lzRun(LZ_STEP); }, {rootMargin:'1500px 0px'});
+    me.io.observe(sent);
+  }else if(!_lz.done) lzAll();
+}
+function lzRun(n){
+  const z = _lz; if(!z || z.done) return;
+  for(let i = 0; i < n; i++){ if(z.gen.next().done){ z.done = true; break; } }
+  if(z.done){ if(z.io) z.io.disconnect(); z.sent.remove(); }
+  else z.wrap.appendChild(z.sent);   /* oznaka uvek na kraju spiska */
+}
+function lzAll(){ while(_lz && !_lz.done) lzRun(1000); }
 function buildDatedPhotoSections(list, oldFirst, byAdded){
-  const frag = document.createDocumentFragment();
+  const wrap = document.createElement('div'); wrap.className = 'lz-wrap';
   const tsOf = byAdded ? addedTs : (it=>it.ts);   /* v292: byAdded = dani dodavanja („Dodato danas“) */
   const sorted = list.slice().sort(oldFirst ? (a,b)=>tsOf(a)-tsOf(b) : (a,b)=>tsOf(b)-tsOf(a));   /* v119: najstarije prvo */
-  let lastKey = null;
-  let currentGrid = null;
-  let idx = 0;
   const daySel = selectionMode && !mergeMode && !actMode;   /* v269: „Ceo dan“ kad i „Izaberi sve“ */
   const pool = daySel ? new Set(selPool().map(i=>i.id)) : null;
   const dayKey = it=>{ const d = new Date(tsOf(it)); return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); };
-  sorted.forEach(item=>{
-    const key = dayKey(item);
-    if(key !== lastKey){
-      lastKey = key;
-      const label = document.createElement('p');
-      label.className = 'date-label';
-      label.textContent = byAdded ? formatAddedLabel(tsOf(item)) : formatDateLabel(item.ts);
-      const mt = byAdded ? '' : mestaDana(sorted.filter(i=>dayKey(i) === key));   /* v287: mesta tog dana (v292: ne za dane dodavanja) */
-      if(mt){ const sp = document.createElement('span'); sp.className = 'date-place'; sp.textContent = mt; label.appendChild(sp); }
-      if(daySel){
-        const ids = sorted.filter(i=>dayKey(i) === key && pool.has(i.id)).map(i=>i.id);
-        if(ids.length) label.appendChild(buildDaySel(ids));
+  /* v303 (K9): stavke po danu jednim prolazom (ranije za svaki dan ceo spisak iznova — 1.500 dana × 5.000 stavki) */
+  const keys = sorted.map(dayKey), byDay = new Map();
+  sorted.forEach((it, i)=>{ const k = keys[i]; if(!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(it); });
+  function* gen(){
+    let lastKey = null, currentGrid = null, idx = 0;
+    for(let i = 0; i < sorted.length; i++){
+      const item = sorted[i], key = keys[i];
+      if(key !== lastKey){
+        lastKey = key;
+        const label = document.createElement('p');
+        label.className = 'date-label';
+        label.textContent = byAdded ? formatAddedLabel(tsOf(item)) : formatDateLabel(item.ts);
+        const mt = byAdded ? '' : mestaDana(byDay.get(key));   /* v287: mesta tog dana (v292: ne za dane dodavanja) */
+        if(mt){ const sp = document.createElement('span'); sp.className = 'date-place'; sp.textContent = mt; label.appendChild(sp); }
+        if(daySel){
+          const ids = byDay.get(key).filter(x=>pool.has(x.id)).map(x=>x.id);
+          if(ids.length) label.appendChild(buildDaySel(ids));
+        }
+        wrap.appendChild(label);
+        currentGrid = document.createElement('div');
+        currentGrid.className = 'grid photos-grid';
+        wrap.appendChild(currentGrid);
       }
-      frag.appendChild(label);
-      currentGrid = document.createElement('div');
-      currentGrid.className = 'grid photos-grid';
-      frag.appendChild(currentGrid);
+      idx++;
+      currentGrid.appendChild(buildCard(item, idx));
+      yield;
     }
-    idx++;
-    currentGrid.appendChild(buildCard(item, idx));
-  });
-  return frag;
+  }
+  lzStart(wrap, gen());
+  return wrap;
 }
 
 /* v269 (Zoran 3.11.): u izboru, desno od datuma „Ceo dan“ — dodir izabere sve stavke tog dana, drugi dodir (kad je ceo dan izabran) poništi;
@@ -11107,7 +11142,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 302;
+const APP_VERSION = 303;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
