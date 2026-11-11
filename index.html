@@ -8514,8 +8514,10 @@ function buildCard(item, indexNumber){
   card.addEventListener('contextmenu', (e)=>{
     e.preventDefault();
     if(mergeMode){ card.onclick(e); return; }
+    const top0 = card.getBoundingClientRect().top;   /* v299 (K13) */
     if(!selectionMode){ enterSelectionMode(); }
     toggleSelect(item.id);
+    keepCardInView(item.id, top0);
   });
 
   card.onclick = (e)=>{
@@ -8605,6 +8607,18 @@ function buildDaySel(ids){
     render();
   };
   return b;
+}
+/* v299 (K13): ulazak u izbor menja visinu sadržaja iznad (i pojavi se donja traka) — označena kartica ostaje gde je bila na ekranu,
+   a ako je pokriva donja traka, ekran se pomeri taman toliko da se vidi cela. */
+function keepCardInView(id, top0){
+  const c = Array.from(document.querySelectorAll('.card')).find(x=>x.dataset.id === id);
+  if(!c) return;
+  let r = c.getBoundingClientRect();
+  if(Math.abs(r.top - top0) > 1) window.scrollBy(0, r.top - top0);
+  r = c.getBoundingClientRect();
+  const bar = selBar.classList.contains('show') ? selBar.getBoundingClientRect().height : 0;
+  const lim = window.innerHeight - bar - 8;
+  if(r.bottom > lim) window.scrollBy(0, Math.min(r.bottom - lim, r.top - 8));
 }
 function enterSelectionMode(){
   selectionMode = true;
