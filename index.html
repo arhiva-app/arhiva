@@ -2819,8 +2819,10 @@ window.pdfLibP = import(PDFJS_DIR + 'pdf.min.mjs').then(function(L){
 });
 window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.js nije učitan', e); });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- v304 (K10): Word i Excel biblioteke su u Arhivi (lib/), ne sa tuđeg servera: ne zadržavaju otvaranje (defer), rade bez interneta (keš),
+     mammoth 1.13.0 (CVE-2025-11849 ispravljen u 1.11.0). xlsx 0.18.5 je poslednja na npm-u; novija (CVE-2023-30533, CVE-2024-22363) samo sa cdn.sheetjs.com -->
+<script src="lib/mammoth-1.13.0/mammoth.browser.min.js" defer></script>
+<script src="lib/xlsx-0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
 <!-- v270 (Zoran 3.11.): pokrivač pri pokretanju — isti kao Androidova slika pokretanja (tamno, zlatni romb), dok Arhiva ne nacrta prvi ekran -->
@@ -3394,6 +3396,8 @@ let selectionMode = false;
 let mergeMode = false;   /* v105: izbor za Spoji (samo slike, broj redosleda, lupa) */
 let actMode = null;      /* v106: donji red bez izbora: 'send' | 'move' | 'rename' | 'delete' | 'more' — izbor sa naslovom i jednim dugmetom */
 let currentGalleryItems = [];
+/* v304 (K10): Word/Excel biblioteke se učitavaju „defer“ — gotove su kad stigne DOMContentLoaded */
+function libsReady(){ return document.readyState === 'loading' ? new Promise(r=>document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve(); }
 let currentGalleryIndex = -1;
 let albumViewMode = 'grid';
 let searchOpen = false;
@@ -3679,11 +3683,11 @@ async function extractContentForItem(item){
       const bytes = new Uint8Array(await (await getFileBlob(item)).arrayBuffer());
       const pdf = await pdfOpen(bytes).promise;
       return (await pdfSearchText(pdf)).text;
-    }else if(ext === 'docx' && typeof mammoth !== 'undefined'){
+    }else if(ext === 'docx' && (await libsReady(), typeof mammoth !== 'undefined')){
       const buf = await (await getFileBlob(item)).arrayBuffer();
       const result = await mammoth.extractRawText({arrayBuffer: buf});
       return result.value.slice(0, 20000);
-    }else if((ext === 'xlsx' || ext === 'xls') && typeof XLSX !== 'undefined'){
+    }else if((ext === 'xlsx' || ext === 'xls') && (await libsReady(), typeof XLSX !== 'undefined')){
       const bytes = new Uint8Array(await (await getFileBlob(item)).arrayBuffer());
       const wb = XLSX.read(bytes, {type:'array'});
       let text = '';
@@ -9091,6 +9095,7 @@ async function docRender(it){
   modalDoc.style.setProperty('--dr-k', drScale());
   try{
     const buf = await (await getFileBlob(it, 0)).arrayBuffer();
+    await libsReady();   /* v304 (K10) */
     if(req !== _drReq) return;
     if(ext === 'docx'){
       if(typeof mammoth === 'undefined') throw new Error('mammoth nije učitan');
@@ -11142,7 +11147,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 303;
+const APP_VERSION = 304;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -15805,6 +15810,7 @@ async function wsTplBlocks(src){
     /* v135: za AI se pamti na kojoj stranici je koji pasus (AI uz tekst dobija i sliku te stranice, samo da vidi natpise) */
     _tplPdfCtx = {id:src.id, pdf:m.pdf, paras:m.paras.map(pa=>{ const c = pa.ch.find(Boolean); return {text:pa.text, p:c ? m.lines[c.li].p : 0}; }), img:new Map()};
   }else if(ext === 'docx'){
+    await libsReady();   /* v304 (K10) */
     if(typeof mammoth === 'undefined') throw aiError('aiErrFile');
     const r = await mammoth.convertToHtml({arrayBuffer:await blob.arrayBuffer()});
     const d = new DOMParser().parseFromString('<body>' + r.value + '</body>', 'text/html');
@@ -15830,6 +15836,7 @@ async function wsTplBlocks(src){
       }else{ const x = tx(n.textContent); if(x) out.push({type:'paragraph', text:x}); }
     });
   }else{
+    await libsReady();   /* v304 (K10) */
     if(typeof XLSX === 'undefined') throw aiError('aiErrFile');
     const wb = XLSX.read(new Uint8Array(await blob.arrayBuffer()), {type:'array'});
     wb.SheetNames.forEach(nm=>{
@@ -18427,6 +18434,7 @@ async function xeOpen(src){
   _xeBusy = true;
   try{
     const bytes = new Uint8Array(await (await getFileBlob(src)).arrayBuffer());
+    await libsReady();   /* v304 (K10) */
     let wb;
     try{ wb = XLSX.read(bytes, {type:'array', cellFormula:true, cellNF:true, cellText:true}); }
     catch(e){ console.error(e); toast(t(/password|encrypt/i.test(String(e && e.message)) ? 'weLocked' : 'xeOpenErr')); return; }
