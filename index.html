@@ -5359,6 +5359,7 @@ Object.assign(I18N.sr, {
   deepPrep: 'Priprema detaljne pretrage: {n} / {total}...', albRenamed: 'Album preimenovan.', addErr: 'Greška pri dodavanju.',
   copiedTo: 'Kopirano u „{name}“.', bkSaved: 'Rezervna kopija sačuvana.', bkDirFallback: 'Fascikla nije dostupna — kopija sačuvana preuzimanjem.',
   inTrashImg: 'Ova slika je u korpi (Podešavanja → korpa).', bkDirOffWeb: 'Rezervna kopija ide ponovo preko preuzimanja.', restoredAlbum: 'Vraćeni album', itemDefault: 'Stavka',
+  addedPart: 'Sačuvano {a} od {b}. Ostali nisu sačuvani.', rcvPart: 'Sačuvano {a} od {b}. Ostali nisu sačuvani — Arhiva će ih pokušati ponovo.',
   trTile: 'Korpa', langTile: 'Jezik · language', langHint: 'Promena se vidi odmah. Pri prvom pokretanju Arhiva sama izabere jezik telefona.',
   setTitle: 'Podešavanja', backAria: 'Nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
   themeTile: 'Tema', themeHint: 'Promena se vidi odmah. Izbor se pamti i čuva u rezervnoj kopiji.',
@@ -5387,6 +5388,7 @@ Object.assign(I18N.en, {
   deepPrep: 'Preparing detailed search: {n} / {total}...', albRenamed: 'Album renamed.', addErr: 'Error while adding.',
   copiedTo: 'Copied to “{name}”.', bkSaved: 'Backup saved.', bkDirFallback: 'Folder not available — backup saved as a download.',
   inTrashImg: 'This image is in the trash (Settings → trash).', bkDirOffWeb: 'The backup is saved as a download again.', restoredAlbum: 'Restored album', itemDefault: 'Item',
+  addedPart: 'Saved {a} of {b}. The rest were not saved.', rcvPart: 'Saved {a} of {b}. The rest were not saved — Arhiva will try them again.',
   trTile: 'Trash', langTile: 'Language', langHint: 'The change is visible right away. On first start Arhiva picks the language of your phone.',
   setTitle: 'Settings', backAria: 'Back', cfOkDef: 'OK', cfCancel: 'Cancel',
   themeTile: 'Theme', themeHint: 'The change is visible right away. Your choice is remembered and saved in the backup.',
@@ -9938,15 +9940,19 @@ newFolderSheet.onclick = (e)=>{ if(e.target === newFolderSheet){ requestClose();
 
 function toastPersist(msg, prog){ showNote(msg, 0, {sticky:true, prog:prog || null}); }   /* v255: prog = {n, total} → traka se puni; bez toga klizi */
 function toastHide(){ if(_note && _note.sticky) hideNote(); }
-async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = sopstvena poruka na kraju (Podeli → Arhiva) */
-  if(files.length === 0) return;
+/* v301 (K15): vraća rezultat za svaki fajl (isti redosled): stavka = sačuvano, null = preskočen duplikat, undefined = NIJE sačuvano.
+   o.retry: poruka kaže da nesačuvani čekaju sledeći pokušaj (Podeli → Arhiva, praćene fascikle). */
+async function addFilesWithProgress(files, category, msg, o){   /* v252: msg(n) = sopstvena poruka na kraju (Podeli → Arhiva) */
+  if(files.length === 0) return [];
   if(files.length === 1){   /* v250: i za jedan fajl (Zoran 31.10.); v255: dok traje — „Dodajem: ime“ sa trakom */
     toastPersist(t('addingOne', {name:files[0].name}));
     const ok = await addFile(files[0], category);
     toastHide();
     if(ok) toast(msg ? msg(1) : t('added1'));
-    return;
+    else if(ok === undefined && o && o.retry) showNote(t('rcvPart', {a:0, b:1}), 7000);
+    return [ok];
   }
+  const results = new Array(files.length);
   const total = files.length;
   let completed = 0;
   _diag = { worker: 0, fallback: 0, errors: [] };
@@ -9957,7 +9963,7 @@ async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = s
   const lane = async ()=>{
     while(nextIndex < files.length){
       const idx = nextIndex++;
-      await addFile(files[idx], category);
+      results[idx] = await addFile(files[idx], category);
       completed++;
       toastPersist(t('procN', {a:completed, b:total}), {n:completed, total});
     }
@@ -9967,8 +9973,11 @@ async function addFilesWithProgress(files, category, msg){   /* v252: msg(n) = s
   await Promise.all(lanes);
   const secs = ((performance.now() - t0) / 1000).toFixed(1);
   toastHide();
-  toast(msg ? msg(total) : (total===1 ? t('added1') : t('addedN', {n:total})));
+  const saved = results.filter(Boolean).length, failed = results.filter(r=>r === undefined).length;
+  if(failed) showNote(t(o && o.retry ? 'rcvPart' : 'addedPart', {a:saved, b:total}), 7000);
+  else if(saved) toast(msg ? msg(saved) : (saved===1 ? t('added1') : t('addedN', {n:saved})));
   console.log('Arhiva: obrada '+total+' fajlova za '+secs+'s (brzo:'+_diag.worker+' sporo:'+_diag.fallback+')', _diag.errors);
+  return results;
 }
 
 fileInput.addEventListener('change', async (e)=>{
@@ -10381,7 +10390,7 @@ async function addFile(file, category, o){
         text:t('dupText', {name:dup.name}),
         okIcon:'➕', okLabel:t('dupOk'), danger:false
       });
-      if(!again) return;
+      if(!again) return null;   /* v301 (K15): null = korisnik preskočio duplikat (rešeno); undefined = nije sačuvano (greška) */
     }
     requestPersistOnce();
     const ext = (file.name.match(/\.([^.]+)$/) || [,''])[1].toUpperCase();
@@ -10433,6 +10442,7 @@ async function addFile(file, category, o){
     console.error(e);
     if(e && (e.name === 'QuotaExceededError' || (e.target && e.target.error && e.target.error.name === 'QuotaExceededError'))){ toast(t('noSpace')); }
     else{ toast(t('addErr')); }
+    return undefined;
   }
 }
 searchEl.addEventListener('input', ()=>{ if(_ask && !_ask.busy && searchEl.value !== _ask.q) _ask = null; render(); });
@@ -10697,12 +10707,14 @@ function getBackupIntervalDays(){
   const v = parseInt(localStorage.getItem(LS_PREFIX+'backupIntervalDays'));
   return (v && v > 0) ? v : 7;
 }
-function setBackupIntervalDays(days){ localStorage.setItem(LS_PREFIX+'backupIntervalDays', String(days)); }
+function setBackupIntervalDays(days){ lsSet(LS_PREFIX+'backupIntervalDays', String(days)); }
 function getLastBackupDate(){
   const v = localStorage.getItem(LS_PREFIX+'lastBackup');
   return v ? new Date(v) : null;
 }
-function markBackupDone(){ localStorage.setItem(LS_PREFIX+'lastBackup', new Date().toISOString()); checkBackupReminder(); }
+/* v301 (K14): upis u localStorage koji ne sme da obori radnju (pun localStorage — ceo domen deli ~5 MB) */
+function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ console.error(e); try{ logError('localStorage', ((e && e.name) || '') + ' ' + k); }catch(_){} return false; } }
+function markBackupDone(){ lsSet(LS_PREFIX+'lastBackup', new Date().toISOString()); checkBackupReminder(); }
 function daysSinceBackup(date){ return Math.floor((Date.now() - date.getTime()) / 86400000); }
 function lastBackupShort(){
   const last = getLastBackupDate();
@@ -10717,7 +10729,7 @@ function bkSinceTouch(){
   try{
     if(!items.length){ localStorage.removeItem(K); return 0; }
     let v = parseInt(localStorage.getItem(K)) || 0;
-    if(!v && !getLastBackupDate()){ v = Date.now(); localStorage.setItem(K, String(v)); }
+    if(!v && !getLastBackupDate()){ v = Date.now(); lsSet(K, String(v)); }
     return v;
   }catch(e){ return 0; }
 }
@@ -10846,7 +10858,7 @@ function renderTrashList(){
     const c = document.createElement('div');
     c.innerHTML = '<div class="settings-card"><div class="settings-field"><label for="trashDaysInput"></label><input type="number" inputmode="numeric" min="1" id="trashDaysInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div></div><div class="settings-hint"></div>';
     c.querySelector('label').textContent = t('trDaysLbl');
-    const inp = c.querySelector('input'); inp.value = getTrashDays(); inp.oninput = ()=>{ const n = parseInt(inp.value); if(n && n > 0) localStorage.setItem(LS_PREFIX+'trashDays', String(n)); };
+    const inp = c.querySelector('input'); inp.value = getTrashDays(); inp.oninput = ()=>{ const n = parseInt(inp.value); if(n && n > 0) lsSet(LS_PREFIX+'trashDays', String(n)); };
     inp.onchange = ()=>renderTrashList();
     c.querySelector('.settings-hint').textContent = t('trDaysHint');
     list.appendChild(c);
@@ -11095,7 +11107,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 300;
+const APP_VERSION = 301;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21150,25 +21162,33 @@ function rcvFile(blob, name, mime, mod){   /* v284: mod = vreme fajla (praćena 
   const ext = ((name || '').match(/\.([^.]+)$/) || [,''])[1].toLowerCase();
   return new File([blob], name || 'Dokument', Object.assign({type: mime || blob.type || EXT_MIME[ext] || ''}, mod > 0 ? {lastModified: mod} : {}));
 }
+/* v301 (K15): done(rezultati) — izvor se briše SAMO za sačuvane (ili preskočene duplikate); nesačuvani ostaju za sledeće pokretanje */
 async function rcvSave(files, done){
-  if(!files.length){ await done(); return; }
+  if(!files.length){ await done([]); return; }
   await scWaitOpen();
   await new Promise(res=>navToAlbum(INBOX, res));
-  await addFilesWithProgress(files, null, n=>n === 1 ? t('rcvOne', {name:files[0].name}) : t('rcvN', {n}));
-  await done();
+  const res = await addFilesWithProgress(files, null, n=>n === 1 ? t('rcvOne', {name:files[0].name}) : t('rcvN', {n}), {retry:true});
+  await done(res);
 }
+/* Android Primanje briše samo sve odjednom: posle delimičnog čuvanja pamti se šta je već sačuvano, pa se pri ponovnom pokušaju preskače bez pitanja */
+const RCV_PART_KEY = 'galerija:rcvSacuvano';
+function rcvPartGet(){ try{ return new Set(JSON.parse(localStorage.getItem(RCV_PART_KEY) || '[]')); }catch(e){ return new Set(); } }
+function rcvPartSet(set){ try{ if(set && set.size) localStorage.setItem(RCV_PART_KEY, JSON.stringify(Array.from(set))); else localStorage.removeItem(RCV_PART_KEY); }catch(e){ console.error(e); } }
 async function rcvFromChrome(){
   if(!('caches' in window) || !(await caches.has(RCV_CACHE))) return;
   const c = await caches.open(RCV_CACHE);
-  const files = [];
+  const files = [], reqs = [];
   for(const req of await c.keys()){
     const r = await c.match(req);
     if(!r) continue;
     let name = '';
     try{ name = decodeURIComponent(r.headers.get('X-Ime') || ''); }catch(e){}
-    files.push(rcvFile(await r.blob(), name, r.headers.get('Content-Type')));
+    files.push(rcvFile(await r.blob(), name, r.headers.get('Content-Type'))); reqs.push(req);
   }
-  await rcvSave(files, ()=>caches.delete(RCV_CACHE));
+  await rcvSave(files, async res=>{
+    if(res.every(r=>r !== undefined)){ await caches.delete(RCV_CACHE); return; }
+    for(let i = 0; i < reqs.length; i++) if(res[i] !== undefined) await c.delete(reqs[i]);   /* v301 (K15): nesačuvani ostaju */
+  });
 }
 function b64Bytes(s){ const b = atob(s), u = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 /* kopija fajla u kešu Android aplikacije → Blob, deo po deo (Primanje i Fascikle imaju isto deo({putanja, od})) */
@@ -21190,12 +21210,20 @@ async function rcvFromAndroid(){
   const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
   let bad = r.greske || 0;
   if(!list.length && !bad) return;
-  const files = [];
+  const files = [], part = rcvPartGet();
+  let readBad = 0;   /* v301: greske iz APK-a (nije mogao ni da kopira) se ne ponavljaju; čitanje već kopiranog fajla — ponavlja se */
   for(const f of list){
-    try{ files.push(rcvFile(await nativeCopyBlob(n, f), f.ime, f.mime)); }
-    catch(e){ console.error('prijem deo', e); bad++; }
+    try{
+      const file = rcvFile(await nativeCopyBlob(n, f), f.ime, f.mime);
+      if(!part.has(file.name + '|' + file.size)) files.push(file);   /* v301: već sačuvan u prethodnom (delimičnom) pokušaju */
+    }catch(e){ console.error('prijem deo', e); bad++; readBad++; }
   }
-  await rcvSave(files, ()=>Promise.resolve(n.obrisi()).catch(()=>{}));
+  await rcvSave(files, async res=>{
+    if(!readBad && res.every(r=>r !== undefined)){ rcvPartSet(null); await Promise.resolve(n.obrisi()).catch(()=>{}); return; }
+    /* v301 (K15): nešto nije sačuvano — ništa se ne briše; sačuvani se pamte da se sledeći put ne bi pitalo za duplikat */
+    files.forEach((f, i)=>{ if(res[i] !== undefined) part.add(f.name + '|' + f.size); });
+    rcvPartSet(part);
+  });
   if(bad) showNote(t('rcvErr', {n:bad}), 6000);
 }
 function rcvBoot(){
@@ -21271,7 +21299,7 @@ async function gpsDozvola(){
   try{
     if(localStorage.getItem('arhiva:gpsDozvola') || !gpsOn()) return;
     toast(t('gpsWhy'));
-    const r = await n.lokacija(); localStorage.setItem('arhiva:gpsDozvola', (r && r.stanje) || '?');
+    const r = await n.lokacija(); lsSet('arhiva:gpsDozvola', (r && r.stanje) || '?');
   }catch(e){}
 }
 function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
@@ -21312,20 +21340,25 @@ async function fzCheck(){
     }
     const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
     let bad = r.greske || 0;
-    const files = [], got = [];
+    const files = [], got = [], pend = [];
     for(const x of list){
       try{
         const file = rcvFile(await nativeCopyBlob(n, x), x.ime, x.mime, x.vreme);
-        got.push(x);
-        if(!items.some(i=>i.sourceSig === file.name + '|' + file.size)) files.push(file);   /* već ručno dodat → bez pitanja, preskače se */
+        if(!items.some(i=>i.sourceSig === file.name + '|' + file.size)) { files.push(file); pend.push(x); }
+        else got.push(x);   /* već ručno dodat → bez pitanja, preskače se */
       }catch(e){ console.error('fascikle deo', e); bad++; }
     }
     try{ await n.obrisi(); }catch(e){}
     const alb = f.kind === 'shots' ? null : (f.album && catById(f.album) ? f.album : null);
-    if(files.length) await addFilesWithProgress(files, alb, k=>f.kind === 'shots' ? t('fzDone', {n:k}) : t('fzDoneF', {n:k, ime:f.ime || fzPath(f)}));
+    /* v301 (K15): „viđeno“ samo ono što je stvarno sačuvano — nesačuvani se uvoze pri sledećoj proveri */
+    const res = files.length ? await addFilesWithProgress(files, alb, k=>f.kind === 'shots' ? t('fzDone', {n:k}) : t('fzDoneF', {n:k, ime:f.ime || fzPath(f)}), {retry:true}) : [];
+    const failT = [];
+    pend.forEach((x, i)=>{ if(res[i] !== undefined) got.push(x); else failT.push(x.vreme || 0); });
     if(got.length) fzUpdate(f.uri, x=>{
       if(mine){ x.vid = (x.vid || []).concat(got.map(g=>g.id)); return; }
-      x.od = Math.max(x.od || 0, ...got.map(g=>g.vreme || 0)); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200);
+      let od = Math.max(...got.map(g=>g.vreme || 0));
+      if(failT.length) od = Math.min(od, Math.min(...failT));   /* snimci: vreme ne sme da preskoči nesačuvan snimak */
+      x.od = Math.max(x.od || 0, od); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200);
     });
     if(bad) showNote(t('rcvErr', {n:bad}), 6000);
     if(r.jos) again = true;
