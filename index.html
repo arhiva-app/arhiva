@@ -2453,6 +2453,9 @@ body.in-album .searchbar{ margin-top:12px; }
 @keyframes dfBarIn{ from{ opacity:0; transform:translateY(-10px); } }
 .modal-bg.df-kb #modalPath, .modal-bg.df-kb #modalBar{ transform:translateY(-140px); opacity:0; pointer-events:none; }
 .modal-bg.df-kb .modal-info, .modal-bg.df-kb .modal-nav{ opacity:0 !important; pointer-events:none !important; }
+/* v313 (Zoran: i dalje kratak blesak): naziv sa senkom je vezan za dno ekrana — kad tastatura skrati ekran, skočio bi na sredinu stranice
+   i tek onda se utopio. Zato se sklanja čim se dodirne polje (pre tastature), a vraća kad tastatura ode do kraja. */
+.modal-bg.df-typing .modal-info, .modal-bg.df-typing .modal-nav{ opacity:0 !important; pointer-events:none !important; transition:opacity .09s ease !important; }
 #dfProbe{ position:fixed; top:calc(env(safe-area-inset-top, 0px) + 8px); left:0; width:0; height:0; visibility:hidden; pointer-events:none; }
 /* v308: tastatura otvorena — samo traka pretrage i dokument */
 .modal-bg.df-kb #dfBar{ top:calc(env(safe-area-inset-top, 0px) + 8px) !important; }
@@ -9273,7 +9276,7 @@ function dfHide(){
   _df.hits = []; _df.cur = -1; _df.sheets = null;
   dfOvDraw();   /* v309: skini sloj sa pogocima */
   dfBar.hidden = true;
-  modalBg.classList.remove('df-open', 'df-kb'); clearTimeout(_df.kbT);
+  modalBg.classList.remove('df-open', 'df-kb', 'df-typing'); clearTimeout(_df.kbT);
   try{ dfIn.blur(); }catch(e){}
   dfUnmark();
   modalFrame.style.top = modalFrame.style.bottom = modalFrame.style.height = '';
@@ -9594,8 +9597,8 @@ function dfPdfReveal(anim){
 /* v311: tastatura se otvara postepeno (više promena veličine) — proverava se tek kad se smiri */
 if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
 window.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
-dfIn.addEventListener('focus', ()=>{ setTimeout(dfKbCheck, 300); setTimeout(dfKbCheck, 800); });   /* ako telefon ne javi promenu veličine */
-dfIn.addEventListener('blur', ()=>{ dfKbSoon(); setTimeout(dfKbCheck, 400); });
+dfIn.addEventListener('focus', ()=>{ if(_df.on) modalBg.classList.add('df-typing'); setTimeout(dfKbCheck, 300); setTimeout(dfKbCheck, 800); });   /* ako telefon ne javi promenu veličine */
+dfIn.addEventListener('blur', ()=>{ dfKbSoon(); setTimeout(dfKbCheck, 400); setTimeout(()=>{ if(document.activeElement !== dfIn) modalBg.classList.remove('df-typing'); }, 900); });
 /* ---------- traka: položaj ---------- */
 /* traka: ispod dugmadi (tastatura otvorena: skroz gore, CSS); vraća gde počinje sadržaj ispod nje */
 function dfPlace(top){
@@ -9619,6 +9622,7 @@ function dfKbCheck(){
   if(_df.baseW !== window.innerWidth){ _df.baseW = window.innerWidth; _df.baseH = h; }   /* okretanje telefona */
   if(h > (_df.baseH || 0)) _df.baseH = h;
   dfPinFrame();
+  if(document.activeElement !== dfIn && h >= _df.baseH - 40) modalBg.classList.remove('df-typing');   /* v313: naziv se vraća tek kad tastatura ode do kraja */
   const on = document.activeElement === dfIn && h < _df.baseH - 120;
   if(on === modalBg.classList.contains('df-kb')){
     if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); }   /* tastatura se još pomera: raspored je prati */
@@ -11671,7 +11675,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 312;
+const APP_VERSION = 313;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
