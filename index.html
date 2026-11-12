@@ -2445,6 +2445,9 @@ body.in-album .searchbar{ margin-top:12px; }
 .modal-bg.can-find:not(.df-open) .modal-find{ display:inline-flex !important; }
 #dfBar{ position:fixed; left:16px; right:16px; z-index:5; margin:0; padding:5px 6px 5px 14px; gap:4px; }
 #dfBar[hidden]{ display:none; }
+/* v311: glatka promena (otvaranje pretrage, tastatura gore/dole) — kratko utišan prikaz umesto skakanja */
+.modal-bg.df-open .modal-inner, .modal-bg.df-open #modalPath, .modal-bg.df-open #modalBar, #dfBar{ transition:opacity .18s ease; }
+.modal-bg.df-swap .modal-inner, .modal-bg.df-swap #modalPath, .modal-bg.df-swap #modalBar, .modal-bg.df-swap #dfBar{ opacity:0; transition:opacity .1s ease; }
 /* v308: tastatura otvorena — samo traka pretrage i dokument */
 .modal-bg.df-kb #modalPath, .modal-bg.df-kb #modalBar, .modal-bg.df-kb .modal-info, .modal-bg.df-kb .modal-nav{ display:none !important; }
 .modal-bg.df-kb #dfBar{ top:calc(env(safe-area-inset-top, 0px) + 8px) !important; }
@@ -9251,6 +9254,7 @@ function dfOpen(){
   _df.kind = modalBg.classList.contains('is-pdfview') ? 'pdf' : 'doc';
   _df.baseH = dfVisH(); _df.baseW = window.innerWidth;
   modalBg.classList.remove('ui-hidden');
+  dfSwapStart();   /* v311: traka i raspored se pojave glatko, kad se tastatura smiri */
   modalBg.classList.add('df-open');
   dfBar.hidden = false;
   dfIn.value = _df.q;
@@ -9269,7 +9273,7 @@ function dfHide(){
   _df.hits = []; _df.cur = -1; _df.sheets = null;
   dfOvDraw();   /* v309: skini sloj sa pogocima */
   dfBar.hidden = true;
-  modalBg.classList.remove('df-open', 'df-kb');
+  modalBg.classList.remove('df-open', 'df-kb', 'df-swap'); clearTimeout(_df.kbT);
   try{ dfIn.blur(); }catch(e){}
   dfUnmark();
   modalFrame.style.top = modalFrame.style.bottom = '';
@@ -9545,7 +9549,8 @@ function dfPdfAfterShow(){
   const req = _modalReq;
   (modalImg.decode ? modalImg.decode() : Promise.resolve()).catch(()=>{}).then(()=>{ if(req === _modalReq) requestAnimationFrame(()=>{ dfOvDraw(); dfPdfReveal(); }); });
 }
-function dfPdfReveal(){
+function dfPdfReveal(anim){
+  if(anim === undefined) anim = true;
   if(!_df.on || _df.kind !== 'pdf') return;
   const kb = dfKbOn();
   if(!kb && _zm.s > 1) return;
@@ -9560,7 +9565,7 @@ function dfPdfReveal(){
     _zm.tx = -_zm.s * c.ox;
     if(m) _zm.ty = c.H / 3 - _zm.s * (c.oy + (m.f[1] + m.f[3]) / 2 * c.ch);
     else if(!was) _zm.ty = -_zm.s * c.oy;   /* v310 (Zoran): i bez pogotka (prazno polje) odmah cela širina, od vrha stranice */
-    zmClamp(); zmApply(true);
+    zmClamp(); zmApply(anim);
     setTimeout(zmSettled, 350);   /* oštrija stranica kad je uvećano */
     return;
   }
@@ -9577,12 +9582,13 @@ function dfPdfReveal(){
   if(y0 < top) dy = top - y0 + 24;
   else if(y1 > bot) dy = bot - y1 - 24;
   if(Math.round(dy) === Math.round(_zm.ty) && !_zm.tx) return;
-  _zm.tx = 0; _zm.ty = dy; zmApply(true);
+  _zm.tx = 0; _zm.ty = dy; zmApply(anim);
 }
-if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on){ dfKbCheck(); if(_df.kind === 'pdf' && !dfKbOn()){ dfOvDraw(); dfPdfReveal(); } } });
-window.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbCheck(); });
-dfIn.addEventListener('focus', ()=>{ setTimeout(dfKbCheck, 350); });
-dfIn.addEventListener('blur', ()=>{ setTimeout(dfKbCheck, 0); });
+/* v311: tastatura se otvara postepeno (više promena veličine) — proverava se tek kad se smiri */
+if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
+window.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
+dfIn.addEventListener('focus', ()=>{ if(_df.on && !dfKbOn()) dfSwapStart(); dfKbSoon(450); });   /* tastatura stiže: prikaz se utiša odmah */
+dfIn.addEventListener('blur', ()=>{ dfKbSoon(150); });
 /* ---------- traka: položaj ---------- */
 /* traka: ispod dugmadi (tastatura otvorena: skroz gore, CSS); vraća gde počinje sadržaj ispod nje */
 function dfPlace(top){
@@ -9601,12 +9607,27 @@ function dfKbCheck(){
   if(_df.baseW !== window.innerWidth){ _df.baseW = window.innerWidth; _df.baseH = h; }   /* okretanje telefona */
   if(h > (_df.baseH || 0)) _df.baseH = h;
   const on = document.activeElement === dfIn && h < _df.baseH - 120;
-  if(on === modalBg.classList.contains('df-kb')){ if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); } return; }
-  modalBg.classList.toggle('df-kb', on);
-  if(_df.kind === 'pdf') zmReset(false);
-  placeModalInfo();
-  requestAnimationFrame(()=>{ if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); });
+  if(on === modalBg.classList.contains('df-kb')){
+    if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); }
+    dfSwapEnd();   /* tastatura se nije pojavila (ili je već tu): samo vrati prikaz */
+    return;
+  }
+  /* v311 (Zoran: „blesne“): promena rasporeda ide dok je prikaz kratko utišan — bez skakanja stranice */
+  dfSwapStart();
+  const wait = Math.max(0, 110 - (Date.now() - _df.swapAt));
+  setTimeout(()=>{
+    if(!_df.on) return;
+    modalBg.classList.toggle('df-kb', on);
+    if(_df.kind === 'pdf') zmReset(false);
+    placeModalInfo();
+    if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(false); } else dfFocusCur();
+    requestAnimationFrame(()=>requestAnimationFrame(dfSwapEnd));
+  }, wait);
 }
+/* v311: kratko utišan prikaz (stranica, traka, gornji red) dok se raspored menja zbog tastature */
+function dfSwapStart(){ if(!modalBg.classList.contains('df-swap')){ _df.swapAt = Date.now(); modalBg.classList.add('df-swap'); } }
+function dfSwapEnd(){ modalBg.classList.remove('df-swap'); }
+function dfKbSoon(d){ clearTimeout(_df.kbT); _df.kbT = setTimeout(dfKbCheck, d || 120); }
 dfIn.placeholder = t('dfPh');
 dfIn.addEventListener('input', dfRun);
 dfIn.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); if(_df.hits.length) dfStep(1); } });
@@ -11634,7 +11655,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 310;
+const APP_VERSION = 311;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
