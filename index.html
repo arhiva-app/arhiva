@@ -2455,6 +2455,12 @@ body.in-album .searchbar{ margin-top:12px; }
   display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
 .df-btn:active{ color:var(--brass); background:var(--surface-2); }
 .df-btn:disabled{ opacity:.3; pointer-events:none; }
+/* v309: PDF pogoci = providan sloj preko stranice (pomera se i uvećava zajedno sa njom); stranica se ne crta ponovo */
+.df-ov{ position:absolute; inset:0; pointer-events:none; transform-origin:0 0; z-index:1; mix-blend-mode:multiply; }   /* boja ispod slova: tekst ostaje crn */
+.df-ov[hidden]{ display:none; }
+.df-ov.zm-anim{ transition:transform .22s ease; }
+.df-ov i{ position:absolute; background:#FFE27A; border-radius:2px; }
+.df-ov i.cur{ background:#FFA53D; }
 mark.df-m{ background:rgba(232,190,70,.45); color:inherit; border-radius:3px; padding:0; }
 mark.df-m.df-cur{ background:#E8A33D; color:#111; }
 .ce-screen{ display:none; position:fixed; inset:0; z-index:60; background:#000; flex-direction:column; color:#fff;
@@ -2979,7 +2985,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <div class="df-bar searchbar" id="dfBar" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg><input id="dfIn" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><span class="df-cnt" id="dfCnt"></span><button type="button" class="df-btn" id="dfPrev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button type="button" class="df-btn" id="dfNext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button><button type="button" class="df-btn" id="dfX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
   <div class="modal-inner">
     <div class="modal-frame modal-peek" id="modalPeek" hidden aria-hidden="true"><img alt=""></div>
-    <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><video id="modalVideo" controls playsinline preload="metadata" hidden></video><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
+    <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><div class="df-ov" id="dfOv" hidden aria-hidden="true"></div><video id="modalVideo" controls playsinline preload="metadata" hidden></video><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
     <div class="modal-info">
       <div class="modal-count-row"><div class="modal-position" id="modalPosition"></div><span class="modal-date" id="modalDate"></span><span class="modal-page-no" id="modalPageNo"></span></div>
       <div class="modal-cap-row"><button class="modal-ren modal-find" id="modalFind" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg></button><button class="modal-ren modal-crop" id="modalCrop" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg></button><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
@@ -8823,6 +8829,7 @@ function setModalSrc(u){ if(u) modalImg.src = u; else modalImg.removeAttribute('
 function showModalItem(item, page){
   if(_df && _df.on && _df.id !== item.id) dfClose();   /* v306: druga stavka zatvara pretragu u dokumentu */
   modalBg.classList.remove('can-find');
+  { const ov = document.getElementById('dfOv'); if(ov){ ov.hidden = true; ov.innerHTML = ''; } }   /* v309: pogoci stare stranice */
   modalItemId = item.id;
   setTimeout(peekPrep, 0);   /* v136: pripremi susede za traku */
   modalPathSet(item);
@@ -8951,7 +8958,7 @@ function pdfPageUrl(it, n){
 }
 /* maxSide 0 = običan prikaz (širina ekrana × gustina × 1,5, najviše 3000 px);
    maxSide > 0 = oštrija stranica za uvećanje (najviše maxSide px po dužoj strani, najviše 12 miliona tačaka) */
-function pdfRenderPage(it, n, maxSide, marks){   /* v306: marks = obojeni pogoci pretrage u dokumentu */
+function pdfRenderPage(it, n, maxSide){
   return (async ()=>{
     const doc = await pdfDocFor(it);
     const page = await doc.getPage(n + 1);
@@ -8969,16 +8976,6 @@ function pdfRenderPage(it, n, maxSide, marks){   /* v306: marks = obojeni pogoci
     cv.width = Math.max(1, Math.floor(vp.width)); cv.height = Math.max(1, Math.floor(vp.height));
     await page.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise;
     page.cleanup();
-    if(marks && marks.length){
-      const cx = cv.getContext('2d');
-      cx.save(); cx.globalCompositeOperation = 'multiply';   /* boja ispod slova: tekst ostaje čitljiv */
-      marks.forEach(m=>{
-        const a = vp.convertToViewportPoint(m.r[0], m.r[1]), b = vp.convertToViewportPoint(m.r[2], m.r[3]);
-        cx.fillStyle = m.cur ? 'rgba(255,140,0,.8)' : 'rgba(255,214,0,.6)';
-        cx.fillRect(Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
-      });
-      cx.restore();
-    }
     const blob = await new Promise((res, rej)=>cv.toBlob(b=>b ? res(b) : rej(new Error('crtanje nije uspelo')), 'image/jpeg', 0.92));
     cv.width = cv.height = 0;
     return URL.createObjectURL(blob);
@@ -9270,6 +9267,7 @@ function dfHide(){
   _df.on = false; _df.req++; clearTimeout(_df.tm);
   const wasPdf = _df.kind === 'pdf', it = dfItem();
   _df.hits = []; _df.cur = -1; _df.sheets = null;
+  dfOvDraw();   /* v309: skini sloj sa pogocima */
   dfBar.hidden = true;
   modalBg.classList.remove('df-open', 'df-kb');
   try{ dfIn.blur(); }catch(e){}
@@ -9278,7 +9276,7 @@ function dfHide(){
   const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = pk.style.bottom = ''; }
   if(modalBg.classList.contains('open')){
     placeModalInfo();
-    if(wasPdf && it && it.id === modalItemId && modalBg.classList.contains('is-pdfview')){ zmReset(false); dfPdfShow(it); }
+    if(wasPdf && it && it.id === modalItemId && modalBg.classList.contains('is-pdfview')) zmReset(false);
   }
 }
 /* zatvaranje iz koda (druga stavka): skida i korak nazad */
@@ -9494,14 +9492,14 @@ function dfPdfRun(it, req){
       _df.cur = hits.length ? (k >= 0 ? k : 0) : -1;
       dfPdfGo();
     }).catch(e=>{ console.error(e); if(req === _df.req) dfShowCount(''); });
-  }, 220);
+  }, 150);
 }
 function dfPdfGo(){
   dfNavState();
   const it = dfItem(); if(!it) return;
   const h = _df.hits[_df.cur];
-  zmReset(false);
   if(h && h.p !== modalPage){ showModalItem(it, h.p); return; }
+  if(!dfKbOn() && _zm.s > 1) zmReset(false);   /* v309: ista stranica — bez vraćanja na manju veličinu dok se kuca */
   dfPdfShow(it);
 }
 /* obojeni delovi stranice (u jedinicama PDF-a); cur = trenutni pogodak */
@@ -9522,38 +9520,30 @@ function dfPdfMarks(it, pg){
   });
   return out;
 }
-function dfPdfSig(it, pg){
-  const mk = dfPdfMarks(it, pg);
-  return mk.length ? '#df:' + _df.qf + ':' + (mk.some(m=>m.cur) ? _df.cur : -1) : '';
+/* v309 (Zoran: PDF kočio i smanjivao se pri kucanju): stranica se više ne crta ponovo za svaku reč — pogoci su sloj preko nje */
+function dfPdfUrl(it, pg){ return pdfPageUrl(it, pg); }
+function dfOvDraw(){
+  const ov = document.getElementById('dfOv'); if(!ov) return;
+  const it = dfItem();
+  const mk = (_df.on && _df.kind === 'pdf' && it && it.id === modalItemId && modalBg.classList.contains('is-pdfview')) ? dfPdfMarks(it, modalPage) : [];
+  const c = mk.length ? zmContent() : null;
+  if(!c){ ov.hidden = true; ov.innerHTML = ''; return; }
+  ov.innerHTML = mk.map(m=>'<i' + (m.cur ? ' class="cur"' : '') + ' style="left:' + (c.ox + m.f[0] * c.cw - 1).toFixed(1) + 'px;top:' + (c.oy + m.f[1] * c.ch).toFixed(1) +
+    'px;width:' + ((m.f[2] - m.f[0]) * c.cw + 2).toFixed(1) + 'px;height:' + ((m.f[3] - m.f[1]) * c.ch).toFixed(1) + 'px"></i>').join('');
+  ov.style.transform = modalImg.style.transform;
+  ov.hidden = false;
 }
-var _dfImg = new Map();   /* 'fajl#str#potpis' → Promise<adresa> */
-function dfPdfUrl(it, pg){
-  const mk = dfPdfMarks(it, pg);
-  if(!mk.length) return pdfPageUrl(it, pg);
-  const key = pdfFileId(it) + '#' + pg + dfPdfSig(it, pg);
-  if(_dfImg.has(key)) return _dfImg.get(key);
-  const pr = pdfRenderPage(it, pg, 0, mk);
-  pr.catch(()=>_dfImg.delete(key));
-  _dfImg.set(key, pr);
-  while(_dfImg.size > 3){
-    const k0 = _dfImg.keys().next().value, p0 = _dfImg.get(k0);
-    _dfImg.delete(k0);
-    p0.then(u=>{ if(modalImg.getAttribute('src') !== u) try{ URL.revokeObjectURL(u); }catch(e){} }).catch(()=>{});
-  }
-  return pr;
-}
-/* trenutna stranica ponovo, sa bojom (ili bez nje) */
+/* trenutna stranica: sloj sa pogocima + pogodak na vidno mesto */
 function dfPdfShow(it){
   if(!it || it.id !== modalItemId || !modalBg.classList.contains('is-pdfview')) return;
-  const pg = modalPage, req = _modalReq;
-  dfPdfUrl(it, pg).then(u=>{ if(req === _modalReq && modalPage === pg && it.id === modalItemId){ modalImg.src = u; dfPdfAfterShow(); } }).catch(e=>console.error(e));
+  dfOvDraw(); dfPdfReveal();
 }
 /* v307 (Zoran 12.11.): stranica se ne smanjuje; ako je trenutni pogodak ispod trake (ili ispod tastature), cela stranica
    se samo pomeri gore ili dole, iste veličine, dok pogodak ne dođe na vidno mesto */
 function dfPdfAfterShow(){
   if(!_df.on || _df.kind !== 'pdf') return;
   const req = _modalReq;
-  (modalImg.decode ? modalImg.decode() : Promise.resolve()).catch(()=>{}).then(()=>{ if(req === _modalReq) requestAnimationFrame(dfPdfReveal); });
+  (modalImg.decode ? modalImg.decode() : Promise.resolve()).catch(()=>{}).then(()=>{ if(req === _modalReq) requestAnimationFrame(()=>{ dfOvDraw(); dfPdfReveal(); }); });
 }
 function dfPdfReveal(){
   if(!_df.on || _df.kind !== 'pdf') return;
@@ -9586,7 +9576,7 @@ function dfPdfReveal(){
   if(Math.round(dy) === Math.round(_zm.ty) && !_zm.tx) return;
   _zm.tx = 0; _zm.ty = dy; zmApply(true);
 }
-if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on){ dfKbCheck(); if(_df.kind === 'pdf' && !dfKbOn()) dfPdfReveal(); } });
+if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on){ dfKbCheck(); if(_df.kind === 'pdf' && !dfKbOn()){ dfOvDraw(); dfPdfReveal(); } } });
 window.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbCheck(); });
 dfIn.addEventListener('focus', ()=>{ setTimeout(dfKbCheck, 350); });
 dfIn.addEventListener('blur', ()=>{ setTimeout(dfKbCheck, 0); });
@@ -9608,11 +9598,11 @@ function dfKbCheck(){
   if(_df.baseW !== window.innerWidth){ _df.baseW = window.innerWidth; _df.baseH = h; }   /* okretanje telefona */
   if(h > (_df.baseH || 0)) _df.baseH = h;
   const on = document.activeElement === dfIn && h < _df.baseH - 120;
-  if(on === modalBg.classList.contains('df-kb')){ if(on){ placeModalInfo(); if(_df.kind === 'pdf') dfPdfReveal(); else dfFocusCur(); } return; }
+  if(on === modalBg.classList.contains('df-kb')){ if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); } return; }
   modalBg.classList.toggle('df-kb', on);
   if(_df.kind === 'pdf') zmReset(false);
   placeModalInfo();
-  requestAnimationFrame(()=>{ if(_df.kind === 'pdf') dfPdfReveal(); else dfFocusCur(); });
+  requestAnimationFrame(()=>{ if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); });
 }
 dfIn.placeholder = t('dfPh');
 dfIn.addEventListener('input', dfRun);
@@ -9851,6 +9841,8 @@ function zmApply(anim){
   modalImg.classList.toggle('zm-anim', !!anim);
   modalBg.classList.toggle('zoomed', _zm.s > 1);
   modalImg.style.transform = (_zm.s === 1 && !_zm.tx && !_zm.ty) ? '' : 'translate(' + _zm.tx + 'px,' + _zm.ty + 'px) scale(' + _zm.s + ')';
+  const ov = document.getElementById('dfOv');   /* v309: obojeni pogoci PDF-a idu zajedno sa stranicom */
+  if(ov){ ov.style.transform = modalImg.style.transform; ov.classList.toggle('zm-anim', !!anim); }
 }
 function zmReset(anim){ _zm.s = 1; _zm.tx = 0; _zm.ty = 0; zmApply(anim); }
 /* slika je object-fit:contain u okviru: gde je stvarni sadržaj (bez praznih ivica) */
@@ -10006,10 +9998,10 @@ function zmSettled(){
   if(_zm.s <= 1.3 || !modalBg.classList.contains('is-pdfview')) return;
   const it = items.find(i=>i.id === modalItemId);
   if(!it || it.type !== 'pdf') return;
-  const pg = modalPage, key = pdfFileId(it) + '#' + pg + dfPdfSig(it, pg);   /* v306: uz obojene pogotke */
+  const pg = modalPage, key = pdfFileId(it) + '#' + pg;
   if(_zmHi && _zmHi.key === key){ if(modalImg.getAttribute('src') !== _zmHi.url) modalImg.src = _zmHi.url; return; }
   const req = _modalReq;
-  pdfRenderPage(it, pg, 4096, dfPdfMarks(it, pg)).then(u=>{
+  pdfRenderPage(it, pg, 4096).then(u=>{
     if(req !== _modalReq || modalPage !== pg){ URL.revokeObjectURL(u); return; }
     if(_zmHi) try{ URL.revokeObjectURL(_zmHi.url); }catch(e){}
     _zmHi = {key, url:u};
@@ -11639,7 +11631,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 308;
+const APP_VERSION = 309;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
