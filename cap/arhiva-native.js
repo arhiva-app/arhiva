@@ -13,7 +13,8 @@
    9) v203 Google Drive: dozvola drive.file (dodatak GoogleDrive u novom APK-u; slanje je u Arhivi, blok GOOGLE DRIVE)
    10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET)
    11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM)
-   12) v272 praćene fascikle (dodatak Fascikle; blok FASCIKLE u Arhivi) */
+   12) v272 praćene fascikle (dodatak Fascikle; blok FASCIKLE u Arhivi)
+   13) v315 skener dokumenata (dodatak Skener; skScan u Arhivi) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -82,6 +83,16 @@
       lokacija: function(){ return Fk.dozvolaLokacije(); },   /* v286: ACCESS_MEDIA_LOCATION (APK probna-66+) */
       mesto: function(o){ return Fk.mesto(o); },   /* v287: naziv mesta iz koordinata (Geocoder, APK probna-67+) */
       stanjeLokacije: function(){ return Fk.checkPermissions().then(function(r){ return (r && r.lokacija) || 'prompt'; }); }   /* v290: ugrađeno u Capacitor */
+    };
+  }
+
+  /* 13) v315 skener dokumenata (dodatak Skener u novom APK-u, Google ML Kit; logika je u Arhivi, skScan) */
+  if(C.isPluginAvailable && C.isPluginAvailable('Skener')){
+    var Sk = reg('Skener');
+    window.ARHIVA_SKENER = {
+      skeniraj: function(){ return Sk.skeniraj(); },
+      deo: function(o){ return Sk.deo(o); },
+      obrisi: function(){ return Sk.obrisi(); }
     };
   }
 

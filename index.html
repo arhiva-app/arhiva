@@ -3829,6 +3829,10 @@ const I18N = {
     pgNameLbl: 'Naziv dokumenta',
     pgDefaultName: 'Dokument',
     pgCamera: 'Slikaj stranicu',
+    pgScan: 'Skeniraj stranicu',
+    addMultiSubScan: 'Skeniraj stranicu po stranicu ili izaberi više slika',
+    pgEmptyScan: 'Još nema stranica. Skeniraj prvu stranicu ili izaberi slike iz galerije.',
+    skNo: 'Skener nije dostupan na ovom telefonu. Otvara se kamera.',
     pgGallery: 'Iz galerije',
     pgSave: 'Sačuvaj',
     pgProcessing: 'Obrađujem stranice…',
@@ -4309,7 +4313,7 @@ const I18N = {
       ['Podeli → Arhiva', 'Samo u Android aplikaciji. U drugoj aplikaciji (galerija, mejl, Viber…) izaberi Podeli, pa Arhiva: slike, video i dokumenti (PDF, Word, Excel, PowerPoint, CSV, ZIP…) odmah se sačuvaju u „Bez albuma“, bez dodatnog ekrana, a gore piše šta je sačuvano. Odatle ih premeštaš u album.', 'Tekst i linkovi se ne primaju. Kad aplikacija umesto fajla deli link (npr. ChatGPT za sliku koju je napravio), Arhive nema na spisku: sačuvaj sliku u galeriju, pa je dodaj odatle.'],
       ['Praćene fascikle', 'Samo u Android aplikaciji: Podešavanja → Praćene fascikle. „Snimci ekrana“: kad je uključeno, novi snimci ekrana sami stižu u Arhivu (samo oni nastali posle uključivanja).', '„Moje fascikle“ → „Dodaj fasciklu“: izabereš fasciklu na telefonu i album u koji idu fajlovi. Odmah se uveze sve što je u njoj, a posle sve što se u njoj pojavi (slike, video, PDF, Word…). Arhiva vidi samo izabranu fasciklu. Novo stiže kad otvoriš Arhivu ili se vratiš u nju.', 'Dodir na fasciklu menja album ili prekida praćenje, a prekidač ga privremeno isključuje. Original ostaje na telefonu, a brisanje iz fascikle ne briše iz Arhive. Fasciklu „Download“ Android ne dozvoljava.'],
       ['Datum i lokacija', 'Pri uvozu Arhiva čita iz fajla kad je slika ili video snimljen, odnosno kad je dokument napravljen, i po tom datumu ga stavlja među dane. Zato stara slika uvezena danas ide na svoj stari dan; da vidiš šta si upravo dodao, izaberi Sortiraj → „Nedavno dodato“.', 'Lokacija (samo u Android aplikaciji): Podešavanja → Lokacija → „Sačuvaj lokaciju“. Kad je uključeno, Arhiva uz sliku i video sačuva gde su snimljeni i prikaže mesto pored datuma, npr. „6. jul · Kalamici, Grčka“; po mestu radi i pretraga. Za to telefon jednom traži dozvolu (pri prvom dodavanju). Kad je isključeno, nove slike se uvoze bez lokacije, a postojeće ostaju.'],
-      ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
+      ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'U Android aplikaciji dugme „Skeniraj stranicu“ otvara Google-ov skener: sam nađe ivice papira, ispravi ugao i ukloni senke, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
       ['Pregled i listanje', 'Dodir na bilo koju stavku (sliku, PDF, Word, Excel) otvara isti pregled. Prevlačenjem levo i desno ili strelicama listaš stranice, a posle poslednje stranice prelaziš na sledeću stavku, istim redom kao u albumu. Kod slike i PDF-a jedan dodir sakriva ili vraća dugmad.', 'Dva prsta uvećavaju sliku ili stranicu PDF-a (do 5 puta), a uvećanu pomeraš jednim prstom. Dvostruki dodir uvećava na tom mestu ili vraća ceo prikaz.', 'PDF se prikazuje stranicu po stranicu. Word i Excel se prikazuju odmah u pregledu: tekst listaš gore-dole, a dva prsta menjaju veličinu slova. Excel tabelu (sa listovima) prstom pomeraš u svim pravcima, a na sledeću stavku prelaziš strelicama. Za zaključan PDF i ostale vrste fajlova kartica sa dugmetom „Otvori“ nudi deljenje ili čuvanje na telefon.', 'Gornji red dugmadi je isti za sve: ✨ (AI), zvonce (podsetnik), PDF ili deljenje, korpa. Dugme sa stranicama (samo kod slika) dodaje nove stranice ili menja njihov redosled. Olovka pored naziva menja naziv; isto radi i „Preimenuj“ u donjem redu albuma.', 'Fajlove prepoznaješ po boji oznake na ikonici: PDF je crven, Word plav, Excel zelen, ostale vrste sive.'],
       ['Spajanje i izdvajanje', 'U albumu dodirni ikonicu „Spoji“, pa dodiruj slike redom kojim idu: svaka dobija broj stranice u novom dokumentu (dokument koji već ima 2 stranice dobija „1–2“). Lupa u uglu sličice otvara stranicu preko celog ekrana, da je pročitaš. PDF, Word i Excel su zatamnjeni jer se spajaju samo slike. Dugme dole „Proveri redosled“ kaže koliko će stranica imati nov dokument; dodir otvara ekran stranica novog dokumenta, gde proveriš i središ redosled (dodir na stranicu, pa Ranije · Na mesto… · Kasnije) i po potrebi dodaš stranice. Ispod svake stranice piše naziv slike iz koje je došla (slika sa imenom iz kamere: „Slika“ i vreme dodavanja), da lakše prepoznaš koja je koja. Ništa se ne pravi dok ne dodirneš „Sačuvaj“ (korak nazad vraća izbor, a izabrane slike ostaju označene); posle čuvanja si u albumu novog dokumenta, a obaveštenje na mestu putanje kaže gde je sačuvan. Prazan kružić na slici pokazuje gde dolazi broj.', 'Naziv, album i podsetnik uzimaju se od prve slike (podsetnik prelazi na nov dokument). Originali ostaju u albumu; ako ti ne trebaju, označi ih i obriši. Pojedinačnu stranicu sačuvanog dokumenta izdvajaš kao posebnu sliku: otvori dokument, dugme „Uredi stranice“, dodir na stranicu, pa „Izdvoji“ (kod novog dokumenta ovog dugmeta nema, jer stranica još nije sačuvana).'],
       ['PDF', 'Sliku, dokument od slika ili više slika pretvaraš u jedan PDF: u pregledu dugmetom PDF, a u albumu dugmetom „Pošalji“ u donjem redu (izaberi stavke, pa „Pošalji“ i „kao jedan PDF“). Zatim ga deliš (Viber, e-pošta…) ili čuvaš na telefon.', 'Stranice idu u PDF bez gubitka kvaliteta.', 'Kod PDF fajla na tom mestu je dugme za deljenje: šalje se originalni fajl, bez izmena. Chrome ne dozvoljava deljenje Word i Excel fajlova, pa je kod njih tu dugme za čuvanje na telefon (u Android aplikaciji Arhiva ih deli kao originalni fajl); sačuvan fajl šalješ iz Vibera ili e-pošte (priloži fajl). Word i Excel imaju i „Podeli kao PDF“: Arhiva od njih napravi PDF (tekst i tabele, bez slika iz dokumenta) i odmah ga deli.'],
@@ -4652,6 +4656,10 @@ const I18N = {
     pgNameLbl: 'Document name',
     pgDefaultName: 'Document',
     pgCamera: 'Take page photo',
+    pgScan: 'Scan page',
+    addMultiSubScan: 'Scan page by page or pick several images',
+    pgEmptyScan: 'No pages yet. Scan the first page or pick images from the gallery.',
+    skNo: 'The scanner is not available on this phone. Opening the camera.',
     pgGallery: 'From gallery',
     pgSave: 'Save',
     pgProcessing: 'Processing pages…',
@@ -5132,7 +5140,7 @@ const I18N = {
       ['Share → Arhiva', 'Only in the Android app. In another app (gallery, email, Viber…) choose Share, then Arhiva: photos, videos and documents (PDF, Word, Excel, PowerPoint, CSV, ZIP…) are saved right away in “No album”, without an extra screen, and the top shows what was saved. From there you move them into an album.', 'Text and links are not received. When an app shares a link instead of a file (e.g. ChatGPT for an image it made), Arhiva is not in the list: save the image to the gallery and add it from there.'],
       ['Watched folders', 'Only in the Android app: Settings → Watched folders. “Screenshots”: when on, new screenshots arrive in Arhiva by themselves (only those taken after you turned it on).', '“My folders” → “Add folder”: pick a folder on the phone and the album the files go to. Everything in it is imported right away, and later everything that appears in it (photos, videos, PDF, Word…). Arhiva sees only the chosen folder. New files arrive when you open Arhiva or return to it.', 'Tap a folder to change the album or stop watching it; the switch turns it off for a while. The original stays on the phone, and deleting it from the folder does not delete it from Arhiva. Android does not allow the “Download” folder.'],
       ['Date and location', 'When importing, Arhiva reads from the file when a photo or video was taken, or when a document was made, and places it under that day. So an old photo imported today goes to its old day; to see what you just added, choose Sort → “Recently added”.', 'Location (only in the Android app): Settings → Location → “Save location”. When on, Arhiva saves where photos and videos were taken and shows the place next to the date, e.g. “July 6 · Kalamitsi, Greece”; search finds places too. The phone asks for permission once (the first time you add). When off, new photos are imported without location, and existing ones stay.'],
-      ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
+      ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'In the Android app, “Scan page” opens Google’s scanner: it finds the paper edges, straightens the angle and removes shadows, and you can scan several pages in a row. It all happens on the phone, without internet.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
       ['Viewing and paging', 'Tap any item (image, PDF, Word, Excel) to open the same viewer. Swipe left and right or use the arrows to turn pages; after the last page you move on to the next item, in the same order as in the album. For an image or a PDF, one tap hides or shows the buttons.', 'Two fingers zoom an image or a PDF page (up to 5 times); move the zoomed view with one finger. A double tap zooms in at that spot or returns to the full view.', 'A PDF is shown page by page. Word and Excel are shown right in the viewer: scroll the text up and down, and two fingers change the text size. Move an Excel table (with its sheets) in any direction with your finger, and go to the next item with the arrows. For a locked PDF and other file types a card with an “Open” button offers sharing or saving to the phone.', 'The top row of buttons is the same for everything: ✨ (AI), bell (reminder), PDF or share, trash. The pages button (images only) adds new pages or changes their order. The pencil next to the name renames the item; “Rename” in the album bottom row does the same.', 'You can tell files apart by the colored tag on the icon: PDF is red, Word blue, Excel green, other types gray.'],
       ['Merging and splitting', 'In an album tap the “Merge” icon, then tap the images in the order they go: each gets its page number in the new document (a document that already has 2 pages gets “1–2”). The magnifier in the corner opens a page full screen so you can read it. PDF, Word and Excel are dimmed because only images can be merged. The “Check order” button at the bottom shows how many pages the new document will have; tapping it opens the pages screen of the new document, where you check and fix the order (tap a page, then Earlier · Move to… · Later) and add pages if needed. Under each page you see the name of the image it came from (an image named by the camera: “Image” and the time it was added), so you can tell them apart. Nothing is made until you tap “Save” (Back returns to the selection and the chosen images stay marked); after saving you are in the new document’s album and a notice in place of the path says where it was saved. An empty circle on an image shows where the number goes.', 'The name, album and reminder come from the first image (the reminder moves to the new document). The originals stay in the album; if you do not need them, select and delete them. To split a page off a saved document as a separate image: open the document, tap “Edit pages”, tap the page and choose “Extract” (a new document has no such button, because the page is not saved yet).'],
       ['PDF', 'Turn an image, an image document or several selected images into one PDF: with the PDF button in the viewer, or in an album with “Send” in the bottom row (choose items, then “Send” and “as one PDF”). Then share it (Viber, email…) or save it to the phone.', 'Pages go into the PDF without losing quality.', 'For a PDF file that spot holds a share button: the original file is sent, unchanged. Chrome does not allow sharing Word and Excel files, so for them that button saves the file to the phone (the Android app shares them as the original file); send the saved file from Viber or email (attach file). Word and Excel also have “Share as PDF”: Arhiva makes a PDF of them (text and tables, without images from the document) and shares it right away.'],
@@ -11730,7 +11738,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 314;
+const APP_VERSION = 315;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -13127,7 +13135,7 @@ function renderPageEditor(){
   grid.innerHTML = '';
   grid.classList.toggle('caps', !!ed.mergeFrom && !!n);
   if(!n){
-    grid.innerHTML = '<div class="pg-empty">'+escapeHtml(t('pgEmpty'))+'</div>';
+    grid.innerHTML = '<div class="pg-empty">'+escapeHtml(t(pgSkener() ? 'pgEmptyScan' : 'pgEmpty'))+'</div>';
     return;
   }
   ed.pages.forEach((pg, idx)=>grid.appendChild(buildPageTile(pg, idx)));
@@ -13488,7 +13496,30 @@ async function edAddFiles(files){
   };
   await Promise.all([lane(), lane()]);
 }
-document.getElementById('pgCamera').onclick = ()=>pgCamInput.click();
+document.getElementById('pgCamera').onclick = ()=>{ if(pgSkener()) skScan(); else pgCamInput.click(); };
+/* v315 (B3, Zoran 12.11.): „Skeniraj stranicu“ — Google-ov skener dokumenata (ML Kit, na telefonu: ivice, ugao, senke, više strana
+   zaredom), samo Android aplikacija sa dodatkom Skener (cap/arhiva-native.js → window.ARHIVA_SKENER). Strane stižu u isti ekran kao
+   slikane. Chrome i stariji APK: obična kamera. Skener nedostupan (npr. bez Google Play usluga) → poruka i obična kamera. */
+let _skBusy = false;
+async function skScan(){
+  const n = pgSkener(); if(!n || _skBusy) return;
+  _skBusy = true;
+  try{
+    let r;
+    try{ r = (await n.skeniraj()) || {}; }
+    catch(e){ logError(t('pgScan'), (e && e.message) || e); toast(t('skNo')); pgCamInput.click(); return; }
+    if(r.otkazano) return;
+    const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
+    const files = []; let bad = r.greske || 0;
+    for(const x of list){
+      try{ files.push(new File([await nativeCopyBlob(n, x)], x.ime || 'skenirano.jpg', {type:x.mime || 'image/jpeg', lastModified:Date.now()})); }
+      catch(e){ console.error('skener deo', e); bad++; }
+    }
+    try{ await n.obrisi(); }catch(e){}
+    if(files.length && ed) edAddFiles(files);
+    if(bad) showNote(t('rcvErr', {n:bad}), 6000);
+  }finally{ _skBusy = false; }
+}
 document.getElementById('pgGallery').onclick = ()=>pgGalInput.click();
 pgCamInput.addEventListener('change', ()=>{ const f = Array.from(pgCamInput.files || []); pgCamInput.value = ''; edAddFiles(f); });
 pgGalInput.addEventListener('change', ()=>{ const f = Array.from(pgGalInput.files || []); pgGalInput.value = ''; edAddFiles(f); });
@@ -21115,7 +21146,7 @@ function aiWireSettings(){
 
 /* ---------- Meni za dodavanje: dokument od više stranica ---------- */
 document.getElementById('addMultiLbl').textContent = t('addMulti');
-document.getElementById('addMultiSub').textContent = t('addMultiSub');
+document.getElementById('addMultiSub').textContent = t(pgSkener() ? 'addMultiSubScan' : 'addMultiSub');
 document.getElementById('addMulti').onclick = ()=>requestCloseThen(()=>openPageEditor(null));
 
 /* =====================================================================
@@ -21129,7 +21160,7 @@ function guideHtml(){
       s.slice(1).map(p=>'<p>'+escapeHtml(p)+'</p>').join('')+'</details>').join('')+'</div>';
 }
 document.getElementById('pgNameLbl').textContent = t('pgNameLbl');
-document.getElementById('pgCameraLbl').textContent = t('pgCamera');
+document.getElementById('pgCameraLbl').textContent = t(pgSkener() ? 'pgScan' : 'pgCamera');
 document.getElementById('pgGalleryLbl').textContent = t('pgGallery');
 
 /* =====================================================================
@@ -21870,6 +21901,7 @@ function rcvBoot(){
 const FZ_KEY = LS_PREFIX + 'fascikle', FZ_START = 'DCIM/Screenshots';
 let _fzLast = 0;
 function fzNative(){ return window.ARHIVA_FASCIKLE || null; }
+function pgSkener(){ return window.ARHIVA_SKENER || null; }   /* v315 skener dokumenata */
 /* v286 (Zoran 4.11.): dozvola „pristup lokaciji u medijima“ — bez nje Android u slikama daje nule umesto GPS-a (proba v285).
    Pita se jednom; oznaka se upiše tek kad APK odgovori (stari APK nema metodu → pita se posle novog APK-a). */
 /* v289 (Zoran 4.11.): ne pri otvaranju aplikacije, nego kad se prvi put dodaju slike — otvaranje menija Dodaj ili izbor
