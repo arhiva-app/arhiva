@@ -3434,7 +3434,9 @@ let mergeMode = false;   /* v105: izbor za Spoji (samo slike, broj redosleda, lu
 let actMode = null;      /* v106: donji red bez izbora: 'send' | 'move' | 'rename' | 'delete' | 'more' — izbor sa naslovom i jednim dugmetom */
 let currentGalleryItems = [];
 /* v304 (K10): Word/Excel biblioteke se učitavaju „defer“ — gotove su kad stigne DOMContentLoaded */
-function libsReady(){ return document.readyState === 'loading' ? new Promise(r=>document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve(); }
+/* v314: defer skripte se izvršavaju POSLE readyState 'interactive', a pre DOMContentLoaded — zato se čeka sam događaj */
+const _libsP = new Promise(r=>document.addEventListener('DOMContentLoaded', r, {once:true}));
+function libsReady(){ return _libsP; }
 let currentGalleryIndex = -1;
 let albumViewMode = 'grid';
 let searchOpen = false;
@@ -6280,6 +6282,41 @@ const Skladiste = (()=>{
     });
   }
 
+  /* ---- K11 (v314): velike mape samo ovog uređaja — Drive mapa i viđeni fajlovi praćenih fascikli (ranije localStorage, ~5 MB
+     za ceo domen: kod velike arhive upis je tiho padao). Posebna baza: ne ide u kopiju, upis po stavci (ne ceo spisak iznova). ---- */
+  const DEV_DB = 'arhivaUredjaj', DEV_STORES = ['drive', 'fzvid'];
+  let _devP = null;
+  function devOpen(){
+    if(_devP) return _devP;
+    _devP = new Promise((res, rej)=>{
+      const r = indexedDB.open(DEV_DB, 1);
+      r.onupgradeneeded = ()=>DEV_STORES.forEach(n=>{ if(!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); });
+      r.onsuccess = ()=>{ const db = r.result; db.onversionchange = ()=>{ db.close(); _devP = null; }; res(db); };
+      r.onerror = ()=>rej(r.error);
+    });
+    _devP.catch(()=>{ _devP = null; });
+    return _devP;
+  }
+  /* work(st) u jednoj transakciji; rezultat iz out.v */
+  function devRun(store, mode, work){
+    return devOpen().then(db=>new Promise((res, rej)=>{
+      let tx;
+      try{ tx = db.transaction(store, mode); }catch(e){ _devP = null; rej(e); return; }
+      const out = {};
+      try{ work(tx.objectStore(store), out); }catch(e){ try{ tx.abort(); }catch(_){} rej(e); return; }
+      tx.oncomplete = ()=>res(out.v);
+      tx.onerror = ()=>rej(tx.error);
+      tx.onabort = ()=>rej(tx.error || new Error('abort'));
+    }));
+  }
+  /* sve [ključ, vrednost] jednog skladišta, jednim prolazom */
+  function devAll(store){
+    return devRun(store, 'readonly', (st, o)=>{
+      const k = st.getAllKeys(), v = st.getAll();
+      v.onsuccess = ()=>{ const ks = k.result || [], vs = v.result || []; o.v = ks.map((x, i)=>[x, vs[i]]); };
+    });
+  }
+
   const api = {
     /* app postavlja: šta da se uradi kad upis ne uspe (poruka „NIJE SAČUVANO!“) */
     kadNeuspeh: null,
@@ -6431,6 +6468,24 @@ const Skladiste = (()=>{
             t.oncomplete = res; t.onerror = ()=>rej(t.error);
           });
         }finally{ d.close(); }
+      },
+      /* Drive mapa: [[ključ, vrednost]] ('f|'+fajl, 's|'+fajl) */
+      driveMapa(){ return devAll('drive'); },
+      /* izmene mape u jednoj transakciji: put [[ključ, vrednost]], del [ključ] */
+      driveUpisi(put, del){
+        return devRun('drive', 'readwrite', (st)=>{ (del || []).forEach(k=>st.delete(k)); (put || []).forEach(p=>st.put(p[1], p[0])); });
+      },
+      /* viđeni fajlovi praćenih fascikli: [[uri, id]] (ključ uri + '\n' + id) */
+      async fzVidjeni(){ return (await devAll('fzvid')).map(p=>p[1]); },
+      fzDodaj(uri, ids){
+        return devRun('fzvid', 'readwrite', (st)=>{ (ids || []).forEach(id=>st.put([uri, id], uri + '\n' + id)); });
+      },
+      /* fascikla više nije praćena: brišu se njeni viđeni */
+      fzBrisi(uri){
+        return devRun('fzvid', 'readwrite', (st)=>{
+          const pre = uri + '\n', c = st.openCursor(IDBKeyRange.lowerBound(pre));
+          c.onsuccess = ()=>{ const r = c.result; if(!r || String(r.key).indexOf(pre) !== 0) return; r.delete(); r.continue(); };
+        });
       }
     }
   };
@@ -11675,7 +11730,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 313;
+const APP_VERSION = 314;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21874,7 +21929,40 @@ async function gpsDozvola(){
   }catch(e){}
 }
 function fzCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(FZ_KEY) || 'null'); }catch(e){} return (c && typeof c === 'object') ? c : {}; }
-function fzSave(c){ try{ localStorage.setItem(FZ_KEY, JSON.stringify(c)); }catch(e){} }
+/* K11 (v314): viđeni fajlovi „Mojih fascikli“ (bez ograničenja) su u bazi uređaja, ne u localStorage; ovde samo podešavanja.
+   _fzVid: uri → Set id-jeva (učitava fzVidLoad pre prve provere). Bez baze uređaja: kao pre v314 (f.vid u localStorage). */
+let _fzVid = new Map(), _fzIdb = false;
+function fzSave(c){
+  if(_fzIdb) (c.moje || []).forEach(x=>{ delete x.vid; });
+  lsSet(FZ_KEY, JSON.stringify(c));
+}
+function fzVid(f){ return _fzIdb ? Array.from(_fzVid.get(f.uri) || []) : (f.vid || []); }
+async function fzVidLoad(){
+  try{
+    const rows = await Skladiste.uredjaj.fzVidjeni();
+    rows.forEach(r=>{ if(!_fzVid.has(r[0])) _fzVid.set(r[0], new Set()); _fzVid.get(r[0]).add(r[1]); });
+    /* prelazak: f.vid iz localStorage (do v313) ide u bazu, pa se iz localStorage briše */
+    const c = fzCfg(), old = (c.moje || []).filter(x=>Array.isArray(x.vid) && x.vid.length);
+    for(const x of old){
+      await Skladiste.uredjaj.fzDodaj(x.uri, x.vid);
+      if(!_fzVid.has(x.uri)) _fzVid.set(x.uri, new Set());
+      x.vid.forEach(id=>_fzVid.get(x.uri).add(id));
+    }
+    _fzIdb = true;
+    if((c.moje || []).some(x=>'vid' in x)) fzSave(c);
+  }catch(e){ console.error('fascikle viđeni', e); try{ logError(t('fzTile'), 'viđeni: ' + ((e && e.message) || e)); }catch(_){} _fzVid = new Map(); _fzIdb = false; }
+}
+/* posle uvoza: zapamti viđene (true = upisano) */
+async function fzVidAdd(uri, ids){
+  if(!_fzIdb){ fzUpdate(uri, x=>{ x.vid = (x.vid || []).concat(ids); }); return true; }
+  try{
+    await Skladiste.uredjaj.fzDodaj(uri, ids);
+    if(!_fzVid.has(uri)) _fzVid.set(uri, new Set());
+    ids.forEach(id=>_fzVid.get(uri).add(id));
+    return true;
+  }catch(e){ console.error('fascikle viđeni', e); try{ logError(t('fzTile'), 'viđeni: ' + ((e && e.message) || e)); }catch(_){} return false; }
+}
+function fzVidDrop(uri){ _fzVid.delete(uri); if(_fzIdb) Skladiste.uredjaj.fzBrisi(uri).catch(e=>console.error('fascikle viđeni', e)); }
 /* v273: osim „Snimci ekrana“ (c.snimci) i „Moje fascikle“ (c.moje: [{uri, ime, album, on, od, vec}]) — Zoran bira jednu ili više,
    uvoze se svi fajlovi nastali posle dodavanja, u izabrani album (ili „Bez albuma“). Isti dodatak, ista pravila. */
 function fzList(c){ return (c.snimci && c.snimci.uri ? [Object.assign({kind:'shots'}, c.snimci)] : []).concat((c.moje || []).filter(f=>f.uri && f.on !== false)); }
@@ -21901,11 +21989,11 @@ async function fzCheck(){
        viđen (f.vid, bez ograničenja). Vreme izmene se ne koristi: slika premeštena/kopirana u fasciklu (npr. iz Galerije) zadrži staro
        vreme, pa je v273 nije uvozio. Snimci ekrana ostaju „samo novi od uključivanja“ (po vremenu — novi snimak uvek ima novo vreme). */
     const mine = f.kind !== 'shots';
-    try{ r = (await n.novi(mine ? {uri:f.uri, posle:0, vec:f.vid || [], max:50} : {uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
+    try{ r = (await n.novi(mine ? {uri:f.uri, posle:0, vec:fzVid(f), max:50} : {uri:f.uri, posle:Math.max(0, (f.od || 0) - 2000), vec:f.vec || [], max:50})) || {}; }
     catch(e){ logError(t('fzTile'), (e && e.message) || e); continue; }
     if(r.nemaPrava){
       const c = fzCfg();
-      if(f.kind === 'shots') delete c.snimci; else c.moje = (c.moje || []).filter(x=>x.uri !== f.uri);
+      if(f.kind === 'shots') delete c.snimci; else{ c.moje = (c.moje || []).filter(x=>x.uri !== f.uri); fzVidDrop(f.uri); }
       fzSave(c); showNote(f.kind === 'shots' ? t('fzLost') : t('fzLostF', {ime:f.ime || fzPath(f)}), 9000); fzRefresh();
       continue;
     }
@@ -21925,8 +22013,8 @@ async function fzCheck(){
     const res = files.length ? await addFilesWithProgress(files, alb, k=>f.kind === 'shots' ? t('fzDone', {n:k}) : t('fzDoneF', {n:k, ime:f.ime || fzPath(f)}), {retry:true}) : [];
     const failT = [];
     pend.forEach((x, i)=>{ if(res[i] !== undefined) got.push(x); else failT.push(x.vreme || 0); });
-    if(got.length) fzUpdate(f.uri, x=>{
-      if(mine){ x.vid = (x.vid || []).concat(got.map(g=>g.id)); return; }
+    if(got.length && mine) await fzVidAdd(f.uri, got.map(g=>g.id));
+    else if(got.length) fzUpdate(f.uri, x=>{
       let od = Math.max(...got.map(g=>g.vreme || 0));
       if(failT.length) od = Math.min(od, Math.min(...failT));   /* snimci: vreme ne sme da preskoči nesačuvan snimak */
       x.od = Math.max(x.od || 0, od); x.vec = (x.vec || []).concat(got.map(g=>g.id)).slice(-200);
@@ -21936,8 +22024,9 @@ async function fzCheck(){
   }
   if(again) rcvQueue(fzCheck);
 }
-function fzBoot(){
+async function fzBoot(){
   if(!fzNative()) return;
+  await fzVidLoad();
   rcvQueue(fzCheck);
   document.addEventListener('visibilitychange', ()=>{
     if(document.visibilityState === 'visible' && Date.now() - _fzLast > 1500) rcvQueue(fzCheck);
@@ -21998,7 +22087,7 @@ async function fzAddFolder(){
   fzAlbumSheet(ime, undefined, ime, alb=>{   /* nov: ništa nije unapred označeno */
     const c = fzCfg();
     if((c.moje || []).some(x=>x.uri === r.uri)) return;
-    c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:alb, on:true, vid:[]}]);
+    c.moje = (c.moje || []).concat([{uri:r.uri, ime:r.ime || '', album:alb, on:true}]); fzVidDrop(r.uri);
     fzSave(c); fzRefresh(); toast(t('fzAdded', {ime, alb:fzAlbName({album:alb})}));
     rcvQueue(fzCheck);   /* odmah uveze sve što je već u fascikli — u izabrani album */
   }, ()=>{
@@ -22086,7 +22175,7 @@ function pickSearch(){
 async function fzStop(i){
   const n = fzNative(), c = fzCfg(), x = (c.moje || [])[i]; if(!x) return;
   try{ if(n) await n.otpusti({uri:x.uri}); }catch(e){}
-  c.moje.splice(i, 1); fzSave(c); fzRefresh(); toast(t('fzStopped', {ime:x.ime || fzPath(x)}));
+  c.moje.splice(i, 1); fzSave(c); fzVidDrop(x.uri); fzRefresh(); toast(t('fzStopped', {ime:x.ime || fzPath(x)}));
 }
 let _fzBusy = false;
 async function fzToggleShots(){
@@ -22704,7 +22793,7 @@ function obBoot(){
    (izbor naloga, „Dozvoli“), pristup drive.file: Arhiva vidi samo fajlove koje je sama napravila.
    Fascikla „Arhiva“ ima ISTI raspored kao ZIP kopija (arhiva.json, Dokumenti/<album>/…, Sličice/ — backupManifest), da 2. korak
    (Drive → nov telefon/računar) bude isto čitanje kao uvoz kopije. Svaki fajl na Drive-u nosi appProperties {arhiva:'f', k:ključ}.
-   Mapa (galerija:drive, samo ovaj uređaj, ne ide u kopiju): ključ (id fajla; 't:'+id za sličicu) → {id na Drive-u, putanja, roditelj, veličina}.
+   Mapa (samo ovaj uređaj, ne ide u kopiju; od v314 u bazi uređaja, drLoad): ključ (id fajla; 't:'+id za sličicu) → {id na Drive-u, putanja, roditelj, veličina}.
    Fajl Arhive se nikad ne menja (izmena = nov dokument), pa se šalje jednom; posle: premeštanje (naziv/album), arhiva.json kad se
    promeni, a u Drive korpu (30 dana) tek kad fajla nema ni u korpi Arhive. Slanje: 4 s posle upisa (Skladiste.kadIzmena), pri
    pokretanju, povratku u aplikaciju i povratku interneta — dok je Arhiva otvorena. Greška → ponovo za minut.
@@ -22728,11 +22817,65 @@ let _drConnecting = false, _drNoteOn = false, _drPull = null;
 let _drStates = new Map(), _drStatesOk = false, _drDirty = true, _drRebAt = 0, _drTick = null;   /* v212: stanja ostalih uređaja (fileId → {m, st, todo}) */
 const DR_DEV_DAYS = 60;   /* uređaj koji se nije javio 60 dana se ne broji (npr. ponovo instalirana aplikacija) */
 function drNative(){ return window.ARHIVA_DRIVE || null; }
-function drCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem(DR_KEY) || 'null'); }catch(e){} c = (c && typeof c === 'object') ? c : {}; c.files = c.files || {}; c.dirs = c.dirs || {}; return c; }
-function drSave(c){ try{ localStorage.setItem(DR_KEY, JSON.stringify(c || _dr)); }catch(e){ console.error('drive mapa', e); } }
+/* K11 (v314): velike mape (_dr.files, _dr.skip — po jedan red po fajlu) su u bazi uređaja (Skladiste.uredjaj), u localStorage
+   (galerija:drive) samo ostatak. _drSaved = šta je sada u bazi (ključ → JSON); drFlush upisuje samo razliku, redom (jedan upis
+   u isto vreme, izmene u međuvremenu idu u sledeći krug). Ako baza uređaja ne radi: sve u localStorage kao pre v314. */
+let _drIdb = false, _drSaved = new Map(), _drFlushP = null, _drFlushAgain = false, _drMapErr = false;
+function drMapErr(e){ console.error('drive mapa', e); if(_drMapErr) return; _drMapErr = true; try{ logError('Google Drive', 'mapa: ' + (((e && e.name) || '') + ' ' + ((e && e.message) || e)).slice(0, 200)); }catch(_){} }
+/* sačuvano stanje; full = false: samo ostatak (bez čitanja velikih mapa — za traku-podsetnik) */
+function drCfg(full){
+  let c = null; try{ c = JSON.parse(localStorage.getItem(DR_KEY) || 'null'); }catch(e){} c = (c && typeof c === 'object') ? c : {};
+  if(_drIdb && full !== false){
+    const files = {}, skip = {};
+    _drSaved.forEach((j, key)=>{ const k = key.slice(2); if(key[0] === 'f') files[k] = JSON.parse(j); else skip[k] = JSON.parse(j); });
+    c.files = files; if(Object.keys(skip).length) c.skip = skip;
+  }
+  c.files = c.files || {}; c.dirs = c.dirs || {}; return c;
+}
+function drSave(){
+  let h = _dr;
+  if(_drIdb){ h = Object.assign({}, _dr); delete h.files; delete h.skip; }
+  try{ localStorage.setItem(DR_KEY, JSON.stringify(h)); }catch(e){ drMapErr(e); }
+  if(_drIdb) drFlush();
+}
+/* upis razlike _dr.files/_dr.skip u bazu uređaja; true = sve upisano */
+function drFlush(){
+  if(_drFlushP){ _drFlushAgain = true; return _drFlushP; }
+  _drFlushP = (async ()=>{
+    let ok = true;
+    do{
+      _drFlushAgain = false;
+      const put = [], now = new Set();
+      const add = (pre, o)=>{ if(o) for(const k of Object.keys(o)){ const key = pre + k, j = JSON.stringify(o[k]); now.add(key); if(_drSaved.get(key) !== j) put.push([key, o[k], j]); } };
+      add('f|', _dr.files); add('s|', _dr.skip);
+      const del = []; _drSaved.forEach((_, key)=>{ if(!now.has(key)) del.push(key); });
+      if(!put.length && !del.length) continue;
+      try{
+        await Skladiste.uredjaj.driveUpisi(put.map(p=>[p[0], p[1]]), del);
+        put.forEach(p=>_drSaved.set(p[0], p[2])); del.forEach(k=>_drSaved.delete(k));
+      }catch(e){ drMapErr(e); ok = false; break; }   /* sledeći drSave pokušava ponovo */
+    }while(_drFlushAgain);
+    return ok;
+  })().finally(()=>{ _drFlushP = null; });
+  return _drFlushP;
+}
+/* pri pokretanju: mapa iz baze uređaja; stara mapa iz localStorage (do v313) prelazi u bazu, pa se iz localStorage briše */
+async function drLoad(){
+  const c = drCfg();
+  let rows;
+  try{ rows = await Skladiste.uredjaj.driveMapa(); }catch(e){ drMapErr(e); _dr = c; return; }   /* bez baze uređaja: kao pre v314 */
+  _drSaved = new Map(rows.map(r=>[String(r[0]), JSON.stringify(r[1])]));
+  if(Object.keys(c.files).length || (c.skip && Object.keys(c.skip).length)){
+    _dr = c; _drIdb = true;
+    if(await drFlush()) drSave();   /* u bazi je → ostatak bez mapa */
+    else{ _drIdb = false; _drSaved = new Map(); }
+    return;
+  }
+  _drIdb = true; _dr = drCfg();
+}
 function drOn(){ return !!(drNative() && _dr.on); }
 /* traka-podsetnik za kopiju se ne pokazuje dok Drive redovno prima (try: zove se i pre ovog bloka) */
-function drFresh(){ try{ if(!drNative()) return false; const c = drCfg(); return !!(c.on && !c.need && c.last && Date.now() - c.last < getBackupIntervalDays() * 86400000); }catch(e){ return false; } }
+function drFresh(){ try{ if(!drNative()) return false; const c = drCfg(false); return !!(c.on && !c.need && c.last && Date.now() - c.last < getBackupIntervalDays() * 86400000); }catch(e){ return false; } }
 const drWait = (ms)=>new Promise(r=>setTimeout(r, ms));
 function drHash(s){ let h = 0x811c9dc5; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16) + ':' + s.length; }
 function drMb(b){
@@ -23505,9 +23648,9 @@ function drProgress(){
   if(show){ _drNoteOn = true; toastPersist(t('drRun', {n:_drProg.n, total:_drProg.total}), {n:_drProg.n, total:_drProg.total}); }
   else if(_drNoteOn){ _drNoteOn = false; toastHide(); }
 }
-function drBoot(){
+async function drBoot(){
   if(!drNative()) return;
-  _dr = drCfg();
+  await drLoad();
   Skladiste.kadIzmena = ()=>{ _drDirty = true; drSoon(); };
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') drSoon(1500); });
   window.addEventListener('online', ()=>drSoon(1000));
