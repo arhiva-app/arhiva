@@ -3406,7 +3406,7 @@ let trash = [];   /* obrisane stavke (deletedAt) — van svih prikaza, brojeva i
 let categories = [];
 let currentFolder = null;
 let _jump = null, _flash = null;   /* v112: prečica do albuma posle premeštanja / kopiranja; kratko istaknute stavke */
-let sortMode = 'date';
+let sortMode = 'date';   /* v307: sačuvan izbor se učita posle LS_PREFIX (albumSort) */
 let pendingAssignItemId = null;
 let selectionMode = false;
 let mergeMode = false;   /* v105: izbor za Spoji (samo slike, broj redosleda, lupa) */
@@ -3794,6 +3794,7 @@ try{ albumViewMode = localStorage.getItem(LS_PREFIX+'albumViewMode') || 'grid'; 
 /* Sortiranje albuma na pocetnom ekranu: '' = rucni redosled, 'alpha' = abeceda, 'recent' = novije */
 let albumSort = '';
 try{ albumSort = localStorage.getItem(LS_PREFIX+'albumSort') || ''; }catch(e){}
+try{ const v = localStorage.getItem(LS_PREFIX+'sortMode'); if(['date','old','added','alpha'].includes(v)) sortMode = v; }catch(e){}   /* v307 (Zoran): izabrano sortiranje se pamti i posle izlaska iz aplikacije */
 
 /* ---------- Rečnik prevoda (novi tekstovi idu samo kroz t()) ---------- */
 const I18N = {
@@ -4279,7 +4280,7 @@ const I18N = {
     guideTileSub: 'Kako se koristi Arhiva',
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
-      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili poslednja izmena: album u kome je nešto dodato ili promenjeno ide na vrh) i AI (radionica). Ispod reda ikonica su sistemski folderi, dva reda po tri: Sve, Slike, Video, Snimci ekrana, Dokumenti i Bez albuma (broj na ikonici Bez albuma kaže koliko stavki tamo čeka). Svaki otvara sve stavke te vrste iz cele Arhive po danima, najnovije prvo; desno gore su lupa za pretragu i Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato ili po abecedi), a kod Dokumenata i Snimaka ekrana ⓘ objašnjava šta je tu. Snimci ekrana su slike veličine ekrana ovog telefona i slike koje je telefon nazvao „Screenshot…“; isti snimak je i u Slikama i u svom albumu. Folderi se ne brišu, ne preimenuju i ne pomeraju. Pri skrolovanju se povlače gore sa albumima, a red ikonica ostaje; posle skrolovanja dole na sredini se pojavi okrugla strelica ↑, koja jednim dodirom vraća na vrh (isto u albumima, folderima i pretrazi). Desno gore su prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato — po danu kada je stavka dodata u Arhivu — ili po abecedi; krug pokazuje koji je uključen) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
+      ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Arhiva“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj Arhivi (sve slike i dokumenti, bez korpe). Ispod naziva „Arhiva“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili poslednja izmena: album u kome je nešto dodato ili promenjeno ide na vrh) i AI (radionica). Ispod reda ikonica su sistemski folderi, dva reda po tri: Sve, Slike, Video, Snimci ekrana, Dokumenti i Bez albuma (broj na ikonici Bez albuma kaže koliko stavki tamo čeka). Svaki otvara sve stavke te vrste iz cele Arhive po danima, najnovije prvo; desno gore su lupa za pretragu i Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato ili po abecedi), a kod Dokumenata i Snimaka ekrana ⓘ objašnjava šta je tu. Snimci ekrana su slike veličine ekrana ovog telefona i slike koje je telefon nazvao „Screenshot…“; isti snimak je i u Slikama i u svom albumu. Folderi se ne brišu, ne preimenuju i ne pomeraju. Pri skrolovanju se povlače gore sa albumima, a red ikonica ostaje; posle skrolovanja dole na sredini se pojavi okrugla strelica ↑, koja jednim dodirom vraća na vrh (isto u albumima, folderima i pretrazi). Desno gore su prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato — po danu kada je stavka dodata u Arhivu — ili po abecedi; krug pokazuje koji je uključen; izbor važi za sve albume i pamti se i posle izlaska iz aplikacije) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Arhiva › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Arhiva“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj Arhivi (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Arhiva sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Arhiva › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Arhiva“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
       ['Donji red u albumu', 'U albumu je dole uvek red: Pošalji · U album · Prečica · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije izabrano otvara izbor (isti kao dugi pritisak na stavku): putanja gore i donji red ostaju, dugmad su bleda dok ne izabereš bar jednu stavku. Dodiruješ stavke, pa radnju koju hoćeš. ✕ ili korak nazad prekida izbor. Kod dugog pritiska na stavku gore je „Izaberi sve“; kad je sve izabrano, isto dugme piše „Poništi sve“ i jednim dodirom poništava izbor.', 'Pošalji nudi „Podeli“ ili „Sačuvaj na telefon“; za slike i dokumente od više stranica i „kao jedan PDF“ ili „svaku posebno“. „Više“ radi sa jednom stavkom: Preimenuj, Podsetnik i AI radionica; kad je izabrano više stavki, bledo je.', 'Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu ide odmah na označeno.', 'Premeštanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premesti ovde“. Jedan dodir na podalbum premešta označeno i ostaješ u albumu. Na vrhu se pojavi obaveštenje sa dugmetom „Vrati“, koje za par sekundi vraća stavke na staro mesto. Za premeštanje u bilo koji drugi album služi „U album“. Posle premeštanja ili kopiranja u drugi album, desno u redu putanje stoji dugme sa nazivom tog albuma (npr. „Stoja ›“): dodir vodi pravo tamo, a prebačeni dokumenti su nakratko uokvireni. Dugme stoji dok si u albumu odakle si slao.', 'Nov podalbum se ne otvara sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.', 'Obaveštenja (šta je sačuvano, premešteno ili šta nije uspelo) uvek izlaze na vrhu ekrana, na mestu putanje. Kvačica znači da je urađeno, znak „!“ da nešto treba proveriti. Obaveštenje posle par sekundi samo nestane, a za to vreme možeš normalno da radiš.'],
       ['Dodavanje', 'Ikonica slike sa plusom dodaje sa telefona: iz galerije (više slika odjednom), slikanjem ili kao dokument (PDF, Word, Excel…). Svaka izabrana slika postaje posebna stavka.', 'Ono što dodaš dok si u albumu (iz galerije, slikanjem ili kao dokument) ide pravo u taj album. Kad slika ima samo automatsko ime iz telefona (niz brojeva, IMG_…), Arhiva ga ne prikazuje, nego piše „Slika“. Pored rednog broja na kartici je datum nastanka: za sliku i video kad su snimljeni, za dokument kad je napravljen (Arhiva ga čita iz samog fajla), a ako ga fajl nema, datum dodavanja. Dodir na naziv otvara prozor sa tri polja: naziv, datum i vreme; datum i vreme se retko menjaju (npr. račun iz marta slikan danas), a po njima se stavke ređaju.'],
       ['Podeli → Arhiva', 'Samo u Android aplikaciji. U drugoj aplikaciji (galerija, mejl, Viber…) izaberi Podeli, pa Arhiva: slike, video i dokumenti (PDF, Word, Excel, PowerPoint, CSV, ZIP…) odmah se sačuvaju u „Bez albuma“, bez dodatnog ekrana, a gore piše šta je sačuvano. Odatle ih premeštaš u album.', 'Tekst i linkovi se ne primaju. Kad aplikacija umesto fajla deli link (npr. ChatGPT za sliku koju je napravio), Arhive nema na spisku: sačuvaj sliku u galeriju, pa je dodaj odatle.'],
@@ -5102,7 +5103,7 @@ const I18N = {
     guideTileSub: 'How to use Arhiva',
     guideIntro: 'Tap a title to open the explanation.',
     guide: [
-      ['Albums and sub-albums', 'On the home screen, next to the name “Arhiva”, you see how many albums there are, and below that how many items are in the whole Arhiva (all images and documents, not counting the trash). Below the name “Arhiva” there is a row of icons: Add (into “No album”), Search, Album (a new album), Sort (my order, by name or last modified: an album where something was added or changed moves to the top) and AI (the workshop). Below the row of icons are the system folders, two rows of three: All, Photos, Videos, Screenshots, Documents and No album (the number on the No album icon shows how many items are waiting there). Each opens every item of that kind in the whole archive by day, newest first; at the top right are a magnifier to search and Sort (newest or oldest first by date taken, recently added, or alphabetically), and in Documents and Screenshots ⓘ explains what is there. Screenshots are images the size of this phone’s screen and images the phone named “Screenshot…”; the same screenshot is also in Photos and in its album. The folders cannot be deleted, renamed or moved. When you scroll they move up with the albums while the row of icons stays; after scrolling, a round ↑ arrow appears at the bottom centre and takes you back to the top with one tap (also in albums, folders and search). At the top right are the view (tiles or list), the bell and settings. Inside an album, below the path, is a row of icons: Add (camera, gallery or a document into this album), Search, Subalbum (a new sub-album, only in a main album; an album card shows how many sub-albums it has next to the number of items) Sort (newest or oldest first by date taken, recently added — by the day the item was added to Arhiva — or by name; the circle shows which is on) and Merge (several images into one document).', 'When you open an image or document, the same path is at the top (Arhiva › album › sub-album): tap any part to go to that album, or “Arhiva” for the home screen. In search results the path is shown below the name, and a document opened from search opens in its own album: Back takes you to that album. The buttons on an open document have labels: Back, AI, Reminder, PDF (or Share / Save), Pages and Delete.', 'The same name cannot be used twice anywhere in Arhiva (neither for albums nor for images and documents; capitals and accents do not count). When a name is taken, the line below the field says where it already exists and the button stays dimmed until you change it. When Arhiva names something itself (merge, adding, copy), it adds “(2)”, and a copy gets “– copy”. Camera images with an automatic name do not count.', 'In the “list” view you can also delete an album by swiping it to the left: a red “Delete” appears, and tapping it asks for confirmation. Swiping back to the right or tapping anywhere else puts the album back without deleting.', 'Long-press an album for options: pin to top, rename, cover image, move or delete. Drag the handle in the corner to change the album order. You can also rename an album inside it with the pencil next to its name in the path (or by tapping the name).', 'At the top of an album is the path, e.g. “Arhiva › Album › Sub-album”, so you always see where you are; the number of items is on the right. Tap “Arhiva” to go to the home screen, or the parent album name to go to that album. Back goes up one level.'],
+      ['Albums and sub-albums', 'On the home screen, next to the name “Arhiva”, you see how many albums there are, and below that how many items are in the whole Arhiva (all images and documents, not counting the trash). Below the name “Arhiva” there is a row of icons: Add (into “No album”), Search, Album (a new album), Sort (my order, by name or last modified: an album where something was added or changed moves to the top) and AI (the workshop). Below the row of icons are the system folders, two rows of three: All, Photos, Videos, Screenshots, Documents and No album (the number on the No album icon shows how many items are waiting there). Each opens every item of that kind in the whole archive by day, newest first; at the top right are a magnifier to search and Sort (newest or oldest first by date taken, recently added, or alphabetically), and in Documents and Screenshots ⓘ explains what is there. Screenshots are images the size of this phone’s screen and images the phone named “Screenshot…”; the same screenshot is also in Photos and in its album. The folders cannot be deleted, renamed or moved. When you scroll they move up with the albums while the row of icons stays; after scrolling, a round ↑ arrow appears at the bottom centre and takes you back to the top with one tap (also in albums, folders and search). At the top right are the view (tiles or list), the bell and settings. Inside an album, below the path, is a row of icons: Add (camera, gallery or a document into this album), Search, Subalbum (a new sub-album, only in a main album; an album card shows how many sub-albums it has next to the number of items) Sort (newest or oldest first by date taken, recently added — by the day the item was added to Arhiva — or by name; the circle shows which is on; the choice applies to all albums and is kept after leaving the app) and Merge (several images into one document).', 'When you open an image or document, the same path is at the top (Arhiva › album › sub-album): tap any part to go to that album, or “Arhiva” for the home screen. In search results the path is shown below the name, and a document opened from search opens in its own album: Back takes you to that album. The buttons on an open document have labels: Back, AI, Reminder, PDF (or Share / Save), Pages and Delete.', 'The same name cannot be used twice anywhere in Arhiva (neither for albums nor for images and documents; capitals and accents do not count). When a name is taken, the line below the field says where it already exists and the button stays dimmed until you change it. When Arhiva names something itself (merge, adding, copy), it adds “(2)”, and a copy gets “– copy”. Camera images with an automatic name do not count.', 'In the “list” view you can also delete an album by swiping it to the left: a red “Delete” appears, and tapping it asks for confirmation. Swiping back to the right or tapping anywhere else puts the album back without deleting.', 'Long-press an album for options: pin to top, rename, cover image, move or delete. Drag the handle in the corner to change the album order. You can also rename an album inside it with the pencil next to its name in the path (or by tapping the name).', 'At the top of an album is the path, e.g. “Arhiva › Album › Sub-album”, so you always see where you are; the number of items is on the right. Tap “Arhiva” to go to the home screen, or the parent album name to go to that album. Back goes up one level.'],
       ['Bottom row in an album', 'At the bottom of an album there is always a row: Send · To album · Shortcut · More · Delete. Tapping any action when nothing is selected opens the selection (the same as a long press on an item): the path at the top and the bottom row stay, and the buttons are dimmed until you pick at least one item. Tap the items, then the action you want. ✕ or Back cancels the selection. After a long press on an item, “Select all” is at the top; when everything is selected the same button reads “Clear all” and clears the selection with one tap.', '“Send” offers “Share” or “Save to phone”; for images and multi-page documents also “as one PDF” or “each separately”. “More” works with one item: Rename, Reminder and the AI workshop; when more items are selected it is dimmed.', 'Long-press still works: select items, and an action in the bottom row then applies to them right away.', 'Moving into a sub-album: while items are selected, sub-albums get a frame and the label “move here”. One tap on a sub-album moves the selection and you stay in the album. A notice with an “Undo” button appears at the top and puts the items back for a few seconds. To move to any other album, use “To album”. After moving or copying to another album, a button with that album’s name (e.g. “Stoja ›”) sits on the right of the path row: one tap takes you there, and the items you sent are briefly outlined. The button stays while you are in the album you sent from.', 'A new sub-album does not open by itself: you stay in the album and the sub-album appears among the sub-albums.', 'Notices (what was saved, moved or what did not work) always appear at the top of the screen, in place of the path. A check mark means it is done, a “!” sign that something needs checking. A notice disappears by itself after a few seconds, and you can keep working meanwhile.'],
       ['Adding', 'The image-plus icon adds from the phone: from the gallery (several images at once), by taking a photo, or as a document (PDF, Word, Excel…). Every picked image becomes a separate item.', 'What you add while inside an album (from the gallery, by taking a photo or as a document) goes straight into that album. When an image has only an automatic phone name (a string of digits, IMG_…), Arhiva does not show it but writes “Image”. Next to the item number on the card is the date it was created: for photos and videos when they were taken, for documents when they were made (Arhiva reads it from the file itself), and if the file has none, the date it was added. Tapping the name opens a window with three fields: name, date and time; date and time rarely change (e.g. a March receipt photographed today), and items are ordered by them.'],
       ['Share → Arhiva', 'Only in the Android app. In another app (gallery, email, Viber…) choose Share, then Arhiva: photos, videos and documents (PDF, Word, Excel, PowerPoint, CSV, ZIP…) are saved right away in “No album”, without an extra screen, and the top shows what was saved. From there you move them into an album.', 'Text and links are not received. When an app shares a link instead of a file (e.g. ChatGPT for an image it made), Arhiva is not in the list: save the image to the gallery and add it from there.'],
@@ -7241,7 +7242,7 @@ function openSortChoice(){
     r.setAttribute('aria-selected', sortMode === mode ? 'true' : 'false');
     r.innerHTML = '<span class="pick-tx"></span><span class="pick-rb" aria-hidden="true"></span>';
     r.querySelector('.pick-tx').textContent = label;
-    r.onclick = ()=>{ const ch = sortMode !== mode; sortMode = mode; requestClose(); if(ch) render(); };
+    r.onclick = ()=>{ const ch = sortMode !== mode; sortMode = mode; lsSet(LS_PREFIX+'sortMode', mode); requestClose(); if(ch) render(); };
     list.appendChild(r);
   });
   bg.classList.add('open');
@@ -9015,6 +9016,7 @@ function showModalPdf(item, page){
       if(req !== _modalReq) return;
       modalImg.src = u;
       load.hidden = true;
+      dfPdfAfterShow();   /* v307 */
       if(pg + 1 < n) pdfPageUrl(item, pg + 1).catch(()=>{});   /* sledeća stranica unapred */
     });
   }).catch(e=>{
@@ -9090,7 +9092,7 @@ function docClear(){
 /* gornja ivica = ispod natpisa gornjeg reda dugmadi, donja = iznad broja/naziva/roka (visina zavisi od roka i dužine naziva) */
 function placeModalDoc(){
   const vid = modalBg.classList.contains('is-videoview');
-  const pdfDf = !!(_df && _df.on) && modalBg.classList.contains('is-pdfview');   /* v306: PDF stranica ispod trake pretrage */
+  const pdfDf = !!(_df && _df.on) && modalBg.classList.contains('is-pdfview');   /* v306: položaj trake pretrage i nad PDF-om */
   if(!vid && !pdfDf && !modalBg.classList.contains('is-docview')) return;
   const bar = document.getElementById('modalBar');
   let top = 0;
@@ -9099,12 +9101,7 @@ function placeModalDoc(){
   let bottom = window.innerHeight;
   if(info){ const r = info.getBoundingClientRect(); bottom = r.top + (parseFloat(getComputedStyle(info).paddingTop) || 0); }
   const dh = dfPlace(top);
-  if(pdfDf){
-    const t0 = Math.round(top + dh + 12) + 'px', b0 = Math.max(0, Math.round(window.innerHeight - bottom + 8)) + 'px';
-    modalFrame.style.top = t0; modalFrame.style.bottom = b0;
-    const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = t0; pk.style.bottom = b0; }
-    return;
-  }
+  if(pdfDf) return;   /* v307 (Zoran): PDF stranica ostaje pune veličine; pogodak ispod trake se pomeri na vidno mesto (dfPdfReveal) */
   if(vid){
     const fr = modalFrame.getBoundingClientRect();
     modalVideo.style.top = Math.round(top + 12 - fr.top) + 'px';
@@ -9440,8 +9437,9 @@ function dfPdfText(it){
         s += x.str;
         prev = x;
       });
+      const vp = page.getViewport({scale:1});   /* v307: za položaj pogotka na ekranu */
       page.cleanup();
-      pages.push({fo:dfFold(s), its});
+      pages.push({fo:dfFold(s), its, vp});
     }
     return pages;
   })();
@@ -9504,7 +9502,9 @@ function dfPdfMarks(it, pg){
       const a = Math.max(h.a, x.a), b = Math.min(h.b, x.b), len = x.b - x.a;
       if(b <= a || !len) return;
       const x0 = x.x + x.w * (a - x.a) / len, x1 = x.x + x.w * (b - x.a) / len;
-      out.push({r:[x0, x.y - 0.25 * x.fs, x1, x.y + 0.95 * x.fs], cur:hi === _df.cur});
+      const r = [x0, x.y - 0.25 * x.fs, x1, x.y + 0.95 * x.fs];
+      const a1 = P.vp.convertToViewportPoint(r[0], r[1]), b1 = P.vp.convertToViewportPoint(r[2], r[3]);
+      out.push({r, cur:hi === _df.cur, f:[Math.min(a1[0], b1[0]) / P.vp.width, Math.min(a1[1], b1[1]) / P.vp.height, Math.max(a1[0], b1[0]) / P.vp.width, Math.max(a1[1], b1[1]) / P.vp.height]});
     });
   });
   return out;
@@ -9533,8 +9533,37 @@ function dfPdfUrl(it, pg){
 function dfPdfShow(it){
   if(!it || it.id !== modalItemId || !modalBg.classList.contains('is-pdfview')) return;
   const pg = modalPage, req = _modalReq;
-  dfPdfUrl(it, pg).then(u=>{ if(req === _modalReq && modalPage === pg && it.id === modalItemId) modalImg.src = u; }).catch(e=>console.error(e));
+  dfPdfUrl(it, pg).then(u=>{ if(req === _modalReq && modalPage === pg && it.id === modalItemId){ modalImg.src = u; dfPdfAfterShow(); } }).catch(e=>console.error(e));
 }
+/* v307 (Zoran 12.11.): stranica se ne smanjuje; ako je trenutni pogodak ispod trake (ili ispod tastature), cela stranica
+   se samo pomeri gore ili dole, iste veličine, dok pogodak ne dođe na vidno mesto */
+function dfPdfAfterShow(){
+  if(!_df.on || _df.kind !== 'pdf') return;
+  const req = _modalReq;
+  (modalImg.decode ? modalImg.decode() : Promise.resolve()).catch(()=>{}).then(()=>{ if(req === _modalReq) requestAnimationFrame(dfPdfReveal); });
+}
+function dfPdfReveal(){
+  if(!_df.on || _df.kind !== 'pdf' || _zm.s > 1) return;
+  const it = dfItem(), h = _df.hits[_df.cur];
+  if(!it || !h || h.p !== modalPage || it.id !== modalItemId) return;
+  const m = dfPdfMarks(it, modalPage).find(x=>x.cur);
+  const c = zmContent();
+  if(!m || !c) return;
+  const fr = modalFrame.getBoundingClientRect();
+  const y0 = fr.top + c.oy + m.f[1] * c.ch, y1 = fr.top + c.oy + m.f[3] * c.ch;
+  const top = dfBar.getBoundingClientRect().bottom + 12;
+  const vv = window.visualViewport;
+  let bot = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  const info = document.querySelector('#modalBg .modal-info');
+  if(info){ const r = info.getBoundingClientRect(); if(r.height) bot = Math.min(bot, r.top + (parseFloat(getComputedStyle(info).paddingTop) || 0)); }
+  bot -= 12;
+  let dy = 0;
+  if(y0 < top) dy = top - y0 + 24;
+  else if(y1 > bot) dy = bot - y1 - 24;
+  if(Math.round(dy) === Math.round(_zm.ty) && !_zm.tx) return;
+  _zm.tx = 0; _zm.ty = dy; zmApply(true);
+}
+if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on && _df.kind === 'pdf') dfPdfReveal(); });
 /* ---------- traka: položaj ---------- */
 function dfPlace(top){
   if(!_df.on) return 0;
@@ -11566,7 +11595,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 306;
+const APP_VERSION = 307;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
