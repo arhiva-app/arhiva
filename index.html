@@ -2439,6 +2439,21 @@ body.in-album .searchbar{ margin-top:12px; }
 /* v257: Okreni i iseci */
 #modalBg .modal-cap-row .modal-crop{ position:absolute; left:0; right:auto; top:50%; transform:translateY(-50%); width:40px; height:40px; }
 .modal-bg.is-file .modal-crop{ display:none !important; }
+/* v306: pretraga u otvorenom dokumentu — lupa levo od naziva (na mestu „iseci“, koje dokument nema), traka ispod dugmadi */
+#modalBg .modal-cap-row .modal-find{ position:absolute; left:0; right:auto; top:50%; transform:translateY(-50%); width:40px; height:40px; }
+.modal-find{ display:none !important; }
+.modal-bg.can-find:not(.df-open) .modal-find{ display:inline-flex !important; }
+#dfBar{ position:fixed; left:16px; right:16px; z-index:5; margin:0; padding:5px 6px 5px 14px; gap:4px; }
+#dfBar[hidden]{ display:none; }
+#dfBar input{ font-size:16px; }
+.df-cnt{ flex:none; color:var(--ink-dim); font:500 14px var(--font-ui); font-variant-numeric:tabular-nums; white-space:nowrap; padding:0 4px; }
+.df-cnt.none{ color:var(--danger); }
+.df-btn{ flex:none; width:38px; height:38px; padding:0; border:none; background:none; border-radius:50%; color:var(--ink);
+  display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+.df-btn:active{ color:var(--brass); background:var(--surface-2); }
+.df-btn:disabled{ opacity:.3; pointer-events:none; }
+mark.df-m{ background:rgba(232,190,70,.45); color:inherit; border-radius:3px; padding:0; }
+mark.df-m.df-cur{ background:#E8A33D; color:#111; }
 .ce-screen{ display:none; position:fixed; inset:0; z-index:60; background:#000; flex-direction:column; color:#fff;
   padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px); }
 .ce-screen.open{ display:flex; }
@@ -2958,12 +2973,13 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <button class="modal-nav next" id="modalNext">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
   </button>
+  <div class="df-bar searchbar" id="dfBar" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg><input id="dfIn" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><span class="df-cnt" id="dfCnt"></span><button type="button" class="df-btn" id="dfPrev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button type="button" class="df-btn" id="dfNext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button><button type="button" class="df-btn" id="dfX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
   <div class="modal-inner">
     <div class="modal-frame modal-peek" id="modalPeek" hidden aria-hidden="true"><img alt=""></div>
     <div class="modal-frame" id="modalFrame"><img id="modalImg" src=""><video id="modalVideo" controls playsinline preload="metadata" hidden></video><div class="modal-load" id="modalLoad" hidden></div><div class="modal-doc" id="modalDoc" hidden><div class="dr-tabs" id="drTabs" hidden></div><div class="dr-body" id="drBody"></div></div><div class="modal-file" id="modalFile" hidden><div class="mf-ico" id="mfIco"></div><div class="mf-kind" id="mfKind"></div><div class="mf-meta" id="mfMeta"></div><div class="mf-note" id="mfNote"></div><button class="mf-open" id="mfOpen" type="button"></button></div></div>
     <div class="modal-info">
       <div class="modal-count-row"><div class="modal-position" id="modalPosition"></div><span class="modal-date" id="modalDate"></span><span class="modal-page-no" id="modalPageNo"></span></div>
-      <div class="modal-cap-row"><button class="modal-ren modal-crop" id="modalCrop" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg></button><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
+      <div class="modal-cap-row"><button class="modal-ren modal-find" id="modalFind" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg></button><button class="modal-ren modal-crop" id="modalCrop" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg></button><div class="modal-caption" id="modalCaption"></div><button class="modal-ren" id="modalRename" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
       <div class="modal-exp-row is-empty" id="modalExpRow"><span class="modal-exp-line" id="modalExpLine" role="button"></span><button class="modal-ren modal-exp-edit" id="modalExpEdit" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button></div>
       <div class="modal-exp-note" id="modalExpNote"></div>
     </div>
@@ -3794,6 +3810,7 @@ const I18N = {
     pgProcessing: 'Obrađujem stranice…',
     pgEmpty: 'Još nema stranica. Slikaj prvu stranicu ili izaberi slike iz galerije.',
     pgHint: 'Lupa u uglu (ili dodir na stranicu) otvara stranicu preko celog ekrana: tamo je čitaš i pomeraš (Ranije, Na mesto…, Kasnije). Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“.',
+    dfFind: 'Pronađi u dokumentu', dfPh: 'Pronađi u dokumentu', dfPrev: 'Prethodni', dfNext: 'Sledeći', dfClose: 'Zatvori pretragu',
     ceTitle: 'Okreni i iseci', ceCancel: 'Otkaži', ceHint: 'Prevuci uglove na ivice papira — Arhiva ga ispravi u pravougaonik.', ceHintOrig: 'Prikazan je original. „Sačuvaj“ ga vraća (ili ga prvo iseci).',
     ceUndo: 'Poništi', ceModeQuad: 'Ispravi iskošen papir', ceModeRect: 'Običan pravougaonik', ceHintRect: 'Povuci ugao, ili pomeri ceo okvir prstom.',
     ceLeft: 'Levo', ceRight: 'Desno', ceOrig: 'Original', ceSave: 'Sačuvaj', ceWork: 'Ispravljam sliku…', ceSaved: 'Slika je sačuvana. Original se čuva.', ceRestored: 'Vraćen je original.',
@@ -4275,7 +4292,7 @@ const I18N = {
       ['Podsetnik', 'Dokumentu uz koji treba nešto uraditi do nekog datuma (obnoviti registraciju ili osiguranje, platiti, poslati papire) upiši podsetnik: u pregledu dodirni dugme sa zvoncetom, zatim polje za datum, izaberi datum i dodirni „Sačuvaj“. Isto važi za PDF, Word i Excel. Podsetnik upisuješ i preko donjeg reda albuma: „Više“, izaberi stavku, pa „Podsetnik“. Upisan podsetnik menjaš i dodirom na oznaku ispod naziva ili na olovku pored nje. Podsetnik se vidi i menja i na ekranu sa stranicama. Ispod datuma upiši šta treba uraditi (npr. „poslati kopiju ugovora“); ta napomena se vidi u obaveštenju, na spisku podsetnika i u pregledu.', 'Svaki podsetnik ima svoja podsećanja: do tri (kvačica i broj dana pre datuma, 0 = na sam dan) i sat. Nov počinje od 30 · 7 · na dan, u 7:00. Arhiva te obavesti po jednom za svako uključeno podsećanje i kad datum prođe. Na početnom ekranu se tada pojavi zvonce sa brojem (crveno ako je neki datum prošao). Dodir na zvonce otvara spisak svih podsetnika: prošlo, uskoro i kasnije.', 'Zvonce na početnom ekranu je uvek tu: otvara spisak podsetnika, gde dodirom na podsetnik menjaš datum, napomenu, dane i sat, a „Nov podsetnik“ pravi nov (biraš dokument). U aplikaciji je gore i prekidač „podsetnici na telefonu“: podsetnik tada stiže i kao obaveštenje, i kad je Arhiva zatvorena.'],
       ['AI radionica (proba)', 'AI radionica je posebno mesto gde AI radi sa tvojim dokumentom. Otvara se dugmetom sa zvezdicama ✨ u pregledu bilo kog dokumenta, ikonicom „AI“ u redu ikonica na početnom ekranu ili preko izbora: dugi pritisak, pa „Više“ i „AI radionica“.', 'Gore je red kvadrata: Napravi šablon · Moji šabloni · Izmeni · Prevedi, a ispod Sažetak i Iznosi. Izbor dokumenta nudi tri mogućnosti: Iz Arhive, Sa telefona (PDF, Word, Excel ili slika) i Slikaj (papirni dokument kamerom). Dokument sa telefona ili iz kamere se prvo sačuva u Arhivu, u „Bez albuma“, pa se odmah otvori; posle ga premeštaš u album kao i svaki drugi. Ako isti fajl već postoji u Arhivi, prozor „Već je u Arhivi“ kaže gde je i nudi „Otvori iz Arhive“; nova kopija se ne pravi. Svi kvadrati, zadaci i polje za pitanje rade i bez otvorenog dokumenta: prvo biraš dokument, pa zadatak odmah kreće. Možeš i da upišeš svoj zadatak u polje dole i dodirneš strelicu. Dugme ⓘ gore desno otvara objašnjenje; na svakom ekranu radionice dugme ⓘ otvara objašnjenje šta se tu radi; strelica ga zatvara. Pri ulasku na ekran objašnjenje je zatvoreno. Dok AI radi, na ekranu je samo prozor rada; „Otkaži“ ili korak nazad prekida rad. Rezultat se otvara na posebnom ekranu, gde ga čitaš ceo. „Izmeni“ ti dozvoljava da ispraviš bilo koji deo teksta, a polje dole traži doradu od AI, npr. „skrati“ ili „dodaj red za ključeve“. Svaka izmena je nova verzija: okvir „Šta je promenjeno“ kaže šta je urađeno, a strelicama se vraćaš na raniju verziju. U radionici ispod zadataka uvek vidiš original: zadaci stoje na vrhu, a pomera se samo dokument. Naziv otvorenog dokumenta stoji iznad originala. Kad rezultat postoji, gore desno je pločica „Rezultat“ koja ga otvara. ✕ na dokumentu ili korak nazad zatvara samo dokument (nesačuvan rezultat Arhiva prvo nudi da odbaciš), pa biraš drugi. Iz radionice izlaziš strelicom ‹ gore levo, ili korakom nazad kad nijedan dokument nije otvoren.', 'Šablon: dodirni „Napravi šablon“ u redu kvadrata (može i u „Moji šabloni“ na vrhu prozora; bez otvorenog dokumenta prvo biraš dokument). Dok AI čita dokument, na ekranu je samo prozor rada (kod dužeg dokumenta „Čitam deo 1 od 6…“); „Otkaži“ ili korak nazad prekida rad. Stalni tekst ostaje, a podaci slučaja postaju polja. Kod Word, Excel i PDF dokumenata (PDF sa tekstom, npr. napravljen na računaru) tekst se preuzima iz originala od reči do reči: AI samo pronalazi podatke, a Arhiva ih menja poljima. Kod PDF-a AI uz tekst vidi i sliku stranice, samo da pročita natpise pored podataka (kod računa i uplatnica natpisi su često deo slike). Isti iznos koji znači različite stvari (npr. dve kazne od 500 EUR) dobija posebna polja, a ista osoba pomenuta više puta ostaje jedno polje. Zatim se odmah otvara ekran „Polja šablona“: za svako polje vidiš njegov naziv, vrstu i šta u dokumentu piše. Polje sa kvačicom popunjavaš za svaki nov slučaj, a kad skineš kvačicu, podatak iz originala ostaje stalni tekst. Dodir bilo gde na red uključuje ili isključuje kvačicu. Ako AI neki podatak nije našao (npr. adresa je ostala stalni tekst), dodirni „Dodaj polje koje nedostaje“ ispod spiska: u tekstu dokumenta dodirni prvu, pa poslednju reč podatka, upiši naziv polja i dodirni „Dodaj polje“. Arhiva isti podatak menja svuda u tekstu, bez slanja AI-ju. Dugme ⓘ gore otvara objašnjenje ovog ekrana; strelica ga zatvara. Dugme „Sačuvaj šablon“ na dnu pita za naziv i čuva šablon, a zatim se otvara „Moji šabloni“, gde je nov šablon prvi. Korak nazad pre čuvanja nudi da odbaciš šablon. „Moji šabloni“ (dugme gore) otvara ekran preko celog ekrana. Bez otvorenog dokumenta vidiš dokumente od kojih si pravio šablone, kao redove ili pločice (dugme gore menja prikaz, Arhiva ga pamti); broj kaže koliko šablona dokument ima, a lupa traži po nazivu dokumenta ili šablona. „Šablon od dokumenta…“ prvo traži da izabereš dokument. Dodir na dokument otvara njegove šablone; gore je putanja „Moji šabloni › naziv dokumenta“, a „Nov šablon od ovog dokumenta“ pravi šablon odmah od njega. Kad je dokument otvoren u radionici, odmah vidiš njegove šablone. Vrh ekrana stoji, pomeraju se samo dokumenti i šabloni. Uz svaki šablon je „Popuni šablon“, koje pravi nov dokument. Za drugačiji izbor polja istog dokumenta ponovo dodirni „Napravi šablon“ u tom prozoru: AI čita dokument samo prvi put, a posle se polja otvaraju odmah iz tog čitanja, sva označena, bez troška. Sačuvan šablon se nikad ne menja: nov se čuva pored njega („… (2)“), dugmetom „Sačuvaj kao nov šablon“. Šablon koji ti više ne treba obrišeš korpom. Korpa briše šablon. Šabloni su i u rezervnoj kopiji.', 'Popunjavanje: u „Moji šabloni“ dodirni „Popuni šablon“ ispod šablona. Za svako polje upiši podatak (sivo je primer iz originala). Telefon se sam svede na cifre, e-pošta na mala slova, a iznos bez valute dobija valutu iz primera. „Napravi dokument“ pita za naziv i album i pravi nov dokument u Arhivi: šablon od Word-a daje Word sa izgledom originala (menja se samo tekst polja), šablon od PDF-a sa tekstom daje PDF sa izgledom originala (stari podatak se prekrije, a nov upiše na isto mesto; duži podatak dobija nešto sitnija slova), a šablon od slike ili skena daje čist, uredan PDF: AI prvo prepiše tekst sa slike, stranicu po stranicu, i od tog teksta Arhiva pravi šablon. Polje koje ostaviš prazno postaje crta za ručni upis. Naziv šablona, brojač popunjenih polja i dugmad Slikaj · Galerija · Arhiva · Napravi dokument stoje gore i ne pomeraju se; pomeraju se samo polja. Dugme ⓘ u kartici sa nazivom otvara objašnjenje; strelica ga zatvara. Tastatura se prilagođava polju (telefon, brojevi, e-pošta), a taster „Dalje“ vodi u sledeće polje. Umesto kucanja podatke može da upiše AI: gore slikaj ličnu kartu ili pasoš (može i obe strane, i više osoba), izaberi sliku iz galerije ili dokument iz Arhive. Izabrano se vidi dole kao sličice sa ✕, a ispod je dugme „Popuni pomoću AI“. Kad izabereš dva ili više dokumenata (npr. ličnu kartu zakupca i supruge), pojavi se i polje za napomenu: napiši ko je ko, npr. „prva je zakupac, druga supruga“, jer AI to ne može sam da zna. Bez izabranog dokumenta dole nema ničega: podatke kucaš ili izgovaraš (mikrofon na tastaturi) pravo u polje, što je brže i besplatno. Dok AI radi, na ekranu je samo prozor rada; „Otkaži“ ili korak nazad prekida rad. AI upisuje samo u prazna polja; ono što si ti upisao ne dira. Polje koje je popunio AI ima oznaku „AI“, a polje koje nije našao „AI nije pronašao“. Proveri podatke pre pravljenja dokumenta. Strelice gore desno (↶ poništi, ↷ vrati) vraćaju polja korak po korak; jedan korak unazad posle AI vraća sva polja kakva su bila pre AI. Izvori idu Google-ovom servisu Gemini i ne čuvaju se u Arhivi. Šablon ostaje isti, pa ga popunjavaš koliko god puta hoćeš. Word se ne može deliti iz Chrome-a: dugmetom „Sačuvaj na telefon“ ga preuzmeš i pošalješ kao prilog, ili ga iz albuma (Pošalji) podeliš kao PDF; PDF može odmah „Podeli“.', 'Izmeni (Word): menja tekst Word dokumenta, a izgled ostaje kao u originalu. Dodirni pasus ili ćeliju tabele, ispravi tekst i dodirni „Primeni“. „Otkaži“ (ili korak nazad) zatvara prozor bez ikakve izmene, pa pasus možeš slobodno samo da pogledaš. „Dodaj pasus ispod“ dodaje nov pasus istog stila, „Obriši pasus“ ga uklanja, a „Vrati kao u originalu“ poništava izmenu. Izmenjeni pasusi su označeni. Strelice gore desno (↶ poništi, ↷ vrati) idu korak po korak kroz sve izmene. I u prozoru pasusa, dok kucaš, ↶ ↷ vraćaju kucanje reč po reč. Izmenu možeš da tražiš i svojim rečima: u polje ✦ dole napiši šta da se promeni, npr. „promeni rok plaćanja na 10.“ ili „dodaj da je kirija 300 EUR“, i dodirni strelicu. AI ne prepisuje dokument: vraća samo delove koje menja, a Arhiva ih upisuje. Izmenjeni delovi su uokvireni i imaju oznaku „AI izmena“, a ekran se pomeri do prve. Obaveštenje gore kaže koliko je pasusa izmenjeno; „Vrati“ u njemu (ili ↶ gore) poništava celu AI izmenu odjednom. Ako AI ne razume zahtev ili ga ne može izvesti, ništa se ne menja i AI kaže zašto. Dok AI radi, na ekranu je samo prozor rada; „Otkaži“ ili korak nazad prekida rad. Kvadrat „Sačuvaj“ gore desno pravi nov Word („… – izmena 1“) u albumu originala. Pravilo Arhive: sadržaj originala se nikad ne menja — svaka izmena teksta, ručna ili pomoću AI, daje nov dokument. Naziv, album i rok menjaš na samom dokumentu. Izmeni PDF (PDF sa tekstom, npr. račun napravljen na računaru): tekst PDF-a je složen kao kod Word-a — svaki podatak (npr. datum, iznos, poziv na broj) i svaki pasus je poseban deo, po stranicama. Dodir na deo otvara prozor: gore je isečak prave stranice sa tim tekstom uokvirenim (da vidiš koje je to mesto, npr. kad se ime ponavlja), ispravi tekst i dodirni „Primeni“, a „Obriši tekst“ ga uklanja. Kad se isti tekst nalazi i na drugim mestima, kvačica „promeni i tamo“ menja ga svuda odjednom. Nov pasus se ne može dodati, jer PDF ne pomera ostatak stranice; duži tekst dobija nešto sitnija slova. Prazno polje (npr. ćeliju obrasca) popunjavaš dugmetom „＋ Dopiši u prazno polje“ na vrhu ekrana: otvori se prava stranica koju gledaš u spisku (strelice ‹ › gore menjaju stranicu; dva prsta je uvećavaju, jedan prst pomera), dodirni prazno mesto, a Arhiva sama nađe ivice polja i upiše tekst u njega (tastatura je odmah gore, strelica na tastaturi = Primeni). Dopisan tekst je u spisku sa oznakom „dopisano“; dodir ga menja ili briše. Isečak gore u prozoru pokazuje stranicu kako će izgledati u novom PDF-u (menja se dok kucaš); dva prsta ga uvećavaju, a jedan prst pomera. Izmenjeni delovi su uokvireni. I ovde radi polje ✦ svojim rečima, ↶ ↷ i „Sačuvaj“, koje pravi nov PDF u izgledu originala: stari tekst se prekrije, a nov upiše na isto mesto. Izmeni Excel: gore su listovi kao pilule (broj uz naziv kaže koliko je izmena na tom listu), a ispod list kao tabela, sa slovima kolona i brojevima redova. Dodir na ćeliju otvara prozor: gore je isečak tabele oko ćelije (red sa nazivima kolona i po dva reda iznad i ispod; ćelija je uokvirena i menja se dok kucaš), iznad polja piše šta je u originalu, ispravi vrednost i dodirni „Primeni“. Broj upiši bez valute (npr. 4250,50), a datum kao 15.10.2026; ćelija zadržava svoj izgled iz originala (valuta, decimale, boja). Ćelija sa formulom (oznaka ƒ, npr. zbir) se ne kuca: menjaš brojeve od kojih zavisi, a ona se sama preračuna. I ovde radi polje ✦ svojim rečima, ↶ ↷ i „Sačuvaj“, koje pravi nov Excel u izgledu originala. Za sken ili sliku izmena ide zadatkom svojim rečima (nastaje nov, čist PDF).', 'Dokument ostaje nepromenjen. Rezultat ulazi u arhivu tek kad dodirneš „Sačuvaj“, kao nov dokument u album koji izabereš. Ispod albuma biraš „sačuvaj kao“: PDF (podrazumevano), Word, kad želiš dalje da menjaš tekst, ili Excel, koji se pojavi samo kad rezultat ima tabelu (svaka tabela na svom listu, iznosi kao brojevi). „Podeli“ šalje rezultat kao PDF. Posle svakog čuvanja novog dokumenta (Rezultat, Izmeni, Popuni šablon) gore se pojavi prečica sa nazivom novog dokumenta i ›: jedan dodir ga otvara u njegovom albumu. Prečica stoji dok si u radionici, dok ne izabereš drugi dokument ili ne sačuvaš sledeći. „Pročitaj (AI)“ (označi dokument → „Više“) predlaže naziv, album, rok i tekst za pretragu samog dokumenta; ništa se ne menja dok ne dodirneš „Primeni izabrano“.', 'Ključ, model i trošak su u Podešavanja → AI obrada. Ispod svakog rezultata piše koliko je koštao. Pre prvog slanja Arhiva traži saglasnost, jer dokument ide Google-ovom servisu Gemini. Dok je ovo proba, ne šalji lične i poverljive dokumente.'],
       ['Zbirni spisak', 'U albumu dodirni ikonicu „Spisak“ (pored „Spoji“), dodiruj dokumente koje hoćeš, pa dole „Napravi spisak“. Izaberi šta AI da izvuče: Troškovi (datum, prodavac, iznos), Rokovi (naziv, ističe) ili Svoje… (sam upišeš kolone), pa „Napravi spisak“.', 'AI čita dokument po dokument i pravi jednu tabelu; kod troškova je dole zbir. Ono što AI nije pronašao piše crveno. Dodir na bilo koju vrednost otvara prozor sa slikom tog dokumenta: uporediš, ispraviš ili upišeš, a „Otvori ceo dokument“ otvara ceo dokument. Upisano ili ispravljeno rukom ima znak olovke. „Sačuvaj kao Excel“ ili „PDF“ čuva spisak kao nov dokument u istom albumu; izabrani dokumenti se ne menjaju.'],
-      ['Pretraga', 'Lupa pretražuje nazive albuma, slika i dokumenata. „Detaljno“ traži i reči unutar PDF, Word i Excel dokumenata.', 'U albumu dodirni ikonicu „Pretraži“: na mestu reda ikonica otvara se polje za pretragu, a pretraga obuhvata i podalbume. Možeš upisati i delove više reči, bilo kojim redom: „info ori“ nalazi „Informatika račun original“. Ćirilica i latinica su isto: „info“ nalazi i „Информатика“, a „инфо“ i „Informatika“. ✕ ili korak nazad zatvara pretragu i vraća ikonice.'],
+      ['Pretraga', 'Lupa pretražuje nazive albuma, slika i dokumenata. „Detaljno“ traži i reči unutar PDF, Word i Excel dokumenata.', 'U albumu dodirni ikonicu „Pretraži“: na mestu reda ikonica otvara se polje za pretragu, a pretraga obuhvata i podalbume. Možeš upisati i delove više reči, bilo kojim redom: „info ori“ nalazi „Informatika račun original“. Ćirilica i latinica su isto: „info“ nalazi i „Информатика“, a „инфо“ i „Informatika“. ✕ ili korak nazad zatvara pretragu i vraća ikonice.', 'U otvorenom dokumentu (Word, Excel, PDF sa tekstom) lupa levo od naziva traži reč unutar tog dokumenta. Svi pogoci se oboje, trenutni je narandžast, a strelice ˄ ˅ (ili Enter) idu na prethodni i sledeći; pored strelica piše koji je to pogodak od ukupno koliko. Excel se pretražuje po svim listovima, a PDF po svim stranicama. Važe ista pravila kao gore (č = c, ćirilica = latinica). Slike i skenirani papiri nemaju lupu, jer u njima nema teksta. ✕ ili korak nazad zatvara pretragu.'],
       ['Prečica na početnom ekranu', 'Označi jednu stavku (dugi pritisak), pa „Prečica“ u donjem redu (preimenovanje je sada u „Više“ i olovkom u pregledu). U aplikaciji Arhiva odmah pravi pravu prečicu sa sličicom i nazivom stavke; dodir na nju otvara stavku u njenom albumu (kad je Arhiva zaključana, posle otključavanja). Ako telefon ne doda prečicu (Xiaomi traži dozvolu), Arhiva to kaže, a dugme „Otvori dozvole“ vodi u podešavanja Arhive. Ako je stavka obrisana, Arhiva to kaže. Kad je Arhiva zaključana, prečica sa početnog ekrana ipak odmah otvara svoju stavku, bez PIN-a: možeš da je gledaš i pošalješ, ali ne i da pređeš na druge stavke, menjaš ili brišeš; „Otključaj“ vodi u celu Arhivu, a korak nazad zatvara aplikaciju. Dugi pritisak na ikonicu Arhive pokazuje poslednje otvorene stavke; one se, kad je Arhiva zaključana, otvaraju tek posle otključavanja. U Chrome-u se stavka otvara u Chrome-u, a iz Chrome menija biraš „Dodaj na početni ekran“. Prečica dokumenta od više stranica lista sve stranice.'],
       ['Vidžet na početnom ekranu', 'U Android aplikaciji Arhiva ima vidžet za početni ekran telefona. Postavljaš ga kao i ostale vidžete: dug pritisak na prazno mesto ekrana → Vidžeti → Arhiva. Podrazumevano je veličine ikonice: znak Arhive i broj podsetnika koji traže pažnju (isti broj kao na zvoncetu; crven ako je neki datum prošao). Dugim pritiskom na vidžet i povlačenjem ivica ga povećavaš: tada pokazuje tri najbliža podsetnika, a još veći i do 4 izabrana dokumenta.', 'Dokument staviš na vidžet ovako: označi ga u albumu, pa Prečica → Na vidžetu. Dodir na vidžet otvara prozor preko celog ekrana sa izabranim podsetnicima i dokumentima — samo za gledanje, i bez PIN-a kad je Arhiva zaključana (zaključan telefon je zaštita); dodir na dokument ga otvara. Menja se u Arhivi: „Uredi ›“ gore desno (PIN ako je zaključana) otvara ekran tog vidžeta. Dodir na ime u naslovu ga menja (pa Sačuvaj). Možeš postaviti i više vidžeta — svaki ima svoje ime, podsetnike i dokumente; kod Prečice tada biraš na koji vidžet ide dokument. Tu biraš koji podsetnici su na vidžetu: Svi, Izabrani (kvačica pored svakog) ili Nijedan (tada samo dokumenti, bez broja); ✕ skida dokument sa vidžeta (uz potvrdu; dokument ostaje u Arhivi), a „Dodaj dokument“ dodaje nov.'],
       ['Zaključavanje', 'Samo u Android aplikaciji: Podešavanja → Zaključavanje. Biraš „Bez zaključavanja“, „PIN (4 cifre)“ ili „Šablon“, a uz to i biometriju (otisak prsta). Arhiva se zaključava pri svakom pokretanju i kad se ugasi ekran telefona; može i kad si u drugoj aplikaciji duže od zadatog vremena.', 'Na svaka 3 dana Arhiva traži PIN (ili šablon) i kad je biometrija uključena, da ga ne zaboraviš. Ako zaboraviš PIN, otključaj šablonom Arhive (i obrnuto) ili otiskom prsta, odnosno PIN-om telefona, pa postavi nov.'],
@@ -4616,6 +4633,7 @@ const I18N = {
     pgProcessing: 'Processing pages…',
     pgEmpty: 'No pages yet. Take a photo of the first page or pick images from the gallery.',
     pgHint: 'The magnifier in the corner (or a tap on the page) opens the page full screen: read it there and move it (Earlier, Move to…, Later). You can also drag the handle in the corner, and ✕ removes the page. Nothing is saved until “Save”.',
+    dfFind: 'Find in document', dfPh: 'Find in document', dfPrev: 'Previous', dfNext: 'Next', dfClose: 'Close search',
     ceTitle: 'Rotate & crop', ceCancel: 'Cancel', ceHint: 'Drag the corners to the edges of the paper — the archive straightens it.', ceHintOrig: 'The original is shown. “Save” restores it (or crop it first).',
     ceUndo: 'Undo', ceModeQuad: 'Straighten tilted paper', ceModeRect: 'Plain rectangle', ceHintRect: 'Drag a corner, or move the whole frame with your finger.',
     ceLeft: 'Left', ceRight: 'Right', ceOrig: 'Original', ceSave: 'Save', ceWork: 'Straightening the image…', ceSaved: 'Image saved. The original is kept.', ceRestored: 'Original restored.',
@@ -5097,7 +5115,7 @@ const I18N = {
       ['Reminder', 'For a document that needs something done by a certain date (renew a registration or insurance, pay, send papers) set a reminder: in the viewer tap the bell button, then the date field, pick the date and tap “Save”. The same works for PDF, Word and Excel. You can also set it from the album bottom row: “More”, choose the item, then “Reminder”. Once set, you can also change it by tapping the label under the name or the pencil next to it. The reminder is also shown and changed on the pages screen. Under the date write what needs to be done (e.g. “send a copy of the contract”); the note is shown in the notification, in the reminders list and in the viewer.', 'Each reminder has its own settings: up to three (checkbox and number of days before the date, 0 = on the day itself) and a time. A new one starts at 30 · 7 · on the day, at 7:00. Arhiva notifies you once for each one that is on and when the date has passed. A bell with a number appears on the home screen (red if a date has passed). Tap the bell to see all reminders: past, soon and later.', 'The bell on the home screen is always there: it opens the list of reminders, where tapping a reminder changes its date, note, days and time, and “New reminder” creates one (you choose the document). In the app, the top also has the “reminders on the phone” switch: the reminder then also arrives as a notification, even when Arhiva is closed.'],
       ['AI workshop (trial)', 'The AI workshop is a separate place where AI works with your document. Open it with the button with the stars ✨ in the viewer of any document, with the “AI” icon in the row of icons on the home screen, or by selecting: long-press, then “More” and “AI workshop”.', 'At the top is a row of squares: Make template · My templates · Edit · Translate, with Summary and Amounts below. Choosing a document offers three options: From Arhiva, From the phone (PDF, Word, Excel or image) and Take a photo (a paper document with the camera). A document from the phone or the camera is first saved to Arhiva, in “No album”, and opens right away; later you move it to an album like any other. If the same file is already in Arhiva, the “Already in Arhiva” window says where it is and offers “Open from Arhiva”; no new copy is made. All squares, tasks and the question field work without an open document too: you choose a document first, then the task starts. You can also type your own task in the field below and tap the arrow. The ⓘ button at the top right opens the explanation; on every workshop screen the ⓘ button opens an explanation of what is done there; the arrow closes it. When you enter a screen, the explanation is closed. While AI works, only the progress window is on the screen; “Cancel” or going back stops the work. The result opens on its own screen where you read all of it. “Edit” lets you correct any part of the text, and the field below asks AI to refine it, e.g. “shorter” or “add a row for the keys”. Every change is a new version: the “What changed” box says what was done, and the arrows take you back to an earlier version. In the workshop the original is always shown below the tasks: the tasks stay at the top and only the document scrolls. The name of the open document is above the original. When there is a result, the “Result” tile at the top right opens it. ✕ on the document or the back gesture closes only the document (Arhiva first offers to discard an unsaved result), so you can choose another. You leave the workshop with the ‹ arrow at the top left, or with the back gesture when no document is open.', 'Template: tap “Make template” in the row of squares (also possible at the top of the “My templates” window; with no document open, you first choose a document). While AI reads the document, only the progress window is on the screen (for a longer document “Reading part 1 of 6…”); “Cancel” or going back stops the work. The fixed text stays, and the data of the case become fields. For Word, Excel and PDF documents (a PDF with text, e.g. made on a computer) the text is taken from the original word for word: AI only finds the data, and Arhiva replaces them with fields. For a PDF, AI also sees a picture of the page, only to read the labels next to the data (on bills and payment slips labels are often part of the picture). The same amount with different meanings (e.g. two penalties of 500 EUR) gets separate fields, while the same person mentioned several times stays one field. Then the “Template fields” screen opens right away: for each field you see its name, its type and what the document says. A checked field is filled in for each new case, and when you uncheck it, the data from the original stays fixed text. Tapping anywhere on a row checks or unchecks it. If the AI missed some data (e.g. an address stayed fixed text), tap “Add a missing field” below the list: in the document text tap the first, then the last word of the data, type a field name and tap “Add field”. Arhiva replaces that data everywhere in the text, without sending anything to AI. The ⓘ button at the top opens the explanation of this screen; the arrow closes it. The “Save template” button at the bottom asks for a name and saves the template, and then “My templates” opens with the new template first. Going back before saving offers to discard the template. “My templates” (the button at the top) opens a full screen. Without an open document you see the documents you made templates from, as rows or tiles (the button at the top switches the view and Arhiva remembers it); the number shows how many templates a document has, and the magnifier searches by document or template name. “Template from a document…” first asks you to choose a document. Tapping a document opens its templates; at the top is the path “My templates › document name”, and “New template from this document” makes a template right from it. When a document is open in the workshop, you see its templates right away. The top of the screen stays put; only documents and templates scroll. Each template has “Fill in template”, which makes a new document. For a different field selection of the same document tap “Make template” in that window again: AI reads the document only the first time, and afterwards the fields open right away from that reading, all checked, at no cost. A saved template is never changed: the new one is saved next to it (“… (2)”) with “Save as new template”. Delete a template you no longer need with the bin. The bin deletes the template. Templates are also in the backup.', 'Filling in: in “My templates” tap “Fill in template” under a template. Enter the data for each field (the grey text is an example from the original). A phone number is reduced to digits, an e-mail to lower case, and an amount without a currency gets the currency from the example. “Make document” asks for a name and an album and makes a new document in Arhiva: a template from Word gives a Word file with the original layout (only the field text changes), a template from a PDF with text gives a PDF with the original look (the old data are covered and the new written in the same place; longer data get somewhat smaller letters), and a template from a photo or a scan gives a clean, tidy PDF: AI first transcribes the text from the image, page by page, and Arhiva makes the template from that text. A field you leave empty becomes a line to fill in by hand. The template name, the counter of filled fields and the Camera · Gallery · Arhiva · Make document buttons stay at the top and do not scroll; only the fields scroll. The ⓘ button at the top opens the explanation of this screen; the arrow closes it. The keyboard matches the field (phone, numbers, e-mail), and the “Next” key moves to the next field. Instead of typing, AI can fill in the data: at the top take a photo of an ID card or passport (both sides and several people are fine), pick a photo from the gallery or a document from Arhiva. What you picked is shown at the bottom as thumbnails with ✕, with the “Fill in with AI” button below. When you pick two or more documents (e.g. the ID cards of the tenant and the spouse), a note field appears too: write who is who, e.g. “the first is the tenant, the second the spouse”, because AI cannot know it on its own. With no document picked there is nothing at the bottom: type or dictate the data (the keyboard microphone) straight into the field, which is faster and free. While AI works, only the progress window is on the screen; “Cancel” or going back stops the work. AI writes only into empty fields; what you typed stays. A field filled in by AI is marked “AI”, and a field it could not find “AI did not find it”. Check the data before making the document. The arrows at the top right (↶ undo, ↷ redo) step the fields back and forward; one step back after AI restores all fields as they were before AI. The sources go to the Google Gemini service and are not kept in Arhiva. The template stays the same, so you can fill it in as many times as you like. Chrome cannot share a Word file: download it with “Save to phone” and send it as an attachment, or share it as a PDF from the album (Send); a PDF can be shared right away with “Share”.', 'Edit (Word): changes the text of a Word document while the layout stays as in the original. Tap a paragraph or a table cell, correct the text and tap “Apply”. “Cancel” (or going back) closes the window without any change, so you can just look at a paragraph. “Add paragraph below” adds a new paragraph in the same style, “Delete paragraph” removes it, and “Restore as in the original” undoes the change. Changed paragraphs are marked. The arrows at the top right (↶ undo, ↷ redo) step through all changes one by one. In the paragraph window, while you type, ↶ ↷ step back and forward word by word. You can also ask for a change in your own words: in the ✦ field at the bottom type what to change, e.g. “change the payment deadline to the 10th” or “add that the rent is 300 EUR”, and tap the arrow. AI does not rewrite the document: it returns only the parts it changes, and Arhiva writes them in. Changed parts are framed and marked “AI change”, and the screen scrolls to the first one. The notice at the top says how many paragraphs were changed; “Undo” in it (or ↶ at the top) undoes the whole AI change at once. If AI does not understand the request or cannot do it, nothing changes and AI says why. While AI works, only the progress window is on the screen; “Cancel” or going back stops the work. The “Save” square at the top right makes a new Word file (“… – edit 1”) in the original’s album. Arhiva’s rule: the content of the original is never changed — every text change, by hand or with AI, gives a new document. You change the name, album and date on the document itself. Edit PDF (a PDF with text, e.g. a bill made on a computer): the PDF text is laid out as in Word — every piece of data (e.g. a date, an amount, a reference number) and every paragraph is a separate part, page by page. Tapping a part opens it: at the top is a cut-out of the real page with that text framed (so you see which place it is, e.g. when a name repeats); correct the text and tap “Apply”, and “Delete text” removes it. When the same text is also in other places, the “change it there too” check box changes it everywhere at once. A new paragraph cannot be added, because a PDF does not move the rest of the page; longer text gets somewhat smaller letters. An empty field (e.g. a form cell) is filled with the “＋ Write in an empty field” button at the top of the screen: the real page you are looking at in the list opens (the ‹ › arrows at the top change the page; two fingers zoom it, one finger moves it), tap the empty place, and Arhiva finds the edges of the field and writes the text into it (the keyboard is up at once, the arrow on the keyboard = Apply). Added text is in the list marked “added”; tapping it changes or deletes it. The cut-out at the top of the window shows the page as it will look in the new PDF (it changes as you type); two fingers zoom it, one finger moves it. Changed parts are framed. The ✦ field in your own words, ↶ ↷ and “Save” work here too; Save makes a new PDF with the original look: the old text is covered and the new one written in the same place. Edit Excel: the sheets are pills at the top (the number next to a name says how many changes that sheet has), and below is the sheet as a table, with column letters and row numbers. Tapping a cell opens a window: at the top is a cut-out of the table around the cell (the row with column names and two rows above and below; the cell is framed and changes as you type), and above the field you see what is in the original; correct the value and tap “Apply”. Type a number without currency (e.g. 4250.50) and a date as 15.10.2026; the cell keeps its look from the original (currency, decimals, colour). A cell with a formula (marked ƒ, e.g. a total) is not typed: change the numbers it depends on and it recalculates. The ✦ field in your own words, ↶ ↷ and “Save” work here too; Save makes a new Excel with the look of the original. For a scan or a photo, editing is done with a task in your own words (a new clean PDF is made).', 'The document stays unchanged. The result enters the archive only when you tap “Save”, as a new document in the album you choose. Below the album you choose “save as”: PDF (default), Word, when you want to keep editing the text, or Excel, which appears only when the result has a table (each table on its own sheet, amounts as numbers). “Share” sends the result as a PDF. After every save of a new document (Result, Edit, Fill in template) a shortcut with the new document’s name and › appears at the top: one tap opens it in its album. The shortcut stays while you are in the workshop, until you choose another document or save the next one. “Read (AI)” (select the document → “More”) suggests a name, an album, a date and text for search for the document itself; nothing changes until you tap “Apply selected”.', 'Key, model and cost are in Settings → AI processing. Below every result you see what it cost. Before the first send Arhiva asks for consent, because the document goes to the Google Gemini service. While this is a trial, do not send personal or confidential documents.'],
       ['Combined list', 'In an album tap the “List” icon (next to “Merge”), tap the documents you want, then “Make list” at the bottom. Choose what the AI should extract: Expenses (date, seller, amount), Deadlines (name, expires) or Custom… (you type the columns), then “Make list”.', 'The AI reads the documents one by one and makes one table; for expenses there is a total at the bottom. Anything the AI did not find is shown in red. Tapping any value opens a window with a picture of that document: compare, correct or type it in; “Open whole document” opens it whole. Values entered or corrected by hand have a pencil mark. “Save as Excel” or “PDF” saves the list as a new document in the same album; the selected documents are not changed.'],
-      ['Search', 'The magnifier searches the names of albums, images and documents. “Detailed” also searches words inside PDF, Word and Excel documents.', 'Inside an album, tap the “Search” icon: a search field opens in place of the icon row, and search also covers sub-albums. You can type parts of several words, in any order: “info ori” finds “Informatika račun original”. Cyrillic and Latin letters count as the same: “info” also finds “Информатика”, and “инфо” finds “Informatika”. ✕ or Back closes the search and brings the icons back.'],
+      ['Search', 'The magnifier searches the names of albums, images and documents. “Detailed” also searches words inside PDF, Word and Excel documents.', 'Inside an album, tap the “Search” icon: a search field opens in place of the icon row, and search also covers sub-albums. You can type parts of several words, in any order: “info ori” finds “Informatika račun original”. Cyrillic and Latin letters count as the same: “info” also finds “Информатика”, and “инфо” finds “Informatika”. ✕ or Back closes the search and brings the icons back.', 'In an open document (Word, Excel, PDF with text) the magnifier left of the name finds a word inside that document. All matches are colored, the current one is orange, and the ˄ ˅ arrows (or Enter) go to the previous and next one; the counter shows which match it is out of how many. Excel is searched across all sheets and PDF across all pages. The same rules as above apply (č = c, Cyrillic = Latin). Images and scanned papers have no magnifier, because they contain no text. ✕ or Back closes the search.'],
       ['Home screen shortcut', 'Select one item (long-press), then “Shortcut” in the bottom row (renaming is now in “More” and with the pencil in the viewer). In the app, Arhiva creates a real shortcut with the item’s thumbnail and name right away; tapping it opens the item in its album (when Arhiva is locked, after unlocking). If the phone does not add the shortcut (Xiaomi requires permission), Arhiva says so, and “Open permissions” leads to Arhiva’s settings. If the item was deleted, Arhiva says so. When Arhiva is locked, a home screen shortcut still opens its item right away, without the PIN: you can view and send it, but not move to other items, edit or delete; “Unlock” leads into the whole Arhiva, and the back step closes the app. Long-pressing the Arhiva icon shows recently opened items; when Arhiva is locked, they open only after unlocking. In Chrome the item opens in Chrome; choose “Add to home screen” from the Chrome menu. The shortcut of a multi-page document shows all pages.'],
       ['Home screen widget', 'In the Android app, Arhiva has a widget for the phone’s home screen. Place it like any other widget: long-press an empty spot → Widgets → Arhiva. By default it is the size of an icon: the Arhiva sign and the number of reminders that need attention (the same number as on the bell; red if a date has passed). Long-press the widget and drag its edges to make it bigger: then it shows the three nearest reminders, and when even bigger, up to 4 chosen documents.', 'To put a document on the widget, select it in its album, then Shortcut → On the widget. Tapping the widget opens a full-screen window with the chosen reminders and documents — for viewing only, and without the PIN when Arhiva is locked (a locked phone is the protection); tapping a document opens it. Changes are made in Arhiva: “Edit ›” at the top right (PIN if locked) opens that widget’s screen. Tap the name in the title to change it (then Save). You can place several widgets — each has its own name, reminders and documents; with Shortcut you then choose which widget a document goes to. There you choose which reminders are on the widget: All, Chosen (a checkbox next to each) or None (then only documents, without a number); ✕ removes a document from the widget (after confirming; it stays in Arhiva), and “Add a document” adds one.'],
       ['App lock', 'Only in the Android app: Settings → App lock. Choose “No lock”, “PIN (4 digits)” or “Pattern”, plus biometrics (fingerprint) if you like. Arhiva locks every time it starts and when the phone screen turns off; it can also lock when you are in another app for longer than the set time.', 'Every 3 days Arhiva asks for the PIN (or pattern) even with biometrics on, so you do not forget it. If you forget the PIN, unlock with the Arhiva pattern (or the other way round) or with the phone fingerprint or PIN, then set a new one.'],
@@ -8799,6 +8817,8 @@ let modalPage = 0;        /* stranica dokumenta koja je sada u pregledu */
 let _modalReq = 0;        /* poslednji zahtev za prikaz (stariji odgovori se odbacuju) */
 function setModalSrc(u){ if(u) modalImg.src = u; else modalImg.removeAttribute('src'); }
 function showModalItem(item, page){
+  if(_df && _df.on && _df.id !== item.id) dfClose();   /* v306: druga stavka zatvara pretragu u dokumentu */
+  modalBg.classList.remove('can-find');
   modalItemId = item.id;
   setTimeout(peekPrep, 0);   /* v136: pripremi susede za traku */
   modalPathSet(item);
@@ -8927,7 +8947,7 @@ function pdfPageUrl(it, n){
 }
 /* maxSide 0 = običan prikaz (širina ekrana × gustina × 1,5, najviše 3000 px);
    maxSide > 0 = oštrija stranica za uvećanje (najviše maxSide px po dužoj strani, najviše 12 miliona tačaka) */
-function pdfRenderPage(it, n, maxSide){
+function pdfRenderPage(it, n, maxSide, marks){   /* v306: marks = obojeni pogoci pretrage u dokumentu */
   return (async ()=>{
     const doc = await pdfDocFor(it);
     const page = await doc.getPage(n + 1);
@@ -8945,6 +8965,16 @@ function pdfRenderPage(it, n, maxSide){
     cv.width = Math.max(1, Math.floor(vp.width)); cv.height = Math.max(1, Math.floor(vp.height));
     await page.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise;
     page.cleanup();
+    if(marks && marks.length){
+      const cx = cv.getContext('2d');
+      cx.save(); cx.globalCompositeOperation = 'multiply';   /* boja ispod slova: tekst ostaje čitljiv */
+      marks.forEach(m=>{
+        const a = vp.convertToViewportPoint(m.r[0], m.r[1]), b = vp.convertToViewportPoint(m.r[2], m.r[3]);
+        cx.fillStyle = m.cur ? 'rgba(255,140,0,.8)' : 'rgba(255,214,0,.6)';
+        cx.fillRect(Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+      });
+      cx.restore();
+    }
     const blob = await new Promise((res, rej)=>cv.toBlob(b=>b ? res(b) : rej(new Error('crtanje nije uspelo')), 'image/jpeg', 0.92));
     cv.width = cv.height = 0;
     return URL.createObjectURL(blob);
@@ -8980,7 +9010,8 @@ function showModalPdf(item, page){
     modalPage = (want < 0) ? n - 1 : Math.min(want, n - 1);
     setNav(n);
     const pg = modalPage;
-    return pdfPageUrl(item, pg).then(u=>{
+    dfPdfHas(item).then(y=>{ if(req === _modalReq) dfCanFind(item, y); }).catch(()=>{});   /* v306: lupa samo za PDF sa tekstom */
+    return dfPdfUrl(item, pg).then(u=>{
       if(req !== _modalReq) return;
       modalImg.src = u;
       load.hidden = true;
@@ -8998,6 +9029,7 @@ function showModalPdf(item, page){
    Sadržaj fajla se čisti pre prikaza: bez skripti, okvira i on…= svojstava; linkovi samo http(s)/mailto/tel. */
 const modalDoc = document.getElementById('modalDoc');
 let _drReq = 0;
+var _drSheets = null;   /* v306: otvoren Excel {req, wb, names, cur, show} — za pretragu po svim listovima */
 const DR_K_MIN = 0.75, DR_K_MAX = 2.2;
 function drScale(){ let k = 1; try{ k = parseFloat(localStorage.getItem('galerija:readerScale')) || 1; }catch(e){} return Math.max(DR_K_MIN, Math.min(DR_K_MAX, k)); }
 function drSetScale(k){
@@ -9049,7 +9081,7 @@ function showModalVideo(item){
 }
 function docClear(){
   vidClear();
-  ++_drReq;
+  ++_drReq; _drSheets = null;
   modalBg.classList.remove('is-docview');
   modalDoc.hidden = true; modalDoc.classList.remove('is-sheet');
   document.getElementById('drBody').innerHTML = '';
@@ -9058,20 +9090,28 @@ function docClear(){
 /* gornja ivica = ispod natpisa gornjeg reda dugmadi, donja = iznad broja/naziva/roka (visina zavisi od roka i dužine naziva) */
 function placeModalDoc(){
   const vid = modalBg.classList.contains('is-videoview');
-  if(!vid && !modalBg.classList.contains('is-docview')) return;
+  const pdfDf = !!(_df && _df.on) && modalBg.classList.contains('is-pdfview');   /* v306: PDF stranica ispod trake pretrage */
+  if(!vid && !pdfDf && !modalBg.classList.contains('is-docview')) return;
   const bar = document.getElementById('modalBar');
   let top = 0;
   if(bar) bar.querySelectorAll('.back-btn, .mb-lbl').forEach(el=>{ const r = el.getBoundingClientRect(); if(r.height) top = Math.max(top, r.bottom); });
   const info = document.querySelector('#modalBg .modal-info');
   let bottom = window.innerHeight;
   if(info){ const r = info.getBoundingClientRect(); bottom = r.top + (parseFloat(getComputedStyle(info).paddingTop) || 0); }
+  const dh = dfPlace(top);
+  if(pdfDf){
+    const t0 = Math.round(top + dh + 12) + 'px', b0 = Math.max(0, Math.round(window.innerHeight - bottom + 8)) + 'px';
+    modalFrame.style.top = t0; modalFrame.style.bottom = b0;
+    const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = t0; pk.style.bottom = b0; }
+    return;
+  }
   if(vid){
     const fr = modalFrame.getBoundingClientRect();
     modalVideo.style.top = Math.round(top + 12 - fr.top) + 'px';
     modalVideo.style.height = Math.max(120, Math.round(bottom - 8 - top - 12)) + 'px';
     return;
   }
-  modalDoc.style.top = Math.round(top + 12) + 'px';
+  modalDoc.style.top = Math.round(top + 12 + dh) + 'px';
   modalDoc.style.bottom = Math.max(0, Math.round(window.innerHeight - bottom + 8)) + 'px';
 }
 function showModalDoc(item){
@@ -9104,6 +9144,8 @@ async function docRender(it){
       const html = drSanitize(r.value || '');
       if(!html.replace(/<[^>]*>/g, '').trim() && !/<img/i.test(html)){ drMsg(t('drEmpty')); return; }
       body.innerHTML = '<div class="dr-page">' + html + '</div>';
+      dfCanFind(it, /[\p{L}\p{N}]/u.test(body.textContent));
+      dfAfterRender();
     }else{
       if(typeof XLSX === 'undefined') throw new Error('xlsx nije učitan');
       const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
@@ -9117,7 +9159,11 @@ async function docRender(it){
         const html = drSanitize(XLSX.utils.sheet_to_html(ws, {editable:false, header:'', footer:''}));
         body.innerHTML = '<div class="dr-sheet">' + html + '</div>';
         body.scrollTop = 0;
+        if(_drSheets) _drSheets.cur = name;
+        dfAfterRender();
       };
+      _drSheets = {req, wb, names, cur:null, show};
+      dfCanFind(it, true);
       if(names.length > 1){
         names.forEach(n=>{
           const b = document.createElement('button');
@@ -9135,6 +9181,379 @@ async function docRender(it){
     if(req === _drReq) drMsg(t('drErr'));
   }
 }
+/* =====================================================================
+   v306 (Zoran 12.11.): PRETRAGA U OTVORENOM DOKUMENTU (lupa levo od naziva)
+   Word, Excel (svi listovi) i PDF sa tekstom; slike i skenirani PDF bez lupe (nema teksta sa položajem).
+   Poređenje kao glavna pretraga: bez razlike velika/mala slova, kvačice (č=c), ćirilica = latinica, „dj“ = „đ“.
+   Dokument se ne menja: Word/Excel — obojeni delovi teksta u prikazu (<mark>); PDF — boja se docrta na sliku stranice.
+   Otvaranje trake = korak nazad (✕ ili Nazad je zatvara); prelazak na drugu stavku je zatvara.
+   ===================================================================== */
+var DF_CYR = {'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'d','е':'e','ж':'z','з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n','њ':'nj',
+  'о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'c','у':'u','ф':'f','х':'h','ц':'c','ч':'c','џ':'dz','ш':'s'};
+/* tekst → svedeni tekst + za svako svedeno slovo početak (m) i kraj (e) u originalu (za bojenje tačno tog dela) */
+function dfFold(s){
+  const f = [], m = [], e = [];
+  for(let i = 0; i < s.length; i++){
+    const c = s[i].toLowerCase();
+    let o = DF_CYR[c];
+    if(o === undefined){ o = c === 'đ' ? 'd' : (c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') || c); }
+    if(/\s/.test(o)){ if(f.length && f[f.length - 1] === ' '){ e[e.length - 1] = i + 1; continue; } o = ' '; }
+    if(o === 'j' && f.length && f[f.length - 1] === 'd'){ e[e.length - 1] = i + 1; continue; }   /* „dj“ = „đ“ */
+    for(const ch of o){ f.push(ch); m.push(i); e.push(i + 1); }
+  }
+  return {f:f.join(''), m, e};
+}
+function dfQuery(q){ return dfFold(String(q || '').trim()).f; }
+/* pogoci u svedenom tekstu → [početak, kraj) u originalu */
+function dfFind(fo, qf){
+  const out = [];
+  if(!qf) return out;
+  let k = fo.f.indexOf(qf);
+  while(k >= 0){ out.push([fo.m[k], fo.e[k + qf.length - 1]]); k = fo.f.indexOf(qf, k + qf.length); }
+  return out;
+}
+/* tekst prikaza (Word/Excel): delovi teksta redom; između blokova (pasus, ćelija) znak koji se ne može tražiti */
+var DF_BLOCK = 'p,li,td,th,h1,h2,h3,h4,h5,h6,div,tr,table,blockquote,pre,caption';
+function dfDomText(root){
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let s = '', lastB = null;
+  const segs = [];
+  while(w.nextNode()){
+    const n = w.currentNode, b = n.parentElement && n.parentElement.closest(DF_BLOCK);
+    if(segs.length && b !== lastB) s += '\u0001';
+    lastB = b;
+    segs.push({n, a:s.length});
+    s += n.nodeValue;
+  }
+  return {s, segs};
+}
+var _df = {on:false, id:null, q:'', qf:'', hits:[], cur:-1, closer:null, kind:'', tm:0, req:0, sheets:null};
+var dfBar = document.getElementById('dfBar');
+var dfIn = document.getElementById('dfIn');
+var dfCnt = document.getElementById('dfCnt');
+function dfIsOn(){ return _df.on; }
+function dfItem(){ return items.find(i=>i.id === _df.id); }
+/* lupa: samo za dokument koji ima tekst (poziva se kad se vidi da ga ima) */
+function dfCanFind(item, yes){
+  if(!item || modalItemId !== item.id) return;
+  modalBg.classList.toggle('can-find', !!yes);
+}
+function dfOpen(){
+  const it = items.find(i=>i.id === modalItemId);
+  if(!it || _df.on) return;
+  _df.on = true; _df.id = it.id; _df.hits = []; _df.cur = -1; _df.sheets = null;
+  _df.kind = modalBg.classList.contains('is-pdfview') ? 'pdf' : 'doc';
+  modalBg.classList.remove('ui-hidden');
+  modalBg.classList.add('df-open');
+  dfBar.hidden = false;
+  dfIn.value = _df.q;
+  zmReset(false);
+  _df.closer = ()=>{ _df.closer = null; dfHide(); };
+  pushBack(_df.closer);
+  placeModalInfo();
+  dfRun();
+  setTimeout(()=>{ try{ dfIn.focus(); }catch(e){} }, 0);
+}
+/* sakrij traku i obojeno (bez koraka nazad) */
+function dfHide(){
+  if(!_df.on) return;
+  _df.on = false; _df.req++; clearTimeout(_df.tm);
+  const wasPdf = _df.kind === 'pdf', it = dfItem();
+  _df.hits = []; _df.cur = -1; _df.sheets = null;
+  dfBar.hidden = true;
+  modalBg.classList.remove('df-open');
+  try{ dfIn.blur(); }catch(e){}
+  dfUnmark();
+  modalFrame.style.top = modalFrame.style.bottom = '';
+  const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = pk.style.bottom = ''; }
+  if(modalBg.classList.contains('open')){
+    placeModalInfo();
+    if(wasPdf && it && it.id === modalItemId && modalBg.classList.contains('is-pdfview')){ zmReset(false); dfPdfShow(it); }
+  }
+}
+/* zatvaranje iz koda (druga stavka): skida i korak nazad */
+function dfClose(){
+  if(!_df.on) return;
+  const c = _df.closer;
+  dfHide();
+  if(c){
+    if(backStack[backStack.length - 1] === c) requestClose();
+    else { const k = backStack.lastIndexOf(c); if(k >= 0) backStack.splice(k, 1); }
+  }
+}
+/* radnja koja zatvara pregled: prvo traka (njen korak nazad), pa radnja */
+function dfThen(fn){
+  if(_df.on && _df.closer && backStack[backStack.length - 1] === _df.closer) requestCloseThen(fn);
+  else fn();
+}
+function dfShowCount(txt){ dfCnt.textContent = txt; }
+function dfNavState(){
+  const n = _df.hits.length;
+  document.getElementById('dfPrev').disabled = n < 2;
+  document.getElementById('dfNext').disabled = n < 2;
+  dfShowCount(_df.qf ? (n ? (_df.cur + 1) + ' / ' + n : '0 / 0') : '');
+  dfCnt.classList.toggle('none', !!_df.qf && !n);
+}
+function dfRun(){
+  _df.q = dfIn.value; _df.qf = dfQuery(_df.q);
+  const req = ++_df.req;
+  const it = dfItem();
+  if(!it) return;
+  if(_df.kind === 'pdf') return dfPdfRun(it, req);
+  dfDocRun(req);
+}
+/* ---------- Word i Excel ---------- */
+function dfUnmark(){
+  const body = document.getElementById('drBody');
+  const ms = body.querySelectorAll('mark.df-m');
+  if(!ms.length) return;
+  const par = new Set();
+  ms.forEach(m=>{ const p = m.parentNode; if(!p) return; p.replaceChild(document.createTextNode(m.textContent), m); par.add(p); });
+  par.forEach(p=>p.normalize());
+}
+/* oboji pogotke u prikazu; vraća spisak (svaki pogodak = jedan ili više <mark>) */
+function dfMark(root, qf){
+  const {s, segs} = dfDomText(root);
+  const hits = dfFind(dfFold(s), qf);
+  if(!hits.length) return [];
+  const per = new Map();   /* deo teksta → [[od, do, broj pogotka]] */
+  let j = 0;
+  hits.forEach((h, hi)=>{
+    while(j + 1 < segs.length && segs[j + 1].a <= h[0]) j++;
+    for(let k = j; k < segs.length && segs[k].a < h[1]; k++){
+      const sg = segs[k], len = sg.n.nodeValue.length;
+      const a = Math.max(h[0], sg.a) - sg.a, b = Math.min(h[1], sg.a + len) - sg.a;
+      if(b > a){ if(!per.has(sg.n)) per.set(sg.n, []); per.get(sg.n).push([a, b, hi]); }
+    }
+  });
+  const out = hits.map(()=>[]);
+  per.forEach((rs, n)=>{
+    for(let r = rs.length - 1; r >= 0; r--){   /* od kraja, da položaji ranijih delova ostanu tačni */
+      const [a, b, hi] = rs[r];
+      const rg = document.createRange(); rg.setStart(n, a); rg.setEnd(n, b);
+      const mk = document.createElement('mark'); mk.className = 'df-m';
+      try{ rg.surroundContents(mk); out[hi].unshift(mk); }catch(e){}
+    }
+  });
+  return out.filter(x=>x.length);
+}
+function dfSheetFold(name){
+  const S = _drSheets;
+  if(!_df.sheets) _df.sheets = new Map();
+  if(_df.sheets.has(name)) return _df.sheets.get(name);
+  let fo = {f:'', m:[], e:[]};
+  try{
+    const ws = S.wb.Sheets[name];
+    if(ws && ws['!ref']){
+      const d = document.createElement('div');
+      d.innerHTML = drSanitize(XLSX.utils.sheet_to_html(ws, {editable:false, header:'', footer:''}));
+      fo = dfFold(dfDomText(d).s);
+    }
+  }catch(e){ console.error(e); }
+  _df.sheets.set(name, fo);
+  return fo;
+}
+function dfDocRun(req){
+  clearTimeout(_df.tm);
+  _df.tm = setTimeout(()=>{
+    if(req !== _df.req || !_df.on) return;
+    dfUnmark();
+    const body = document.getElementById('drBody');
+    _df.marks = null;
+    if(!_df.qf){ _df.hits = []; _df.cur = -1; dfNavState(); return; }
+    const S = _drSheets && _drSheets.req === _drReq ? _drSheets : null;
+    if(S && S.names.length > 1){
+      /* svi listovi: pogoci redom po listovima; prikazani list se boji */
+      const hits = [];
+      S.names.forEach(nm=>{ const c = dfFind(dfSheetFold(nm), _df.qf).length; for(let i = 0; i < c; i++) hits.push({sheet:nm, i}); });
+      _df.hits = hits;
+      const marks = dfMark(body, _df.qf);
+      _df.marks = {sheet:S.cur, list:marks};
+      const first = hits.findIndex(h=>h.sheet === S.cur);
+      _df.cur = hits.length ? (first >= 0 ? first : 0) : -1;
+      if(_df.cur >= 0 && hits[_df.cur].sheet !== S.cur){ S.show(hits[_df.cur].sheet); return; }   /* show() zove dfAfterRender */
+    }else{
+      const marks = dfMark(body, _df.qf);
+      _df.hits = marks.map((m, i)=>({sheet:null, i}));
+      _df.marks = {sheet:S ? S.cur : null, list:marks};
+      _df.cur = marks.length ? 0 : -1;
+    }
+    dfFocusCur();
+  }, 160);
+}
+/* posle iscrtavanja Word/Excel prikaza (i promene lista) */
+function dfAfterRender(){
+  if(!_df.on || _df.kind !== 'doc' || !_df.qf) return;
+  const S = _drSheets && _drSheets.req === _drReq ? _drSheets : null;
+  const body = document.getElementById('drBody');
+  const marks = dfMark(body, _df.qf);
+  _df.marks = {sheet:S ? S.cur : null, list:marks};
+  if(!S || S.names.length < 2){ _df.hits = marks.map((m, i)=>({sheet:null, i})); if(_df.cur >= _df.hits.length) _df.cur = _df.hits.length - 1; if(_df.cur < 0 && _df.hits.length) _df.cur = 0; }
+  else if(_df.cur < 0 || !_df.hits[_df.cur] || _df.hits[_df.cur].sheet !== S.cur){ const k = _df.hits.findIndex(h=>h.sheet === S.cur); if(k >= 0) _df.cur = k; }
+  dfFocusCur();
+}
+function dfFocusCur(){
+  dfNavState();
+  const body = document.getElementById('drBody');
+  body.querySelectorAll('mark.df-cur').forEach(m=>m.classList.remove('df-cur'));
+  const h = _df.hits[_df.cur];
+  if(!h || !_df.marks) return;
+  const ms = _df.marks.list[h.i];
+  if(!ms || !ms.length) return;
+  ms.forEach(m=>m.classList.add('df-cur'));
+  const br = body.getBoundingClientRect(), r = ms[0].getBoundingClientRect();
+  if(r.top < br.top + 8 || r.bottom > br.bottom - 8) body.scrollTop += r.top - br.top - br.height / 3;
+  const sx = ms[0].closest('.dr-sheet') || body, sr = sx.getBoundingClientRect();
+  if(r.left < sr.left + 8 || r.right > sr.right - 8) sx.scrollLeft += r.left - sr.left - sr.width / 3;
+}
+function dfStep(d){
+  const n = _df.hits.length;
+  if(!n) return;
+  _df.cur = (_df.cur + d + n) % n;
+  if(_df.kind === 'pdf') return dfPdfGo();
+  const h = _df.hits[_df.cur], S = _drSheets && _drSheets.req === _drReq ? _drSheets : null;
+  if(S && h.sheet && h.sheet !== S.cur){ S.show(h.sheet); return; }
+  dfFocusCur();
+}
+/* ---------- PDF ---------- */
+var _dfPdfTx = new Map();   /* ID fajla → Promise<[{fo, its:[{x,y,w,fs,a,b}]} po stranici]> (samo u memoriji) */
+function dfPdfText(it){
+  const f = pdfFileId(it);
+  if(_dfPdfTx.has(f)) return _dfPdfTx.get(f);
+  const p = (async ()=>{
+    const doc = await pdfDocFor(it);
+    const pages = [];
+    for(let pn = 1; pn <= doc.numPages; pn++){
+      const page = await doc.getPage(pn);
+      const tc = await page.getTextContent();
+      let s = '', prev = null;
+      const its = [];
+      tc.items.forEach(x=>{
+        if(!x || typeof x.str !== 'string' || !x.transform) return;
+        const tr = x.transform, fs = Math.hypot(tr[2], tr[3]) || x.height || 10;
+        if(prev){   /* kao pdfSearchText (v249): nastavak bez razmaka ostaje u istoj reči */
+          const pt = prev.transform;
+          const glued = !prev.hasEOL && Math.abs(tr[5] - pt[5]) < 0.45 * fs && Math.abs(tr[4] - (pt[4] + (prev.width || 0))) <= 0.18 * fs;
+          if(!glued) s += ' ';
+        }
+        its.push({x:tr[4], y:tr[5], w:x.width || 0, fs, a:s.length, b:s.length + x.str.length});
+        s += x.str;
+        prev = x;
+      });
+      page.cleanup();
+      pages.push({fo:dfFold(s), its});
+    }
+    return pages;
+  })();
+  p.catch(()=>_dfPdfTx.delete(f));
+  _dfPdfTx.set(f, p);
+  while(_dfPdfTx.size > 3) _dfPdfTx.delete(_dfPdfTx.keys().next().value);
+  return p;
+}
+/* ima li PDF tekst (lupa): stranica po stranica dok se ne nađe tekst */
+var _dfPdfHas = new Map();
+function dfPdfHas(it){
+  const f = pdfFileId(it);
+  if(_dfPdfHas.has(f)) return _dfPdfHas.get(f);
+  const p = (async ()=>{
+    const doc = await pdfDocFor(it);
+    for(let pn = 1; pn <= doc.numPages; pn++){
+      const page = await doc.getPage(pn);
+      const tc = await page.getTextContent();
+      page.cleanup();
+      if(tc.items.some(x=>x && typeof x.str === 'string' && /[\p{L}\p{N}]/u.test(x.str))) return true;
+    }
+    return false;
+  })();
+  p.catch(()=>_dfPdfHas.delete(f));
+  _dfPdfHas.set(f, p);
+  return p;
+}
+function dfPdfRun(it, req){
+  clearTimeout(_df.tm);
+  if(!_df.qf){ _df.hits = []; _df.cur = -1; dfNavState(); dfPdfShow(it); return; }
+  dfShowCount('…');
+  _df.tm = setTimeout(()=>{
+    dfPdfText(it).then(pages=>{
+      if(req !== _df.req || !_df.on) return;
+      const hits = [];
+      pages.forEach((pg, p)=>dfFind(pg.fo, _df.qf).forEach(h=>hits.push({p, a:h[0], b:h[1]})));
+      _df.hits = hits; _df.pages = pages;
+      const k = hits.findIndex(h=>h.p >= modalPage);
+      _df.cur = hits.length ? (k >= 0 ? k : 0) : -1;
+      dfPdfGo();
+    }).catch(e=>{ console.error(e); if(req === _df.req) dfShowCount(''); });
+  }, 220);
+}
+function dfPdfGo(){
+  dfNavState();
+  const it = dfItem(); if(!it) return;
+  const h = _df.hits[_df.cur];
+  zmReset(false);
+  if(h && h.p !== modalPage){ showModalItem(it, h.p); return; }
+  dfPdfShow(it);
+}
+/* obojeni delovi stranice (u jedinicama PDF-a); cur = trenutni pogodak */
+function dfPdfMarks(it, pg){
+  if(!_df.on || _df.kind !== 'pdf' || !_df.qf || !_df.pages || !it || it.id !== _df.id) return [];
+  const P = _df.pages[pg]; if(!P) return [];
+  const out = [];
+  _df.hits.forEach((h, hi)=>{
+    if(h.p !== pg) return;
+    P.its.forEach(x=>{
+      const a = Math.max(h.a, x.a), b = Math.min(h.b, x.b), len = x.b - x.a;
+      if(b <= a || !len) return;
+      const x0 = x.x + x.w * (a - x.a) / len, x1 = x.x + x.w * (b - x.a) / len;
+      out.push({r:[x0, x.y - 0.25 * x.fs, x1, x.y + 0.95 * x.fs], cur:hi === _df.cur});
+    });
+  });
+  return out;
+}
+function dfPdfSig(it, pg){
+  const mk = dfPdfMarks(it, pg);
+  return mk.length ? '#df:' + _df.qf + ':' + (mk.some(m=>m.cur) ? _df.cur : -1) : '';
+}
+var _dfImg = new Map();   /* 'fajl#str#potpis' → Promise<adresa> */
+function dfPdfUrl(it, pg){
+  const mk = dfPdfMarks(it, pg);
+  if(!mk.length) return pdfPageUrl(it, pg);
+  const key = pdfFileId(it) + '#' + pg + dfPdfSig(it, pg);
+  if(_dfImg.has(key)) return _dfImg.get(key);
+  const pr = pdfRenderPage(it, pg, 0, mk);
+  pr.catch(()=>_dfImg.delete(key));
+  _dfImg.set(key, pr);
+  while(_dfImg.size > 3){
+    const k0 = _dfImg.keys().next().value, p0 = _dfImg.get(k0);
+    _dfImg.delete(k0);
+    p0.then(u=>{ if(modalImg.getAttribute('src') !== u) try{ URL.revokeObjectURL(u); }catch(e){} }).catch(()=>{});
+  }
+  return pr;
+}
+/* trenutna stranica ponovo, sa bojom (ili bez nje) */
+function dfPdfShow(it){
+  if(!it || it.id !== modalItemId || !modalBg.classList.contains('is-pdfview')) return;
+  const pg = modalPage, req = _modalReq;
+  dfPdfUrl(it, pg).then(u=>{ if(req === _modalReq && modalPage === pg && it.id === modalItemId) modalImg.src = u; }).catch(e=>console.error(e));
+}
+/* ---------- traka: položaj ---------- */
+function dfPlace(top){
+  if(!_df.on) return 0;
+  dfBar.style.top = Math.round(top + 10) + 'px';
+  return dfBar.offsetHeight + 10;
+}
+dfIn.placeholder = t('dfPh');
+dfIn.addEventListener('input', dfRun);
+dfIn.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); if(_df.hits.length) dfStep(1); } });
+wireBackspace(dfIn, dfRun);
+document.getElementById('dfPrev').onclick = ()=>dfStep(-1);
+document.getElementById('dfNext').onclick = ()=>dfStep(1);
+document.getElementById('dfX').onclick = ()=>requestClose();
+document.getElementById('modalFind').onclick = ()=>dfOpen();
+document.getElementById('modalFind').setAttribute('aria-label', t('dfFind'));
+document.getElementById('dfPrev').setAttribute('aria-label', t('dfPrev'));
+document.getElementById('dfNext').setAttribute('aria-label', t('dfNext'));
+document.getElementById('dfX').setAttribute('aria-label', t('dfClose'));
+/* ===================== kraj PRETRAGE U DOKUMENTU ===================== */
 async function fileAsFile(it){
   const blob = await getFileBlob(it, 0);
   const ext = pageExt(it, it.pages && it.pages[0]);
@@ -9502,7 +9921,7 @@ modalBg.addEventListener('touchend', (e)=>{
     _tapLast = {t:now, x:p.x, y:p.y};
     clearTimeout(_tapTimer);
     // obican dodir (bez pomeranja prsta) = sakrij / vrati dugmad i natpise (posle kratke pauze, da se prepozna dvostruki)
-    _tapTimer = setTimeout(()=>{ _tapTimer = null; _tapLast = null; modalBg.classList.toggle('ui-hidden'); }, 280);
+    _tapTimer = setTimeout(()=>{ _tapTimer = null; _tapLast = null; if(!dfIsOn()) modalBg.classList.toggle('ui-hidden'); }, 280);   /* v306: dok je otvorena pretraga, dugmad ostaju */
   }
 });
 modalImg.addEventListener('load', ()=>requestAnimationFrame(placeModalInfo));
@@ -9514,10 +9933,10 @@ function zmSettled(){
   if(_zm.s <= 1.3 || !modalBg.classList.contains('is-pdfview')) return;
   const it = items.find(i=>i.id === modalItemId);
   if(!it || it.type !== 'pdf') return;
-  const pg = modalPage, key = pdfFileId(it) + '#' + pg;
+  const pg = modalPage, key = pdfFileId(it) + '#' + pg + dfPdfSig(it, pg);   /* v306: uz obojene pogotke */
   if(_zmHi && _zmHi.key === key){ if(modalImg.getAttribute('src') !== _zmHi.url) modalImg.src = _zmHi.url; return; }
   const req = _modalReq;
-  pdfRenderPage(it, pg, 4096).then(u=>{
+  pdfRenderPage(it, pg, 4096, dfPdfMarks(it, pg)).then(u=>{
     if(req !== _modalReq || modalPage !== pg){ URL.revokeObjectURL(u); return; }
     if(_zmHi) try{ URL.revokeObjectURL(_zmHi.url); }catch(e){}
     _zmHi = {key, url:u};
@@ -9525,11 +9944,11 @@ function zmSettled(){
   }).catch(e=>console.error(e));
 }
 
-const closeModal = ()=>{ modalBg.classList.remove('open'); zmReset(false); docClear(); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vwRet){ _vwRet = false; vwBack(); } else if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind && !_vzLeaving) vzLeave(); } else if(scPeekOn) scPeekClosed(); };
+const closeModal = ()=>{ dfHide(); modalBg.classList.remove('open'); zmReset(false); docClear(); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vwRet){ _vwRet = false; vwBack(); } else if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind && !_vzLeaving) vzLeave(); } else if(scPeekOn) scPeekClosed(); };
 document.getElementById('modalClose').onclick = ()=>requestClose();
 modalBg.onclick = (e)=>{ if(e.target === modalBg){ requestClose(); } };
 
-crumb.onclick = ()=>requestClose();
+crumb.onclick = ()=>dfThen(requestClose);   /* v306: otvorena pretraga je svoj korak nazad */
 
 /* ---------- Brisanje slike direktno iz pregleda ---------- */
 const delBackdrop = document.getElementById('delBackdrop');
@@ -9567,7 +9986,7 @@ function deleteModalItem(id){
     currentGalleryIndex = Math.min(oldIndex, currentGalleryItems.length - 1);
     showModalItem(currentGalleryItems[currentGalleryIndex]);
   }else{
-    requestClose();
+    dfThen(requestClose);   /* v306: prvo korak pretrage u dokumentu, pa pregled */
   }
   toast(t('trMoved1'));
 }
@@ -11147,7 +11566,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 305;
+const APP_VERSION = 306;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
