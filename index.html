@@ -2445,11 +2445,16 @@ body.in-album .searchbar{ margin-top:12px; }
 .modal-bg.can-find:not(.df-open) .modal-find{ display:inline-flex !important; }
 #dfBar{ position:fixed; left:16px; right:16px; z-index:5; margin:0; padding:5px 6px 5px 14px; gap:4px; }
 #dfBar[hidden]{ display:none; }
-/* v311: glatka promena (otvaranje pretrage, tastatura gore/dole) — kratko utišan prikaz umesto skakanja */
-.modal-bg.df-open .modal-inner, .modal-bg.df-open #modalPath, .modal-bg.df-open #modalBar, #dfBar{ transition:opacity .18s ease; }
-.modal-bg.df-swap .modal-inner, .modal-bg.df-swap #modalPath, .modal-bg.df-swap #modalBar, .modal-bg.df-swap #dfBar{ opacity:0; transition:opacity .1s ease; }
+/* v312 (Zoran): klizanje umesto treptaja — putanja i dugmad kliznu gore, traka klizne do vrha, naziv se utopi */
+.modal-bg.df-open #modalPath, .modal-bg.df-open #modalBar{ transition:transform .26s cubic-bezier(.2,.7,.2,1), opacity .2s ease; }
+.modal-bg.df-open .modal-info, .modal-bg.df-open .modal-nav{ transition:opacity .2s ease; }
+.modal-bg.df-open #dfBar{ transition:top .26s cubic-bezier(.2,.7,.2,1); animation:dfBarIn .2s ease; }
+.modal-bg.df-open #modalDoc{ transition:top .26s cubic-bezier(.2,.7,.2,1), bottom .26s cubic-bezier(.2,.7,.2,1); }
+@keyframes dfBarIn{ from{ opacity:0; transform:translateY(-10px); } }
+.modal-bg.df-kb #modalPath, .modal-bg.df-kb #modalBar{ transform:translateY(-140px); opacity:0; pointer-events:none; }
+.modal-bg.df-kb .modal-info, .modal-bg.df-kb .modal-nav{ opacity:0 !important; pointer-events:none !important; }
+#dfProbe{ position:fixed; top:calc(env(safe-area-inset-top, 0px) + 8px); left:0; width:0; height:0; visibility:hidden; pointer-events:none; }
 /* v308: tastatura otvorena — samo traka pretrage i dokument */
-.modal-bg.df-kb #modalPath, .modal-bg.df-kb #modalBar, .modal-bg.df-kb .modal-info, .modal-bg.df-kb .modal-nav{ display:none !important; }
 .modal-bg.df-kb #dfBar{ top:calc(env(safe-area-inset-top, 0px) + 8px) !important; }
 #dfBar input{ font-size:16px; }
 .df-cnt{ flex:none; color:var(--ink-dim); font:500 14px var(--font-ui); font-variant-numeric:tabular-nums; white-space:nowrap; padding:0 4px; }
@@ -2985,6 +2990,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
   <button class="modal-nav next" id="modalNext">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
   </button>
+  <div id="dfProbe"></div>
   <div class="df-bar searchbar" id="dfBar" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg><input id="dfIn" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><span class="df-cnt" id="dfCnt"></span><button type="button" class="df-btn" id="dfPrev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button type="button" class="df-btn" id="dfNext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button><button type="button" class="df-btn" id="dfX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
   <div class="modal-inner">
     <div class="modal-frame modal-peek" id="modalPeek" hidden aria-hidden="true"><img alt=""></div>
@@ -9099,21 +9105,15 @@ function placeModalDoc(){
   if(!vid && !pdfDf && !modalBg.classList.contains('is-docview')) return;
   const bar = document.getElementById('modalBar');
   let top = 0;
-  if(bar) bar.querySelectorAll('.back-btn, .mb-lbl').forEach(el=>{ const r = el.getBoundingClientRect(); if(r.height) top = Math.max(top, r.bottom); });
+  const bty = bar ? (new DOMMatrixReadOnly(getComputedStyle(bar).transform).m42 || 0) : 0;   /* v312: dugmad mogu da klize — računa se njihovo mesto bez klizanja */
+  if(bar) bar.querySelectorAll('.back-btn, .mb-lbl').forEach(el=>{ const r = el.getBoundingClientRect(); if(r.height) top = Math.max(top, r.bottom - bty); });
   const info = document.querySelector('#modalBg .modal-info');
   let bottom = window.innerHeight;
   if(info){ const r = info.getBoundingClientRect(); bottom = r.top + (parseFloat(getComputedStyle(info).paddingTop) || 0); }
   const kb = dfKbOn();   /* v308: dok kuca u pretrazi — gore i dole se ništa ne prikazuje, ispod je tastatura */
   if(kb) bottom = dfVisBottom();
   const dh = dfPlace(top);
-  if(pdfDf){   /* v307 (Zoran): PDF stranica ostaje pune veličine; pogodak se pomeri na vidno mesto (dfPdfReveal) */
-    const pk = document.getElementById('modalPeek');
-    if(kb){
-      const t0 = Math.round(dh) + 'px', b0 = Math.max(0, Math.round(window.innerHeight - bottom)) + 'px';
-      modalFrame.style.top = t0; modalFrame.style.bottom = b0; if(pk){ pk.style.top = t0; pk.style.bottom = b0; }
-    }else{ modalFrame.style.top = modalFrame.style.bottom = ''; if(pk){ pk.style.top = pk.style.bottom = ''; } }
-    return;
-  }
+  if(pdfDf) return;   /* v312: PDF okvir ostaje ceo ekran; stranica samo klizi i uvećava se (dfPdfReveal) */
   if(vid){
     const fr = modalFrame.getBoundingClientRect();
     modalVideo.style.top = Math.round(top + 12 - fr.top) + 'px';
@@ -9253,8 +9253,8 @@ function dfOpen(){
   _df.on = true; _df.id = it.id; _df.hits = []; _df.cur = -1; _df.sheets = null;
   _df.kind = modalBg.classList.contains('is-pdfview') ? 'pdf' : 'doc';
   _df.baseH = dfVisH(); _df.baseW = window.innerWidth;
+  _df.pinW = 0; _df.pinH = 0; dfPinFrame();
   modalBg.classList.remove('ui-hidden');
-  dfSwapStart();   /* v311: traka i raspored se pojave glatko, kad se tastatura smiri */
   modalBg.classList.add('df-open');
   dfBar.hidden = false;
   dfIn.value = _df.q;
@@ -9273,11 +9273,12 @@ function dfHide(){
   _df.hits = []; _df.cur = -1; _df.sheets = null;
   dfOvDraw();   /* v309: skini sloj sa pogocima */
   dfBar.hidden = true;
-  modalBg.classList.remove('df-open', 'df-kb', 'df-swap'); clearTimeout(_df.kbT);
+  modalBg.classList.remove('df-open', 'df-kb'); clearTimeout(_df.kbT);
   try{ dfIn.blur(); }catch(e){}
   dfUnmark();
-  modalFrame.style.top = modalFrame.style.bottom = '';
-  const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = pk.style.bottom = ''; }
+  modalFrame.style.top = modalFrame.style.bottom = modalFrame.style.height = '';
+  const pk = document.getElementById('modalPeek'); if(pk){ pk.style.top = pk.style.bottom = pk.style.height = ''; }
+  _df.pinW = 0; _df.pinH = 0;
   if(modalBg.classList.contains('open')){
     placeModalInfo();
     if(wasPdf && it && it.id === modalItemId && modalBg.classList.contains('is-pdfview')) zmReset(false);
@@ -9559,16 +9560,22 @@ function dfPdfReveal(anim){
   const m = (h && h.p === modalPage) ? dfPdfMarks(it, modalPage).find(x=>x.cur) : null;
   const c = zmContent();
   if(!c) return;
-  if(kb){   /* v308: stranica cele širine ekrana, pogodak u gornjoj trećini vidnog dela */
-    const s0 = Math.max(1, c.W / c.cw), was = Math.abs(_zm.s - s0) < 0.01;
-    _zm.s = s0;
-    _zm.tx = -_zm.s * c.ox;
-    if(m) _zm.ty = c.H / 3 - _zm.s * (c.oy + (m.f[1] + m.f[3]) / 2 * c.ch);
-    else if(!was) _zm.ty = -_zm.s * c.oy;   /* v310 (Zoran): i bez pogotka (prazno polje) odmah cela širina, od vrha stranice */
-    zmClamp(); zmApply(anim);
+  if(kb){   /* v308/v312: stranica cele širine; vidni pojas = od trake do tastature (okvir ostaje ceo ekran, pa sve klizi) */
+    const fr = modalFrame.getBoundingClientRect();
+    const bt = dfBarTop() + dfBar.offsetHeight + 8 - fr.top, bb = dfVisBottom() - fr.top;
+    const s0 = Math.max(1, c.W / c.cw), was = Math.abs(_zm.s - s0) < 0.01 && _df.kbFit;
+    _zm.s = s0; _zm.tx = -s0 * c.ox;
+    const pTop = s0 * c.oy, pH = s0 * c.ch;   /* stranica pri ty = 0 */
+    if(m) _zm.ty = bt + (bb - bt) / 3 - s0 * (c.oy + (m.f[1] + m.f[3]) / 2 * c.ch);
+    else if(!was) _zm.ty = bt - pTop;   /* v310: bez pogotka — od vrha stranice */
+    _zm.ty = Math.min(bt - pTop, Math.max(bb - pTop - pH, _zm.ty));   /* vrh stranice ne ispod trake, dno ne iznad tastature */
+    if(pH <= bb - bt) _zm.ty = bt - pTop;
+    _df.kbFit = true;
+    zmApply(anim);
     setTimeout(zmSettled, 350);   /* oštrija stranica kad je uvećano */
     return;
   }
+  _df.kbFit = false;
   if(!m) return;
   const fr = modalFrame.getBoundingClientRect();
   const y0 = fr.top + c.oy + m.f[1] * c.ch, y1 = fr.top + c.oy + m.f[3] * c.ch;
@@ -9587,14 +9594,19 @@ function dfPdfReveal(anim){
 /* v311: tastatura se otvara postepeno (više promena veličine) — proverava se tek kad se smiri */
 if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
 window.addEventListener('resize', ()=>{ if(_df && _df.on) dfKbSoon(); });
-dfIn.addEventListener('focus', ()=>{ if(_df.on && !dfKbOn()) dfSwapStart(); dfKbSoon(450); });   /* tastatura stiže: prikaz se utiša odmah */
-dfIn.addEventListener('blur', ()=>{ dfKbSoon(150); });
+dfIn.addEventListener('focus', ()=>{ setTimeout(dfKbCheck, 300); setTimeout(dfKbCheck, 800); });   /* ako telefon ne javi promenu veličine */
+dfIn.addEventListener('blur', ()=>{ dfKbSoon(); setTimeout(dfKbCheck, 400); });
 /* ---------- traka: položaj ---------- */
 /* traka: ispod dugmadi (tastatura otvorena: skroz gore, CSS); vraća gde počinje sadržaj ispod nje */
 function dfPlace(top){
   if(!_df || !_df.on) return 0;
   dfBar.style.top = Math.round(top + 10) + 'px';
-  return dfBar.getBoundingClientRect().bottom + 10;
+  return dfBarTop() + dfBar.offsetHeight + 10;
+}
+/* konačan vrh trake (traka klizi — getBoundingClientRect bi dao mesto usred klizanja) */
+function dfBarTop(){
+  if(dfKbOn()){ const pr = document.getElementById('dfProbe'); return pr ? pr.getBoundingClientRect().top : 8; }
+  return parseFloat(dfBar.style.top) || 0;
 }
 /* v308 (Zoran 12.11.): dok je tastatura otvorena za pretragu — bez putanje, dugmadi, naziva (i njegove senke) i strelica;
    tastatura = polje pretrage ima fokus i vidni deo ekrana je bar 120 px niži nego bez tastature */
@@ -9606,28 +9618,32 @@ function dfKbCheck(){
   const h = dfVisH();
   if(_df.baseW !== window.innerWidth){ _df.baseW = window.innerWidth; _df.baseH = h; }   /* okretanje telefona */
   if(h > (_df.baseH || 0)) _df.baseH = h;
+  dfPinFrame();
   const on = document.activeElement === dfIn && h < _df.baseH - 120;
   if(on === modalBg.classList.contains('df-kb')){
-    if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); }
-    dfSwapEnd();   /* tastatura se nije pojavila (ili je već tu): samo vrati prikaz */
+    if(on){ placeModalInfo(); if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur(); }   /* tastatura se još pomera: raspored je prati */
     return;
   }
-  /* v311 (Zoran: „blesne“): promena rasporeda ide dok je prikaz kratko utišan — bez skakanja stranice */
-  dfSwapStart();
-  const wait = Math.max(0, 110 - (Date.now() - _df.swapAt));
-  setTimeout(()=>{
-    if(!_df.on) return;
-    modalBg.classList.toggle('df-kb', on);
-    if(_df.kind === 'pdf') zmReset(false);
-    placeModalInfo();
-    if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(false); } else dfFocusCur();
-    requestAnimationFrame(()=>requestAnimationFrame(dfSwapEnd));
-  }, wait);
+  /* v312 (Zoran): klizanje — putanja i dugmad gore, traka do vrha, stranica se raširi (CSS prelazi + zmApply) */
+  modalBg.classList.toggle('df-kb', on);
+  if(!on && _df.kind === 'pdf'){ _df.kbFit = false; zmReset(true); }   /* tastatura dole: stranica glatko nazad u celu */
+  placeModalInfo();
+  if(_df.kind === 'pdf'){ dfOvDraw(); dfPdfReveal(); } else dfFocusCur();
 }
-/* v311: kratko utišan prikaz (stranica, traka, gornji red) dok se raspored menja zbog tastature */
-function dfSwapStart(){ if(!modalBg.classList.contains('df-swap')){ _df.swapAt = Date.now(); modalBg.classList.add('df-swap'); } }
-function dfSwapEnd(){ modalBg.classList.remove('df-swap'); }
-function dfKbSoon(d){ clearTimeout(_df.kbT); _df.kbT = setTimeout(dfKbCheck, d || 120); }
+/* v312: PDF okvir zadrži visinu ekrana bez tastature — kad telefon skrati ekran za tastaturu, stranica se ne smanji pa ponovo raširi */
+function dfPinFrame(){
+  if(!_df.on || _df.kind !== 'pdf') return;
+  if(window.innerWidth !== _df.pinW){ _df.pinW = window.innerWidth; _df.pinH = window.innerHeight; }
+  _df.pinH = Math.max(_df.pinH || 0, window.innerHeight);
+  const pk = document.getElementById('modalPeek');
+  [modalFrame, pk].forEach(f=>{ if(f){ f.style.bottom = 'auto'; f.style.height = _df.pinH + 'px'; } });
+}
+var _dfKbRaf = 0;
+function dfKbSoon(d){
+  clearTimeout(_df.kbT);
+  if(d){ _df.kbT = setTimeout(dfKbCheck, d); return; }
+  if(!_dfKbRaf) _dfKbRaf = requestAnimationFrame(()=>{ _dfKbRaf = 0; dfKbCheck(); });   /* odmah, najviše jednom po sličici */
+}
 dfIn.placeholder = t('dfPh');
 dfIn.addEventListener('input', dfRun);
 dfIn.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); if(_df.hits.length) dfStep(1); } });
@@ -11655,7 +11671,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 311;
+const APP_VERSION = 312;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
