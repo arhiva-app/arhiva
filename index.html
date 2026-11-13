@@ -6560,7 +6560,8 @@ function docRecord(it){
 }
 function itemFromRecord(r){
   const it = {
-    id: r.id, name: r.name || '', category: r.albumId || null, type: r.kind || 'image',
+    id: r.id, name: r.name || '', category: r.albumId || null,
+    type: (r.kind === 'image' || !r.kind) && Array.isArray(r.pages) && r.pages[0] && /^video\//i.test(r.pages[0].mime || '') ? 'video' : (r.kind || 'image'),   /* v322: popravka videa koji je stigao kao „slika“ */
     pages: Array.isArray(r.pages) ? r.pages : [], ts: r.createdAt || 0, updatedAt: r.updatedAt || 0,
     validUntil: r.validUntil || null, validNote: r.validNote || null, remind: remClean(r.remind), lang: r.lang || null, derivedFrom: r.derivedFrom || null,
     sourceSig: r.sourceSig || null, hasText: !!r.hasText, thumb: ''
@@ -6730,7 +6731,8 @@ function dataUrlToBlob(dataUrl){
   for(let i=0;i<raw.length;i++) bytes[i] = raw.charCodeAt(i);
   return new Blob([bytes], {type: m[1] || 'application/octet-stream'});
 }
-function normKind(tp){ return tp === 'pdf' ? 'pdf' : (tp === 'doc' ? 'doc' : 'image'); }
+/* v322 (Zoran 13.11.: video sa Drive-a na tabletu = crn ekran): 'video' je izostao od v254 — video iz kopije/Drive-a postajao je „slika“ */
+function normKind(tp){ return tp === 'pdf' ? 'pdf' : tp === 'doc' ? 'doc' : tp === 'video' ? 'video' : 'image'; }
 
 /* ---------- Učitavanje ---------- */
 async function loadAll(){
@@ -11929,7 +11931,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 321;
+const APP_VERSION = 322;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12762,7 +12764,7 @@ async function mergeBackup(src, opts){
       }
       let orig = null;
       if(p.orig){ try{ const ob = await p.orig.get(); if(ob) orig = {blob:ob, mime:p.orig.mime, w:p.orig.w, h:p.orig.h}; }catch(e){ console.error(e); } }   /* v257: original nije obavezan */
-      pages.push({blob, thumbBlob, w, h, file:fid, orig});
+      pages.push(Object.assign({blob, thumbBlob, w, h, file:fid, orig}, p.dur ? {dur:p.dur} : {}));   /* v322: trajanje videa */
     }
     return pages;
   };
@@ -12943,7 +12945,7 @@ function bkSource(liveAlbums, liveDocs, readFile, readThumb){
     derivedFrom:d.derivedFrom || null, sourceSig:d.sourceSig || null, text:d.text || null,
     sources:Array.isArray(d.sources) ? d.sources.filter(x=>typeof x === 'string') : null,
     files:(d.pages || []).map(p=>p && p.file || null),
-    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, getBlob:()=>readFile(p), getThumb: p.thumbPath ? ()=>readThumb(p) : null,
+    pages:(d.pages || []).map(p=>({mime:p.mime, w:p.w, h:p.h, dur:p.dur || 0, getBlob:()=>readFile(p),   /* v322: trajanje videa */ getThumb: p.thumbPath ? ()=>readThumb(p) : null,
       orig: (p.orig && p.orig.path) ? {mime:p.orig.mime, w:p.orig.w, h:p.orig.h, get:()=>readFile(p.orig)} : null}))   /* v257 */
   }));
   return {albums, docs, coverOf};
