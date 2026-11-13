@@ -391,6 +391,19 @@ html.sc-peek #modalUnlock{ display:flex; }
     .grid.photos-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px 10px;}
     .grid.folders-grid:not(.folders-list){grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
   }
+  /* v321 (Zoran 13.11., tablet B): položen tablet — otvorena stavka desno, spisak levo (html.split, splitSync) */
+  html{ --spw:520px; }
+  html.split body{ padding-right:0; }
+  html.split .wrap{ width:calc(var(--spw) - 40px); max-width:none; margin:0; }
+  html.split #modalBg{ left:var(--spw); border-left:1px solid var(--line); }
+  html.split #selBar{ right:auto; width:var(--spw); box-sizing:border-box; }
+  html.split #toTopBtn{ display:none; }
+  html.split .card.split-cur{ outline:3px solid var(--brass); outline-offset:3px; border-radius:14px; }
+  #modalSplit{ display:none; }
+  html.split-avail #modalBar > #modalSplit{ display:flex; align-items:center; justify-content:center; }
+  #modalSplit .ms-in{ display:none; }
+  html.split #modalSplit .ms-in{ display:block; }
+  html.split #modalSplit .ms-out{ display:none; }
 
   .album-summary-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .album-summary-row .album-summary{margin:0;}
@@ -4323,7 +4336,7 @@ const I18N = {
       ['Praćene fascikle', 'Samo u Android aplikaciji: Podešavanja → Praćene fascikle. „Snimci ekrana“: kad je uključeno, novi snimci ekrana sami stižu u Arhivu (samo oni nastali posle uključivanja).', '„Moje fascikle“ → „Dodaj fasciklu“: izabereš fasciklu na telefonu i album u koji idu fajlovi. Odmah se uveze sve što je u njoj, a posle sve što se u njoj pojavi (slike, video, PDF, Word…). Arhiva vidi samo izabranu fasciklu. Novo stiže kad otvoriš Arhivu ili se vratiš u nju.', 'Dodir na fasciklu menja album ili prekida praćenje, a prekidač ga privremeno isključuje. Original ostaje na telefonu, a brisanje iz fascikle ne briše iz Arhive. Fasciklu „Download“ Android ne dozvoljava.'],
       ['Datum i lokacija', 'Pri uvozu Arhiva čita iz fajla kad je slika ili video snimljen, odnosno kad je dokument napravljen, i po tom datumu ga stavlja među dane. Zato stara slika uvezena danas ide na svoj stari dan; da vidiš šta si upravo dodao, izaberi Sortiraj → „Nedavno dodato“.', 'Lokacija (samo u Android aplikaciji): Podešavanja → Lokacija → „Sačuvaj lokaciju“. Kad je uključeno, Arhiva uz sliku i video sačuva gde su snimljeni i prikaže mesto pored datuma, npr. „6. jul · Kalamici, Grčka“; po mestu radi i pretraga. Za to telefon jednom traži dozvolu (pri prvom dodavanju). Kad je isključeno, nove slike se uvoze bez lokacije, a postojeće ostaju.'],
       ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'U Android aplikaciji dugme „Skeniraj stranicu“ otvara Google-ov skener: sam nađe ivice papira, ispravi ugao i ukloni senke, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
-      ['Pregled i listanje', 'Dodir na bilo koju stavku (sliku, PDF, Word, Excel) otvara isti pregled. Prevlačenjem levo i desno ili strelicama listaš stranice, a posle poslednje stranice prelaziš na sledeću stavku, istim redom kao u albumu. Kod slike i PDF-a jedan dodir sakriva ili vraća dugmad.', 'Dva prsta uvećavaju sliku ili stranicu PDF-a (do 5 puta), a uvećanu pomeraš jednim prstom. Dvostruki dodir uvećava na tom mestu ili vraća ceo prikaz.', 'PDF se prikazuje stranicu po stranicu. Word i Excel se prikazuju odmah u pregledu: tekst listaš gore-dole, a dva prsta menjaju veličinu slova. Excel tabelu (sa listovima) prstom pomeraš u svim pravcima, a na sledeću stavku prelaziš strelicama. Za zaključan PDF i ostale vrste fajlova kartica sa dugmetom „Otvori“ nudi deljenje ili čuvanje na telefon.', 'Gornji red dugmadi je isti za sve: ✨ (AI), zvonce (podsetnik), PDF ili deljenje, korpa. Dugme sa stranicama (samo kod slika) dodaje nove stranice ili menja njihov redosled. Olovka pored naziva menja naziv; isto radi i „Preimenuj“ u donjem redu albuma.', 'Fajlove prepoznaješ po boji oznake na ikonici: PDF je crven, Word plav, Excel zelen, ostale vrste sive.', 'Na tabletu i drugom širokom ekranu Arhiva koristi celu širinu: u red stane onoliko sličica koliko ima mesta, a otvorena stavka i dalje zauzima ceo ekran.'],
+      ['Pregled i listanje', 'Dodir na bilo koju stavku (sliku, PDF, Word, Excel) otvara isti pregled. Prevlačenjem levo i desno ili strelicama listaš stranice, a posle poslednje stranice prelaziš na sledeću stavku, istim redom kao u albumu. Kod slike i PDF-a jedan dodir sakriva ili vraća dugmad.', 'Dva prsta uvećavaju sliku ili stranicu PDF-a (do 5 puta), a uvećanu pomeraš jednim prstom. Dvostruki dodir uvećava na tom mestu ili vraća ceo prikaz.', 'PDF se prikazuje stranicu po stranicu. Word i Excel se prikazuju odmah u pregledu: tekst listaš gore-dole, a dva prsta menjaju veličinu slova. Excel tabelu (sa listovima) prstom pomeraš u svim pravcima, a na sledeću stavku prelaziš strelicama. Za zaključan PDF i ostale vrste fajlova kartica sa dugmetom „Otvori“ nudi deljenje ili čuvanje na telefon.', 'Gornji red dugmadi je isti za sve: ✨ (AI), zvonce (podsetnik), PDF ili deljenje, korpa. Dugme sa stranicama (samo kod slika) dodaje nove stranice ili menja njihov redosled. Olovka pored naziva menja naziv; isto radi i „Preimenuj“ u donjem redu albuma.', 'Fajlove prepoznaješ po boji oznake na ikonici: PDF je crven, Word plav, Excel zelen, ostale vrste sive.', 'Na tabletu i drugom širokom ekranu Arhiva koristi celu širinu: u red stane onoliko sličica koliko ima mesta.', 'Kad je tablet položen, stavka se otvara desno, a spisak ostaje levo: dodir na drugu sličicu levo odmah je otvara desno, a „Nazad“ zatvara desnu stranu. Dugme „Ceo ekran“ u pregledu širi stavku preko celog ekrana, a „Pored spiska“ je vraća; Arhiva pamti tvoj izbor. Uspravan tablet i telefon uvek prikazuju stavku preko celog ekrana.'],
       ['Spajanje i izdvajanje', 'U albumu dodirni ikonicu „Spoji“, pa dodiruj slike redom kojim idu: svaka dobija broj stranice u novom dokumentu (dokument koji već ima 2 stranice dobija „1–2“). Lupa u uglu sličice otvara stranicu preko celog ekrana, da je pročitaš. PDF, Word i Excel su zatamnjeni jer se spajaju samo slike. Dugme dole „Proveri redosled“ kaže koliko će stranica imati nov dokument; dodir otvara ekran stranica novog dokumenta, gde proveriš i središ redosled (dodir na stranicu, pa Ranije · Na mesto… · Kasnije) i po potrebi dodaš stranice. Ispod svake stranice piše naziv slike iz koje je došla (slika sa imenom iz kamere: „Slika“ i vreme dodavanja), da lakše prepoznaš koja je koja. Ništa se ne pravi dok ne dodirneš „Sačuvaj“ (korak nazad vraća izbor, a izabrane slike ostaju označene); posle čuvanja si u albumu novog dokumenta, a obaveštenje na mestu putanje kaže gde je sačuvan. Prazan kružić na slici pokazuje gde dolazi broj.', 'Naziv, album i podsetnik uzimaju se od prve slike (podsetnik prelazi na nov dokument). Originali ostaju u albumu; ako ti ne trebaju, označi ih i obriši. Pojedinačnu stranicu sačuvanog dokumenta izdvajaš kao posebnu sliku: otvori dokument, dugme „Uredi stranice“, dodir na stranicu, pa „Izdvoji“ (kod novog dokumenta ovog dugmeta nema, jer stranica još nije sačuvana).'],
       ['PDF', 'Sliku, dokument od slika ili više slika pretvaraš u jedan PDF: u pregledu dugmetom PDF, a u albumu dugmetom „Pošalji“ u donjem redu (izaberi stavke, pa „Pošalji“ i „kao jedan PDF“). Zatim ga deliš (Viber, e-pošta…) ili čuvaš na telefon.', 'Stranice idu u PDF bez gubitka kvaliteta.', 'Kod PDF fajla na tom mestu je dugme za deljenje: šalje se originalni fajl, bez izmena. Chrome ne dozvoljava deljenje Word i Excel fajlova, pa je kod njih tu dugme za čuvanje na telefon (u Android aplikaciji Arhiva ih deli kao originalni fajl); sačuvan fajl šalješ iz Vibera ili e-pošte (priloži fajl). Word i Excel imaju i „Podeli kao PDF“: Arhiva od njih napravi PDF (tekst i tabele, bez slika iz dokumenta) i odmah ga deli.'],
       ['Podsetnik', 'Dokumentu uz koji treba nešto uraditi do nekog datuma (obnoviti registraciju ili osiguranje, platiti, poslati papire) upiši podsetnik: u pregledu dodirni dugme sa zvoncetom, zatim polje za datum, izaberi datum i dodirni „Sačuvaj“. Isto važi za PDF, Word i Excel. Podsetnik upisuješ i preko donjeg reda albuma: „Više“, izaberi stavku, pa „Podsetnik“. Upisan podsetnik menjaš i dodirom na oznaku ispod naziva ili na olovku pored nje. Podsetnik se vidi i menja i na ekranu sa stranicama. Ispod datuma upiši šta treba uraditi (npr. „poslati kopiju ugovora“); ta napomena se vidi u obaveštenju, na spisku podsetnika i u pregledu.', 'Svaki podsetnik ima svoja podsećanja: do tri (kvačica i broj dana pre datuma, 0 = na sam dan) i sat. Nov počinje od 30 · 7 · na dan, u 7:00. Arhiva te obavesti po jednom za svako uključeno podsećanje i kad datum prođe. Na početnom ekranu se tada pojavi zvonce sa brojem (crveno ako je neki datum prošao). Dodir na zvonce otvara spisak svih podsetnika: prošlo, uskoro i kasnije.', 'Zvonce na početnom ekranu je uvek tu: otvara spisak podsetnika, gde dodirom na podsetnik menjaš datum, napomenu, dane i sat, a „Nov podsetnik“ pravi nov (biraš dokument). U aplikaciji je gore i prekidač „podsetnici na telefonu“: podsetnik tada stiže i kao obaveštenje, i kad je Arhiva zatvorena.'],
@@ -5151,7 +5164,7 @@ const I18N = {
       ['Watched folders', 'Only in the Android app: Settings → Watched folders. “Screenshots”: when on, new screenshots arrive in Arhiva by themselves (only those taken after you turned it on).', '“My folders” → “Add folder”: pick a folder on the phone and the album the files go to. Everything in it is imported right away, and later everything that appears in it (photos, videos, PDF, Word…). Arhiva sees only the chosen folder. New files arrive when you open Arhiva or return to it.', 'Tap a folder to change the album or stop watching it; the switch turns it off for a while. The original stays on the phone, and deleting it from the folder does not delete it from Arhiva. Android does not allow the “Download” folder.'],
       ['Date and location', 'When importing, Arhiva reads from the file when a photo or video was taken, or when a document was made, and places it under that day. So an old photo imported today goes to its old day; to see what you just added, choose Sort → “Recently added”.', 'Location (only in the Android app): Settings → Location → “Save location”. When on, Arhiva saves where photos and videos were taken and shows the place next to the date, e.g. “July 6 · Kalamitsi, Greece”; search finds places too. The phone asks for permission once (the first time you add). When off, new photos are imported without location, and existing ones stay.'],
       ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'In the Android app, “Scan page” opens Google’s scanner: it finds the paper edges, straightens the angle and removes shadows, and you can scan several pages in a row. It all happens on the phone, without internet.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
-      ['Viewing and paging', 'Tap any item (image, PDF, Word, Excel) to open the same viewer. Swipe left and right or use the arrows to turn pages; after the last page you move on to the next item, in the same order as in the album. For an image or a PDF, one tap hides or shows the buttons.', 'Two fingers zoom an image or a PDF page (up to 5 times); move the zoomed view with one finger. A double tap zooms in at that spot or returns to the full view.', 'A PDF is shown page by page. Word and Excel are shown right in the viewer: scroll the text up and down, and two fingers change the text size. Move an Excel table (with its sheets) in any direction with your finger, and go to the next item with the arrows. For a locked PDF and other file types a card with an “Open” button offers sharing or saving to the phone.', 'The top row of buttons is the same for everything: ✨ (AI), bell (reminder), PDF or share, trash. The pages button (images only) adds new pages or changes their order. The pencil next to the name renames the item; “Rename” in the album bottom row does the same.', 'You can tell files apart by the colored tag on the icon: PDF is red, Word blue, Excel green, other types gray.', 'On a tablet or another wide screen Arhiva uses the full width: each row holds as many thumbnails as fit, and an open item still fills the whole screen.'],
+      ['Viewing and paging', 'Tap any item (image, PDF, Word, Excel) to open the same viewer. Swipe left and right or use the arrows to turn pages; after the last page you move on to the next item, in the same order as in the album. For an image or a PDF, one tap hides or shows the buttons.', 'Two fingers zoom an image or a PDF page (up to 5 times); move the zoomed view with one finger. A double tap zooms in at that spot or returns to the full view.', 'A PDF is shown page by page. Word and Excel are shown right in the viewer: scroll the text up and down, and two fingers change the text size. Move an Excel table (with its sheets) in any direction with your finger, and go to the next item with the arrows. For a locked PDF and other file types a card with an “Open” button offers sharing or saving to the phone.', 'The top row of buttons is the same for everything: ✨ (AI), bell (reminder), PDF or share, trash. The pages button (images only) adds new pages or changes their order. The pencil next to the name renames the item; “Rename” in the album bottom row does the same.', 'You can tell files apart by the colored tag on the icon: PDF is red, Word blue, Excel green, other types gray.', 'On a tablet or another wide screen Arhiva uses the full width: each row holds as many thumbnails as fit.', 'When the tablet is in landscape, an item opens on the right while the list stays on the left: tapping another thumbnail on the left opens it on the right right away, and “Back” closes the right side. “Full screen” in the viewer expands the item over the whole screen and “Beside the list” brings it back; Arhiva remembers your choice. A tablet in portrait and a phone always show the item over the whole screen.'],
       ['Merging and splitting', 'In an album tap the “Merge” icon, then tap the images in the order they go: each gets its page number in the new document (a document that already has 2 pages gets “1–2”). The magnifier in the corner opens a page full screen so you can read it. PDF, Word and Excel are dimmed because only images can be merged. The “Check order” button at the bottom shows how many pages the new document will have; tapping it opens the pages screen of the new document, where you check and fix the order (tap a page, then Earlier · Move to… · Later) and add pages if needed. Under each page you see the name of the image it came from (an image named by the camera: “Image” and the time it was added), so you can tell them apart. Nothing is made until you tap “Save” (Back returns to the selection and the chosen images stay marked); after saving you are in the new document’s album and a notice in place of the path says where it was saved. An empty circle on an image shows where the number goes.', 'The name, album and reminder come from the first image (the reminder moves to the new document). The originals stay in the album; if you do not need them, select and delete them. To split a page off a saved document as a separate image: open the document, tap “Edit pages”, tap the page and choose “Extract” (a new document has no such button, because the page is not saved yet).'],
       ['PDF', 'Turn an image, an image document or several selected images into one PDF: with the PDF button in the viewer, or in an album with “Send” in the bottom row (choose items, then “Send” and “as one PDF”). Then share it (Viber, email…) or save it to the phone.', 'Pages go into the PDF without losing quality.', 'For a PDF file that spot holds a share button: the original file is sent, unchanged. Chrome does not allow sharing Word and Excel files, so for them that button saves the file to the phone (the Android app shares them as the original file); send the saved file from Viber or email (attach file). Word and Excel also have “Share as PDF”: Arhiva makes a PDF of them (text and tables, without images from the document) and shares it right away.'],
       ['Reminder', 'For a document that needs something done by a certain date (renew a registration or insurance, pay, send papers) set a reminder: in the viewer tap the bell button, then the date field, pick the date and tap “Save”. The same works for PDF, Word and Excel. You can also set it from the album bottom row: “More”, choose the item, then “Reminder”. Once set, you can also change it by tapping the label under the name or the pencil next to it. The reminder is also shown and changed on the pages screen. Under the date write what needs to be done (e.g. “send a copy of the contract”); the note is shown in the notification, in the reminders list and in the viewer.', 'Each reminder has its own settings: up to three (checkbox and number of days before the date, 0 = on the day itself) and a time. A new one starts at 30 · 7 · on the day, at 7:00. Arhiva notifies you once for each one that is on and when the date has passed. A bell with a number appears on the home screen (red if a date has passed). Tap the bell to see all reminders: past, soon and later.', 'The bell on the home screen is always there: it opens the list of reminders, where tapping a reminder changes its date, note, days and time, and “New reminder” creates one (you choose the document). In the app, the top also has the “reminders on the phone” switch: the reminder then also arrives as a notification, even when Arhiva is closed.'],
@@ -5448,7 +5461,7 @@ Object.assign(I18N.sr, {
   wipeDrKeep: ' Kopija na Google Drive-u ostaje, a Drive se na ovom uređaju isključuje — kopiju kasnije možeš vratiti.', wipeDoneDr: 'Sve je obrisano sa uređaja. Kopija na Google Drive-u je sačuvana.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
   wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
-  loadFailT: 'Podaci nisu učitani', loadFailS: 'Arhiva trenutno ne može da pročita svoje podatke. Ništa nije obrisano. Pokušaj ponovo; ako se ponavlja, zatvori Arhivu i ponovo je otvori.', loadFailBtn: 'Pokušaj ponovo', loadFailWhere: 'Učitavanje', ocrWhere: 'Tekst iz slike', loadFailWait: 'Podaci se još učitavaju.',
+  loadFailT: 'Podaci nisu učitani', loadFailS: 'Arhiva trenutno ne može da pročita svoje podatke. Ništa nije obrisano. Pokušaj ponovo; ako se ponavlja, zatvori Arhivu i ponovo je otvori.', loadFailBtn: 'Pokušaj ponovo', loadFailWhere: 'Učitavanje', mbFull: 'Ceo ekran', mbSplit: 'Pored spiska', ocrWhere: 'Tekst iz slike', loadFailWait: 'Podaci se još učitavaju.',
   storUsed: 'Iskorišćeno: ~{mb} MB', storTrash: ' (u korpi {n})', buildLbl: 'Verzija',
   viewAsList: 'Prikaži kao listu', viewAsGrid: 'Prikaži kao mrežu', selN: '{n} odabrano'
 });
@@ -5478,7 +5491,7 @@ Object.assign(I18N.en, {
   wipeDrKeep: ' The copy on Google Drive stays, and Drive is turned off on this device — you can restore the copy later.', wipeDoneDr: 'Everything has been deleted from this device. The copy on Google Drive is kept.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
   wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
-  loadFailT: 'Data not loaded', loadFailS: 'Arhiva can’t read its data right now. Nothing has been deleted. Try again; if it keeps happening, close Arhiva and open it again.', loadFailBtn: 'Try again', loadFailWhere: 'Loading', ocrWhere: 'Text from image', loadFailWait: 'Your data is still loading.',
+  loadFailT: 'Data not loaded', loadFailS: 'Arhiva can’t read its data right now. Nothing has been deleted. Try again; if it keeps happening, close Arhiva and open it again.', loadFailBtn: 'Try again', loadFailWhere: 'Loading', mbFull: 'Full screen', mbSplit: 'Beside the list', ocrWhere: 'Text from image', loadFailWait: 'Your data is still loading.',
   storUsed: 'Used: ~{mb} MB', storTrash: ' ({n} in trash)', buildLbl: 'Version',
   viewAsList: 'Show as list', viewAsGrid: 'Show as grid', selN: '{n} selected'
 });
@@ -7738,6 +7751,11 @@ function modalPathSet(item){
   const lbl = (b, html)=>{ const s = document.createElement('span'); s.className = 'mb-lbl'; s.innerHTML = html; b.appendChild(s); bar.appendChild(b); };
   const g = id=>document.getElementById(id);
   lbl(g('modalClose'), escapeHtml(t('mbBack')));
+  { const sp = document.createElement('button'); sp.className = 'back-btn modal-split'; sp.id = 'modalSplit'; sp.type = 'button';   /* v321 tablet B */
+    sp.innerHTML = '<svg class="ms-out" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>' +
+      '<svg class="ms-in" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
+    lbl(sp, '<b class="ms-in">' + escapeHtml(t('mbFull')) + '</b><b class="ms-out">' + escapeHtml(t('mbSplit')) + '</b>');
+    sp.onclick = (e)=>{ e.stopPropagation(); splitToggle(); }; }
   lbl(g('modalAi'), escapeHtml(t('mbAi')));
   lbl(g('modalExp'), escapeHtml(t('mbExp')));
   lbl(g('modalPdf'), '<b class="mp-pdf">'+escapeHtml(t('mbPdf'))+'</b><b class="mp-share">'+escapeHtml(t('mbShare'))+'</b><b class="mp-save">'+escapeHtml(t('mbSave'))+'</b>');
@@ -8751,11 +8769,12 @@ function buildCard(item, indexNumber){
   });
 
   card.onclick = (e)=>{
+    if(_splitOk && modalBg.classList.contains('open')){ splitGo(item); return; }   /* v321: druga stavka desno, bez novog koraka nazad */
     if(mergeOff){ toast(t('mergeOnlyImg')); return; }
     if(actMode === 'rename'){ openNameSheet(item, (ok)=>{ if(ok) exitSelection(); }); return; }
     if(selectionMode){ toggleSelect(item.id); }
-    else if(searchEl.value.trim()){ openFromSearch(item); }
-    else{ openModal(item); }
+    else if(searchEl.value.trim()){ _splitNext = true; openFromSearch(item); }
+    else{ _splitNext = true; openModal(item); }
   };
 
   const meta = document.createElement('div');
@@ -8922,6 +8941,7 @@ function openModal(item, page){
   modalBg.classList.add('open');
   pushBack(closeModal);
   enterModalFullscreen();
+  _splitOk = _splitNext; _splitNext = false; splitSync();   /* v321: pored spiska samo kad je otvorena iz mreže */
 }
 window.addEventListener('scroll', ()=>{
   document.body.classList.toggle('scrolled', window.scrollY > 4);
@@ -9019,6 +9039,7 @@ function showModalItem(item, page){
   modalBg.classList.remove('can-find');
   { const ov = document.getElementById('dfOv'); if(ov){ ov.hidden = true; ov.innerHTML = ''; } }   /* v309: pogoci stare stranice */
   modalItemId = item.id;
+  splitMark();   /* v321 */
   setTimeout(peekPrep, 0);   /* v136: pripremi susede za traku */
   modalPathSet(item);
   modalBg.classList.toggle('no-share', fileNoShare(item));
@@ -10229,7 +10250,64 @@ function zmSettled(){
   }).catch(e=>console.error(e));
 }
 
-const closeModal = ()=>{ dfHide(); modalBg.classList.remove('open'); zmReset(false); docClear(); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vwRet){ _vwRet = false; vwBack(); } else if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind && !_vzLeaving) vzLeave(); } else if(scPeekOn) scPeekClosed(); };
+const closeModal = ()=>{ dfHide(); modalBg.classList.remove('open'); _splitOk = false; splitSync(); zmReset(false); docClear(); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vwRet){ _vwRet = false; vwBack(); } else if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind && !_vzLeaving) vzLeave(); } else if(scPeekOn) scPeekClosed(); };
+/* =====================================================================
+   TABLET B (v321, Zoran 13.11.): položen tablet (≥ 900 px, vodoravno) — stavka otvorena iz mreže stoji DESNO, spisak ostaje levo
+   (html.split). Dugme „Ceo ekran“ / „Pored spiska“ u pregledu; izbor se pamti (galerija:tabPregled = 'ceo'). Uspravno i telefon:
+   kao pre. Dodir na pločicu levo = ta stavka desno (bez novog koraka nazad); svaki drugi dodir levo prvo zatvori pregled (da se
+   koraci nazad ne izmešaju); dugi pritisak levo ne radi dok je pregled otvoren. Stavka otvorena iz prečice, vidžeta… = ceo ekran.
+   ===================================================================== */
+const SPLIT_KEY = 'galerija:tabPregled';
+const splitMq = window.matchMedia('(min-width:900px) and (orientation:landscape)');
+let _splitOk = false, _splitNext = false;
+function splitPref(){ try{ return localStorage.getItem(SPLIT_KEY) !== 'ceo'; }catch(e){ return true; } }
+function splitMark(){
+  document.querySelectorAll('.card.split-cur').forEach(c=>c.classList.remove('split-cur'));
+  if(!document.documentElement.classList.contains('split') || !modalItemId) return;
+  const c = document.querySelector('.card[data-id="' + CSS.escape(modalItemId) + '"]');
+  if(c){ c.classList.add('split-cur'); const r = c.getBoundingClientRect(); if(r.top < 60 || r.bottom > window.innerHeight - 90) c.scrollIntoView({block:'center'}); }
+}
+function splitSync(){
+  const H = document.documentElement, was = H.classList.contains('split');
+  const avail = splitMq.matches && _splitOk && modalBg.classList.contains('open');
+  const on = avail && splitPref();
+  H.classList.toggle('split-avail', avail);
+  H.classList.toggle('split', on);
+  if(was !== on){
+    splitMark();
+    window.dispatchEvent(new Event('resize'));   /* natpis, putanja, pretraga u dokumentu — nova širina pregleda */
+    const it = modalBg.classList.contains('open') && items.concat(trash).find(i=>i.id === modalItemId);
+    if(it && it.type !== 'image' && it.type !== 'video') showModalItem(it, modalPage);   /* PDF/Word/Excel ponovo po novoj širini */
+  }
+}
+function splitToggle(){
+  try{ if(splitPref()) localStorage.setItem(SPLIT_KEY, 'ceo'); else localStorage.removeItem(SPLIT_KEY); }catch(e){}
+  splitSync();
+}
+function splitGo(item){
+  const i = currentGalleryItems.findIndex(x=>x.id === item.id);
+  if(i < 0 || item.id === modalItemId) return;
+  modalFrame.style.transition = ''; modalFrame.style.transform = '';
+  currentGalleryIndex = i;
+  scNoteOpened(item);
+  showModalItem(item, 0);
+  modalBg.classList.remove('ui-hidden');
+}
+splitMq.addEventListener('change', splitSync);
+/* levo (spisak) dok je pregled desno: pločica radi sama (card.onclick), sve ostalo prvo zatvori pregled */
+function splitLeft(e){
+  if(!document.documentElement.classList.contains('split')) return null;
+  const el = e.target instanceof Element ? e.target : null;
+  if(!el || modalBg.contains(el) || !el.closest('.wrap, #selBar')) return null;
+  return el;
+}
+document.addEventListener('click', (e)=>{
+  const el = splitLeft(e); if(!el) return;
+  if(el.closest('.card[data-id]') && !el.closest('.merge-look')) return;
+  e.preventDefault(); e.stopPropagation(); requestClose();
+}, true);
+document.addEventListener('contextmenu', (e)=>{ if(splitLeft(e)){ e.preventDefault(); e.stopPropagation(); } }, true);
+
 document.getElementById('modalClose').onclick = ()=>requestClose();
 modalBg.onclick = (e)=>{ if(e.target === modalBg){ requestClose(); } };
 
@@ -11851,7 +11929,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 320;
+const APP_VERSION = 321;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
