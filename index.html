@@ -11931,7 +11931,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 322;
+const APP_VERSION = 323;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -23240,6 +23240,7 @@ async function drDir(path){
    je uzimalo prvu koju Google vrati, a kad se fascikla obriše, pravila se nova bez traženja postojeće. */
 async function drPickRoot(){
   const r = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id,createdTime');
+  _drRootsN = r.length;   /* v323: više od jedne → drCleanOld */
   r.sort((a, b)=>((Date.parse(a.createdTime) || 0) - (Date.parse(b.createdTime) || 0)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return r.length ? r[0].id : null;
 }
@@ -23502,16 +23503,55 @@ function drProtected(localTs){
   });
   return p;
 }
+async function drDevDir(){
+  if(_dr.devDir) return _dr.devDir;
+  const f = await drList("appProperties has { key='arhiva' and value='devs' } and '" + _dr.root + "' in parents and trashed=false", 'id');
+  _dr.devDir = f.length ? f[0].id : await drMkdir('Uređaji', _dr.root, 'devs'); drSave();
+  return _dr.devDir;
+}
+/* v323 (Zoran 13.11.: „obriši duplu Arhivu“): druga (stara) fascikla Arhive ide u Drive korpu (30 dana) tek kad u njoj nema
+   fajla koji neki uređaj koristi, a nema ga u zajedničkoj (drPickRoot). Fajlovi stanja uređaja se prvo premeste u zajedničku
+   („Uređaji“), da je drugi uređaji i dalje vide. arhiva.json i fascikle se ne čuvaju. Nepoznat fajl Arhive → fascikla ostaje.
+   Najviše jednom u 10 min, samo kad su stanja svih uređaja pročitana (_drStatesOk) i slanje prošlo. */
+let _drOldAt = 0, _drRootsN = 1;
+async function drCleanOld(want, keep, prot){
+  if(Date.now() - _drOldAt < 600000) return false;
+  _drOldAt = Date.now();
+  const roots = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id');
+  const others = roots.map(r=>r.id).filter(id=>id !== _dr.root);
+  if(!others.length) return false;
+  const all = await drList('trashed=false', 'id,name,parents,mimeType,appProperties');
+  const by = new Map(all.map(f=>[f.id, f]));
+  const top = (f)=>{ let x = f, d = 0; while(x && x.parents && d < 14){ const p = x.parents[0]; if(p === _dr.root || others.includes(p)) return p; x = by.get(p); d++; } return null; };
+  let did = false;
+  for(const R of others){
+    let ok = true; const devs = [];
+    for(const f of all){
+      if(f.id === R || top(f) !== R) continue;
+      const ap = f.appProperties || {};
+      if(f.mimeType === DR_FOLDER || ap.arhiva === 'json') continue;
+      if(ap.arhiva === 'dev'){ devs.push(f); continue; }
+      if(ap.arhiva === 'f' && ap.k){
+        const c = _dr.files[ap.k];
+        if(c && c.id !== f.id && c.p != null) continue;                        /* ista stvar je u zajedničkoj */
+        if(!want.has(ap.k) && !keep.has(ap.k) && !prot.has(ap.k)) continue;   /* niko ga ne koristi */
+      }
+      ok = false; break;   /* još se premešta (uređaj koji ga ima) ili nepoznat fajl */
+    }
+    if(!ok) continue;
+    if(devs.length){ const dd = await drDevDir(); for(const f of devs) await drMove({id:f.id, par:f.parents && f.parents[0]}, f.name, dd); }
+    await drTrash(R); did = true;
+  }
+  if(did) _dr.check = true;   /* sledeći put mapa iz onoga što je ostalo */
+  return did;
+}
 async function drPutState(state){
   const jb = ()=>new Blob([JSON.stringify(state)], {type:'application/json'});
   if(_dr.devFile){
     try{ await drFetch(DR_UP + '/' + _dr.devFile + '?uploadType=media&fields=id', {method:'PATCH', headers:{'Content-Type':'application/json'}, body:jb()}); return; }
     catch(er){ if(er.status !== 404) throw er; _dr.devFile = null; }
   }
-  if(!_dr.devDir){
-    const f = await drList("appProperties has { key='arhiva' and value='devs' } and '" + _dr.root + "' in parents and trashed=false", 'id');
-    _dr.devDir = f.length ? f[0].id : await drMkdir('Uređaji', _dr.root, 'devs'); drSave();
-  }
+  await drDevDir();
   try{ _dr.devFile = await drUpload('uredjaj-' + _dr.dev + '.json', _dr.devDir, jb(), {arhiva:'dev', dev:_dr.dev}); }
   catch(er){ if(er.status === 404) _dr.devDir = null; throw er; }
   drSave();
@@ -23613,7 +23653,7 @@ async function drSync(){
     if(!drOn()) return;
     await drApplyAll();
     if(!drOn()) return;
-    if(!_drDirty && !first){ _dr.last = Date.now(); _dr.err = null; drSave(); return; }   /* ovde ništa novo: nema slanja */
+    if(!_drDirty && !first && !(_drRootsN > 1 && _drStatesOk && Date.now() - _drOldAt >= 600000)){ _dr.last = Date.now(); _dr.err = null; drSave(); return; }   /* ovde ništa novo: nema slanja */
     _drDirty = false;
     await drRenameAlbums();   /* v281: preimenovan/premešten album = ista fascikla na Drive-u (deljenje ostaje) */
     if(!drOn()) return;
@@ -23676,6 +23716,7 @@ async function drSync(){
       }
     }
     if(moved) await drCleanDirs();
+    if(_drStatesOk && drOn()) await drCleanOld(want, keep, drProtected(ts));   /* v323 */
     _dr.last = Date.now(); _dr.err = null; _dr.full = true; drSave();
     if(first && drOn()) toast(t('drDone'));
     checkBackupReminder();
