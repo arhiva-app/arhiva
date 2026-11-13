@@ -14,7 +14,8 @@
    10) v214 vidžet na početnom ekranu (dodatak Vidzet u novom APK-u; logika je u Arhivi, blok VIDŽET)
    11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM)
    12) v272 praćene fascikle (dodatak Fascikle; blok FASCIKLE u Arhivi)
-   13) v315 skener dokumenata (dodatak Skener; skScan u Arhivi) */
+   13) v315 skener dokumenata (dodatak Skener; skScan u Arhivi)
+   14) v316 tekst iz slike (dodatak Tekst; blok TEKST IZ SLIKE u Arhivi) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -93,6 +94,20 @@
       skeniraj: function(){ return Sk.skeniraj(); },
       deo: function(o){ return Sk.deo(o); },
       obrisi: function(){ return Sk.obrisi(); }
+    };
+  }
+
+  /* 14) v316 tekst iz slike (dodatak Tekst u novom APK-u, Google ML Kit, na telefonu; logika je u Arhivi, blok TEKST IZ SLIKE).
+     procitaj(blob): slika ide u keš (uKes, isti put kao „Sačuvaj kao“), telefon pročita tekst i obriše fajl → {tekst} | {neCita} */
+  if(C.isPluginAvailable && C.isPluginAvailable('Tekst')){
+    var Tk = reg('Tekst'), tkN = 0;
+    window.ARHIVA_TEKST = {
+      pripremi: function(){ return Tk.pripremi(); },
+      procitaj: async function(blob){
+        var putanja = 'ocr/' + Date.now() + '_' + (++tkN) + '.img';
+        await uKes(blob, putanja);
+        return await Tk.procitaj({ putanja: putanja });
+      }
     };
   }
 
