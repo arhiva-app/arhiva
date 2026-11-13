@@ -687,6 +687,7 @@ html.sc-peek #modalUnlock{ display:flex; }
 .set-tile .tile-sub{ display:block; font-size:12px; color:var(--ink-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .set-tile .tile-chev{ color:var(--ink-dim); font-size:22px; flex:none; line-height:1; }
 .set-tile.danger{ margin-top:24px; }
+.set-tile.fb-tile{ margin-top:24px; }   /* v317: odvojeno od „Obriši sve podatke“ */
 .set-tile.danger .tile-title{ color:var(--danger); }
 .settings-card{ background:var(--surface); border-radius:13px; border:1px solid var(--line); overflow:hidden; }
 .settings-field{ padding:12px 14px; border-bottom:1px solid var(--line); }
@@ -4330,6 +4331,7 @@ const I18N = {
       ['Jezik', 'Podešavanja → Jezik bira srpski ili engleski (English). Promena se vidi odmah. Pri prvom pokretanju Arhiva sama izabere jezik telefona.'],
       ['Teme', 'Podešavanja → Tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
+      ['Povratne informacije', 'Podešavanja → „Pošalji povratne informacije“ (poslednja stavka) otvara e-poštu sa već upisanim primaocem i naslovom. Napiši pohvalu, predlog ili problem i pošalji.', 'Na dnu poruke Arhiva sama doda verziju, Android i model telefona i jezik, a ako u Dnevniku grešaka ima zapisa, i poslednje greške — da bismo lakše pronašli problem. Sve vidiš pre slanja i možeš da obrišeš šta nećeš.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
     ],
     migTitle: 'Nov način čuvanja',
@@ -5157,6 +5159,7 @@ const I18N = {
       ['Language', 'Settings → Language switches between Serbian (Srpski) and English. The change is visible right away. On first start Arhiva picks the language of your phone.'],
       ['Themes', 'Settings → Theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
+      ['Feedback', 'Settings → “Send feedback” (the last item) opens an email with the recipient and subject already filled in. Write praise, a suggestion or a problem and send it.', 'At the bottom of the message Arhiva adds the version, Android and phone model and the language, and if the Error log has records, the latest errors too — so we can find the problem more easily. You see everything before sending and can delete what you don’t want.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
     ],
     migTitle: 'New storage',
@@ -5432,6 +5435,7 @@ Object.assign(I18N.sr, {
   bkEvery: 'Podseti me na svakih (dana)', bkEveryHint: 'Kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.',
   bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
   wipeTile: 'Obriši sve podatke', wipeSub: 'Trajno briše sve slike, dokumente i albume',
+  fbTile: 'Pošalji povratne informacije', fbSub: 'Pohvala, predlog ili problem — piši nam', fbSubj: 'Arhiva {v} — povratne informacije', fbLang: 'Jezik', fbErr: 'Dnevnik grešaka',
   wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
   wipeDrKeep: ' Kopija na Google Drive-u ostaje, a Drive se na ovom uređaju isključuje — kopiju kasnije možeš vratiti.', wipeDoneDr: 'Sve je obrisano sa uređaja. Kopija na Google Drive-u je sačuvana.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
@@ -5461,6 +5465,7 @@ Object.assign(I18N.en, {
   bkEvery: 'Remind me every (days)', bkEveryHint: 'When this many days have passed since the last backup, a reminder appears at the top.',
   bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
   wipeTile: 'Delete all data', wipeSub: 'Permanently deletes all images, documents and albums',
+  fbTile: 'Send feedback', fbSub: 'Praise, a suggestion or a problem — write to us', fbSubj: 'Arhiva {v} — feedback', fbLang: 'Language', fbErr: 'Error log',
   wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
   wipeDrKeep: ' The copy on Google Drive stays, and Drive is turned off on this device — you can restore the copy later.', wipeDoneDr: 'Everything has been deleted from this device. The copy on Google Drive is kept.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
@@ -11838,7 +11843,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 316;
+const APP_VERSION = 317;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -11866,6 +11871,37 @@ function errBadgeHtml(){ const n = getErrLog().length; return n ? '<button type=
 function updateErrBadge(){ const v = document.querySelector('#settingsScreen .set-build'); if(v) v.innerHTML = 'verzija '+APP_VERSION+errBadgeHtml(); }
 function errTimeText(iso){ const d = new Date(iso), p = n=>String(n).padStart(2,'0'); return p(d.getDate())+'.'+p(d.getMonth()+1)+'. '+p(d.getHours())+':'+p(d.getMinutes()); }
 function errLogText(){ return getErrLog().map(x=> errTimeText(x.at)+' · v'+x.v+' · '+x.where+'\n'+x.msg).join('\n\n'); }
+/* v317 (Zoran 13.11.): „Pošalji povratne informacije“ — jedan dodir otvara e-poštu (mailto, RFC 6068): primalac i naslov upisani,
+   na dnu verzija, Android i model telefona, jezik i (samo ako ih ima) poslednje greške. Korisnik vidi sve pre slanja.
+   Android aplikacija: Capacitor mailto predaje telefonu (Bridge.launchIntent → ACTION_VIEW). Adresa: FB_EMAIL — upisati pred objavu na
+   Play (Zoran: posebna adresa samo za Arhivu); dok je prazna, telefon otvori poruku bez primaoca.
+   Telefon: User-Agent Client Hints (model, platformVersion), inače iz userAgent-a. Dnevnik skraćen (dug mailto neki programi seku). */
+const FB_EMAIL = '';
+async function fbDevice(){
+  let os = '', model = '';
+  try{
+    const d = navigator.userAgentData;
+    if(d && d.getHighEntropyValues){
+      const v = await d.getHighEntropyValues(['model', 'platformVersion']);
+      if(d.platform) os = d.platform + (v.platformVersion ? ' ' + String(v.platformVersion).replace(/(\.0)+$/, '') : '');
+      model = v.model || '';
+    }
+  }catch(e){}
+  const ua = navigator.userAgent || '', m = /Android\s([\d.]+)(?:;\s*([^;)]+))?/.exec(ua);
+  if(!os && m) os = 'Android ' + m[1];
+  if(!model && m && m[2] && !/^K$/.test(m[2].trim())) model = m[2].replace(/\s*Build\/.*$/, '').trim();
+  return [os || (navigator.platform || ''), model].filter(Boolean).join(' · ');
+}
+async function sendFeedback(){
+  const dev = await fbDevice();
+  const lines = ['', '', '', '———', 'Arhiva ' + APP_VERSION + (window.ARHIVA_NATIVE ? ' (Android)' : ' (Chrome)') + (dev ? ' · ' + dev : ''), t('fbLang') + ': ' + LANG_NAMES[appLang()]];
+  const log = getErrLog().slice(-8).map(x=>errTimeText(x.at) + ' · v' + x.v + ' · ' + x.where + ' — ' + String(x.msg || '').slice(0, 160)).join('\n');
+  if(log) lines.push('', t('fbErr') + ':', log.slice(0, 1400));
+  const url = 'mailto:' + encodeURIComponent(FB_EMAIL).replace('%40', '@') + '?subject=' + encodeURIComponent(t('fbSubj', {v:APP_VERSION})) +
+    '&body=' + encodeURIComponent(lines.join('\r\n'));
+  const a = document.createElement('a'); a.href = url; a.rel = 'noopener'; a.style.display = 'none';
+  document.body.appendChild(a); a.click(); a.remove();
+}
 function errLogBodyHtml(){
   const list = getErrLog();
   if(!list.length) return '<div class="settings-hint" style="padding-top:0">'+escapeHtml(t('errNone'))+'</div>';
@@ -11967,6 +12003,7 @@ function renderSettingsTiles(){
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
     (_oldDbPresent ? settingsTile('🗄️', t('oldTile'), t('oldTileSub'), "openSettingsSub('old')") : '')+
     settingsTile('🗑', t('wipeTile'), t('wipeSub'), 'wipeAllData()', 'danger')+
+    settingsTile('💬', t('fbTile'), t('fbSub'), 'sendFeedback()', 'fb-tile')+   /* v317: poslednja stavka (Zoran 13.11.) */
     '<div class="settings-hint" id="storageInfo"></div>'+
     '<div class="settings-hint" id="persistInfo"></div>'+
     '<div class="settings-hint set-build">'+t('buildLbl')+' '+APP_VERSION+errBadgeHtml()+'</div>'+
