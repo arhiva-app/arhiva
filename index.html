@@ -11851,7 +11851,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 318;
+const APP_VERSION = 319;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12724,6 +12724,8 @@ async function mergeBackup(src, opts){
   }
   await saveCategories();
   let added = 0, updated = 0, skipped = 0, n = 0, bad = 0;
+  const errs = (opts && opts.errs) || null;   /* v319: Drive — zašto dokument nije upisan (ime + razlog) */
+  const why = (d, e)=>{ if(errs) errs.push({n:d.name || d.id || '?', e:String((e && (e.message || e)) || '?').slice(0, 120)}); };
   for(const d of src.docs){
     n++;
     if(n % 3 === 0 || n === src.docs.length){ if(opts && opts.prog) opts.prog(n, src.docs.length); else toastPersist(t('bkRestoring', {n, total:src.docs.length}), {n, total:src.docs.length}); }
@@ -12751,7 +12753,7 @@ async function mergeBackup(src, opts){
       }catch(e){
         if(e && e.message === 'CRC'){ bad++; continue; }
         if(e && e.message === 'PACKED') throw e;
-        console.error(e); skipped++;
+        console.error(e); skipped++; why(d, e);
       }
       continue;
     }
@@ -12764,12 +12766,12 @@ async function mergeBackup(src, opts){
         trash = trash.filter(x=>x !== inTrash);
         if(!items.includes(inTrash)) items.push(inTrash);
         added++;
-      }catch(e){ inTrash.deletedAt = delAt; console.error(e); }
+      }catch(e){ inTrash.deletedAt = delAt; console.error(e); why(d, e); }
       continue;
     }
     try{
       const pages = await readPages(d);
-      if(!pages.length) continue;
+      if(!pages.length){ why(d, 'bez stranica'); continue; }
       if(inTrash){ trash = trash.filter(x=>x !== inTrash); setThumbUrl(inTrash, null); }
       const item = newItem(d, catId);
       await db2AddDoc(item, pages, d.text || null, {updatedAt: d.updatedAt || 0, keepName:true});
@@ -12778,7 +12780,7 @@ async function mergeBackup(src, opts){
     }catch(e){
       if(e && e.message === 'CRC'){ bad++; continue; }   /* v158: oštećen fajl se preskače, broj ide u završnu poruku */
       if(e && e.message === 'PACKED') throw e;
-      console.error(e);
+      console.error(e); why(d, e);
     }
   }
   /* v171: „Zameni sve“ — tek kad je sve iz kopije upisano bez greške, briše se ono čega u kopiji nema
@@ -23222,7 +23224,7 @@ async function drOthers(){
 function drPl(n, a, b, c){ const m10 = n % 10, m100 = n % 100; return n + ' ' + (m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) ? b : c); }
 /* Preuzimanje onoga što je u stanju drugog uređaja novije nego ovde. Vreme izmene ostaje ono sa drugog uređaja. */
 async function drApply(st){
-  const res = {added:0, updated:0, trashed:0, bad:0};
+  const res = {added:0, updated:0, trashed:0, bad:0, miss:0, of:0, why:''};
   /* 1. šabloni: obrisan tamo kasnije → obrisan i ovde; nov ili noviji → ovde */
   try{
     const have = new Map((await tplAllRaw()).map(r=>[r.tpl.id, r.tpl]));
@@ -23316,9 +23318,14 @@ async function drApply(st){
     const src = bkSource(srcAlb, live,
       (p)=>pf.get(p.file).then(b=>b.type === p.mime || !p.mime ? b : b.slice(0, b.size, p.mime)),
       (p)=>pf.get('t:' + p.file).then(b=>b.type ? b : b.slice(0, b.size, 'image/jpeg')).catch(()=>null));
-    const r = await mergeBackup(src, {quiet:true, prog:(n, total)=>{ if(big) toastPersist(t('drInRun', {n, total}), {n, total}); }});
+    const errs = [];
+    const r = await mergeBackup(src, {quiet:true, errs, prog:(n, total)=>{ if(big) toastPersist(t('drInRun', {n, total}), {n, total}); }});
     if(big) toastHide();
     res.added += r.added; res.updated += r.updated; res.bad += r.bad;
+    /* v319: šta od poslatog sa drugog uređaja i dalje nije ovde (bilo koji razlog) — ponovo kasnije, uz zapis u Dnevniku grešaka */
+    const miss = live.filter(d=>{ const it = items.find(i=>i.id === d.id); return !it || (it.updatedAt || 0) !== (d.updatedAt || 0); });
+    res.miss = miss.length; res.of = live.length;
+    if(miss.length){ const e0 = errs[0]; res.why = e0 ? '„' + e0.n + '“: ' + e0.e : (r.bad ? 'fajl nije na Drive-u ili je oštećen (CRC)' : '„' + (miss[0].name || miss[0].id) + '“'); }
     live.forEach(d=>{
       const it = items.find(i=>i.id === d.id);
       if(!it || (it.updatedAt || 0) !== (d.updatedAt || 0)) return;   /* nije stiglo: pokušava se ponovo, beleži se tada */
@@ -23360,10 +23367,19 @@ async function drApply(st){
 async function drApplyAll(){
   const tot = {added:0, updated:0, trashed:0, bad:0};
   for(const c of _drStates.values()){
-    if(!c.todo) continue;
+    if(!c.todo || (c.next && Date.now() < c.next)) continue;
     const r = await drApply(c.st);
     tot.added += r.added; tot.updated += r.updated; tot.trashed += r.trashed;
-    if(!r.bad) c.todo = false;   /* oštećen/nedostupan fajl: pokušava se ponovo sledeći put */
+    /* v319 (Zoran 13.11.: tablet 20, telefon 67 na istom nalogu): ranije se stanje drugog uređaja smatralo obrađenim i kad
+       dokument nije upisan iz bilo kog razloga osim CRC — tiho, bez ponovnog pokušaja dok taj uređaj nešto ne promeni.
+       Sada: sve što nije stiglo → ponovo za 2 min, i jedan zapis u Dnevniku grešaka (ponavlja se samo kad se broj promeni). */
+    if(!r.bad && !r.miss){ c.todo = false; c.next = 0; continue; }
+    c.next = Date.now() + 120000;
+    const key = c.m + '|' + r.miss + '|' + r.bad;
+    if(c.logged !== key){
+      c.logged = key;
+      try{ logError('Google Drive', 'sa drugog uređaja nije preuzeto ' + Math.max(r.miss, r.bad) + ' od ' + r.of + (r.why ? ' — ' + r.why : '')); }catch(_){}
+    }
   }
   /* v213: umesto kratkog obaveštenja — ikonica u zaglavlju i spisak (syAdd u drApply) */
 }
