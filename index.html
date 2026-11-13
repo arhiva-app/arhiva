@@ -11851,7 +11851,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 319;
+const APP_VERSION = 320;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -23155,12 +23155,23 @@ async function drDir(path){
   const id = ex ? ex.id : await drMkdir(name, parent, 'dir');
   _dr.dirs[k] = id; drSave(); return id;
 }
+/* v320 (Zoran 13.11.: dve fascikle „Arhiva“ na istom nalogu — telefon u jednoj, tablet u drugoj, tablet nije video telefonove fajlove):
+   SVI uređaji koriste istu glavnu fasciklu — najstariju (createdTime, pa id) među neobrisanim fasciklama Arhive. Ranije: povezivanje
+   je uzimalo prvu koju Google vrati, a kad se fascikla obriše, pravila se nova bez traženja postojeće. */
+async function drPickRoot(){
+  const r = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id,createdTime');
+  r.sort((a, b)=>((Date.parse(a.createdTime) || 0) - (Date.parse(b.createdTime) || 0)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return r.length ? r[0].id : null;
+}
 async function drRoot(){
-  if(_dr.root){
-    try{ const r = await drJson(DR_API + '/' + _dr.root + '?fields=id,trashed'); if(!r.trashed) return; }
-    catch(e){ if(e.status !== 404) throw e; }
-    _dr.files = {}; _dr.dirs = {}; _dr.json = null; _dr.jsonSig = null; _dr.devDir = null; _dr.devFile = null; _dr.devSig = null;   /* korisnik je obrisao fasciklu na Drive-u: sve ponovo */
+  const best = await drPickRoot();
+  if(best){
+    if(best !== _dr.root){   /* prelazak u zajedničku fasciklu: mapa iz onoga što je stvarno na Drive-u (drRebuild), fajlovi iz druge fascikle se premeštaju, ne šalju ponovo */
+      _dr.root = best; _dr.dirs = {}; _dr.json = null; _dr.jsonSig = null; _dr.check = true; drSave();
+    }
+    return;
   }
+  if(_dr.root){ _dr.files = {}; _dr.dirs = {}; _dr.json = null; _dr.jsonSig = null; _dr.devDir = null; _dr.devFile = null; _dr.devSig = null; }   /* korisnik je obrisao fasciklu na Drive-u: sve ponovo */
   _dr.root = await drMkdir('Arhiva', null, 'root'); _dr.check = false; drSave();
 }
 /* mapa iz onoga što je stvarno na Drive-u (posle 404 ili pri ponovnom povezivanju) */
@@ -23183,7 +23194,11 @@ async function drRebuild(){
     if(ap.arhiva === 'dev'){ if(_dr.dev && ap.dev === _dr.dev) devFile = f.id; return; }
     if(ap.arhiva === 'f' && ap.k){
       const pp = pathOf(par, 0);
-      if(pp != null){ files[ap.k] = {id:f.id, p:(pp ? pp + '/' : '') + f.name, par, s:+f.size || 0}; if(old[ap.k] && old[ap.k].o && old[ap.k].id === f.id) files[ap.k].o = 1; }
+      /* v320: i fajl iz druge fascikle Arhive (p:null) — može da se preuzme, a slanje ga premesti u zajedničku (drMove).
+         Isti fajl u obe: važi onaj u zajedničkoj fascikli. */
+      if(pp == null && files[ap.k]) return;
+      files[ap.k] = {id:f.id, p:pp != null ? (pp ? pp + '/' : '') + f.name : null, par, s:+f.size || 0};
+      if(old[ap.k] && old[ap.k].o && old[ap.k].id === f.id) files[ap.k].o = 1;
     }
   });
   _dr.files = files; _dr.dirs = dirs; _dr.json = json; _dr.jsonSig = null; _dr.devDir = devDir; _dr.devFile = devFile; _dr.check = false; drSave();
@@ -23730,10 +23745,10 @@ async function drConnect(){
     const c = (_dr.email && _dr.email === email) ? _dr : {files:{}, dirs:{}};
     c.email = email; c.need = false; c.err = null;
     /* Arhiva koju je ova aplikacija već napravila na ovom nalogu (ponovno povezivanje, nova instalacija) */
-    const roots = await drList("appProperties has { key='arhiva' and value='root' } and trashed=false", 'id');
+    const root0 = await drPickRoot();   /* v320: uvek ista (najstarija), ne prva koju Google vrati */
     let pulled = null;
-    if(roots.length){
-      _dr = Object.assign(c, {root:roots[0].id});
+    if(root0){
+      _dr = Object.assign(c, {root:root0});
       await drRebuild();
       const data = await drReadJson();
       const live = data ? data.docs.filter(d=>d && !d.purged && !d.deletedAt && Array.isArray(d.pages) && d.pages.length) : [];
