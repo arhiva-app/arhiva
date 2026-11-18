@@ -1,0 +1,35 @@
+{
+  "novosti": [
+    {
+      "id": "2026-11-19-novosti",
+      "datum": "2026-11-19",
+      "cilj": "settings:news",
+      "sr": { "n": "Novosti", "t": "Ovde ćeš ubuduće videti šta je novo u Arhivi. Sve novosti su i u Podešavanjima → Novosti." },
+      "en": { "n": "News", "t": "From now on you will see here what is new in Arhiva. All news is also in Settings → News." }
+    },
+    {
+      "id": "2026-11-18-obrisi-sve",
+      "datum": "2026-11-18",
+      "sr": { "n": "Obriši sve podatke", "t": "Briše sve sa ovog uređaja, i podešavanja, pa je Arhiva kao tek instalirana. Rezervne kopije ostaju." },
+      "en": { "n": "Delete all data", "t": "Deletes everything on this device, settings included, so Arhiva is as if freshly installed. Backups stay." }
+    },
+    {
+      "id": "2026-11-13-tablet",
+      "datum": "2026-11-13",
+      "sr": { "n": "Tablet", "t": "Na tabletu Arhiva koristi ceo ekran, a položena otvara stavku pored spiska." },
+      "en": { "n": "Tablet", "t": "On a tablet Arhiva uses the whole screen, and in landscape it opens an item next to the list." }
+    },
+    {
+      "id": "2026-11-13-tekst",
+      "datum": "2026-11-13",
+      "sr": { "n": "Tekst iz slike", "t": "Tekst sa fotografisanog papira i snimka ekrana sada se može pretraživati, bez interneta." },
+      "en": { "n": "Text from images", "t": "Text on photographed paper and screenshots is now searchable, without internet." }
+    },
+    {
+      "id": "2026-11-12-skener",
+      "datum": "2026-11-12",
+      "sr": { "n": "Skener dokumenata", "t": "„Dokument od više stranica“ sada sam nalazi ivice papira i ispravlja ugao." },
+      "en": { "n": "Document scanner", "t": "“Multi-page document” now finds the paper edges and straightens the angle by itself." }
+    }
+  ]
+}

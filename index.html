@@ -2785,6 +2785,23 @@ html .home-inbox.home-inbox:active{ background:var(--brass-glow); }
 header, body.in-album header{ margin-bottom:0; }
 .alb-icons{ margin-top:10px; margin-bottom:0; }
 /* v261: sistemski folderi — dva reda po tri, izgled kao raniji „Bez albuma“ (zlatna podloga sleva, tanka zlatna ivica) */
+/* v326 NOVOSTI: kartica ispod panela, dok je korisnik ne zatvori */
+.nov-card{ margin:12px 0 0; padding:14px; border-radius:16px; background:var(--surface); border:1px solid var(--brass); box-shadow:0 0 0 3px var(--brass-soft); box-sizing:border-box; }
+.nov-top{ display:flex; gap:12px; align-items:center; }
+.nov-ic{ flex:none; width:46px; height:46px; border-radius:50%; background:var(--brass-soft); display:flex; align-items:center; justify-content:center; font-size:24px; }
+.nov-h{ flex:1; min-width:0; }
+.nov-t{ font-family:var(--font-title); font-size:19px; font-weight:700; color:var(--title-color); }
+.nov-d{ font-size:12px; color:var(--ink-dim); }
+.nov-x{ margin-top:10px; font-size:15px; line-height:1.4; color:var(--ink); }
+.nov-btns{ display:flex; gap:10px; margin-top:12px; }
+.nov-btns button{ flex:1; padding:12px; border-radius:12px; font-size:15px; font-family:inherit; cursor:pointer; }
+.nov-go{ border:0; background:var(--brass); color:var(--on-brass); font-weight:700; }
+.nov-no{ border:1px solid var(--line); background:transparent; color:var(--ink); font-weight:600; }
+.nov-item{ padding:14px 4px; border-bottom:1px solid var(--line-soft); }
+.nov-item .nov-d{ font-size:12px; }
+.nov-in{ font-size:17px; font-weight:700; color:var(--title-color); margin-top:3px; }
+.nov-new{ margin-left:8px; font-size:11px; font-weight:800; padding:2px 7px; border-radius:6px; background:var(--brass); color:var(--on-brass); vertical-align:middle; }
+.nov-ix{ font-size:14.5px; line-height:1.4; color:var(--ink); margin-top:4px; }
 .sys-panel{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); margin:12px 0 0; border-radius:14px; overflow:hidden; box-sizing:border-box;
   background:linear-gradient(90deg, color-mix(in srgb, var(--brass) 14%, var(--surface-2)), var(--surface-2) 70%);
   border:1px solid color-mix(in srgb, var(--brass) 45%, var(--line)); --sys-sep:color-mix(in srgb, var(--line) 85%, transparent); }
@@ -4361,6 +4378,7 @@ const I18N = {
       ['Teme', 'Podešavanja → Tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Povratne informacije', 'Podešavanja → „Pošalji povratne informacije“ (poslednja stavka) otvara e-poštu sa već upisanim primaocem i naslovom. Napiši pohvalu, predlog ili problem i pošalji.', 'Na dnu poruke Arhiva sama doda verziju, Android i model telefona i jezik, a ako u Dnevniku grešaka ima zapisa, i poslednje greške — da bismo lakše pronašli problem. Sve vidiš pre slanja i možeš da obrišeš šta nećeš.'],
+      ['Novosti', 'Kad u Arhivi ima nešto novo, na početnom ekranu ispod panela pojavi se kartica „Novo u Arhivi“. „Pogledaj“ vodi do te mogućnosti, „Zatvori“ sklanja karticu i ona se više ne pojavljuje.', 'Sve novosti su u Podešavanjima → Novosti. Stižu sa sajta Arhive kad je telefon na internetu; sa telefona se ništa ne šalje.'],
       ['Obriši sve podatke', 'Podešavanja → „Obriši sve podatke“ briše sve iz Arhive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Arhiva se zatim pokrene kao tek instalirana.', 'Rezervne kopije (ZIP) u fascikli telefona i kopija na Google Drive-u ostaju, pa ih kasnije možeš vratiti. U prvom prozoru možeš izabrati „Prvo napravi kopiju“.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
     ],
@@ -5191,6 +5209,7 @@ const I18N = {
       ['Themes', 'Settings → Theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Feedback', 'Settings → “Send feedback” (the last item) opens an email with the recipient and subject already filled in. Write praise, a suggestion or a problem and send it.', 'At the bottom of the message Arhiva adds the version, Android and phone model and the language, and if the Error log has records, the latest errors too — so we can find the problem more easily. You see everything before sending and can delete what you don’t want.'],
+      ['News', 'When there is something new in Arhiva, a “New in Arhiva” card appears on the home screen below the panel. “Show me” takes you to that feature, “Close” removes the card and it does not come back.', 'All news is in Settings → News. It comes from the Arhiva website when the phone is online; nothing is sent from the phone.'],
       ['Delete all data', 'Settings → “Delete all data” deletes everything in Arhiva on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Arhiva then starts as if freshly installed.', 'Backups (ZIP) in the phone folder and the copy on Google Drive stay, so you can restore them later. In the first window you can choose “Back up first”.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
     ],
@@ -5466,6 +5485,8 @@ Object.assign(I18N.sr, {
   bkDirGone: 'Fascikla „{name}“ nije dostupna. Izaberi gde da se sačuva kopija.',
   bkEvery: 'Podseti me na svakih (dana)', bkEveryHint: 'Kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.',
   bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
+  novTile: 'Novosti', novNone: 'Još nema novosti', novCardT: 'Novo u Arhivi', novGo: 'Pogledaj', novClose: 'Zatvori', novNew: 'NOVO',
+  novHint: 'Novosti stižu sa sajta Arhive kad je telefon na internetu. Ništa se ne šalje sa telefona.',
   wipeTile: 'Obriši sve podatke', wipeSub: 'Sve se briše — Arhiva kao tek instalirana',
   fbTile: 'Pošalji povratne informacije', fbSub: 'Pohvala, predlog ili problem — piši nam', fbSubj: 'Arhiva {v} — povratne informacije', fbLang: 'Jezik', fbErr: 'Dnevnik grešaka',
   wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE iz Arhive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Arhiva će biti kao tek instalirana. Nema opoziva. Rezervne kopije (ZIP) u fascikli telefona ostaju — kasnije ih možeš vratiti.',
@@ -5496,6 +5517,8 @@ Object.assign(I18N.en, {
   bkDirGone: 'Folder “{name}” is not available. Choose where to save the backup.',
   bkEvery: 'Remind me every (days)', bkEveryHint: 'When this many days have passed since the last backup, a reminder appears at the top.',
   bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
+  novTile: 'News', novNone: 'No news yet', novCardT: 'New in Arhiva', novGo: 'Show me', novClose: 'Close', novNew: 'NEW',
+  novHint: 'News comes from the Arhiva website when the phone is online. Nothing is sent from the phone.',
   wipeTile: 'Delete all data', wipeSub: 'Deletes everything — Arhiva as freshly installed',
   fbTile: 'Send feedback', fbSub: 'Praise, a suggestion or a problem — write to us', fbSubj: 'Arhiva {v} — feedback', fbLang: 'Language', fbErr: 'Error log',
   wipeT1: 'Delete all data', wipeX1: 'This permanently deletes EVERYTHING in Arhiva on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Arhiva will be as if freshly installed. It cannot be undone. Backups (ZIP) in the phone folder stay — you can restore them later.',
@@ -8455,6 +8478,7 @@ function _renderView(){
   const welcome = !items.length && !categories.length && !selectionMode && !searchOpen;
   if(welcome) homeHead.appendChild(homeWelcome());
   else homeHead.appendChild(buildSysPanel(closeAlbumView));   /* v262 (Zoran): sistemski folderi zamrznuti — u zakačenom delu, ispod reda ikonica */
+  if(!welcome && !selectionMode && !searchOpen){ const nc = novCardEl(); if(nc) homeHead.appendChild(nc); }   /* v326 */
   albumHeaderZone.appendChild(homeHead);
 
 
@@ -11556,6 +11580,7 @@ loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzB
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   let wp = null; try{ wp = sessionStorage.getItem('galerija:wiped'); sessionStorage.removeItem('galerija:wiped'); }catch(e){}
   if(wp) toast(t(wp === 'dr' ? 'wipeDoneDr' : 'wipeDone'));   /* v325: posle „Obriši sve“ */
+  setTimeout(novFetch, 1500);   /* v326 */
   if(ol){ openSettings(); openSettingsSub('lang'); } });
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
@@ -11966,7 +11991,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 325;
+const APP_VERSION = 326;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -12116,6 +12141,7 @@ function renderSettingsTiles(){
     '<div class="set-body">'+
     settingsTile('🌐', t('langTile'), LANG_NAMES[appLang()], "openSettingsSub('lang')")+
     settingsTile('📖', t('guideTile'), t('guideTileSub'), "openSettingsSub('guide')")+
+    settingsTile('📣', t('novTile'), novTileSub(), "openSettingsSub('news')")+   /* v326 */
     settingsTile('🎨', t('themeTile'), themeName(getTheme()), "openSettingsSub('theme')")+
     (lkNative() ? settingsTile('🔒', t('lkTile'), lkTileSub(), "openSettingsSub('lock')") : '')+   /* v190: samo Android aplikacija */
     (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
@@ -12203,6 +12229,9 @@ function openSettingsSub(which){
   }else if(which === 'guide'){
     title = t('guideTile');
     body = guideHtml();
+  }else if(which === 'news'){
+    title = t('novTile');
+    body = novListHtml();
   }else if(which === 'lock'){
     if(!lkNative()) return;
     title = t('lkTile');
@@ -13127,6 +13156,75 @@ async function wipeAllData(){
     toast(t('wipeErr'));
   }
 }
+
+/* ================= NOVOSTI (v326, Zoran 18.11.) =================
+   Spisak sa sajta Arhive (NOV_URL, isti fajl za veb i Android aplikaciju): {novosti:[{id, datum:'YYYY-MM-DD', sr:{n,t}, en:{n,t}, cilj?}]}.
+   Arhiva samo ČITA (ništa ne šalje). Poslednji spisak se pamti (Podešavanja → Novosti bez interneta). Kartica na početnom ekranu:
+   najnovija vest od dana kad je Arhiva prvi put pročitala spisak (nov korisnik ne dobija stare vesti) i koju korisnik nije zatvorio;
+   stoji dok ne dodirne „Zatvori“ ili „Pogledaj“. cilj: 'settings' ili 'settings:<podekran>' (npr. 'settings:guide'); bez cilja nema „Pogledaj“. */
+const NOV_URL = 'https://arhiva-app.github.io/arhiva/novosti.json', NOV_LIST = LS_PREFIX + 'novosti', NOV_OD = LS_PREFIX + 'novOd', NOV_ZAT = LS_PREFIX + 'novZat';
+function novJson(k, d){ try{ const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; }catch(e){ return d; } }
+function novAll(){
+  const a = novJson(NOV_LIST, []);
+  return (Array.isArray(a) ? a : []).filter(x=>x && x.id && /^\d{4}-\d{2}-\d{2}$/.test(String(x.datum || '')) && (x.sr || x.en))
+    .sort((a, b)=>a.datum < b.datum ? 1 : a.datum > b.datum ? -1 : 0);
+}
+function novTx(x){ const L = x[appLang()] || x.en || x.sr || {}; return {n:String(L.n || ''), t:String(L.t || '')}; }
+const NOV_MES = ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
+function novDate(ymd){
+  const [y, m, d] = ymd.split('-').map(Number);
+  if(appLang() === 'en') return new Date(y, m-1, d).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  return d + '. ' + NOV_MES[m-1] + ' ' + y + '.';
+}
+function novClosed(){ const z = novJson(NOV_ZAT, []); return Array.isArray(z) ? z : []; }
+function novCurrent(){
+  const od = localStorage.getItem(NOV_OD); if(!od) return null;
+  const zat = novClosed();
+  return novAll().find(x=>x.datum >= od && !zat.includes(x.id)) || null;
+}
+function novCardEl(){
+  const x = novCurrent(); if(!x) return null;
+  const L = novTx(x); if(!L.n && !L.t) return null;
+  const go = novGoOk(x.cilj);
+  const d = document.createElement('div'); d.className = 'nov-card'; d.id = 'novCard';
+  d.innerHTML = '<div class="nov-top"><div class="nov-ic">📣</div><div class="nov-h"><div class="nov-t">' + escapeHtml(t('novCardT')) + '</div><div class="nov-d">' + escapeHtml(novDate(x.datum)) + '</div></div></div>' +
+    '<div class="nov-x">' + (L.n ? '<b>' + escapeHtml(L.n) + '.</b> ' : '') + escapeHtml(L.t) + '</div>' +
+    '<div class="nov-btns">' + (go ? '<button type="button" class="nov-go">' + escapeHtml(t('novGo')) + '</button>' : '') + '<button type="button" class="nov-no">' + escapeHtml(t('novClose')) + '</button></div>';
+  const done = ()=>{ const z = novClosed(); if(!z.includes(x.id)) z.push(x.id); lsSet(NOV_ZAT, JSON.stringify(z.slice(-200))); d.remove(); };
+  d.querySelector('.nov-no').onclick = done;
+  if(go) d.querySelector('.nov-go').onclick = ()=>{ done(); novGo(x.cilj); };
+  return d;
+}
+function novGoOk(c){ return typeof c === 'string' && /^settings(:[a-z]+)?$/.test(c); }
+function novGo(c){
+  if(!novGoOk(c)) return;
+  openSettings();
+  const sub = c.split(':')[1]; if(sub) openSettingsSub(sub);
+}
+function novTileSub(){ const a = novAll(); return a.length ? novTx(a[0]).n : t('novNone'); }
+function novListHtml(){
+  const a = novAll(); if(!a.length) return '<div class="settings-hint">' + escapeHtml(t('novNone')) + '</div>';
+  const cur = novCurrent();
+  return a.map(x=>{ const L = novTx(x);
+    return '<div class="nov-item"><div class="nov-d">' + escapeHtml(novDate(x.datum)) + '</div><div class="nov-in">' + escapeHtml(L.n) +
+      (cur && cur.id === x.id ? '<span class="nov-new">' + escapeHtml(t('novNew')) + '</span>' : '') + '</div><div class="nov-ix">' + escapeHtml(L.t) + '</div></div>'; }).join('') +
+    '<div class="settings-hint">' + escapeHtml(t('novHint')) + '</div>';
+}
+async function novFetch(){
+  if(navigator.onLine === false) return;
+  let j = null;
+  try{
+    const r = await fetch(NOV_URL + '?t=' + Date.now(), {cache:'no-store'});
+    if(!r.ok) return;
+    j = await r.json();
+  }catch(e){ return; }   /* bez interneta ili sajt nedostupan: ostaje poslednji spisak, bez poruke */
+  const list = j && Array.isArray(j.novosti) ? j.novosti : null; if(!list) return;
+  const before = (novCurrent() || {}).id || '';
+  lsSet(NOV_LIST, JSON.stringify(list.slice(0, 100)));
+  if(!localStorage.getItem(NOV_OD)) lsSet(NOV_OD, todayYmd());
+  if(((novCurrent() || {}).id || '') !== before && !currentFolder && !selectionMode && !searchOpen) render();
+}
+/* ================= kraj NOVOSTI ================= */
 
 /* v325 (Zoran 18.11., opcija B): posle podataka Arhiva postaje kao tek instalirana — podsetnici na telefonu, vidžet, dozvole za
    fascikle, baza uređaja i SVA podešavanja (localStorage galerija:* i arhiva:*: tema, jezik, PIN, AI ključ, dnevnik grešaka…).
