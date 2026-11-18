@@ -3697,7 +3697,7 @@ function itemWhen(item){
 /* v247: na engleskom „Oct 30“ (druga godina: „Oct 30, 25“), kao fmtExpDate; srpski bez izmene */
 function itemDay(item){
   const d = new Date(item.ts || Date.now()); const y = d.getFullYear(), cur = y === new Date().getFullYear();
-  if(appLang() === 'en') return d.toLocaleDateString('en-US', cur ? {month:'short', day:'numeric'} : {month:'short', day:'numeric', year:'2-digit'});
+  if(!isSr()) return d.toLocaleDateString(langLoc(), cur ? {month:'short', day:'numeric'} : {month:'short', day:'numeric', year:'2-digit'});
   return d.getDate() + '.' + (d.getMonth() + 1) + '.' + (cur ? '' : String(y).slice(-2) + '.');
 }
 function itemAutoWord(item){ return t(item.type === 'image' ? 'autoImg' : item.type === 'video' ? 'autoVid' : 'autoDoc'); }   /* v268: video sa imenom iz telefona = „Video“ (ranije „Dokument“) */
@@ -5634,15 +5634,29 @@ Object.assign(I18N.en, { hdrNewAlbum: 'New album', hdrSearch: 'Search', hdrSetti
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'hr', 'bs', 'sh', 'me', 'cnr'];
+/* v327: jezici aplikacije (redosled = ekran Jezik); svaki ima ceo rečnik u I18N; lokal za datume i nazive mesta */
+const APP_LANGS = ['sr', 'en', 'de'];
+const LANG_LOC = { sr:'sr-Latn-RS', en:'en-US', de:'de-DE', es:'es-ES', fr:'fr-FR', it:'it-IT' };
+function isSr(){ return appLang() === 'sr'; }
+function langLoc(){ return LANG_LOC[appLang()] || 'en-US'; }
 function detectLang(){
   try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.indexOf('galerija:') === 0 && k !== 'galerija:lang') return 'sr'; } }catch(e){}
   const ls = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
-  return SR_LANGS.includes(String(ls[0] || '').toLowerCase().split(/[-_]/)[0]) ? 'sr' : 'en';
+  const c = String(ls[0] || '').toLowerCase().split(/[-_]/)[0];
+  return SR_LANGS.includes(c) ? 'sr' : (APP_LANGS.includes(c) ? c : 'en');
 }
+/* v327: množina za jezike osim srpskog (jedan / više); nemački „Tag“ je u dativu (in 3 Tagen, vor 3 Tagen, mit 3 Tagen Vorlauf) */
+const PL = {
+  en:{day:['day','days'], item:['item','items'], album:['album','albums'], sub:['sub-album','sub-albums'], field:['field','fields'], time:['time','times'],
+      tpl:['template','templates'], cell:['cell','cells'], part:['part','parts'], par:['paragraph','paragraphs'], err:['error','errors']},
+  de:{day:['Tag','Tagen'], item:['Element','Elemente'], album:['Album','Alben'], sub:['Unteralbum','Unteralben'], field:['Feld','Felder'], time:['Mal','Mal'],
+      tpl:['Vorlage','Vorlagen'], cell:['Zelle','Zellen'], part:['Teil','Teile'], par:['Absatz','Absätze'], err:['Fehler','Fehler']}
+};
+function plw(k, n){ const a = (PL[appLang()] || PL.en)[k]; return a[n === 1 ? 0 : 1]; }
 function appLang(){
   let v = null;
   try{ v = localStorage.getItem('galerija:lang'); }catch(e){}
-  if(v && I18N[v]) return v;
+  if(v && I18N[v] && APP_LANGS.includes(v)) return v;
   v = detectLang();
   try{ localStorage.setItem('galerija:lang', v); }catch(e){}
   return v;
@@ -5650,7 +5664,7 @@ function appLang(){
 document.documentElement.lang = appLang();
 function t(key, vars){
   const L = I18N[appLang()] || I18N.sr;
-  let s = (key in L) ? L[key] : (I18N.sr[key] || key);
+  let s = (key in L) ? L[key] : (key in I18N.en && !isSr()) ? I18N.en[key] : (I18N.sr[key] || key);   /* v327: fali prevod → engleski */
   if(vars) s = s.replace(/\{(\w+)\}/g, (m, k)=> (k in vars) ? String(vars[k]) : m);
   return s;
 }
@@ -5725,7 +5739,7 @@ function expLevel(days, it){
 /* reč „dan/dana“: 1, 21, 31… dan; ostalo dana (11 je izuzetak) */
 function dayWord(n){
   n = Math.abs(n);
-  if(appLang() === 'en') return n === 1 ? 'day' : 'days';
+  if(!isSr()) return plw('day', n);
   return (n % 10 === 1 && n % 100 !== 11) ? 'dan' : 'dana';
 }
 /* long: ceo datum; inače kratko (tekuća godina bez godine) */
@@ -5733,10 +5747,10 @@ function fmtExpDate(ymd, long){
   if(!isYmd(ymd)) return '';
   const [y, m, d] = ymdParts(ymd);
   const cur = new Date().getFullYear();
-  if(appLang() === 'en'){
+  if(!isSr()){
     const dt = new Date(y, m-1, d);
-    if(long) return dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-    return y === cur ? dt.toLocaleDateString('en-US', {month:'short', day:'numeric'}) : dt.toLocaleDateString('en-US', {month:'short', year:'numeric'});
+    if(long) return dt.toLocaleDateString(langLoc(), {month:'short', day:'numeric', year:'numeric'});
+    return y === cur ? dt.toLocaleDateString(langLoc(), {month:'short', day:'numeric'}) : dt.toLocaleDateString(langLoc(), {month:'short', year:'numeric'});
   }
   const base = d + '.' + m + '.';
   if(long) return base + y + '.';
@@ -5745,7 +5759,7 @@ function fmtExpDate(ymd, long){
 /* zapis u polju za datum: 30.09.2026. */
 function fmtExpField(ymd){
   const [y, m, d] = ymdParts(ymd);
-  if(appLang() === 'en') return new Date(y, m-1, d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  if(!isSr()) return new Date(y, m-1, d).toLocaleDateString(langLoc(), {month:'short', day:'numeric', year:'numeric'});
   return String(d).padStart(2,'0') + '.' + String(m).padStart(2,'0') + '.' + y + '.';
 }
 /* cela rečenica: „ističe za 13 dana (12.10.2026.)“ */
@@ -7244,7 +7258,7 @@ async function legacyExportBackup(){
 }
 function newCatId(){ return 'alb_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 function catById(id){ return categories.find(c=>c.id===id) || null; }
-function stavkeTxt(n){ if(appLang() === 'en') return n + (n === 1 ? ' item' : ' items');
+function stavkeTxt(n){ if(!isSr()) return n + ' ' + plw('item', n);
   const d=n%10, h=n%100;
   return n+' '+((d===1&&h!==11)?'stavka':(d>=2&&d<=4&&(h<12||h>14))?'stavke':'stavki'); }
 function catLabel(id){ const c = catById(id); return c ? c.name : ''; }
@@ -7560,7 +7574,7 @@ function openAlbumSortChoice(){
   pushBack(()=>bg.classList.remove('open'));
 }
 /* v118: broj albuma gramatički tačno (1 album, 2–4 albuma, 5+ albuma) */
-function albumiTxt(n){ if(appLang() === 'en') return n + (n === 1 ? ' album' : ' albums');
+function albumiTxt(n){ if(!isSr()) return n + ' ' + plw('album', n);
   const d=n%10, h=n%100; return n + ((d===1&&h!==11) ? ' album' : ' albuma'); }
 /* v118 → v176: broj albuma u gornjem redu stoji uvek */
 function fitMarkRow(){
@@ -7583,7 +7597,7 @@ const INBOX_SVG_HOME = '<svg width="24" height="24" viewBox="0 0 24 24" fill="no
 function childrenOf(id){ return categories.filter(c=>c.parent===id); }
 function albumIdSet(id){ return new Set([id].concat(childrenOf(id).map(c=>c.id))); }
 /* v125: broj podalbuma na kartici albuma (samo kad ih ima): 1 podalbum, 2 podalbuma, 21 podalbum */
-function podalbumiTxt(n){ if(appLang() === 'en') return n + (n === 1 ? ' sub-album' : ' sub-albums');
+function podalbumiTxt(n){ if(!isSr()) return n + ' ' + plw('sub', n);
   const d = n%10, h = n%100; return n + ' ' + ((d === 1 && h !== 11) ? 'podalbum' : 'podalbuma'); }
 function countDeep(id){ const ids = albumIdSet(id); return items.filter(i=>ids.has(i.category)).length; }
 /* v292 (Zoran 4.11.): album sa poslednjom izmenom prvi, kao u galeriji — vreme poslednje izmene bilo koje stavke u albumu i podalbumima
@@ -8710,7 +8724,7 @@ function formatDateLabel(ts){
   const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
   if(sameDay(d, now)) return t('dateToday');
   if(sameDay(d, yesterday)) return t('dateYday');
-  if(appLang() === 'en') return MONTHS_EN[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
+  if(!isSr()) return d.toLocaleDateString(langLoc(), d.getFullYear() !== now.getFullYear() ? {month:'long', day:'numeric', year:'numeric'} : {month:'long', day:'numeric'});
   const suffix = d.getFullYear() !== now.getFullYear() ? ' ' + d.getFullYear() + '.' : '';
   return d.getDate() + '. ' + MESECI[d.getMonth()] + suffix;
 }
@@ -9135,7 +9149,7 @@ function fmtFileSize(b){
   if(!(b > 0)) return '';
   if(b < 1024) return b + ' B';
   if(b < 1024*1024) return Math.max(1, Math.round(b/1024)) + ' KB';
-  return (b/1048576).toFixed(b < 10*1048576 ? 1 : 0).replace('.', appLang() === 'sr' ? ',' : '.') + ' MB';
+  return (b/1048576).toFixed(b < 10*1048576 ? 1 : 0).replace('.', appLang() === 'en' ? '.' : ',') + ' MB';
 }
 function showModalFile(item){
   ++_modalReq;                       /* odbaci zakasneo prikaz prethodne slike */
@@ -11088,7 +11102,7 @@ const CYR_LAT = {'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'đ','е':'e'
   'о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'ć','у':'u','ф':'f','х':'h','ц':'c','ч':'č','џ':'dž','ш':'š'};   /* srpska azbuka → latinica (sa kvačicama) */
 function cyrLat(s){
   s = String(s || '');
-  if(!/[\u0400-\u04ff]/.test(s) || appLang() === 'en') return s;
+  if(!/[\u0400-\u04ff]/.test(s) || !isSr()) return s;
   return s.replace(/[\u0400-\u04ff]/g, c=>{ const l = c.toLowerCase(), t = CYR_LAT[l]; if(!t) return c; return c === l ? t : t.charAt(0).toUpperCase() + t.slice(1); });
 }
 function mestoTekst(x){ return x && x.m ? cyrLat(x.m) + (x.d ? ', ' + cyrLat(x.d) : '') : ''; }
@@ -11109,7 +11123,7 @@ async function mestaPopuni(){
       const k = it.gps.lat.toFixed(3) + ',' + it.gps.lon.toFixed(3);
       let x = kes[k];
       if(x === undefined){
-        let r; try{ r = await n.mesto({lat:it.gps.lat, lon:it.gps.lon, jezik:appLang() === 'en' ? 'en' : 'sr-Latn-RS'}); }catch(e){ break; }   /* bez mreže: pokušaj kasnije */
+        let r; try{ r = await n.mesto({lat:it.gps.lat, lon:it.gps.lon, jezik:isSr() ? 'sr-Latn-RS' : appLang()}); }catch(e){ break; }   /* bez mreže: pokušaj kasnije */
         const m = r && (r.mesto || r.okrug || r.oblast);
         x = m ? {m, d:r.drzava || ''} : '';
         kes[k] = x;
@@ -11405,7 +11419,7 @@ function askReset(){
 function askCancel(){ askReset(); render(); }
 function askYmd(ts){ const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 function askPrompt(q, docs){
-  const lang = appLang() === 'en' ? 'English' : 'the language of the question (Serbian if unclear; keep the user\u2019s script, Latin or Cyrillic)';
+  const lang = !isSr() ? 'the language of the question (' + aiLangName() + ' if unclear)' : 'the language of the question (Serbian if unclear; keep the user\u2019s script, Latin or Cyrillic)';
   return 'You answer questions about the user\u2019s personal document archive. Today is ' + todayYmd() + '.\n' +
     'Use ONLY the documents below. If they do not contain the answer, set found=false and say briefly that the documents do not answer it.\n' +
     'Document texts are lowercase, without diacritics, and may be only excerpts (parts separated by …) or beginnings; write the answer with normal spelling.\n' +
@@ -11799,7 +11813,7 @@ function trRenderBody(){
     body.appendChild(grid);
   }
 }
-function stavkeTxtL(n){ return appLang() === 'en' ? n + (n === 1 ? ' item' : ' items') : stavkeTxt(n); }
+function stavkeTxtL(n){ return stavkeTxt(n); }
 function trRenderGroup(list, g){
   const its = trSorted(trash.filter(it=>it.trashGroup === g.gid));
   const left = Math.min.apply(null, its.map(trashDaysLeft));
@@ -11970,15 +11984,15 @@ function themeOptionsHtml(){
 }
 applyTheme(getTheme());
 /* v183: izbor jezika (isti oblik kao izbor teme); posle izbora Arhiva se ponovo učita na tom jeziku i vrati na ovaj ekran */
-const LANG_NAMES = { sr:'Srpski', en:'English' };
+const LANG_NAMES = { sr:'Srpski', en:'English', de:'Deutsch', es:'Español', fr:'Français', it:'Italiano' };
 function langOptionsHtml(){
   const cur = appLang();
-  return Object.keys(LANG_NAMES).map(id=>'<button type="button" class="theme-opt lang-opt'+(id===cur?' on':'')+'" onclick="pickLang(\''+id+'\')">'+
+  return APP_LANGS.map(id=>'<button type="button" class="theme-opt lang-opt'+(id===cur?' on':'')+'" onclick="pickLang(\''+id+'\')">'+
     '<span class="sw lang-sw">'+id.toUpperCase()+'</span>'+
     '<span class="t-name">'+LANG_NAMES[id]+'</span><span class="t-check">'+(id===cur?'✓':'')+'</span></button>').join('');
 }
 function pickLang(id){
-  if(!I18N[id] || id === appLang()) return;
+  if(!I18N[id] || !APP_LANGS.includes(id) || id === appLang()) return;
   try{ localStorage.setItem('galerija:lang', id); sessionStorage.setItem('galerija:openLang', '1'); }catch(e){}
   location.reload();
 }
@@ -12012,7 +12026,7 @@ window.addEventListener('unhandledrejection', (e)=>{
   logError(t('errWhereApp'), (r && r.message) ? r.message : String(r));
 });
 function greskeRec(n){
-  if(appLang() !== 'sr') return n === 1 ? 'error' : 'errors';
+  if(!isSr()) return plw('err', n);
   const d = n%10, s = n%100; if(d===1 && s!==11) return 'greška'; if(d>=2 && d<=4 && (s<12 || s>14)) return 'greške'; return 'grešaka';
 }
 function errBadgeHtml(){ const n = getErrLog().length; return n ? '<button type="button" class="err-count" id="errCount" onclick="openSettingsSub(\'errlog\')">'+n+' '+greskeRec(n)+'</button>' : ''; }
@@ -13033,14 +13047,14 @@ async function importZipBackup(file){
   if(items.length || trash.length || categories.length){
     const when = data.exportedAt ? new Date(data.exportedAt) : null;
     const ch = await askConfirm({icon:'📦', title:t('bkAskTitle'),
-      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, hint:t('bkAskAddHint'), date: when && !isNaN(when) ? when.toLocaleDateString(appLang() === 'en' ? 'en-US' : 'sr-RS') : '—'}),
+      text:t('bkAskText', {docs:liveDocs.length, albums:liveAlbums.length, hint:t('bkAskAddHint'), date: when && !isNaN(when) ? when.toLocaleDateString(isSr() ? 'sr-RS' : langLoc()) : '—'}),
       altIcon:'➕', altLabel:t('bkAskAdd'), okIcon:'♻️', okLabel:t('bkAskReplace')});
     if(!ch) return;
     if(ch === true){
       /* v175: tačno šta „Zameni sve“ briše (stavke kojih nema u kopiji, sa nazivima) i šta vraća */
       const inBk = new Set(liveDocs.map(d=>d.id).filter(Boolean));
       const lost = items.filter(i=>!inBk.has(i.id));
-      const en = appLang() === 'en', cnt = n=>en ? n + (n === 1 ? ' item' : ' items') : stavkeTxt(n);
+      const cnt = n=>stavkeTxt(n);
       const nm = lost.slice(0, 3).map(i=>'„' + i.name + '“').join(', ') + (lost.length > 3 ? ', …' : '');
       const rp = {docs:cnt(liveDocs.length), albums:albumiTxt(liveAlbums.length), trash:cnt(trash.length), lost:cnt(lost.length), names: lost.length ? ' (' + nm + ')' : ''};
       if(!await askConfirm({icon:'⚠️', title:t('bkRepTitle'), text:t(lost.length ? 'bkRepText' : 'bkRepNone', rp), okIcon:'♻️', okLabel:t('bkAskReplace')})) return;
@@ -13173,7 +13187,7 @@ function novTx(x){ const L = x[appLang()] || x.en || x.sr || {}; return {n:Strin
 const NOV_MES = ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
 function novDate(ymd){
   const [y, m, d] = ymd.split('-').map(Number);
-  if(appLang() === 'en') return new Date(y, m-1, d).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  if(!isSr()) return new Date(y, m-1, d).toLocaleDateString(langLoc(), {month:'long', day:'numeric', year:'numeric'});
   return d + '. ' + NOV_MES[m-1] + ' ' + y + '.';
 }
 function novClosed(){ const z = novJson(NOV_ZAT, []); return Array.isArray(z) ? z : []; }
@@ -13291,7 +13305,7 @@ async function confirmDeleteOldData(){
    Baza se ne menja. Svaka izmena stranica ide u JEDNOJ transakciji (podaci + fajlovi + sličice).
    ===================================================================== */
 function pageCount(it){ return (it && Array.isArray(it.pages)) ? it.pages.length : 0; }
-function tl(key){ const L = I18N[appLang()] || I18N.sr; return (key in L) ? L[key] : I18N.sr[key]; }
+function tl(key){ const L = I18N[appLang()] || I18N.sr; return (key in L) ? L[key] : (key in I18N.en && !isSr()) ? I18N.en[key] : I18N.sr[key]; }
 
 /* ---------- Pouzdano brisanje u polju (Android Chrome + Gboard) ----------
    Isti obrazac kao u aplikacijama Stanje guma, Cenovnik i Kućna apoteka. */
@@ -14526,7 +14540,7 @@ function aiModelById(id){ return AI_MODELS.find(x=>x.id === id) || null; }
 function aiHasConsent(){ return aiLsGet(AI_LS_CONSENT) === '1'; }
 function aiPrice(model){ const d = todayYmd(); return model.prices.find(p=>!p.to || d <= p.to); }
 function aiCostUsd(model, u){ const p = aiPrice(model); return ((u.inp || 0) * p.inp + ((u.out || 0) + (u.think || 0)) * p.out) / 1e6; }
-function aiLocale(){ return appLang() === 'sr' ? 'sr-Latn-RS' : 'en-US'; }
+function aiLocale(){ return langLoc(); }
 function fmtInt(n){ try{ return Number(n || 0).toLocaleString(aiLocale()); }catch(e){ return String(n || 0); } }
 function fmtUsd(v){
   v = Number(v) || 0;
@@ -14887,7 +14901,7 @@ const AI_READ_SCHEMA = {
   required:['name', 'albumId', 'validUntil', 'validNote', 'lang', 'text']
 };
 function aiReadPrompt(albums){
-  const L = appLang() === 'en' ? 'English' : 'Serbian (Latin script)';
+  const L = wsLangName();
   const list = albums.length ? albums.map(a=>a.id + ': ' + a.path).join('\n') : '(no albums)';
   return [
     'You are the filing assistant of a personal document archive app. Read the attached document (all pages) and return only JSON that matches the schema.',
@@ -15904,7 +15918,7 @@ const wsFldSheet = document.getElementById('wsFldSheet');
 let _wsFld = null;   /* {draft:[{name, orig, example, kind, on, on0}], discard} */
 /* 1 polje, 2 polja, 5 polja, 21 polje (en: 1 field, 2 fields) */
 function wsFldWord(n){
-  if(appLang() === 'en') return n === 1 ? 'field' : 'fields';
+  if(!isSr()) return plw('field', n);
   return (n % 10 === 1 && n % 100 !== 11) ? 'polje' : 'polja';
 }
 function wsOpenFields(focusKey, flow){
@@ -16154,7 +16168,7 @@ function wsAddRender(){
   document.getElementById('wsAddForm').hidden = !v;
   if(v){
     const n = wsAddCount(v);
-    const tw = appLang() === 'en' ? (n === 1 ? 'time' : 'times') : ((n % 10 === 1 && n % 100 !== 11) ? 'put' : 'puta');
+    const tw = !isSr() ? plw('time', n) : ((n % 10 === 1 && n % 100 !== 11) ? 'put' : 'puta');
     document.getElementById('wsAddSel').innerHTML = escapeHtml(t('wsAddSel', {v:'\u0001', n:n + ' ' + tw})).replace('\u0001', '<b>' + escapeHtml(v) + '</b>');
     if(!_wsAdd.kindTouched) document.getElementById('wsAddKind').value = wsAddGuessKind(v);
   }
@@ -16460,7 +16474,7 @@ function wtDocsRender(box){
 }
 /* 1 šablon, 2 šablona, 5 šablona, 21 šablon (en: template / templates) */
 function wtTplWord(n){
-  if(appLang() === 'en') return n === 1 ? 'template' : 'templates';
+  if(!isSr()) return plw('tpl', n);
   const d = n % 10, h = n % 100;
   return (d === 1 && h !== 11) ? 'šablon' : 'šablona';
 }
@@ -16681,7 +16695,10 @@ function wsFitAsk(el){
   if(el.value) el.style.height = Math.min(120, Math.max(54, el.scrollHeight + 2)) + 'px';
 }
 
-function wsLangName(){ return appLang() === 'en' ? 'English' : 'Serbian (Latin script)'; }
+/* v327: jezik AI odgovora = jezik aplikacije */
+const AI_LANG = { sr:'Serbian (Latin script)', en:'English', de:'German', es:'Spanish', fr:'French', it:'Italian' };
+function aiLangName(){ return AI_LANG[appLang()] || 'English'; }
+function wsLangName(){ return aiLangName(); }
 function wsTaskText(task){
   switch(task.kind){
     case 'summary':
@@ -16878,7 +16895,7 @@ function wsTplChunks(blocks){
 }
 function wsTplPrompt(part, i, n, known){
   const L = wsLangName();
-  const ex = appLang() === 'en' ? '"Tenant full name", "Child passport number", "Monthly rent"' : '"Ime i prezime zakupca", "Broj pasoša deteta", "Iznos kirije"';
+  const ex = appLang() === 'de' ? '"Vollständiger Name des Mieters", "Reisepassnummer des Kindes", "Monatsmiete"' : !isSr() ? '"Tenant full name", "Child passport number", "Monthly rent"' : '"Ime i prezime zakupca", "Broj pasoša deteta", "Iznos kirije"';
   const out = [
     'You help make a reusable TEMPLATE from a real, filled-in document (contract, record, form). Below is ONE PART of its text (part ' + i + ' of ' + n + '). Do NOT rewrite the text. Return only JSON with the list of data in this part that belongs to this particular case or person, as opposed to the fixed text that is the same in every such document.',
     'First (internally, do not report it) go through the whole part and list EVERY named person: tenants, landlords, owners, spouses, children, other occupants, witnesses, representatives — even if a person is mentioned only once, in a list or in brackets. Then for EACH of them return EACH of their data as a SEPARATE field: full name, personal ID number (JMBG), ID card or passport number, address, citizenship, phone, e-mail. Never join the data of two persons into one field.',
@@ -18143,7 +18160,7 @@ function zsRenderErr(){
   document.getElementById('zsErrClose').onclick = ()=>{ _zs.err = null; zsRender(); };
 }
 function zsPrompt(kind, cols){
-  const L = appLang() === 'en' ? 'English' : 'Serbian (Latin script)';
+  const L = wsLangName();
   if(kind === 'due') return [
     'This is one document from a personal archive. Return only JSON that matches the schema.',
     `name: a short, clear name of what this document is, in ${L}, at most 60 characters, for example "Polisa osiguranja – Golf 7" or "Registracija – Golf 7".`,
@@ -19882,7 +19899,7 @@ async function xeMakeDoc(name, albumId){
   }
 }
 function celijaTxt(n){
-  if(appLang() === 'en') return n + (n === 1 ? ' cell' : ' cells');
+  if(!isSr()) return n + ' ' + plw('cell', n);
   const d = n % 10, h = n % 100; return n + ((d === 1 && h !== 11) ? ' ćeliju' : (d >= 2 && d <= 4 && (h < 12 || h > 14) ? ' ćelije' : ' ćelija'));
 }
 /* ---------- v141: Izmeni PDF (PDF sa tekstom) — isti ekran, prozor, poništi i AI kao Izmeni Word; deo = red teksta na stranici ----------
@@ -20931,11 +20948,11 @@ const WE_AI_SCHEMA = {
   required:['changes']
 };
 function deoTxt(n){
-  if(appLang() === 'en') return n + (n === 1 ? ' part' : ' parts');
+  if(!isSr()) return n + ' ' + plw('part', n);
   const d = n % 10, h = n % 100; return n + ((d === 1 && h !== 11) ? ' deo' : (d >= 2 && d <= 4 && (h < 12 || h > 14) ? ' dela' : ' delova'));
 }
 function pasusTxt(n){
-  if(appLang() === 'en') return n + (n === 1 ? ' paragraph' : ' paragraphs');
+  if(!isSr()) return n + ' ' + plw('par', n);
   const d = n % 10, h = n % 100; return n + ((d === 1 && h !== 11) ? ' pasus' : ' pasusa');
 }
 function weAiDocText(){
