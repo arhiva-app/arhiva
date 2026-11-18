@@ -15,6 +15,13 @@
 <meta name="theme-color" id="themeColor" content="#0d0e10">
 <meta name="color-scheme" content="light dark"><!-- v239: Android WebView poštuje prefers-color-scheme tek uz ovu oznaku (zvanično: developer.android.com/guide/webapps/dark-theme) -->
 <script>
+/* v325: posle „Obriši sve“ podešavanja se brišu NA POČETKU novog pokretanja — stara stranica do samog odlaska još može nešto
+   da upiše (vidžet, jezik), pa brisanje pre ponovnog pokretanja nije dovoljno. Samo ključevi Arhive (galerija:*, arhiva:*). */
+(function(){ try{ if(!sessionStorage.getItem('galerija:wiped')) return; var ks = [];
+  for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && (k.indexOf('galerija:') === 0 || k.indexOf('arhiva:') === 0)) ks.push(k); }
+  ks.forEach(function(k){ localStorage.removeItem(k); }); }catch(e){} })();
+</script>
+<script>
 /* tema se postavlja pre prvog iscrtavanja, da ne bi "bljesnula" klasična */
 (function(){ try{ var t = localStorage.getItem('galerija:theme') || ((window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'crna' : 'banka'); var bars = {banka:'#0E2747', crna:'#000000', ponoc:'#000000', koza:'#EFE5CF', klasicna:'#E9ECEF'}; if(t && bars[t]){ document.documentElement.setAttribute('data-theme', t); var m = document.getElementById('themeColor'); if(m) m.setAttribute('content', bars[t]); } }catch(e){} })();
 </script>
@@ -4354,6 +4361,7 @@ const I18N = {
       ['Teme', 'Podešavanja → Tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Arhivi desi greška, Arhiva je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Arhiva ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Povratne informacije', 'Podešavanja → „Pošalji povratne informacije“ (poslednja stavka) otvara e-poštu sa već upisanim primaocem i naslovom. Napiši pohvalu, predlog ili problem i pošalji.', 'Na dnu poruke Arhiva sama doda verziju, Android i model telefona i jezik, a ako u Dnevniku grešaka ima zapisa, i poslednje greške — da bismo lakše pronašli problem. Sve vidiš pre slanja i možeš da obrišeš šta nećeš.'],
+      ['Obriši sve podatke', 'Podešavanja → „Obriši sve podatke“ briše sve iz Arhive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Arhiva se zatim pokrene kao tek instalirana.', 'Rezervne kopije (ZIP) u fascikli telefona i kopija na Google Drive-u ostaju, pa ih kasnije možeš vratiti. U prvom prozoru možeš izabrati „Prvo napravi kopiju“.'],
       ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
     ],
     migTitle: 'Nov način čuvanja',
@@ -5183,6 +5191,7 @@ const I18N = {
       ['Themes', 'Settings → Theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Arhiva, Arhiva records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Arhiva cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Feedback', 'Settings → “Send feedback” (the last item) opens an email with the recipient and subject already filled in. Write praise, a suggestion or a problem and send it.', 'At the bottom of the message Arhiva adds the version, Android and phone model and the language, and if the Error log has records, the latest errors too — so we can find the problem more easily. You see everything before sending and can delete what you don’t want.'],
+      ['Delete all data', 'Settings → “Delete all data” deletes everything in Arhiva on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Arhiva then starts as if freshly installed.', 'Backups (ZIP) in the phone folder and the copy on Google Drive stay, so you can restore them later. In the first window you can choose “Back up first”.'],
       ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
     ],
     migTitle: 'New storage',
@@ -5457,10 +5466,10 @@ Object.assign(I18N.sr, {
   bkDirGone: 'Fascikla „{name}“ nije dostupna. Izaberi gde da se sačuva kopija.',
   bkEvery: 'Podseti me na svakih (dana)', bkEveryHint: 'Kad prođe ovoliko dana od poslednje rezervne kopije, gore će se pojaviti podsetnik.',
   bkRemNever: 'Nikad nisi napravio bekap podataka.', bkRemDays: 'Prošlo je {n} dana od poslednjeg bekapa.', bkRemBtn: 'Izvezi bekap',
-  wipeTile: 'Obriši sve podatke', wipeSub: 'Trajno briše sve slike, dokumente i albume',
+  wipeTile: 'Obriši sve podatke', wipeSub: 'Sve se briše — Arhiva kao tek instalirana',
   fbTile: 'Pošalji povratne informacije', fbSub: 'Pohvala, predlog ili problem — piši nam', fbSubj: 'Arhiva {v} — povratne informacije', fbLang: 'Jezik', fbErr: 'Dnevnik grešaka',
-  wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE slike, dokumente, albume i šablone iz Arhive na ovom uređaju. Nema opoziva.',
-  wipeDrKeep: ' Kopija na Google Drive-u ostaje, a Drive se na ovom uređaju isključuje — kopiju kasnije možeš vratiti.', wipeDoneDr: 'Sve je obrisano sa uređaja. Kopija na Google Drive-u je sačuvana.',
+  wipeT1: 'Obriši sve podatke', wipeX1: 'Ovo trajno briše SVE iz Arhive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Arhiva će biti kao tek instalirana. Nema opoziva. Rezervne kopije (ZIP) u fascikli telefona ostaju — kasnije ih možeš vratiti.',
+  wipeDrKeep: ' Kopija na Google Drive-u takođe ostaje.', wipeDoneDr: 'Sve je obrisano sa uređaja. Kopija na Google Drive-u je sačuvana.',
   wipeOk1: 'Obriši sve', wipeBk: 'Prvo napravi kopiju', wipeT2: 'Poslednja potvrda', wipeX2: 'Stvarno obrisati baš sve?', wipeOk2: 'Da, obriši',
   wipeDone: 'Sve je obrisano.', wipeErr: 'Greška pri brisanju.',
   loadFailT: 'Podaci nisu učitani', loadFailS: 'Arhiva trenutno ne može da pročita svoje podatke. Ništa nije obrisano. Pokušaj ponovo; ako se ponavlja, zatvori Arhivu i ponovo je otvori.', loadFailBtn: 'Pokušaj ponovo', loadFailWhere: 'Učitavanje', mbFull: 'Ceo ekran', mbSplit: 'Pored spiska', ocrWhere: 'Tekst iz slike', loadFailWait: 'Podaci se još učitavaju.',
@@ -5487,10 +5496,10 @@ Object.assign(I18N.en, {
   bkDirGone: 'Folder “{name}” is not available. Choose where to save the backup.',
   bkEvery: 'Remind me every (days)', bkEveryHint: 'When this many days have passed since the last backup, a reminder appears at the top.',
   bkRemNever: 'You have never backed up your data.', bkRemDays: '{n} days have passed since your last backup.', bkRemBtn: 'Back up',
-  wipeTile: 'Delete all data', wipeSub: 'Permanently deletes all images, documents and albums',
+  wipeTile: 'Delete all data', wipeSub: 'Deletes everything — Arhiva as freshly installed',
   fbTile: 'Send feedback', fbSub: 'Praise, a suggestion or a problem — write to us', fbSubj: 'Arhiva {v} — feedback', fbLang: 'Language', fbErr: 'Error log',
-  wipeT1: 'Delete all data', wipeX1: 'This permanently deletes ALL images, documents, albums and templates from Arhiva on this device. It cannot be undone.',
-  wipeDrKeep: ' The copy on Google Drive stays, and Drive is turned off on this device — you can restore the copy later.', wipeDoneDr: 'Everything has been deleted from this device. The copy on Google Drive is kept.',
+  wipeT1: 'Delete all data', wipeX1: 'This permanently deletes EVERYTHING in Arhiva on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Arhiva will be as if freshly installed. It cannot be undone. Backups (ZIP) in the phone folder stay — you can restore them later.',
+  wipeDrKeep: ' The copy on Google Drive stays as well.', wipeDoneDr: 'Everything has been deleted from this device. The copy on Google Drive is kept.',
   wipeOk1: 'Delete all', wipeBk: 'Back up first', wipeT2: 'Final confirmation', wipeX2: 'Really delete everything?', wipeOk2: 'Yes, delete',
   wipeDone: 'Everything has been deleted.', wipeErr: 'Error while deleting.',
   loadFailT: 'Data not loaded', loadFailS: 'Arhiva can’t read its data right now. Nothing has been deleted. Try again; if it keeps happening, close Arhiva and open it again.', loadFailBtn: 'Try again', loadFailWhere: 'Loading', mbFull: 'Full screen', mbSplit: 'Beside the list', ocrWhere: 'Text from image', loadFailWait: 'Your data is still loading.',
@@ -6515,6 +6524,12 @@ const Skladiste = (()=>{
       async fzVidjeni(){ return (await devAll('fzvid')).map(p=>p[1]); },
       fzDodaj(uri, ids){
         return devRun('fzvid', 'readwrite', (st)=>{ (ids || []).forEach(id=>st.put([uri, id], uri + '\n' + id)); });
+      },
+      /* v325 („Obriši sve“ = kao tek instalirana): Drive mapa, viđeni fajlovi fascikli i zapamćena fascikla kopije */
+      async obrisiSve(){
+        await devRun('drive', 'readwrite', (st)=>st.clear());
+        await devRun('fzvid', 'readwrite', (st)=>st.clear());
+        await api.uredjaj.sacuvajFasciklu(null);
       },
       /* fascikla više nije praćena: brišu se njeni viđeni */
       fzBrisi(uri){
@@ -11539,6 +11554,8 @@ function searchEmptyAlt(inAlbum){
 loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
+  let wp = null; try{ wp = sessionStorage.getItem('galerija:wiped'); sessionStorage.removeItem('galerija:wiped'); }catch(e){}
+  if(wp) toast(t(wp === 'dr' ? 'wipeDoneDr' : 'wipeDone'));   /* v325: posle „Obriši sve“ */
   if(ol){ openSettings(); openSettingsSub('lang'); } });
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
@@ -11949,7 +11966,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 324;
+const APP_VERSION = 325;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -13103,15 +13120,46 @@ async function wipeAllData(){
     await storeWipeAll();
     /* i stari podaci od pre prelaska, da se ništa ne bi vratilo samo */
     await deleteOldDb().catch(e=>console.error(e));
-    currentFolder = null;
-    render();
-    updateStorageInfo();
-    toast(t(drWas ? 'wipeDoneDr' : 'wipeDone'));
-    requestClose();
+    await wipeDeviceRest();
+    wipeSettingsAndRestart(drWas ? 'dr' : '1');
   }catch(e){
     console.error(e);
     toast(t('wipeErr'));
   }
+}
+
+/* v325 (Zoran 18.11., opcija B): posle podataka Arhiva postaje kao tek instalirana — podsetnici na telefonu, vidžet, dozvole za
+   fascikle, baza uređaja i SVA podešavanja (localStorage galerija:* i arhiva:*: tema, jezik, PIN, AI ključ, dnevnik grešaka…).
+   Ostaju ZIP kopije u fascikli telefona i kopija na Drive-u (Drive je već isključen). Greška jednog dela ne zaustavlja ostale. */
+async function wipeDeviceRest(){
+  const deo = async (ime, f)=>{ try{ await f(); }catch(e){ console.error('obriši sve: ' + ime, e); } };
+  await deo('podsetnici', async ()=>{
+    clearTimeout(_obTimer); const n = obNative(); if(!n) return;
+    let old = []; try{ old = JSON.parse(localStorage.getItem(OB_IDS) || '[]'); }catch(e){}
+    if(old.length) await n.otkazi(old);
+  });
+  await deo('vidzet', async ()=>{ clearTimeout(_vzTimer); _vzLast = null; await vzPush(); });   /* prazan: telefon briše i sličice */
+  await deo('fascikle', async ()=>{
+    const n = fzNative(); if(!n) return;
+    const c = fzCfg(), uri = (c.moje || []).map(x=>x.uri).concat(c.snimci && c.snimci.uri ? [c.snimci.uri] : []);
+    for(const u of uri) await Promise.resolve(n.otpusti({uri:u})).catch(()=>{});
+  });
+  await deo('fascikla kopije', async ()=>{
+    const k = window.ARHIVA_KOPIJA_FASCIKLA; let o = null; try{ o = JSON.parse(localStorage.getItem(BK_APP_KEY) || 'null'); }catch(e){}
+    if(k && o && o.uri) await k.otpusti(o.uri);
+  });
+  await deo('baza uređaja', ()=>Skladiste.uredjaj.obrisiSve());
+}
+/* podešavanja se brišu sinhrono, tik pre ponovnog pokretanja — između ne sme da se izvrši ništa što bi ih upisalo ponovo
+   (npr. jezik: t() bi odmah upisao „galerija:lang“, pa bi Arhiva posle mislila da je stari korisnik) */
+function wipeSettingsAndRestart(how){
+  try{
+    const keys = [];
+    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && (k.indexOf(LS_PREFIX) === 0 || k.indexOf('arhiva:') === 0)) keys.push(k); }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(e){ console.error('obriši sve: podešavanja', e); }
+  try{ sessionStorage.setItem('galerija:wiped', how); }catch(e){}
+  location.reload();
 }
 
 /* ---------- Stari podaci (od pre prelaska) ---------- */
