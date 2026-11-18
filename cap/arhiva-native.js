@@ -327,7 +327,8 @@
       if(d.text) o.text = d.text;
       if(d.url) o.url = d.url;
       if(uris.length) o.files = uris;
-      await Share.share(o);
+      /* v324: vraća {activityType} = paket aplikacije koja je primila fajl (zvanični SharePlugin.java: EXTRA_CHOSEN_COMPONENT → getPackageName(), može biti „“) */
+      return await Share.share(o);
     }catch(e){
       var m = String(e && e.message || e);
       if(/cancel/i.test(m)){ var a = new Error(m); a.name = 'AbortError'; throw a; }
