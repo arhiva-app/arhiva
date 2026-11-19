@@ -1,6 +1,6 @@
 {
-  "name": "Arhiva",
-  "short_name": "Arhiva",
+  "name": "Life Archive",
+  "short_name": "Life Archive",
   "description": "Privatna arhiva dokumenata i slika",
   "start_url": "./index.html",
   "scope": "./",

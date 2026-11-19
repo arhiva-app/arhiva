@@ -28,6 +28,9 @@
   if(C.isPluginAvailable && C.isPluginAvailable('Trake')){
     var Trake = reg('Trake');
     window.ARHIVA_TRAKE = function(boja, gore){ try{ Trake.boja({ boja: boja, gore: gore || boja }).catch(function(){}); }catch(e){} };   /* v237: gore = gornja traka (stariji APK je zanemari) */
+    /* v333 (B2): visina dugmića telefona (donja traka je providna) → --sab; APK je upisuje i sam posle učitavanja, ovo je
+       za slučaj da je upis stigao pre stranice. Stariji APK nema „dno“ → greška se zanemari (traka puna kao do sada). */
+    try{ Trake.dno().then(function(r){ if(r && r.dp >= 0) document.documentElement.style.setProperty('--sab', r.dp + 'px'); }).catch(function(){}); }catch(e){}
   }
 
   /* 6) zaključavanje: dok Arhiva ne nacrta svoj ekran, ništa se ne vidi (klasa lk-boot) */
