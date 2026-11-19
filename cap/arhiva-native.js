@@ -164,7 +164,8 @@
   var DE = { 'Preparing to save…':'Wird zum Speichern vorbereitet…', 'Writing backup…':'Sicherung wird geschrieben…', 'Not saved.':'Nicht gespeichert.', 'Preparing to share…':'Wird zum Teilen vorbereitet…' };
   function lng(){ try{ return localStorage.getItem('galerija:lang') || 'sr'; }catch(e){ return 'sr'; } }
   var ES = { 'Preparing to save…':'Preparando para guardar…', 'Writing backup…':'Escribiendo la copia…', 'Not saved.':'No guardado.', 'Preparing to share…':'Preparando para compartir…' };
-  function tx2(sr, eng){ var l = lng(), d = l === 'de' ? DE : l === 'es' ? ES : null; return l === 'sr' ? sr : (d && d[eng]) ? d[eng] : eng; }
+  var FR = { 'Preparing to save…':'Préparation de l’enregistrement…', 'Writing backup…':'Écriture de la sauvegarde…', 'Not saved.':'Non enregistré.', 'Preparing to share…':'Préparation du partage…' };
+  function tx2(sr, eng){ var l = lng(), d = l === 'de' ? DE : l === 'es' ? ES : l === 'fr' ? FR : null; return l === 'sr' ? sr : (d && d[eng]) ? d[eng] : eng; }
   function say(sr, eng){ var m = tx2(sr, eng); if(typeof window.toast === 'function') window.toast(m); }
 
   /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.
