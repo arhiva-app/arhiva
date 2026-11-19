@@ -166,7 +166,8 @@
   var ES = { 'Preparing to save…':'Preparando para guardar…', 'Writing backup…':'Escribiendo la copia…', 'Not saved.':'No guardado.', 'Preparing to share…':'Preparando para compartir…' };
   var FR = { 'Preparing to save…':'Préparation de l’enregistrement…', 'Writing backup…':'Écriture de la sauvegarde…', 'Not saved.':'Non enregistré.', 'Preparing to share…':'Préparation du partage…' };
   var IT = { 'Preparing to save…':'Preparazione al salvataggio…', 'Writing backup…':'Scrittura del backup…', 'Not saved.':'Non salvato.', 'Preparing to share…':'Preparazione alla condivisione…' };
-  function tx2(sr, eng){ var l = lng(), d = l === 'de' ? DE : l === 'es' ? ES : l === 'fr' ? FR : l === 'it' ? IT : null; return l === 'sr' ? sr : (d && d[eng]) ? d[eng] : eng; }
+  var HR = { 'Preparing to save…':'Pripremam spremanje…', 'Writing backup…':'Zapisujem sigurnosnu kopiju…', 'Not saved.':'Nije spremljeno.', 'Preparing to share…':'Pripremam dijeljenje…' };
+  function tx2(sr, eng){ var l = lng(), d = l === 'de' ? DE : l === 'es' ? ES : l === 'fr' ? FR : l === 'it' ? IT : l === 'hr' ? HR : null; return l === 'sr' ? sr : (d && d[eng]) ? d[eng] : eng; }
   function say(sr, eng){ var m = tx2(sr, eng); if(typeof window.toast === 'function') window.toast(m); }
 
   /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.

@@ -5,31 +5,36 @@
       "datum": "2026-11-19",
       "cilj": "settings:news",
       "sr": { "n": "Novosti", "t": "Ovde ćeš ubuduće videti šta je novo u Arhivi. Sve novosti su i u Podešavanjima → Novosti." },
-      "en": { "n": "News", "t": "From now on you will see here what is new in Arhiva. All news is also in Settings → News." }
+      "en": { "n": "News", "t": "From now on you will see here what is new in Arhiva. All news is also in Settings → News." },
+      "hr": { "n": "Novosti", "t": "Ovdje ćeš ubuduće vidjeti što je novo u Arhivi. Sve novosti su i u Postavkama → Novosti." }
     },
     {
       "id": "2026-11-18-obrisi-sve",
       "datum": "2026-11-18",
       "sr": { "n": "Obriši sve podatke", "t": "Briše sve sa ovog uređaja, i podešavanja, pa je Arhiva kao tek instalirana. Rezervne kopije ostaju." },
-      "en": { "n": "Delete all data", "t": "Deletes everything on this device, settings included, so Arhiva is as if freshly installed. Backups stay." }
+      "en": { "n": "Delete all data", "t": "Deletes everything on this device, settings included, so Arhiva is as if freshly installed. Backups stay." },
+      "hr": { "n": "Izbriši sve podatke", "t": "Briše sve s ovog uređaja, i postavke, pa je Arhiva kao tek instalirana. Sigurnosne kopije ostaju." }
     },
     {
       "id": "2026-11-13-tablet",
       "datum": "2026-11-13",
       "sr": { "n": "Tablet", "t": "Na tabletu Arhiva koristi ceo ekran, a položena otvara stavku pored spiska." },
-      "en": { "n": "Tablet", "t": "On a tablet Arhiva uses the whole screen, and in landscape it opens an item next to the list." }
+      "en": { "n": "Tablet", "t": "On a tablet Arhiva uses the whole screen, and in landscape it opens an item next to the list." },
+      "hr": { "n": "Tablet", "t": "Na tabletu Arhiva koristi cijeli zaslon, a položena otvara stavku pored popisa." }
     },
     {
       "id": "2026-11-13-tekst",
       "datum": "2026-11-13",
       "sr": { "n": "Tekst iz slike", "t": "Tekst sa fotografisanog papira i snimka ekrana sada se može pretraživati, bez interneta." },
-      "en": { "n": "Text from images", "t": "Text on photographed paper and screenshots is now searchable, without internet." }
+      "en": { "n": "Text from images", "t": "Text on photographed paper and screenshots is now searchable, without internet." },
+      "hr": { "n": "Tekst sa slike", "t": "Tekst s fotografiranog papira i snimke zaslona sada se može pretraživati, bez interneta." }
     },
     {
       "id": "2026-11-12-skener",
       "datum": "2026-11-12",
       "sr": { "n": "Skener dokumenata", "t": "„Dokument od više stranica“ sada sam nalazi ivice papira i ispravlja ugao." },
-      "en": { "n": "Document scanner", "t": "“Multi-page document” now finds the paper edges and straightens the angle by itself." }
+      "en": { "n": "Document scanner", "t": "“Multi-page document” now finds the paper edges and straightens the angle by itself." },
+      "hr": { "n": "Skener dokumenata", "t": "„Dokument od više stranica” sada sam pronalazi rubove papira i ispravlja kut." }
     }
   ]
 }
