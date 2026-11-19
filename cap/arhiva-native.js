@@ -160,8 +160,11 @@
     });
   }
   function safe(n){ return String(n || 'fajl').replace(/[\\\/:*?"<>|\u0000-\u001f]+/g, '_').trim().slice(0, 150) || 'fajl'; }
-  function en(){ try{ return localStorage.getItem('galerija:lang') === 'en'; }catch(e){ return false; } }
-  function say(sr, eng){ var m = en() ? eng : sr; if(typeof window.toast === 'function') window.toast(m); }
+  /* v327: jezik kao u Arhivi — srpski, nemački (rečnik ispod), ostalo engleski */
+  var DE = { 'Preparing to save…':'Wird zum Speichern vorbereitet…', 'Writing backup…':'Sicherung wird geschrieben…', 'Not saved.':'Nicht gespeichert.', 'Preparing to share…':'Wird zum Teilen vorbereitet…' };
+  function lng(){ try{ return localStorage.getItem('galerija:lang') || 'sr'; }catch(e){ return 'sr'; } }
+  function tx2(sr, eng){ var l = lng(); return l === 'sr' ? sr : (l === 'de' && DE[eng]) ? DE[eng] : eng; }
+  function say(sr, eng){ var m = tx2(sr, eng); if(typeof window.toast === 'function') window.toast(m); }
 
   /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.
      Vraća {ime} ili {otkazano:true}. Arhiva ga zove za rezervnu kopiju (window.ARHIVA_SACUVAJ_KAO). */
@@ -231,7 +234,7 @@
   /* v264 (Zoran): rad koji traje (više od jednog dela) se vidi — obaveštenje sa kružićem, procentom i trakom dok traje */
   function radPocni(sr, eng, ukupno){
     if(ukupno <= DEO || typeof window.toastPersist !== 'function') return null;
-    var tx = en() ? eng : sr;
+    var tx = tx2(sr, eng);
     var f = function(gotovo){ window.toastPersist(tx + ' ' + Math.floor(gotovo / ukupno * 100) + '%', { n: gotovo, total: ukupno }); };
     f(0); return f;
   }
