@@ -163,7 +163,8 @@
   /* v327: jezik kao u Arhivi — srpski, nemački (rečnik ispod), ostalo engleski */
   var DE = { 'Preparing to save…':'Wird zum Speichern vorbereitet…', 'Writing backup…':'Sicherung wird geschrieben…', 'Not saved.':'Nicht gespeichert.', 'Preparing to share…':'Wird zum Teilen vorbereitet…' };
   function lng(){ try{ return localStorage.getItem('galerija:lang') || 'sr'; }catch(e){ return 'sr'; } }
-  function tx2(sr, eng){ var l = lng(); return l === 'sr' ? sr : (l === 'de' && DE[eng]) ? DE[eng] : eng; }
+  var ES = { 'Preparing to save…':'Preparando para guardar…', 'Writing backup…':'Escribiendo la copia…', 'Not saved.':'No guardado.', 'Preparing to share…':'Preparando para compartir…' };
+  function tx2(sr, eng){ var l = lng(), d = l === 'de' ? DE : l === 'es' ? ES : null; return l === 'sr' ? sr : (d && d[eng]) ? d[eng] : eng; }
   function say(sr, eng){ var m = tx2(sr, eng); if(typeof window.toast === 'function') window.toast(m); }
 
   /* 1a) „Sačuvaj kao“: fajl u keš po delovima (veliki ZIP ne ide odjednom kroz most), pa Android pita gde i kako da se zove.
