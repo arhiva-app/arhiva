@@ -9171,7 +9171,8 @@ function fmtExpDate(ymd, long){
 /* zapis u polju za datum: 30.09.2026. */
 function fmtExpField(ymd){
   const [y, m, d] = ymdParts(ymd);
-  if(!isSr()) return new Date(y, m-1, d).toLocaleDateString(langLoc(), {month:'short', day:'numeric', year:'numeric'});
+  /* v329 (Zoran 19.11.): u polju samo brojevi po pravilu jezika (28.9.2026 · 28/9/2026 · 9/28/2026) — ime meseca nije stajalo u usko polje */
+  if(!isSr()) return new Date(y, m-1, d).toLocaleDateString(langLoc(), {day:'numeric', month:'numeric', year:'numeric'});
   return String(d).padStart(2,'0') + '.' + String(m).padStart(2,'0') + '.' + y + '.';
 }
 /* cela rečenica: „ističe za 13 dana (12.10.2026.)“ */
@@ -9590,7 +9591,7 @@ const closeNameSheet = ()=>{ nameSheet.classList.remove('open'); try{ nameInput.
 function nameDtSync(){
   const dv = document.getElementById('nameDate').value, tv = document.getElementById('nameTime').value;
   const dt = document.getElementById('nameDateTxt'), tt = document.getElementById('nameTimeTxt');
-  dt.textContent = dv ? fmtExpDate(dv, true) : '—'; dt.className = 'exp-field-txt' + (dv ? '' : ' is-empty');
+  dt.textContent = dv ? (isSr() ? fmtExpDate(dv, true) : fmtExpField(dv)) : '—'; dt.className = 'exp-field-txt' + (dv ? '' : ' is-empty');
   tt.textContent = tv || '—'; tt.className = 'exp-field-txt' + (tv ? '' : ' is-empty');
 }
 document.getElementById('nameDate').addEventListener('input', nameDtSync);
@@ -15417,7 +15418,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 328;
+const APP_VERSION = 329;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
