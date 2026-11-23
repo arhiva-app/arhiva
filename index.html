@@ -2602,6 +2602,8 @@ body.merge-mode .card .select-mark{ display:none; }
 .drg-ghost .drg-in > *{ width:100% !important; height:100% !important; margin:0 !important; border:0 !important; border-radius:0 !important; }
 .drg-ghost .drg-n{ position:absolute; right:-11px; top:-11px; min-width:28px; height:28px; padding:0 7px; box-sizing:border-box; border-radius:14px;
   background:var(--brass); color:var(--bg); font:700 15px/28px var(--font-ui); text-align:center; }
+body.drg-on #pathZone .path-bar:has(.path-lnk[data-drop-cat]){ outline:1px dashed color-mix(in srgb, var(--brass) 55%, transparent); outline-offset:-1px; border-radius:10px; }
+body.drg-on #pathZone .path-bar:has(.drop-hot){ background:color-mix(in srgb, var(--brass) 10%, transparent); }
 body.drg-on #pathZone .path-lnk[data-drop-cat]{ outline:2px dashed var(--brass); outline-offset:-2px; border-radius:8px; padding-left:8px; padding-right:8px; }
 .folder-tile.drop-hot, .folder-tile-row.drop-hot{ background:var(--brass-glow); outline-width:4px; transform:scale(1.04); transition:transform .12s; }
 body.drg-on #pathZone .path-lnk.drop-hot{ outline:3px solid var(--brass); outline-offset:-3px; background:var(--brass-glow); color:var(--ink); }
@@ -17311,8 +17313,10 @@ function drgTargetAt(x, y){
   document.querySelectorAll('[data-drop-cat]').forEach(el=>{
     if(!el.isConnected) return;
     const r = el.getBoundingClientRect(); if(!r.width || !r.height) return;
-    const inPath = el.classList.contains('path-lnk'), pad = inPath ? 12 : 0;
-    if(!(x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad)) return;
+    const inPath = el.classList.contains('path-lnk');
+    /* v335: za glavni album u putanji meta je cela traka putanje (mala reč ispod prsta je teška meta) */
+    const box = inPath ? ((el.closest('.path-bar') || el).getBoundingClientRect()) : r, pad = inPath ? 10 : 0;
+    if(!(x >= box.left - pad && x <= box.right + pad && y >= box.top - pad && y <= box.bottom + pad)) return;
     /* podalbum skriven ispod zaglavlja ili donjeg reda nije cilj: mora biti ono što je stvarno pod prstom */
     if(!inPath){ const hit = document.elementFromPoint(x, y); if(!hit || hit.closest('[data-drop-cat]') !== el) return; }
     best = el;
@@ -17328,9 +17332,10 @@ function drgHotUpdate(){
 }
 function drgPlace(){
   if(!DRG.ghost) return;
-  /* sličica je iznad prsta; uz vrh ekrana (putanja) ide ispod prsta, da cilj ostane vidljiv */
-  const gy = DRG.y < 150 ? DRG.y + 34 : DRG.y - 56;
-  DRG.ghost.style.transform = 'translate(' + (DRG.x - 40) + 'px,' + gy + 'px) rotate(-6deg)';
+  /* sličica je iznad prsta; uz vrh ekrana (putanja) ide pored prsta na istoj visini (v335: bez skoka ispod prsta, ne pokriva cilj) */
+  let gx = DRG.x - 40, gy = DRG.y - 56;
+  if(DRG.y < 150){ gy = Math.max(6, DRG.y - 40); gx = (DRG.x > window.innerWidth - 120) ? DRG.x - 112 : DRG.x + 28; }
+  DRG.ghost.style.transform = 'translate(' + gx + 'px,' + gy + 'px) rotate(-6deg)';
 }
 function drgStart(){
   DRG.on = true;
@@ -20667,7 +20672,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 334;
+const APP_VERSION = 335;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
