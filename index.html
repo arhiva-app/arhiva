@@ -3091,6 +3091,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
     <div class="sheet-head"><button class="back-btn" id="addSheetBack"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h3>Dodaj</h3></div>
     <div class="sheet-row" id="addFromGallery"><span>Iz galerije</span></div>
     <div class="sheet-row" id="addFromCamera"><span>Slikaj</span></div>
+    <div class="sheet-row" id="addScan" hidden><span class="row-name"><span id="addScanLbl"></span><span class="row-sub" id="addScanSub"></span></span></div>
     <div class="sheet-row" id="addMulti"><span class="row-name"><span id="addMultiLbl"></span><span class="row-sub" id="addMultiSub"></span></span></div>
     <div class="sheet-row" id="addFromDocs"><span>Dokument</span></div>
   </div>
@@ -3892,6 +3893,7 @@ const I18N = {
     pgCamera: 'Slikaj stranicu',
     pgScan: 'Skeniraj stranicu',
     addMultiSubScan: 'Skeniraj stranicu po stranicu ili izaberi više slika',
+    addScan: 'Skeniraj dokument', addScanSub: 'Sam nađe ivice papira, ispravi ugao i senke',
     pgEmptyScan: 'Još nema stranica. Skeniraj prvu stranicu ili izaberi slike iz galerije.',
     skNo: 'Skener nije dostupan na ovom telefonu. Otvara se kamera.',
     pgGallery: 'Iz galerije',
@@ -4375,7 +4377,7 @@ const I18N = {
       ['Podeli → Life Archive', 'Samo u Android aplikaciji. U drugoj aplikaciji (galerija, mejl, Viber…) izaberi Podeli, pa Life Archive: slike, video i dokumenti (PDF, Word, Excel, PowerPoint, CSV, ZIP…) odmah se sačuvaju u „Bez albuma“, bez dodatnog ekrana, a gore piše šta je sačuvano. Odatle ih premeštaš u album.', 'Tekst i linkovi se ne primaju. Kad aplikacija umesto fajla deli link (npr. ChatGPT za sliku koju je napravio), Life Archive nema na spisku: sačuvaj sliku u galeriju, pa je dodaj odatle.'],
       ['Praćene fascikle', 'Samo u Android aplikaciji: Podešavanja → Praćene fascikle. „Snimci ekrana“: kad je uključeno, novi snimci ekrana sami stižu u Life Archive (samo oni nastali posle uključivanja).', '„Moje fascikle“ → „Dodaj fasciklu“: izabereš fasciklu na telefonu i album u koji idu fajlovi. Odmah se uveze sve što je u njoj, a posle sve što se u njoj pojavi (slike, video, PDF, Word…). Life Archive vidi samo izabranu fasciklu. Novo stiže kad otvoriš Life Archive ili se vratiš u nju.', 'Dodir na fasciklu menja album ili prekida praćenje, a prekidač ga privremeno isključuje. Original ostaje na telefonu, a brisanje iz fascikle ne briše iz Life Archive. Fasciklu „Download“ Android ne dozvoljava.'],
       ['Datum i lokacija', 'Pri uvozu Life Archive čita iz fajla kad je slika ili video snimljen, odnosno kad je dokument napravljen, i po tom datumu ga stavlja među dane. Zato stara slika uvezena danas ide na svoj stari dan; da vidiš šta si upravo dodao, izaberi Sortiraj → „Nedavno dodato“.', 'Lokacija (samo u Android aplikaciji): Podešavanja → Lokacija → „Sačuvaj lokaciju“. Kad je uključeno, Life Archive uz sliku i video sačuva gde su snimljeni i prikaže mesto pored datuma, npr. „6. jul · Kalamici, Grčka“; po mestu radi i pretraga. Za to telefon jednom traži dozvolu (pri prvom dodavanju). Kad je isključeno, nove slike se uvoze bez lokacije, a postojeće ostaju.'],
-      ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'U Android aplikaciji dugme „Skeniraj stranicu“ otvara Google-ov skener: sam nađe ivice papira, ispravi ugao i ukloni senke, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
+      ['Dokument od više stranica', 'U meniju za dodavanje izaberi „Dokument od više stranica“. Slikaj stranicu po stranicu ili izaberi više slika iz galerije, upiši naziv i dodirni „Sačuvaj“.', 'U Android aplikaciji dugme „Skeniraj stranicu“ otvara Google-ov skener: sam nađe ivice papira, ispravi ugao i ukloni senke, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta. Najbrže: u meniju „Dodaj“ izaberi „Skeniraj dokument“ i skener se odmah otvara.', 'Lupa u uglu stranice (ili dodir na stranicu) otvara je preko celog ekrana, da vidiš šta piše (dva prsta uvećavaju, prevlačenje levo-desno lista stranice). Dole su „Ranije“ i „Kasnije“, koji pomeraju tu stranicu za jedno mesto, i „Na mesto…“, koje je jednim dodirom na broj premešta na bilo koje mesto. Krupan broj na vrhu slike (npr. „3 / 8“) pokazuje na kom je mestu stranica i zatreperi posle svakog pomeranja; ⓘ gore desno objašnjava ekran. „Ukloni“ prvo traži potvrdu, a „Izdvoji“ se vidi samo kod već sačuvanog dokumenta. Redosled menjaš i prevlačenjem ručke u uglu, a ✕ uklanja stranicu. Sve se čuva tek na „Sačuvaj“. U mreži se vidi prva stranica sa oznakom broja stranica.'],
       ['Pregled i listanje', 'Dodir na bilo koju stavku (sliku, PDF, Word, Excel) otvara isti pregled. Prevlačenjem levo i desno ili strelicama listaš stranice, a posle poslednje stranice prelaziš na sledeću stavku, istim redom kao u albumu. Kod slike i PDF-a jedan dodir sakriva ili vraća dugmad.', 'Dva prsta uvećavaju sliku ili stranicu PDF-a (do 5 puta), a uvećanu pomeraš jednim prstom. Dvostruki dodir uvećava na tom mestu ili vraća ceo prikaz.', 'PDF se prikazuje stranicu po stranicu. Word i Excel se prikazuju odmah u pregledu: tekst listaš gore-dole, a dva prsta menjaju veličinu slova. Excel tabelu (sa listovima) prstom pomeraš u svim pravcima, a na sledeću stavku prelaziš strelicama. Za zaključan PDF i ostale vrste fajlova kartica sa dugmetom „Otvori“ nudi deljenje ili čuvanje na telefon.', 'Gornji red dugmadi je isti za sve: ✨ (AI), zvonce (podsetnik), PDF ili deljenje, korpa. Dugme sa stranicama (samo kod slika) dodaje nove stranice ili menja njihov redosled. Olovka pored naziva menja naziv; isto radi i „Preimenuj“ u donjem redu albuma.', 'Fajlove prepoznaješ po boji oznake na ikonici: PDF je crven, Word plav, Excel zelen, ostale vrste sive.', 'Na tabletu i drugom širokom ekranu Life Archive koristi celu širinu: u red stane onoliko sličica koliko ima mesta.', 'Kad je tablet položen, stavka se otvara desno, a spisak ostaje levo: dodir na drugu sličicu levo odmah je otvara desno, a „Nazad“ zatvara desnu stranu. Dugme „Ceo ekran“ u pregledu širi stavku preko celog ekrana, a „Pored spiska“ je vraća; Life Archive pamti tvoj izbor. Uspravan tablet i telefon uvek prikazuju stavku preko celog ekrana.'],
       ['Spajanje i izdvajanje', 'U albumu dodirni ikonicu „Spoji“, pa dodiruj slike redom kojim idu: svaka dobija broj stranice u novom dokumentu (dokument koji već ima 2 stranice dobija „1–2“). Lupa u uglu sličice otvara stranicu preko celog ekrana, da je pročitaš. PDF, Word i Excel su zatamnjeni jer se spajaju samo slike. Dugme dole „Proveri redosled“ kaže koliko će stranica imati nov dokument; dodir otvara ekran stranica novog dokumenta, gde proveriš i središ redosled (dodir na stranicu, pa Ranije · Na mesto… · Kasnije) i po potrebi dodaš stranice. Ispod svake stranice piše naziv slike iz koje je došla (slika sa imenom iz kamere: „Slika“ i vreme dodavanja), da lakše prepoznaš koja je koja. Ništa se ne pravi dok ne dodirneš „Sačuvaj“ (korak nazad vraća izbor, a izabrane slike ostaju označene); posle čuvanja si u albumu novog dokumenta, a obaveštenje na mestu putanje kaže gde je sačuvan. Prazan kružić na slici pokazuje gde dolazi broj.', 'Naziv, album i podsetnik uzimaju se od prve slike (podsetnik prelazi na nov dokument). Originali ostaju u albumu; ako ti ne trebaju, označi ih i obriši. Pojedinačnu stranicu sačuvanog dokumenta izdvajaš kao posebnu sliku: otvori dokument, dugme „Uredi stranice“, dodir na stranicu, pa „Izdvoji“ (kod novog dokumenta ovog dugmeta nema, jer stranica još nije sačuvana).'],
       ['PDF', 'Sliku, dokument od slika ili više slika pretvaraš u jedan PDF: u pregledu dugmetom PDF, a u albumu dugmetom „Pošalji“ u donjem redu (izaberi stavke, pa „Pošalji“ i „kao jedan PDF“). Zatim ga deliš (Viber, e-pošta…) ili čuvaš na telefon.', 'Stranice idu u PDF bez gubitka kvaliteta.', 'Kod PDF fajla na tom mestu je dugme za deljenje: šalje se originalni fajl, bez izmena. Chrome ne dozvoljava deljenje Word i Excel fajlova, pa je kod njih tu dugme za čuvanje na telefon (u Android aplikaciji, Life Archive ih deli kao originalni fajl); sačuvan fajl šalješ iz Vibera ili e-pošte (priloži fajl). Word i Excel imaju i „Podeli kao PDF“: Life Archive od njih napravi PDF (tekst i tabele, bez slika iz dokumenta) i odmah ga deli.'],
@@ -4723,6 +4725,7 @@ const I18N = {
     pgCamera: 'Take page photo',
     pgScan: 'Scan page',
     addMultiSubScan: 'Scan page by page or pick several images',
+    addScan: 'Scan document', addScanSub: 'Finds the paper edges and fixes angle and shadows',
     pgEmptyScan: 'No pages yet. Scan the first page or pick images from the gallery.',
     skNo: 'The scanner is not available on this phone. Opening the camera.',
     pgGallery: 'From gallery',
@@ -5206,7 +5209,7 @@ const I18N = {
       ['Share → Life Archive', 'Only in the Android app. In another app (gallery, email, Viber…) choose Share, then Life Archive: photos, videos and documents (PDF, Word, Excel, PowerPoint, CSV, ZIP…) are saved right away in “No album”, without an extra screen, and the top shows what was saved. From there you move them into an album.', 'Text and links are not received. When an app shares a link instead of a file (e.g. ChatGPT for an image it made), Life Archive is not in the list: save the image to the gallery and add it from there.'],
       ['Watched folders', 'Only in the Android app: Settings → Watched folders. “Screenshots”: when on, new screenshots arrive in Life Archive by themselves (only those taken after you turned it on).', '“My folders” → “Add folder”: pick a folder on the phone and the album the files go to. Everything in it is imported right away, and later everything that appears in it (photos, videos, PDF, Word…). Life Archive sees only the chosen folder. New files arrive when you open Life Archive or return to it.', 'Tap a folder to change the album or stop watching it; the switch turns it off for a while. The original stays on the phone, and deleting it from the folder does not delete it from Life Archive. Android does not allow the “Download” folder.'],
       ['Date and location', 'When importing, Life Archive reads from the file when a photo or video was taken, or when a document was made, and places it under that day. So an old photo imported today goes to its old day; to see what you just added, choose Sort → “Recently added”.', 'Location (only in the Android app): Settings → Location → “Save location”. When on, Life Archive saves where photos and videos were taken and shows the place next to the date, e.g. “July 6 · Kalamitsi, Greece”; search finds places too. The phone asks for permission once (the first time you add). When off, new photos are imported without location, and existing ones stay.'],
-      ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'In the Android app, “Scan page” opens Google’s scanner: it finds the paper edges, straightens the angle and removes shadows, and you can scan several pages in a row. It all happens on the phone, without internet.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
+      ['Multi-page document', 'In the add menu choose “Multi-page document”. Photograph page by page or pick several images from the gallery, type a name and tap “Save”.', 'In the Android app, “Scan page” opens Google’s scanner: it finds the paper edges, straightens the angle and removes shadows, and you can scan several pages in a row. It all happens on the phone, without internet. Fastest: in the “Add” menu choose “Scan document” and the scanner opens right away.', 'The magnifier in the corner of a page (or a tap on the page) opens it full screen so you can see what it says (two fingers zoom, swiping left and right turns pages). At the bottom, “Earlier” and “Later” move that page by one place, and “Move to…” moves it to any place with one tap on a number. A large number at the top of the page (e.g. “3 / 8”) shows its place and flashes after every move; ⓘ at the top right explains the screen. “Remove” asks for confirmation first, and “Extract” appears only for an already saved document. You can also drag the handle in the corner; ✕ removes a page. Nothing is saved until you tap “Save”. The grid shows the first page with the page count.'],
       ['Viewing and paging', 'Tap any item (image, PDF, Word, Excel) to open the same viewer. Swipe left and right or use the arrows to turn pages; after the last page you move on to the next item, in the same order as in the album. For an image or a PDF, one tap hides or shows the buttons.', 'Two fingers zoom an image or a PDF page (up to 5 times); move the zoomed view with one finger. A double tap zooms in at that spot or returns to the full view.', 'A PDF is shown page by page. Word and Excel are shown right in the viewer: scroll the text up and down, and two fingers change the text size. Move an Excel table (with its sheets) in any direction with your finger, and go to the next item with the arrows. For a locked PDF and other file types a card with an “Open” button offers sharing or saving to the phone.', 'The top row of buttons is the same for everything: ✨ (AI), bell (reminder), PDF or share, trash. The pages button (images only) adds new pages or changes their order. The pencil next to the name renames the item; “Rename” in the album bottom row does the same.', 'You can tell files apart by the colored tag on the icon: PDF is red, Word blue, Excel green, other types gray.', 'On a tablet or another wide screen Life Archive uses the full width: each row holds as many thumbnails as fit.', 'When the tablet is in landscape, an item opens on the right while the list stays on the left: tapping another thumbnail on the left opens it on the right right away, and “Back” closes the right side. “Full screen” in the viewer expands the item over the whole screen and “Beside the list” brings it back; Life Archive remembers your choice. A tablet in portrait and a phone always show the item over the whole screen.'],
       ['Merging and splitting', 'In an album tap the “Merge” icon, then tap the images in the order they go: each gets its page number in the new document (a document that already has 2 pages gets “1–2”). The magnifier in the corner opens a page full screen so you can read it. PDF, Word and Excel are dimmed because only images can be merged. The “Check order” button at the bottom shows how many pages the new document will have; tapping it opens the pages screen of the new document, where you check and fix the order (tap a page, then Earlier · Move to… · Later) and add pages if needed. Under each page you see the name of the image it came from (an image named by the camera: “Image” and the time it was added), so you can tell them apart. Nothing is made until you tap “Save” (Back returns to the selection and the chosen images stay marked); after saving you are in the new document’s album and a notice in place of the path says where it was saved. An empty circle on an image shows where the number goes.', 'The name, album and reminder come from the first image (the reminder moves to the new document). The originals stay in the album; if you do not need them, select and delete them. To split a page off a saved document as a separate image: open the document, tap “Edit pages”, tap the page and choose “Extract” (a new document has no such button, because the page is not saved yet).'],
       ['PDF', 'Turn an image, an image document or several selected images into one PDF: with the PDF button in the viewer, or in an album with “Send” in the bottom row (choose items, then “Send” and “as one PDF”). Then share it (Viber, email…) or save it to the phone.', 'Pages go into the PDF without losing quality.', 'For a PDF file that spot holds a share button: the original file is sent, unchanged. Chrome does not allow sharing Word and Excel files, so for them that button saves the file to the phone (the Android app shares them as the original file); send the saved file from Viber or email (attach file). Word and Excel also have “Share as PDF”: Life Archive makes a PDF of them (text and tables, without images from the document) and shares it right away.'],
@@ -5689,6 +5692,8 @@ I18N.de = {
 "pgCamera": "Seite fotografieren",
 "pgScan": "Seite scannen",
 "addMultiSubScan": "Seite für Seite scannen oder mehrere Bilder auswählen",
+"addScan": "Dokument scannen",
+"addScanSub": "Findet die Papierränder und korrigiert Winkel und Schatten",
 "pgEmptyScan": "Noch keine Seiten. Scanne die erste Seite oder wähle Bilder aus der Galerie.",
 "skNo": "Der Scanner ist auf diesem Telefon nicht verfügbar. Die Kamera wird geöffnet.",
 "pgGallery": "Aus der Galerie",
@@ -6596,7 +6601,7 @@ I18N.de = {
 [
 "Mehrseitiges Dokument",
 "Wähle im Menü Hinzufügen „Mehrseitiges Dokument“. Fotografiere Seite für Seite oder wähle mehrere Bilder aus der Galerie, gib einen Namen ein und tippe auf „Speichern“.",
-"In der Android-App öffnet „Seite scannen“ den Scanner von Google: er findet die Ränder des Papiers, richtet den Winkel gerade und entfernt Schatten, und du kannst mehrere Seiten hintereinander scannen. Alles passiert auf dem Telefon, ohne Internet.",
+"In der Android-App öffnet „Seite scannen“ den Scanner von Google: er findet die Ränder des Papiers, richtet den Winkel gerade und entfernt Schatten, und du kannst mehrere Seiten hintereinander scannen. Alles passiert auf dem Telefon, ohne Internet. Am schnellsten: im Menü „Hinzufügen“ „Dokument scannen“ wählen, der Scanner öffnet sich sofort.",
 "Die Lupe in der Ecke einer Seite (oder ein Tippen auf die Seite) öffnet sie im Vollbild, damit du siehst, was dort steht (zwei Finger zoomen, Wischen nach links und rechts blättert um). Unten verschieben „Früher“ und „Später“ diese Seite um eine Stelle, und „Verschieben nach…“ bringt sie mit einem Tippen auf eine Zahl an jede Stelle. Eine große Zahl oben auf der Seite (z. B. „3 / 8“) zeigt ihre Stelle und blinkt nach jedem Verschieben; ⓘ oben rechts erklärt den Bildschirm. „Entfernen“ fragt zuerst nach einer Bestätigung, und „Herauslösen“ erscheint nur bei einem bereits gespeicherten Dokument. Du kannst auch den Griff in der Ecke ziehen; ✕ entfernt eine Seite. Nichts wird gespeichert, bevor du auf „Speichern“ tippst. Das Raster zeigt die erste Seite mit der Seitenzahl."
 ],
 [
@@ -7394,6 +7399,8 @@ I18N.es = {
 "pgCamera": "Fotografiar página",
 "pgScan": "Escanear página",
 "addMultiSubScan": "Escanea página a página o elige varias imágenes",
+"addScan": "Escanear documento",
+"addScanSub": "Detecta los bordes del papel y corrige el ángulo y las sombras",
 "pgEmptyScan": "Aún no hay páginas. Escanea la primera página o elige imágenes de la galería.",
 "skNo": "El escáner no está disponible en este teléfono. Se abre la cámara.",
 "pgGallery": "De la galería",
@@ -8301,7 +8308,7 @@ I18N.es = {
 [
 "Documento de varias páginas",
 "En el menú Añadir elige “Documento de varias páginas”. Fotografía página a página o elige varias imágenes de la galería, escribe un nombre y toca “Guardar”.",
-"En la app de Android, “Escanear página” abre el escáner de Google: encuentra los bordes del papel, endereza el ángulo y quita las sombras, y puedes escanear varias páginas seguidas. Todo ocurre en el teléfono, sin internet.",
+"En la app de Android, “Escanear página” abre el escáner de Google: encuentra los bordes del papel, endereza el ángulo y quita las sombras, y puedes escanear varias páginas seguidas. Todo ocurre en el teléfono, sin internet. Lo más rápido: en el menú “Añadir” elige “Escanear documento” y el escáner se abre al instante.",
 "La lupa de la esquina de una página (o un toque en la página) la abre a pantalla completa para que veas lo que dice (dos dedos amplían; deslizar a izquierda y derecha pasa las páginas). Abajo, “Antes” y “Después” mueven esa página un puesto, y “Mover a…” la lleva a cualquier puesto con un toque en un número. Un número grande arriba en la página (p. ej. “3 / 8”) indica su puesto y parpadea tras cada movimiento; ⓘ arriba a la derecha explica la pantalla. “Quitar” pide confirmación primero, y “Separar” solo aparece en un documento ya guardado. También puedes arrastrar el asa de la esquina; ✕ quita una página. No se guarda nada hasta que tocas “Guardar”. La cuadrícula muestra la primera página con el número de páginas."
 ],
 [
@@ -9099,6 +9106,8 @@ I18N.fr = {
 "pgCamera": "Photographier une page",
 "pgScan": "Scanner une page",
 "addMultiSubScan": "Scanne page par page ou choisis plusieurs images",
+"addScan": "Scanner un document",
+"addScanSub": "Trouve les bords du papier, corrige l’angle et les ombres",
 "pgEmptyScan": "Pas encore de pages. Scanne la première page ou choisis des images dans la galerie.",
 "skNo": "Le scanner n’est pas disponible sur ce téléphone. L’appareil photo s’ouvre.",
 "pgGallery": "Depuis la galerie",
@@ -10006,7 +10015,7 @@ I18N.fr = {
 [
 "Document de plusieurs pages",
 "Dans le menu Ajouter, choisis « Document de plusieurs pages ». Photographie page par page ou choisis plusieurs images dans la galerie, saisis un nom et touche « Enregistrer ».",
-"Dans l’app Android, « Scanner une page » ouvre le scanner de Google : il trouve les bords du papier, redresse l’angle et retire les ombres, et tu peux scanner plusieurs pages à la suite. Tout se passe sur le téléphone, sans Internet.",
+"Dans l’app Android, « Scanner une page » ouvre le scanner de Google : il trouve les bords du papier, redresse l’angle et retire les ombres, et tu peux scanner plusieurs pages à la suite. Tout se passe sur le téléphone, sans Internet. Le plus rapide : dans le menu « Ajouter », choisis « Scanner un document » et le scanner s’ouvre aussitôt.",
 "La loupe dans le coin d’une page (ou un appui sur la page) l’ouvre en plein écran pour que tu voies ce qui y est écrit (deux doigts zooment, glisser à gauche et à droite tourne les pages). En bas, « Avant » et « Après » déplacent cette page d’une place, et « Déplacer vers… » l’amène à n’importe quelle place en touchant un numéro. Un grand numéro en haut de la page (p. ex. « 3 / 8 ») indique sa place et clignote après chaque déplacement ; ⓘ en haut à droite explique l’écran. « Retirer » demande d’abord une confirmation, et « Séparer » n’apparaît que pour un document déjà enregistré. Tu peux aussi faire glisser la poignée dans le coin ; ✕ retire une page. Rien n’est enregistré avant que tu touches « Enregistrer ». La grille montre la première page avec le nombre de pages."
 ],
 [
@@ -10804,6 +10813,8 @@ I18N.it = {
 "pgCamera": "Fotografa pagina",
 "pgScan": "Scansiona pagina",
 "addMultiSubScan": "Scansiona pagina per pagina o scegli più immagini",
+"addScan": "Scansiona documento",
+"addScanSub": "Trova i bordi del foglio, corregge angolo e ombre",
 "pgEmptyScan": "Ancora nessuna pagina. Scansiona la prima pagina o scegli immagini dalla galleria.",
 "skNo": "Lo scanner non è disponibile su questo telefono. Si apre la fotocamera.",
 "pgGallery": "Dalla galleria",
@@ -11711,7 +11722,7 @@ I18N.it = {
 [
 "Documento di più pagine",
 "Nel menu Aggiungi scegli “Documento di più pagine”. Fotografa pagina per pagina o scegli più immagini dalla galleria, inserisci un nome e tocca “Salva”.",
-"Nell’app Android, “Scansiona pagina” apre lo scanner di Google: trova i bordi del foglio, raddrizza l’angolo e toglie le ombre, e puoi scansionare più pagine di fila. Tutto avviene sul telefono, senza Internet.",
+"Nell’app Android, “Scansiona pagina” apre lo scanner di Google: trova i bordi del foglio, raddrizza l’angolo e toglie le ombre, e puoi scansionare più pagine di fila. Tutto avviene sul telefono, senza Internet. Più veloce: nel menu “Aggiungi” scegli “Scansiona documento” e lo scanner si apre subito.",
 "La lente nell’angolo di una pagina (o un tocco sulla pagina) la apre a schermo intero, così vedi cosa c’è scritto (due dita ingrandiscono, scorrere a sinistra e a destra gira le pagine). In basso, “Prima” e “Dopo” spostano quella pagina di un posto, e “Sposta a…” la porta in qualsiasi posto toccando un numero. Un grande numero in cima alla pagina (ad es. “3 / 8”) mostra il suo posto e lampeggia dopo ogni spostamento; ⓘ in alto a destra spiega la schermata. “Rimuovi” chiede prima una conferma, e “Separa” compare solo per un documento già salvato. Puoi anche trascinare la maniglia nell’angolo; ✕ rimuove una pagina. Non si salva nulla finché non tocchi “Salva”. La griglia mostra la prima pagina con il numero di pagine."
 ],
 [
@@ -12477,6 +12488,8 @@ I18N.hr = {
 "pgCamera": "Fotografiraj stranicu",
 "pgScan": "Skeniraj stranicu",
 "addMultiSubScan": "Skeniraj stranicu po stranicu ili odaberi više slika",
+"addScan": "Skeniraj dokument",
+"addScanSub": "Sam pronađe rubove papira, ispravi kut i sjene",
 "pgEmptyScan": "Još nema stranica. Skeniraj prvu stranicu ili odaberi slike iz galerije.",
 "skNo": "Skener nije dostupan na ovom telefonu. Otvara se kamera.",
 "pgGallery": "Iz galerije",
@@ -13384,7 +13397,7 @@ I18N.hr = {
 [
 "Dokument od više stranica",
 "U izborniku za dodavanje odaberi „Dokument od više stranica”. Fotografiraj stranicu po stranicu ili odaberi više slika iz galerije, upiši naziv i dodirni „Spremi”.",
-"U Android aplikaciji gumb „Skeniraj stranicu” otvara Googleov skener: sam pronađe rubove papira, ispravi kut i ukloni sjene, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta.",
+"U Android aplikaciji gumb „Skeniraj stranicu” otvara Googleov skener: sam pronađe rubove papira, ispravi kut i ukloni sjene, a možeš skenirati više stranica zaredom. Sve se radi na telefonu, bez interneta. Najbrže: u izborniku „Dodaj” odaberi „Skeniraj dokument” i skener se odmah otvara.",
 "Povećalo u kutu stranice (ili dodir na stranicu) otvara je preko cijelog zaslona, da vidiš što piše (dva prsta povećavaju, povlačenje lijevo-desno lista stranice). Dolje su „Ranije” i „Kasnije”, koji pomiču tu stranicu za jedno mjesto, i „Na mjesto…”, koje je jednim dodirom na broj premješta na bilo koje mjesto. Krupan broj na vrhu slike (npr. „3 / 8”) pokazuje na kojem je mjestu stranica i zatreperi nakon svakog pomicanja; ⓘ gore desno objašnjava zaslon. „Ukloni” prvo traži potvrdu, a „Izdvoji” se vidi samo kod već spremljenog dokumenta. Redoslijed mijenjaš i povlačenjem ručke u kutu, a ✕ uklanja stranicu. Sve se sprema tek na „Spremi”. U mreži se vidi prva stranica s oznakom broja stranica."
 ],
 [
@@ -20672,7 +20685,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 335;
+const APP_VERSION = 336;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -22580,7 +22593,7 @@ async function skScan(){
     let r;
     try{ r = (await n.skeniraj()) || {}; }
     catch(e){ logError(t('pgScan'), (e && e.message) || e); toast(t('skNo')); pgCamInput.click(); return; }
-    if(r.otkazano) return;
+    if(r.otkazano) return 'otkazano';
     const list = Array.isArray(r.fajlovi) ? r.fajlovi : [];
     const files = []; let bad = r.greske || 0;
     for(const x of list){
@@ -30220,7 +30233,17 @@ function aiWireSettings(){
 
 /* ---------- Meni za dodavanje: dokument od više stranica ---------- */
 document.getElementById('addMultiLbl').textContent = t('addMulti');
-document.getElementById('addMultiSub').textContent = t(pgSkener() ? 'addMultiSubScan' : 'addMultiSub');
+document.getElementById('addMultiSub').textContent = t('addMultiSub');
+/* v336 (Zoran 24.11.): „Skeniraj dokument“ u meniju Dodaj — samo Android aplikacija sa skenerom (v315). Otvara ekran dokumenta i
+   odmah skener; strane stižu tamo (pregled, naziv, Sačuvaj). Skener otkazan bez ijedne strane → ekran se zatvara. */
+document.getElementById('addScanLbl').textContent = t('addScan');
+document.getElementById('addScanSub').textContent = t('addScanSub');
+document.getElementById('addScan').hidden = !pgSkener();
+document.getElementById('addScan').onclick = ()=>requestCloseThen(async ()=>{
+  openPageEditor(null);
+  const r = await skScan();
+  if(r === 'otkazano' && ed && !ed.item && !ed.pages.length && !ed.dirty) requestClose();
+});
 document.getElementById('addMulti').onclick = ()=>requestCloseThen(()=>openPageEditor(null));
 
 /* =====================================================================
