@@ -2595,6 +2595,16 @@ body.merge-mode .card .select-mark{ display:none; }
 @media (max-width:360px){ .move-target .move-here{ font-size:11.5px; padding:3px 7px; max-width:100%; } }
 .folder-tile-row.move-target .move-here{ margin:0 10px 0 auto; flex:none; }
 .move-target .drag-handle{ display:none; }
+/* v334: prevlačenje stavki (blok PREVLAČENJE) */
+.drg-ghost{ position:fixed; left:0; top:0; z-index:9000; width:80px; height:80px; pointer-events:none; border-radius:14px; border:2px solid var(--brass);
+  box-shadow:0 10px 28px rgba(0,0,0,.5); background:var(--bg); will-change:transform; }
+.drg-ghost .drg-in{ width:100%; height:100%; border-radius:12px; overflow:hidden; opacity:.92; }
+.drg-ghost .drg-in > *{ width:100% !important; height:100% !important; margin:0 !important; border:0 !important; border-radius:0 !important; }
+.drg-ghost .drg-n{ position:absolute; right:-11px; top:-11px; min-width:28px; height:28px; padding:0 7px; box-sizing:border-box; border-radius:14px;
+  background:var(--brass); color:var(--bg); font:700 15px/28px var(--font-ui); text-align:center; }
+body.drg-on #pathZone .path-lnk[data-drop-cat]{ outline:2px dashed var(--brass); outline-offset:-2px; border-radius:8px; padding-left:8px; padding-right:8px; }
+.folder-tile.drop-hot, .folder-tile-row.drop-hot{ background:var(--brass-glow); outline-width:4px; transform:scale(1.04); transition:transform .12s; }
+body.drg-on #pathZone .path-lnk.drop-hot{ outline:3px solid var(--brass); outline-offset:-3px; background:var(--brass-glow); color:var(--ink); }
 /* v110: donji red u istom stilu kao gornji red ikonica: zaobljeni kvadrati 46 px (gore 54 px), nijedan nije popunjen;
    „Izbriši“ crvena ikonica i crvenkast obrub */
 .sel-bar button{ gap:6px; color:var(--ink-dim); font-size:12px; }
@@ -4358,7 +4368,7 @@ const I18N = {
     guideIntro: 'Dodirni naslov da otvoriš objašnjenje.',
     guide: [
       ['Albumi i podalbumi', 'Na početnom ekranu pored naziva „Life Archive“ piše koliko ima albuma, a ispod toga koliko ima stavki u celoj aplikaciji Life Archive (sve slike i dokumenti, bez korpe). Ispod naziva „Life Archive“ je red ikonica: Dodaj (u „Bez albuma“), Pretraži, Album (nov album), Sortiraj (moj redosled, po abecedi ili poslednja izmena: album u kome je nešto dodato ili promenjeno ide na vrh) i AI (radionica). Ispod reda ikonica su sistemski folderi, dva reda po tri: Sve, Slike, Video, Snimci ekrana, Dokumenti i Bez albuma (broj na ikonici Bez albuma kaže koliko stavki tamo čeka). Svaki otvara sve stavke te vrste iz cele Life Archive po danima, najnovije prvo; desno gore su lupa za pretragu i Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato ili po abecedi), a kod Dokumenata i Snimaka ekrana ⓘ objašnjava šta je tu. Snimci ekrana su slike veličine ekrana ovog telefona i slike koje je telefon nazvao „Screenshot…“; isti snimak je i u Slikama i u svom albumu. Folderi se ne brišu, ne preimenuju i ne pomeraju. Pri skrolovanju se povlače gore sa albumima, a red ikonica ostaje; posle skrolovanja dole na sredini se pojavi okrugla strelica ↑, koja jednim dodirom vraća na vrh (isto u albumima, folderima i pretrazi). Desno gore su prikaz (pločice ili spisak), zvonce i podešavanja. U albumu je ispod putanje red ikonica: Dodaj (slikaj, iz galerije ili dokument u ovaj album), Pretraži, Podalbum (nov podalbum, samo u glavnom albumu; na kartici albuma uz broj stavki piše i koliko ima podalbuma) Sortiraj (najnovije ili najstarije prvo po datumu nastanka, nedavno dodato — po danu kada je stavka dodata u Life Archive — ili po abecedi; krug pokazuje koji je uključen; izbor važi za sve albume i pamti se i posle izlaska iz aplikacije) i Spoji (više slika u jedan dokument).', 'Kad otvoriš sliku ili dokument, na vrhu je ista putanja (Life Archive › album › podalbum): dodir na bilo koji deo vodi u taj album, a na „Life Archive“ na početni ekran. U rezultatima pretrage putanja stoji ispod naziva, a dokument otvoren iz pretrage otvara se u svom albumu: korak nazad vodi u taj album. Dugmad na otvorenom dokumentu imaju natpise: Nazad, AI, Podsetnik, PDF (ili Podeli / Sačuvaj), Stranice i Izbriši.', 'Isti naziv ne može dva puta u celoj aplikaciji Life Archive (ni za albume, ni za slike i dokumente; velika slova i kvačice se ne računaju). Kad je naziv zauzet, ispod polja piše gde već postoji, a dugme je bledo dok ga ne promeniš. Kad Life Archive sama daje naziv (spajanje, dodavanje, kopija), dodaje „(2)“, a kopija dobija „– kopija“. Slike iz kamere sa automatskim imenom se ne računaju.', 'U prikazu „spisak“ album brišeš i prevlačenjem prsta ulevo preko njega: pojavi se crveno „Izbriši“, a dodir na njega traži potvrdu. Prevlačenje udesno ili dodir bilo gde drugde vraća album bez brisanja.', 'Dugi pritisak na album otvara izbor: zakači na vrh, preimenuj, naslovna slika (izbor „Bez slike“ vraća album bez slike), premesti ili izbriši. Redosled albuma menjaš prevlačenjem ručke u uglu. Naziv albuma menjaš i olovkom pored njegovog naziva u putanji (ili dodirom na sam naziv) kad si u albumu.', 'Na vrhu albuma je putanja, npr. „Life Archive › Album › Podalbum“: uvek vidiš gde si, a desno piše koliko stavki ima. Dodir na „Life Archive“ vodi na početni ekran, a dodir na naziv nadređenog albuma u taj album. Korak nazad vraća jedan nivo.'],
-      ['Donji red u albumu', 'U albumu je dole uvek red: Pošalji · U album · Prečica · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije izabrano otvara izbor (isti kao dugi pritisak na stavku): putanja gore i donji red ostaju, dugmad su bleda dok ne izabereš bar jednu stavku. Dodiruješ stavke, pa radnju koju hoćeš. ✕ ili korak nazad prekida izbor. Kod dugog pritiska na stavku gore je „Izaberi sve“; kad je sve izabrano, isto dugme piše „Poništi sve“ i jednim dodirom poništava izbor.', 'Pošalji nudi „Podeli“ ili „Sačuvaj na telefon“; za slike i dokumente od više stranica i „kao jedan PDF“ ili „svaku posebno“. Kad podeliš, na vrhu piše kojoj aplikaciji je fajl predat (npr. „Predato: Viber“); da li je poruka zaista poslata vidi se samo u toj aplikaciji. „Više“ radi sa jednom stavkom: Preimenuj, Podsetnik i AI radionica; kad je izabrano više stavki, bledo je.', 'Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu ide odmah na označeno.', 'Premeštanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premesti ovde“. Jedan dodir na podalbum premešta označeno i ostaješ u albumu. Na vrhu se pojavi obaveštenje sa dugmetom „Vrati“, koje za par sekundi vraća stavke na staro mesto. Za premeštanje u bilo koji drugi album služi „U album“. Posle premeštanja ili kopiranja u drugi album, desno u redu putanje stoji dugme sa nazivom tog albuma (npr. „Stoja ›“): dodir vodi pravo tamo, a prebačeni dokumenti su nakratko uokvireni. Dugme stoji dok si u albumu odakle si slao.', 'Nov podalbum se ne otvara sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.', 'Obaveštenja (šta je sačuvano, premešteno ili šta nije uspelo) uvek izlaze na vrhu ekrana, na mestu putanje. Kvačica znači da je urađeno, znak „!“ da nešto treba proveriti. Obaveštenje posle par sekundi samo nestane, a za to vreme možeš normalno da radiš.'],
+      ['Donji red u albumu', 'U albumu je dole uvek red: Pošalji · U album · Prečica · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije izabrano otvara izbor (isti kao dugi pritisak na stavku): putanja gore i donji red ostaju, dugmad su bleda dok ne izabereš bar jednu stavku. Dodiruješ stavke, pa radnju koju hoćeš. ✕ ili korak nazad prekida izbor. Kod dugog pritiska na stavku gore je „Izaberi sve“; kad je sve izabrano, isto dugme piše „Poništi sve“ i jednim dodirom poništava izbor.', 'Pošalji nudi „Podeli“ ili „Sačuvaj na telefon“; za slike i dokumente od više stranica i „kao jedan PDF“ ili „svaku posebno“. Kad podeliš, na vrhu piše kojoj aplikaciji je fajl predat (npr. „Predato: Viber“); da li je poruka zaista poslata vidi se samo u toj aplikaciji. „Više“ radi sa jednom stavkom: Preimenuj, Podsetnik i AI radionica; kad je izabrano više stavki, bledo je.', 'Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu ide odmah na označeno.', 'Premeštanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premesti ovde“. Jedan dodir na podalbum premešta označeno i ostaješ u albumu. Brže: dugo pritisni stavku i ne podiži prst, pa je prevuci na podalbum; iz podalbuma je prevuci na naziv glavnog albuma u putanji gore. Prevlače se sve označene stavke, a kad prst stigne do vrha ili dna ekrana, spisak se sam pomera. Na vrhu se pojavi obaveštenje sa dugmetom „Vrati“, koje za par sekundi vraća stavke na staro mesto. Za premeštanje u bilo koji drugi album služi „U album“. Posle premeštanja ili kopiranja u drugi album, desno u redu putanje stoji dugme sa nazivom tog albuma (npr. „Stoja ›“): dodir vodi pravo tamo, a prebačeni dokumenti su nakratko uokvireni. Dugme stoji dok si u albumu odakle si slao.', 'Nov podalbum se ne otvara sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.', 'Obaveštenja (šta je sačuvano, premešteno ili šta nije uspelo) uvek izlaze na vrhu ekrana, na mestu putanje. Kvačica znači da je urađeno, znak „!“ da nešto treba proveriti. Obaveštenje posle par sekundi samo nestane, a za to vreme možeš normalno da radiš.'],
       ['Dodavanje', 'Ikonica slike sa plusom dodaje sa telefona: iz galerije (više slika odjednom), slikanjem ili kao dokument (PDF, Word, Excel…). Svaka izabrana slika postaje posebna stavka.', 'Ono što dodaš dok si u albumu (iz galerije, slikanjem ili kao dokument) ide pravo u taj album. Kad slika ima samo automatsko ime iz telefona (niz brojeva, IMG_…), Life Archive ga ne prikazuje, nego piše „Slika“. Pored rednog broja na kartici je datum nastanka: za sliku i video kad su snimljeni, za dokument kad je napravljen (Life Archive ga čita iz samog fajla), a ako ga fajl nema, datum dodavanja. Dodir na naziv otvara prozor sa tri polja: naziv, datum i vreme; datum i vreme se retko menjaju (npr. račun iz marta slikan danas), a po njima se stavke ređaju.'],
       ['Podeli → Life Archive', 'Samo u Android aplikaciji. U drugoj aplikaciji (galerija, mejl, Viber…) izaberi Podeli, pa Life Archive: slike, video i dokumenti (PDF, Word, Excel, PowerPoint, CSV, ZIP…) odmah se sačuvaju u „Bez albuma“, bez dodatnog ekrana, a gore piše šta je sačuvano. Odatle ih premeštaš u album.', 'Tekst i linkovi se ne primaju. Kad aplikacija umesto fajla deli link (npr. ChatGPT za sliku koju je napravio), Life Archive nema na spisku: sačuvaj sliku u galeriju, pa je dodaj odatle.'],
       ['Praćene fascikle', 'Samo u Android aplikaciji: Podešavanja → Praćene fascikle. „Snimci ekrana“: kad je uključeno, novi snimci ekrana sami stižu u Life Archive (samo oni nastali posle uključivanja).', '„Moje fascikle“ → „Dodaj fasciklu“: izabereš fasciklu na telefonu i album u koji idu fajlovi. Odmah se uveze sve što je u njoj, a posle sve što se u njoj pojavi (slike, video, PDF, Word…). Life Archive vidi samo izabranu fasciklu. Novo stiže kad otvoriš Life Archive ili se vratiš u nju.', 'Dodir na fasciklu menja album ili prekida praćenje, a prekidač ga privremeno isključuje. Original ostaje na telefonu, a brisanje iz fascikle ne briše iz Life Archive. Fasciklu „Download“ Android ne dozvoljava.'],
@@ -5189,7 +5199,7 @@ const I18N = {
     guideIntro: 'Tap a title to open the explanation.',
     guide: [
       ['Albums and sub-albums', 'On the home screen, next to the name “Life Archive”, you see how many albums there are, and below that how many items are in the whole Life Archive (all images and documents, not counting the trash). Below the name “Life Archive” there is a row of icons: Add (into “No album”), Search, Album (a new album), Sort (my order, by name or last modified: an album where something was added or changed moves to the top) and AI (the workshop). Below the row of icons are the system folders, two rows of three: All, Photos, Videos, Screenshots, Documents and No album (the number on the No album icon shows how many items are waiting there). Each opens every item of that kind in the whole archive by day, newest first; at the top right are a magnifier to search and Sort (newest or oldest first by date taken, recently added, or alphabetically), and in Documents and Screenshots ⓘ explains what is there. Screenshots are images the size of this phone’s screen and images the phone named “Screenshot…”; the same screenshot is also in Photos and in its album. The folders cannot be deleted, renamed or moved. When you scroll they move up with the albums while the row of icons stays; after scrolling, a round ↑ arrow appears at the bottom centre and takes you back to the top with one tap (also in albums, folders and search). At the top right are the view (tiles or list), the bell and settings. Inside an album, below the path, is a row of icons: Add (camera, gallery or a document into this album), Search, Subalbum (a new sub-album, only in a main album; an album card shows how many sub-albums it has next to the number of items) Sort (newest or oldest first by date taken, recently added — by the day the item was added to Life Archive — or by name; the circle shows which is on; the choice applies to all albums and is kept after leaving the app) and Merge (several images into one document).', 'When you open an image or document, the same path is at the top (Life Archive › album › sub-album): tap any part to go to that album, or “Life Archive” for the home screen. In search results the path is shown below the name, and a document opened from search opens in its own album: Back takes you to that album. The buttons on an open document have labels: Back, AI, Reminder, PDF (or Share / Save), Pages and Delete.', 'The same name cannot be used twice anywhere in Life Archive (neither for albums nor for images and documents; capitals and accents do not count). When a name is taken, the line below the field says where it already exists and the button stays dimmed until you change it. When Life Archive names something itself (merge, adding, copy), it adds “(2)”, and a copy gets “– copy”. Camera images with an automatic name do not count.', 'In the “list” view you can also delete an album by swiping it to the left: a red “Delete” appears, and tapping it asks for confirmation. Swiping back to the right or tapping anywhere else puts the album back without deleting.', 'Long-press an album for options: pin to top, rename, cover image, move or delete. Drag the handle in the corner to change the album order. You can also rename an album inside it with the pencil next to its name in the path (or by tapping the name).', 'At the top of an album is the path, e.g. “Life Archive › Album › Sub-album”, so you always see where you are; the number of items is on the right. Tap “Life Archive” to go to the home screen, or the parent album name to go to that album. Back goes up one level.'],
-      ['Bottom row in an album', 'At the bottom of an album there is always a row: Send · To album · Shortcut · More · Delete. Tapping any action when nothing is selected opens the selection (the same as a long press on an item): the path at the top and the bottom row stay, and the buttons are dimmed until you pick at least one item. Tap the items, then the action you want. ✕ or Back cancels the selection. After a long press on an item, “Select all” is at the top; when everything is selected the same button reads “Clear all” and clears the selection with one tap.', '“Send” offers “Share” or “Save to phone”; for images and multi-page documents also “as one PDF” or “each separately”. After sharing, the top shows which app the file was handed to (e.g. “Handed to Viber”); whether the message was actually sent can only be seen in that app. “More” works with one item: Rename, Reminder and the AI workshop; when more items are selected it is dimmed.', 'Long-press still works: select items, and an action in the bottom row then applies to them right away.', 'Moving into a sub-album: while items are selected, sub-albums get a frame and the label “move here”. One tap on a sub-album moves the selection and you stay in the album. A notice with an “Undo” button appears at the top and puts the items back for a few seconds. To move to any other album, use “To album”. After moving or copying to another album, a button with that album’s name (e.g. “Stoja ›”) sits on the right of the path row: one tap takes you there, and the items you sent are briefly outlined. The button stays while you are in the album you sent from.', 'A new sub-album does not open by itself: you stay in the album and the sub-album appears among the sub-albums.', 'Notices (what was saved, moved or what did not work) always appear at the top of the screen, in place of the path. A check mark means it is done, a “!” sign that something needs checking. A notice disappears by itself after a few seconds, and you can keep working meanwhile.'],
+      ['Bottom row in an album', 'At the bottom of an album there is always a row: Send · To album · Shortcut · More · Delete. Tapping any action when nothing is selected opens the selection (the same as a long press on an item): the path at the top and the bottom row stay, and the buttons are dimmed until you pick at least one item. Tap the items, then the action you want. ✕ or Back cancels the selection. After a long press on an item, “Select all” is at the top; when everything is selected the same button reads “Clear all” and clears the selection with one tap.', '“Send” offers “Share” or “Save to phone”; for images and multi-page documents also “as one PDF” or “each separately”. After sharing, the top shows which app the file was handed to (e.g. “Handed to Viber”); whether the message was actually sent can only be seen in that app. “More” works with one item: Rename, Reminder and the AI workshop; when more items are selected it is dimmed.', 'Long-press still works: select items, and an action in the bottom row then applies to them right away.', 'Moving into a sub-album: while items are selected, sub-albums get a frame and the label “move here”. One tap on a sub-album moves the selection and you stay in the album. Faster: long-press an item without lifting your finger and drag it onto a sub-album; from a sub-album, drag it onto the main album’s name in the path at the top. All selected items are moved, and the list scrolls by itself when your finger reaches the top or bottom of the screen. A notice with an “Undo” button appears at the top and puts the items back for a few seconds. To move to any other album, use “To album”. After moving or copying to another album, a button with that album’s name (e.g. “Stoja ›”) sits on the right of the path row: one tap takes you there, and the items you sent are briefly outlined. The button stays while you are in the album you sent from.', 'A new sub-album does not open by itself: you stay in the album and the sub-album appears among the sub-albums.', 'Notices (what was saved, moved or what did not work) always appear at the top of the screen, in place of the path. A check mark means it is done, a “!” sign that something needs checking. A notice disappears by itself after a few seconds, and you can keep working meanwhile.'],
       ['Adding', 'The image-plus icon adds from the phone: from the gallery (several images at once), by taking a photo, or as a document (PDF, Word, Excel…). Every picked image becomes a separate item.', 'What you add while inside an album (from the gallery, by taking a photo or as a document) goes straight into that album. When an image has only an automatic phone name (a string of digits, IMG_…), Life Archive does not show it but writes “Image”. Next to the item number on the card is the date it was created: for photos and videos when they were taken, for documents when they were made (Life Archive reads it from the file itself), and if the file has none, the date it was added. Tapping the name opens a window with three fields: name, date and time; date and time rarely change (e.g. a March receipt photographed today), and items are ordered by them.'],
       ['Share → Life Archive', 'Only in the Android app. In another app (gallery, email, Viber…) choose Share, then Life Archive: photos, videos and documents (PDF, Word, Excel, PowerPoint, CSV, ZIP…) are saved right away in “No album”, without an extra screen, and the top shows what was saved. From there you move them into an album.', 'Text and links are not received. When an app shares a link instead of a file (e.g. ChatGPT for an image it made), Life Archive is not in the list: save the image to the gallery and add it from there.'],
       ['Watched folders', 'Only in the Android app: Settings → Watched folders. “Screenshots”: when on, new screenshots arrive in Life Archive by themselves (only those taken after you turned it on).', '“My folders” → “Add folder”: pick a folder on the phone and the album the files go to. Everything in it is imported right away, and later everything that appears in it (photos, videos, PDF, Word…). Life Archive sees only the chosen folder. New files arrive when you open Life Archive or return to it.', 'Tap a folder to change the album or stop watching it; the switch turns it off for a while. The original stays on the phone, and deleting it from the folder does not delete it from Life Archive. Android does not allow the “Download” folder.'],
@@ -6556,7 +6566,7 @@ I18N.de = {
 "Unten in einem Album gibt es immer eine Leiste: Senden · Ins Album · Verknüpfung · Mehr · Löschen. Ein Tippen auf eine Aktion, wenn nichts ausgewählt ist, öffnet die Auswahl (wie langes Drücken auf ein Element): der Pfad oben und die untere Leiste bleiben, und die Schaltflächen sind gedimmt, bis du mindestens ein Element wählst. Tippe auf die Elemente und dann auf die gewünschte Aktion. ✕ oder Zurück bricht die Auswahl ab. Nach langem Drücken auf ein Element steht oben „Alle auswählen“; wenn alles ausgewählt ist, heißt dieselbe Schaltfläche „Alle abwählen“ und hebt die Auswahl mit einem Tippen auf.",
 "„Senden“ bietet „Teilen“ oder „Auf dem Telefon speichern“; für Bilder und mehrseitige Dokumente auch „als ein PDF“ oder „jedes einzeln“. Nach dem Teilen zeigt die Kopfzeile, an welche App die Datei übergeben wurde (z. B. „Übergeben an Viber“); ob die Nachricht wirklich gesendet wurde, sieht man nur in dieser App. „Mehr“ arbeitet mit einem Element: Umbenennen, Erinnerung und die KI-Werkstatt; bei mehreren ausgewählten Elementen ist es gedimmt.",
 "Langes Drücken funktioniert weiterhin: wähle Elemente aus, und eine Aktion in der unteren Leiste gilt dann sofort für sie.",
-"Verschieben in ein Unteralbum: während Elemente ausgewählt sind, bekommen Unteralben einen Rahmen und die Beschriftung „hierher verschieben“. Ein Tippen auf ein Unteralbum verschiebt die Auswahl, und du bleibst im Album. Oben erscheint eine Meldung mit der Schaltfläche „Rückgängig“, die die Elemente ein paar Sekunden lang zurückholt. Um in ein beliebiges anderes Album zu verschieben, nutze „Ins Album“. Nach dem Verschieben oder Kopieren in ein anderes Album steht rechts in der Pfadzeile eine Schaltfläche mit dem Namen dieses Albums (z. B. „Stoja ›“): ein Tippen bringt dich dorthin, und die gesendeten Elemente sind kurz umrandet. Die Schaltfläche bleibt, solange du in dem Album bist, aus dem du gesendet hast.",
+"Verschieben in ein Unteralbum: während Elemente ausgewählt sind, bekommen Unteralben einen Rahmen und die Beschriftung „hierher verschieben“. Ein Tippen auf ein Unteralbum verschiebt die Auswahl, und du bleibst im Album. Schneller: Element lange drücken, Finger nicht anheben und auf ein Unteralbum ziehen; aus einem Unteralbum auf den Namen des Hauptalbums im Pfad oben ziehen. Alle ausgewählten Elemente werden verschoben, und die Liste scrollt von selbst, wenn der Finger den oberen oder unteren Bildschirmrand erreicht. Oben erscheint eine Meldung mit der Schaltfläche „Rückgängig“, die die Elemente ein paar Sekunden lang zurückholt. Um in ein beliebiges anderes Album zu verschieben, nutze „Ins Album“. Nach dem Verschieben oder Kopieren in ein anderes Album steht rechts in der Pfadzeile eine Schaltfläche mit dem Namen dieses Albums (z. B. „Stoja ›“): ein Tippen bringt dich dorthin, und die gesendeten Elemente sind kurz umrandet. Die Schaltfläche bleibt, solange du in dem Album bist, aus dem du gesendet hast.",
 "Ein neues Unteralbum öffnet sich nicht von selbst: du bleibst im Album, und das Unteralbum erscheint bei den Unteralben.",
 "Meldungen (was gespeichert, verschoben wurde oder was nicht funktioniert hat) erscheinen immer oben auf dem Bildschirm, anstelle des Pfads. Ein Häkchen bedeutet, dass es erledigt ist, ein „!“, dass etwas geprüft werden muss. Eine Meldung verschwindet nach ein paar Sekunden von selbst, und du kannst währenddessen weiterarbeiten."
 ],
@@ -8261,7 +8271,7 @@ I18N.es = {
 "Abajo en un álbum siempre hay una barra: Enviar · A álbum · Acceso directo · Más · Eliminar. Tocar cualquier acción cuando no hay nada seleccionado abre la selección (igual que mantener pulsado un elemento): la ruta de arriba y la barra inferior se quedan, y los botones están atenuados hasta que elijas al menos un elemento. Toca los elementos y luego la acción que quieras. ✕ o Atrás cancelan la selección. Tras mantener pulsado un elemento, arriba aparece “Seleccionar todo”; cuando todo está seleccionado, el mismo botón dice “Quitar selección” y la quita con un toque.",
 "“Enviar” ofrece “Compartir” o “Guardar en el teléfono”; para imágenes y documentos de varias páginas también “como un PDF” o “cada uno por separado”. Tras compartir, arriba se indica a qué app se entregó el archivo (p. ej. “Entregado a Viber”); si el mensaje se envió de verdad solo se ve en esa app. “Más” trabaja con un elemento: Renombrar, Recordatorio y el taller de IA; con varios elementos seleccionados está atenuado.",
 "Mantener pulsado sigue funcionando: selecciona elementos y una acción de la barra inferior se aplica a ellos enseguida.",
-"Mover a un subálbum: mientras hay elementos seleccionados, los subálbumes tienen un marco y la etiqueta “mover aquí”. Un toque en un subálbum mueve la selección y te quedas en el álbum. Arriba aparece un aviso con el botón “Deshacer”, que devuelve los elementos durante unos segundos. Para mover a cualquier otro álbum, usa “A álbum”. Tras mover o copiar a otro álbum, a la derecha de la fila de la ruta hay un botón con el nombre de ese álbum (p. ej. “Stoja ›”): un toque te lleva allí y los elementos enviados aparecen resaltados un momento. El botón se queda mientras estés en el álbum desde el que enviaste.",
+"Mover a un subálbum: mientras hay elementos seleccionados, los subálbumes tienen un marco y la etiqueta “mover aquí”. Un toque en un subálbum mueve la selección y te quedas en el álbum. Más rápido: mantén pulsado un elemento sin levantar el dedo y arrástralo a un subálbum; desde un subálbum, arrástralo al nombre del álbum principal en la ruta de arriba. Se mueven todos los elementos seleccionados, y la lista se desplaza sola cuando el dedo llega al borde superior o inferior de la pantalla. Arriba aparece un aviso con el botón “Deshacer”, que devuelve los elementos durante unos segundos. Para mover a cualquier otro álbum, usa “A álbum”. Tras mover o copiar a otro álbum, a la derecha de la fila de la ruta hay un botón con el nombre de ese álbum (p. ej. “Stoja ›”): un toque te lleva allí y los elementos enviados aparecen resaltados un momento. El botón se queda mientras estés en el álbum desde el que enviaste.",
 "Un subálbum nuevo no se abre solo: te quedas en el álbum y el subálbum aparece entre los subálbumes.",
 "Los avisos (qué se guardó, se movió o qué no funcionó) aparecen siempre arriba en la pantalla, en lugar de la ruta. Una marca de verificación significa que está hecho; un “!”, que hay que revisar algo. Un aviso desaparece solo tras unos segundos, y mientras tanto puedes seguir trabajando."
 ],
@@ -9966,7 +9976,7 @@ I18N.fr = {
 "En bas d’un album, il y a toujours une barre : Envoyer · Vers album · Raccourci · Plus · Supprimer. Toucher une action quand rien n’est sélectionné ouvre la sélection (comme un appui long sur un élément) : le chemin en haut et la barre du bas restent, et les boutons sont grisés tant que tu n’as pas choisi au moins un élément. Touche les éléments, puis l’action voulue. ✕ ou Retour annulent la sélection. Après un appui long sur un élément, « Tout sélectionner » apparaît en haut ; quand tout est sélectionné, le même bouton devient « Tout désélectionner » et retire la sélection d’un appui.",
 "« Envoyer » propose « Partager » ou « Enregistrer sur le téléphone » ; pour les images et les documents de plusieurs pages aussi « en un seul PDF » ou « chacun séparément ». Après le partage, le haut de l’écran indique à quelle app le fichier a été transmis (p. ex. « Transmis à Viber ») ; si le message a vraiment été envoyé, seule cette app le sait. « Plus » agit sur un seul élément : Renommer, Rappel et l’atelier IA ; il est grisé quand plusieurs éléments sont sélectionnés.",
 "L’appui long fonctionne toujours : sélectionne des éléments, et une action de la barre du bas s’y applique tout de suite.",
-"Déplacer vers un sous-album : tant que des éléments sont sélectionnés, les sous-albums ont un cadre et l’étiquette « déplacer ici ». Un appui sur un sous-album y déplace la sélection, et tu restes dans l’album. En haut apparaît un message avec le bouton « Annuler », qui remet les éléments pendant quelques secondes. Pour déplacer vers n’importe quel autre album, utilise « Vers album ». Après un déplacement ou une copie vers un autre album, un bouton portant le nom de cet album apparaît à droite dans la ligne du chemin (p. ex. « Stoja › ») : un appui t’y emmène, et les éléments envoyés sont brièvement encadrés. Le bouton reste tant que tu es dans l’album depuis lequel tu as envoyé.",
+"Déplacer vers un sous-album : tant que des éléments sont sélectionnés, les sous-albums ont un cadre et l’étiquette « déplacer ici ». Un appui sur un sous-album y déplace la sélection, et tu restes dans l’album. Plus rapide : appuie longuement sur un élément sans lever le doigt et fais-le glisser sur un sous-album ; depuis un sous-album, fais-le glisser sur le nom de l’album principal dans le chemin en haut. Tous les éléments sélectionnés sont déplacés, et la liste défile toute seule quand le doigt atteint le haut ou le bas de l’écran. En haut apparaît un message avec le bouton « Annuler », qui remet les éléments pendant quelques secondes. Pour déplacer vers n’importe quel autre album, utilise « Vers album ». Après un déplacement ou une copie vers un autre album, un bouton portant le nom de cet album apparaît à droite dans la ligne du chemin (p. ex. « Stoja › ») : un appui t’y emmène, et les éléments envoyés sont brièvement encadrés. Le bouton reste tant que tu es dans l’album depuis lequel tu as envoyé.",
 "Un nouveau sous-album ne s’ouvre pas tout seul : tu restes dans l’album, et le sous-album apparaît parmi les sous-albums.",
 "Les messages (ce qui a été enregistré, déplacé ou ce qui n’a pas marché) apparaissent toujours en haut de l’écran, à la place du chemin. Une coche signifie que c’est fait, un « ! » qu’il faut vérifier quelque chose. Un message disparaît de lui-même après quelques secondes, et tu peux continuer à travailler pendant ce temps."
 ],
@@ -11671,7 +11681,7 @@ I18N.it = {
 "In basso in un album c’è sempre una barra: Invia · In album · Scorciatoia · Altro · Elimina. Toccare un’azione quando non è selezionato nulla apre la selezione (come tenere premuto un elemento): il percorso in alto e la barra in basso restano, e i pulsanti sono attenuati finché non scegli almeno un elemento. Tocca gli elementi e poi l’azione che vuoi. ✕ o Indietro annullano la selezione. Dopo aver tenuto premuto un elemento, in alto compare “Seleziona tutto”; quando tutto è selezionato, lo stesso pulsante diventa “Deseleziona tutto” e toglie la selezione con un tocco.",
 "“Invia” offre “Condividi” o “Salva sul telefono”; per immagini e documenti di più pagine anche “come un unico PDF” o “ognuno separatamente”. Dopo la condivisione, in alto si vede a quale app è stato passato il file (ad es. “Passato a Viber”); se il messaggio è stato davvero inviato lo sa solo quell’app. “Altro” lavora con un solo elemento: Rinomina, Promemoria e il laboratorio IA; con più elementi selezionati è attenuato.",
 "Tenere premuto funziona ancora: seleziona gli elementi, e un’azione della barra in basso si applica subito a loro.",
-"Spostare in un sottoalbum: mentre ci sono elementi selezionati, i sottoalbum hanno una cornice e l’etichetta “sposta qui”. Un tocco su un sottoalbum vi sposta la selezione, e tu resti nell’album. In alto compare un messaggio con il pulsante “Annulla”, che per qualche secondo rimette a posto gli elementi. Per spostare in qualsiasi altro album, usa “In album”. Dopo aver spostato o copiato in un altro album, a destra nella riga del percorso c’è un pulsante con il nome di quell’album (ad es. “Stoja ›”): un tocco ti porta lì, e gli elementi inviati sono brevemente incorniciati. Il pulsante resta finché sei nell’album da cui hai inviato.",
+"Spostare in un sottoalbum: mentre ci sono elementi selezionati, i sottoalbum hanno una cornice e l’etichetta “sposta qui”. Un tocco su un sottoalbum vi sposta la selezione, e tu resti nell’album. Più veloce: tieni premuto un elemento senza sollevare il dito e trascinalo su un sottoalbum; da un sottoalbum, trascinalo sul nome dell’album principale nel percorso in alto. Vengono spostati tutti gli elementi selezionati, e l’elenco scorre da solo quando il dito arriva al bordo superiore o inferiore dello schermo. In alto compare un messaggio con il pulsante “Annulla”, che per qualche secondo rimette a posto gli elementi. Per spostare in qualsiasi altro album, usa “In album”. Dopo aver spostato o copiato in un altro album, a destra nella riga del percorso c’è un pulsante con il nome di quell’album (ad es. “Stoja ›”): un tocco ti porta lì, e gli elementi inviati sono brevemente incorniciati. Il pulsante resta finché sei nell’album da cui hai inviato.",
 "Un nuovo sottoalbum non si apre da solo: resti nell’album, e il sottoalbum compare tra i sottoalbum.",
 "I messaggi (cosa è stato salvato, spostato o cosa non ha funzionato) compaiono sempre in alto sullo schermo, al posto del percorso. Un segno di spunta significa che è fatto, un “!” che c’è qualcosa da controllare. Un messaggio scompare da solo dopo qualche secondo, e intanto puoi continuare a lavorare."
 ],
@@ -13344,7 +13354,7 @@ I18N.hr = {
 "U albumu je dolje uvijek red: Pošalji · U album · Prečac · Više · Izbriši. Dodir na bilo koju radnju kad ništa nije odabrano otvara odabir (isto kao dugi pritisak na stavku): putanja gore i donji red ostaju, gumbi su blijedi dok ne odabereš barem jednu stavku. Dodiruješ stavke, pa radnju koju želiš. ✕ ili korak natrag prekida odabir. Kod dugog pritiska na stavku gore je „Odaberi sve”; kad je sve odabrano, isti gumb piše „Poništi sve” i jednim dodirom poništava odabir.",
 "Pošalji nudi „Podijeli” ili „Spremi na telefon”; za slike i dokumente od više stranica i „kao jedan PDF” ili „svaku zasebno”. Kad podijeliš, na vrhu piše kojoj je aplikaciji datoteka predana (npr. „Predano: Viber”); je li poruka zaista poslana vidi se samo u toj aplikaciji. „Više” radi s jednom stavkom: Preimenuj, Podsjetnik i AI radionica; kad je odabrano više stavki, blijedo je.",
 "Dugi pritisak na stavku i dalje radi: stavke označiš, pa radnja u donjem redu odmah ide na označeno.",
-"Premještanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premjesti ovdje”. Jedan dodir na podalbum premješta označeno i ostaješ u albumu. Na vrhu se pojavi obavijest s gumbom „Vrati”, koji kroz nekoliko sekundi vraća stavke na staro mjesto. Za premještanje u bilo koji drugi album služi „U album”. Nakon premještanja ili kopiranja u drugi album, desno u redu putanje stoji gumb s nazivom tog albuma (npr. „Stoja ›”): dodir vodi ravno onamo, a prebačeni dokumenti su nakratko uokvireni. Gumb stoji dok si u albumu iz kojeg si slao.",
+"Premještanje u podalbum: dok su stavke označene, podalbumi dobiju obrub i natpis „premjesti ovdje”. Jedan dodir na podalbum premješta označeno i ostaješ u albumu. Brže: dugo pritisni stavku i ne podiži prst, pa je povuci na podalbum; iz podalbuma je povuci na naziv glavnog albuma u putanji gore. Povlače se sve označene stavke, a kad prst stigne do vrha ili dna zaslona, popis se sam pomiče. Na vrhu se pojavi obavijest s gumbom „Vrati”, koji kroz nekoliko sekundi vraća stavke na staro mjesto. Za premještanje u bilo koji drugi album služi „U album”. Nakon premještanja ili kopiranja u drugi album, desno u redu putanje stoji gumb s nazivom tog albuma (npr. „Stoja ›”): dodir vodi ravno onamo, a prebačeni dokumenti su nakratko uokvireni. Gumb stoji dok si u albumu iz kojeg si slao.",
 "Novi podalbum ne otvara se sam: ostaješ u albumu, a podalbum se pojavi među podalbumima.",
 "Obavijesti (što je spremljeno, premješteno ili što nije uspjelo) uvijek se pojavljuju na vrhu zaslona, na mjestu putanje. Kvačica znači da je učinjeno, znak „!” da nešto treba provjeriti. Obavijest nakon nekoliko sekundi sama nestane, a za to vrijeme možeš normalno raditi."
 ],
@@ -16196,6 +16206,8 @@ function buildPathBar(curCat, total){
     el.className = last ? 'path-cur' : 'path-lnk';
     el.textContent = p.label;
     if(!last){ el.type = 'button'; el.onclick = (e)=>{ e.stopPropagation(); pathGo(p.target); }; }
+    /* v334: tokom izbora u podalbumu, glavni album u putanji prima prevučene stavke */
+    if(!last && selectionMode && curCat && curCat.parent && p.target === curCat.parent && !mergeMode && (!actMode || actMode === 'move')) el.dataset.dropCat = p.target;
     bar.appendChild(el);
   });
   /* v104: olovka za preimenovanje odmah iza naziva (dodir na naziv ili olovku), broj stavki desno */
@@ -16671,6 +16683,7 @@ const buildFolderTile = (cat, groupCats, onOpen)=>{
   const moveHere = isMoveTarget(cat);
   if(moveHere){
     tile.classList.add('move-target');
+    tile.dataset.dropCat = cat.id;   /* v334: prima prevučene stavke */
     const mh = document.createElement('span');
     mh.className = 'move-here'; mh.textContent = t('moveHere');
     tile.appendChild(mh);
@@ -17278,6 +17291,106 @@ function formatAddedLabel(ts){
   return t('addedOn', {d: formatDateLabel(ts)});
 }
 
+/* ---------- PREVLAČENJE (v334) ----------
+   Dug pritisak na stavku (izbor), prst se ne podiže: pomeranjem ide sličica sa brojem označenih; spuštanje na element sa
+   data-drop-cat (podalbum sa „Premesti ovde“ ili glavni album u putanji) = moveSelectedToFolder (obaveštenje sa „Vrati“).
+   Osluškivači su na samoj kartici: render() je zameni, a dodir i dalje stiže staroj (odvojenoj) kartici. Cilj se traži po
+   pravougaoniku (putanja je tokom izbora bez pointer-events). Uz vrh/dno ekrana spisak se sam pomera. */
+const DRG = {touch:false, arm:null, on:false, ghost:null, hot:null, x:0, y:0, raf:0, ended:0, zt:0};
+function drgCan(){ return selectionMode && selectedIds.size > 0 && !mergeMode && (!actMode || actMode === 'move'); }
+function drgTouchStart(e){
+  const t0 = e.touches[0]; if(!t0 || e.touches.length > 1){ drgCancel(); return; }
+  DRG.touch = true; DRG.arm = null; DRG.x = t0.clientX; DRG.y = t0.clientY;
+}
+function drgArm(thumbBox){
+  if(!drgCan()) return;
+  DRG.arm = {x:DRG.x, y:DRG.y, thumb:thumbBox ? thumbBox.cloneNode(true) : null};
+}
+function drgTargetAt(x, y){
+  let best = null;
+  document.querySelectorAll('[data-drop-cat]').forEach(el=>{
+    if(!el.isConnected) return;
+    const r = el.getBoundingClientRect(); if(!r.width || !r.height) return;
+    const inPath = el.classList.contains('path-lnk'), pad = inPath ? 12 : 0;
+    if(!(x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad)) return;
+    /* podalbum skriven ispod zaglavlja ili donjeg reda nije cilj: mora biti ono što je stvarno pod prstom */
+    if(!inPath){ const hit = document.elementFromPoint(x, y); if(!hit || hit.closest('[data-drop-cat]') !== el) return; }
+    best = el;
+  });
+  return best;
+}
+function drgHotUpdate(){
+  const tg = drgTargetAt(DRG.x, DRG.y);
+  if(DRG.hot && (DRG.hot !== tg || !DRG.hot.isConnected)) DRG.hot.classList.remove('drop-hot');
+  if(tg && tg !== DRG.hot && navigator.vibrate){ try{ navigator.vibrate(12); }catch(err){} }
+  if(tg) tg.classList.add('drop-hot');
+  DRG.hot = tg;
+}
+function drgPlace(){
+  if(!DRG.ghost) return;
+  /* sličica je iznad prsta; uz vrh ekrana (putanja) ide ispod prsta, da cilj ostane vidljiv */
+  const gy = DRG.y < 150 ? DRG.y + 34 : DRG.y - 56;
+  DRG.ghost.style.transform = 'translate(' + (DRG.x - 40) + 'px,' + gy + 'px) rotate(-6deg)';
+}
+function drgStart(){
+  DRG.on = true;
+  document.body.classList.add('drg-on');
+  /* obaveštenje stoji na mestu putanje: kad je glavni album u putanji cilj, prevlačenje ga zatvara da bi se cilj video */
+  if(pathZone.classList.contains('noting') && pathZone.querySelector('.path-lnk[data-drop-cat]')) hideNote();
+  const g = document.createElement('div'); g.className = 'drg-ghost'; g.setAttribute('aria-hidden','true');
+  const inn = document.createElement('div'); inn.className = 'drg-in';
+  if(DRG.arm.thumb){ DRG.arm.thumb.querySelectorAll('.select-mark, .corner, .merge-num, .merge-look').forEach(x=>x.remove()); inn.appendChild(DRG.arm.thumb); }
+  const n = document.createElement('span'); n.className = 'drg-n'; n.textContent = String(selectedIds.size);
+  g.appendChild(inn); g.appendChild(n); document.body.appendChild(g); DRG.ghost = g;
+  if(navigator.vibrate){ try{ navigator.vibrate(30); }catch(err){} }
+  const step = ()=>{
+    if(!DRG.on) return;
+    const hd = document.querySelector('header'); const top = hd ? hd.getBoundingClientRect().bottom : 0;
+    const zone = 80, bot = window.innerHeight - 160;
+    let v = 0;
+    if(DRG.y < top + zone && !DRG.hot) v = -Math.min(1, (top + zone - DRG.y) / zone);   /* i u zaglavlju, osim nad ciljem (putanja) */
+    else if(DRG.y > bot) v = Math.min(1, (DRG.y - bot) / 120);
+    if(v){
+      /* dublje u pojas = brže; što duže prst stoji uz ivicu, brže (do 3 puta), da i dug album brzo stigne do vrha */
+      if(!DRG.zt) DRG.zt = performance.now();
+      const mult = 1 + Math.min(2, (performance.now() - DRG.zt) / 1200);
+      window.scrollBy(0, Math.round(v * 18 * mult) || (v < 0 ? -1 : 1)); drgHotUpdate();
+    }else DRG.zt = 0;
+    DRG.raf = requestAnimationFrame(step);
+  };
+  DRG.raf = requestAnimationFrame(step);
+}
+function drgStop(){
+  DRG.on = false; DRG.arm = null; DRG.zt = 0;
+  if(DRG.raf){ cancelAnimationFrame(DRG.raf); DRG.raf = 0; }
+  if(DRG.ghost){ DRG.ghost.remove(); DRG.ghost = null; }
+  if(DRG.hot){ DRG.hot.classList.remove('drop-hot'); DRG.hot = null; }
+  document.querySelectorAll('.drop-hot').forEach(x=>x.classList.remove('drop-hot'));
+  document.body.classList.remove('drg-on');
+}
+function drgMove(e){
+  const t0 = e.touches[0]; if(!t0) return;
+  DRG.x = t0.clientX; DRG.y = t0.clientY;
+  if(!DRG.arm) return;
+  if(e.cancelable) e.preventDefault();
+  if(!DRG.on){
+    if(Math.hypot(DRG.x - DRG.arm.x, DRG.y - DRG.arm.y) < 10) return;
+    if(!drgCan()){ DRG.arm = null; return; }
+    drgStart();
+  }
+  drgPlace(); drgHotUpdate();
+}
+function drgEnd(e){
+  DRG.touch = false;
+  if(!DRG.on){ DRG.arm = null; return; }
+  if(e && e.cancelable) e.preventDefault();
+  const tg = (DRG.hot && DRG.hot.isConnected) ? DRG.hot : drgTargetAt(DRG.x, DRG.y);
+  const catId = tg ? tg.dataset.dropCat : null;
+  drgStop(); DRG.ended = Date.now();
+  if(catId && catById(catId) && drgCan()) moveSelectedToFolder(catId);
+}
+function drgCancel(){ DRG.touch = false; if(DRG.on) DRG.ended = Date.now(); drgStop(); }
+
 function buildCard(item, indexNumber){
   const card = document.createElement('div');
   card.dataset.id = item.id;
@@ -17361,11 +17474,20 @@ function buildCard(item, indexNumber){
     if(mergeMode){ card.onclick(e); return; }
     const top0 = card.getBoundingClientRect().top;   /* v299 (K13) */
     if(!selectionMode){ enterSelectionMode(); }
-    toggleSelect(item.id);
+    /* v334: dug pritisak na već označenu stavku ne poništava je (prst ostaje za prevlačenje); poništava se dodirom */
+    if(!(DRG.touch && selectedIds.has(item.id))) toggleSelect(item.id);
     keepCardInView(item.id, top0);
+    if(DRG.touch && selectedIds.has(item.id)) drgArm(thumbBox);
   });
+  /* v334: posle dugog pritiska prst nastavlja: prevlačenje označenog na podalbum ili na glavni album u putanji (blok PREVLAČENJE) */
+  card.addEventListener('touchstart', drgTouchStart, {passive:true});
+  card.addEventListener('touchmove', drgMove, {passive:false});
+  card.addEventListener('touchend', drgEnd, {passive:false});
+  card.addEventListener('touchcancel', drgCancel);
+  card.addEventListener('dragstart', (e)=>e.preventDefault());
 
   card.onclick = (e)=>{
+    if(Date.now() - DRG.ended < 700) return;   /* v334: kraj prevlačenja nije dodir */
     if(_splitOk && modalBg.classList.contains('open')){ splitGo(item); return; }   /* v321: druga stavka desno, bez novog koraka nazad */
     if(mergeOff){ toast(t('mergeOnlyImg')); return; }
     if(actMode === 'rename'){ openNameSheet(item, (ok)=>{ if(ok) exitSelection(); }); return; }
@@ -20545,7 +20667,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 333;
+const APP_VERSION = 334;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
