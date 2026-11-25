@@ -1,6 +1,23 @@
 {
   "novosti": [
     {
+      "id": "2026-11-25-kvalitet-fotografija",
+      "datum": "2026-11-25",
+      "cilj": "settings:foto",
+      "sr": {
+        "n": "Fotografije u punom kvalitetu",
+        "t": "Life Archive od sada čuva fotografije tačno onakve kakve jesu, u punoj rezoluciji. Ako želiš da zauzimaju manje mesta, izaberi „Ušteda prostora“ u Podešavanjima → Kvalitet fotografija."
+      },
+      "en": {
+        "n": "Photos in full quality",
+        "t": "Life Archive now keeps photos exactly as they are, at full resolution. If you want them to take less space, choose “Storage saver” in Settings → Photo quality."
+      },
+      "hr": {
+        "n": "Fotografije u punoj kvaliteti",
+        "t": "Life Archive od sada čuva fotografije točno onakve kakve jesu, u punoj rezoluciji. Ako želiš da zauzimaju manje mjesta, odaberi „Ušteda prostora“ u Postavkama → Kvaliteta fotografija."
+      }
+    },
+    {
       "id": "2026-11-19-life-archive",
       "datum": "2026-11-19",
       "sr": {

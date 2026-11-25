@@ -4389,6 +4389,7 @@ const I18N = {
       ['Vidžet na početnom ekranu', 'U Android aplikaciji, Life Archive ima vidžet za početni ekran telefona. Postavljaš ga kao i ostale vidžete: dug pritisak na prazno mesto ekrana → Vidžeti → Life Archive. Podrazumevano je veličine ikonice: znak Life Archive i broj podsetnika koji traže pažnju (isti broj kao na zvoncetu; crven ako je neki datum prošao). Dugim pritiskom na vidžet i povlačenjem ivica ga povećavaš: tada pokazuje tri najbliža podsetnika, a još veći i do 4 izabrana dokumenta.', 'Dokument staviš na vidžet ovako: označi ga u albumu, pa Prečica → Na vidžetu. Dodir na vidžet otvara prozor preko celog ekrana sa izabranim podsetnicima i dokumentima — samo za gledanje, i bez PIN-a kad je Life Archive zaključana (zaključan telefon je zaštita); dodir na dokument ga otvara. Menja se u Life Archive: „Uredi ›“ gore desno (PIN ako je zaključana) otvara ekran tog vidžeta. Dodir na ime u naslovu ga menja (pa Sačuvaj). Možeš postaviti i više vidžeta — svaki ima svoje ime, podsetnike i dokumente; kod Prečice tada biraš na koji vidžet ide dokument. Tu biraš koji podsetnici su na vidžetu: Svi, Izabrani (kvačica pored svakog) ili Nijedan (tada samo dokumenti, bez broja); ✕ skida dokument sa vidžeta (uz potvrdu; dokument ostaje u Life Archive), a „Dodaj dokument“ dodaje nov.'],
       ['Zaključavanje', 'Samo u Android aplikaciji: Podešavanja → Zaključavanje. Biraš „Bez zaključavanja“, „PIN (4 cifre)“ ili „Šablon“, a uz to i biometriju (otisak prsta). Life Archive se zaključava pri svakom pokretanju i kad se ugasi ekran telefona; može i kad si u drugoj aplikaciji duže od zadatog vremena.', 'Na svaka 3 dana Life Archive traži PIN (ili šablon) i kad je biometrija uključena, da ga ne zaboraviš. Ako zaboraviš PIN, otključaj šablonom Life Archive (i obrnuto) ili otiskom prsta, odnosno PIN-om telefona, pa postavi nov.'],
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → Korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Life Archive ga pri vraćanju napravi ponovo sa istim imenom.'],
+      ['Kvalitet fotografija', 'Podešavanja → Kvalitet fotografija. „Originalni kvalitet“ (podrazumevano) čuva fotografiju tačno onakvu kakva je, u punoj rezoluciji. „Ušteda prostora“ smanjuje fotografije veće od 16 MP na 16 MP i sažima ih, pa zauzimaju mnogo manje mesta, a razlika se na telefonu skoro ne vidi.', 'Izbor važi za fotografije koje dodaš od tada; već dodate ostaju kakve jesu. Video se uvek čuva u originalu. Stranice dokumenata (skener, dokument od više stranica) se i dalje smanjuju, da budu lake i čitljive.'],
       ['Rezervna kopija', 'Podešavanja → Rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Pri vraćanju biraš „Dodaj postojećim“ (samo ono što nedostaje, bez duplikata) ili „Zameni sve“. Oštećen fajl iz kopije se nikad ne uvozi, a kod „Zameni sve“ ništa se ne briše dok kopija nije uspešno vraćena. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.', 'Fascikla za kopiju: izaberi je jednom, pa izvoz ide pravo u nju, bez pitanja; čuvaju se poslednje 3 kopije, starije se same brišu. Bez fascikle telefon (ili Chrome) pita gde da sačuva. Ako fascikla više nije dostupna, telefon pita, pa kopija ne propada.'],
       ['Google Drive', 'Samo u Android aplikaciji: Podešavanja → Google Drive → „Poveži Google Drive“. Life Archive tada čuva tvoje podatke i na tvom Drive-u, u fascikli „Life Archive“, a ostale tvoje fajlove ne vidi. Prvi put prenese sve, a posle sama šalje novo i izmenjeno.', 'Svi uređaji sa istim Google nalogom imaju iste podatke: šta dodaš, izmeniš ili izbrišeš na jednom, stiže i na ostale. Kad dva uređaja izmene istu stavku, važi kasnija izmena. Na novom telefonu povežeš isti nalog i preuzmeš sve.', 'Podeli album: dugi pritisak na album → „Podeli album“, upišeš e-adresu i biraš „Samo gleda“ ili „Gleda i komentariše“. Osoba dobija e-poruku sa linkom i album gleda u Google Drive-u, bez Life Archive; pristup ukloniš na istom mestu.', '„Prekini vezu“ ne briše ništa: podaci ostaju i na telefonu i na Drive-u. Dok je Drive povezan, traka-podsetnik za rezervnu kopiju se ne pojavljuje.'],
       ['Jezik', 'Podešavanja → Jezik bira srpski, engleski (English), nemački (Deutsch), španski (Español), francuski (Français) italijanski (Italiano) ili hrvatski (Hrvatski). Promena se vidi odmah. Pri prvom pokretanju Life Archive sama izabere jezik telefona.'],
@@ -5221,6 +5222,7 @@ const I18N = {
       ['Home screen widget', 'In the Android app, Life Archive has a widget for the phone’s home screen. Place it like any other widget: long-press an empty spot → Widgets → Life Archive. By default it is the size of an icon: the Life Archive sign and the number of reminders that need attention (the same number as on the bell; red if a date has passed). Long-press the widget and drag its edges to make it bigger: then it shows the three nearest reminders, and when even bigger, up to 4 chosen documents.', 'To put a document on the widget, select it in its album, then Shortcut → On the widget. Tapping the widget opens a full-screen window with the chosen reminders and documents — for viewing only, and without the PIN when Life Archive is locked (a locked phone is the protection); tapping a document opens it. Changes are made in Life Archive: “Edit ›” at the top right (PIN if locked) opens that widget’s screen. Tap the name in the title to change it (then Save). You can place several widgets — each has its own name, reminders and documents; with Shortcut you then choose which widget a document goes to. There you choose which reminders are on the widget: All, Chosen (a checkbox next to each) or None (then only documents, without a number); ✕ removes a document from the widget (after confirming; it stays in Life Archive), and “Add a document” adds one.'],
       ['App lock', 'Only in the Android app: Settings → App lock. Choose “No lock”, “PIN (4 digits)” or “Pattern”, plus biometrics (fingerprint) if you like. Life Archive locks every time it starts and when the phone screen turns off; it can also lock when you are in another app for longer than the set time.', 'Every 3 days Life Archive asks for the PIN (or pattern) even with biometrics on, so you do not forget it. If you forget the PIN, unlock with the Life Archive pattern (or the other way round) or with the phone fingerprint or PIN, then set a new one.'],
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → Trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Life Archive creates it again with the same name when restoring.'],
+      ['Photo quality', 'Settings → Photo quality. “Original quality” (the default) keeps each photo exactly as it is, at full resolution. “Storage saver” reduces photos larger than 16 MP to 16 MP and compresses them, so they take much less space, and on a phone the difference is hard to see.', 'The choice applies to photos you add from then on; photos already added stay as they are. Videos are always kept in original quality. Document pages (scanner, multi-page document) are still reduced, so they stay light and readable.'],
       ['Backup', 'Settings → Backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'When restoring, choose “Add to existing” (only what is missing, no duplicates) or “Replace all”. A damaged file is never imported, and with “Replace all” nothing is deleted until the backup is restored successfully. A bar at the top reminds you when the set number of days has passed since the last backup.', 'Backup folder: choose it once, and the export goes straight into it without asking; the last 3 backups are kept and older ones are deleted automatically. Without a folder the phone (or Chrome) asks where to save. If the folder is no longer available, the phone asks, so the backup is never lost.'],
       ['Google Drive', 'Only in the Android app: Settings → Google Drive → “Connect Google Drive”. Life Archive then keeps your data on your Drive too, in the “Life Archive” folder, and does not see your other files. The first time it uploads everything, and afterwards it sends new and changed items by itself.', 'All devices with the same Google account have the same data: what you add, change or delete on one reaches the others. When two devices change the same item, the later change wins. On a new phone connect the same account and download everything.', 'Share album: long-press an album → “Share album”, type an email address and choose “View only” or “View and comment”. The person gets an email with a link and views the album in Google Drive, without Life Archive; you remove access in the same place.', '“Disconnect” deletes nothing: the data stays both on the phone and on Drive. While Drive is connected, the backup reminder bar does not appear.'],
       ['Language', 'Settings → Language chooses Serbian (Srpski), English, German (Deutsch), Spanish (Español), French (Français), Italian (Italiano) or Croatian (Hrvatski). The change is visible right away. On first start Life Archive picks the language of your phone.'],
@@ -5491,6 +5493,7 @@ Object.assign(I18N.sr, {
   trTile: 'Korpa', langTile: 'Jezik · language', langHint: 'Promena se vidi odmah. Pri prvom pokretanju Life Archive sama izabere jezik telefona.',
   setTitle: 'Podešavanja', backAria: 'Nazad', cfOkDef: 'U redu', cfCancel: 'Otkaži',
   themeTile: 'Tema', themeHint: 'Promena se vidi odmah. Izbor se pamti i čuva u rezervnoj kopiji.',
+  fqTile: 'Kvalitet fotografija', fqOrig: 'Originalni kvalitet', fqOrigSub: 'Fotografija ostaje tačno kakva je', fqSaver: 'Ušteda prostora', fqSaverSub: 'Do 16 MP · zauzima mnogo manje', fqHint: 'Važi za fotografije koje dodaš od sada. Video se uvek čuva u originalu. Izbor se čuva u rezervnoj kopiji.',
   th_banka: 'Privatno bankarstvo', th_crna: 'Crna kartica', th_ponoc: 'Ponoć', th_koza: 'Kožni rokovnik', th_klasicna: 'Klasična',
   bkTile: 'Rezervna kopija', bkLast: 'Poslednja rezervna kopija: {d}', bkNever: 'nikad',
   bkExport: 'Rezervna kopija - izvezi', bkImport: 'Rezervna kopija - uvezi',
@@ -5523,6 +5526,7 @@ Object.assign(I18N.en, {
   trTile: 'Trash', langTile: 'Language', langHint: 'The change is visible right away. On first start Life Archive picks the language of your phone.',
   setTitle: 'Settings', backAria: 'Back', cfOkDef: 'OK', cfCancel: 'Cancel',
   themeTile: 'Theme', themeHint: 'The change is visible right away. Your choice is remembered and saved in the backup.',
+  fqTile: 'Photo quality', fqOrig: 'Original quality', fqOrigSub: 'Photos stay exactly as they are', fqSaver: 'Storage saver', fqSaverSub: 'Up to 16 MP · takes much less space', fqHint: 'Applies to photos you add from now on. Videos are always kept in original quality. Your choice is saved in the backup.',
   th_banka: 'Private banking', th_crna: 'Black card', th_ponoc: 'Midnight', th_koza: 'Leather notebook', th_klasicna: 'Classic',
   bkTile: 'Backup', bkLast: 'Last backup: {d}', bkNever: 'never',
   bkExport: 'Export backup', bkImport: 'Import backup',
@@ -6676,6 +6680,11 @@ I18N.de = {
 "Ein Tippen auf das Vorschaubild eines Elements wählt es aus (Häkchen), und ein Tippen auf seinen Namen öffnet seine Details: woraus es gelöscht wurde, wohin es zurückkehrt, wann es hinzugefügt und gelöscht wurde, Art, woraus es erstellt wurde, und Gültigkeitsdatum. Existiert das Album nicht mehr, erstellt Life Archive es beim Wiederherstellen mit demselben Namen neu."
 ],
 [
+"Fotoqualität",
+"Einstellungen → Fotoqualität. „Originalqualität“ (Standard) speichert jedes Foto genau so, wie es ist, in voller Auflösung. „Speicherplatz sparen“ verkleinert Fotos über 16 MP auf 16 MP und komprimiert sie, sodass sie viel weniger Platz brauchen; auf dem Telefon sieht man den Unterschied kaum.",
+"Die Wahl gilt für Fotos, die du ab dann hinzufügst; bereits hinzugefügte bleiben, wie sie sind. Videos werden immer in Originalqualität gespeichert. Dokumentseiten (Scanner, mehrseitiges Dokument) werden weiterhin verkleinert, damit sie leicht und lesbar bleiben."
+],
+[
 "Sicherung",
 "Einstellungen → Sicherung erstellt eine ZIP-Datei mit allen Dokumenten und Alben. Bewahre sie außerhalb des Telefons auf, zum Beispiel in Google Drive.",
 "Beim Wiederherstellen wählst du „Zu Vorhandenem hinzufügen“ (nur was fehlt, ohne Duplikate) oder „Alles ersetzen“. Eine beschädigte Datei wird nie importiert, und bei „Alles ersetzen“ wird nichts gelöscht, bevor die Sicherung erfolgreich wiederhergestellt ist. Eine Leiste oben erinnert dich, wenn seit der letzten Sicherung die eingestellte Anzahl Tage vergangen ist.",
@@ -7079,6 +7088,12 @@ I18N.de = {
 "cfOkDef": "OK",
 "cfCancel": "Abbrechen",
 "themeTile": "Design",
+"fqTile": "Fotoqualität",
+"fqOrig": "Originalqualität",
+"fqOrigSub": "Fotos bleiben genau so, wie sie sind",
+"fqSaver": "Speicherplatz sparen",
+"fqSaverSub": "Bis 16 MP · braucht viel weniger Platz",
+"fqHint": "Gilt für Fotos, die du ab jetzt hinzufügst. Videos werden immer in Originalqualität gespeichert. Deine Wahl wird in der Sicherung gespeichert.",
 "themeHint": "Die Änderung ist sofort sichtbar. Deine Wahl wird gespeichert und ist auch in der Sicherung.",
 "th_banka": "Private Banking",
 "th_crna": "Schwarze Karte",
@@ -8383,6 +8398,11 @@ I18N.es = {
 "Tocar la miniatura de un elemento lo selecciona (marca de verificación), y tocar su nombre abre sus detalles: de dónde se eliminó, adónde volverá, cuándo se añadió y se eliminó, tipo, a partir de qué se creó y fecha de validez. Si el álbum ya no existe, Life Archive lo crea de nuevo con el mismo nombre al restaurar."
 ],
 [
+"Calidad de las fotos",
+"Ajustes → Calidad de las fotos. «Calidad original» (la predeterminada) guarda cada foto exactamente como es, a resolución completa. «Ahorro de espacio» reduce las fotos de más de 16 MP a 16 MP y las comprime, así ocupan mucho menos, y en el teléfono la diferencia apenas se nota.",
+"La elección se aplica a las fotos que añadas desde entonces; las ya añadidas se quedan como están. Los vídeos se guardan siempre en calidad original. Las páginas de documentos (escáner, documento de varias páginas) se siguen reduciendo para que sean ligeras y legibles."
+],
+[
 "Copia de seguridad",
 "Ajustes → Copia de seguridad crea un archivo ZIP con todos los documentos y álbumes. Guárdalo fuera del teléfono, por ejemplo en Google Drive.",
 "Al restaurar eliges “Añadir a lo existente” (solo lo que falta, sin duplicados) o “Reemplazar todo”. Un archivo dañado nunca se importa, y con “Reemplazar todo” no se elimina nada hasta que la copia se restaura con éxito. Una barra arriba te avisa cuando ha pasado el número de días establecido desde la última copia.",
@@ -8786,6 +8806,12 @@ I18N.es = {
 "cfOkDef": "OK",
 "cfCancel": "Cancelar",
 "themeTile": "Tema",
+"fqTile": "Calidad de las fotos",
+"fqOrig": "Calidad original",
+"fqOrigSub": "Las fotos se quedan exactamente como son",
+"fqSaver": "Ahorro de espacio",
+"fqSaverSub": "Hasta 16 MP · ocupa mucho menos",
+"fqHint": "Se aplica a las fotos que añadas a partir de ahora. Los vídeos se guardan siempre en calidad original. Tu elección se guarda en la copia de seguridad.",
 "themeHint": "El cambio se ve enseguida. Tu elección se recuerda y se guarda en la copia de seguridad.",
 "th_banka": "Banca privada",
 "th_crna": "Tarjeta negra",
@@ -10090,6 +10116,11 @@ I18N.fr = {
 "Toucher la vignette d’un élément le sélectionne (coche), et toucher son nom ouvre ses détails : d’où il a été supprimé, où il reviendra, quand il a été ajouté et supprimé, le type, à partir de quoi il a été créé et la date de validité. Si l’album n’existe plus, Life Archive le recrée avec le même nom lors de la restauration."
 ],
 [
+"Qualité des photos",
+"Paramètres → Qualité des photos. « Qualité d’origine » (par défaut) conserve chaque photo exactement telle qu’elle est, en pleine résolution. « Économiseur d’espace » réduit les photos de plus de 16 MP à 16 MP et les compresse : elles prennent beaucoup moins de place, et sur un téléphone la différence se voit à peine.",
+"Le choix s’applique aux photos que tu ajoutes ensuite ; celles déjà ajoutées restent telles quelles. Les vidéos sont toujours conservées en qualité d’origine. Les pages de documents (scanner, document de plusieurs pages) sont toujours réduites pour rester légères et lisibles."
+],
+[
 "Sauvegarde",
 "Réglages → Sauvegarde crée un fichier ZIP avec tous les documents et albums. Garde-le hors du téléphone, par exemple dans Google Drive.",
 "À la restauration, tu choisis « Ajouter à l’existant » (seulement ce qui manque, sans doublons) ou « Tout remplacer ». Un fichier endommagé n’est jamais importé, et avec « Tout remplacer », rien n’est supprimé avant que la sauvegarde soit restaurée avec succès. Une barre en haut te prévient quand le nombre de jours choisi s’est écoulé depuis la dernière sauvegarde.",
@@ -10493,6 +10524,12 @@ I18N.fr = {
 "cfOkDef": "OK",
 "cfCancel": "Annuler",
 "themeTile": "Thème",
+"fqTile": "Qualité des photos",
+"fqOrig": "Qualité d’origine",
+"fqOrigSub": "Les photos restent exactement telles quelles",
+"fqSaver": "Économiseur d’espace",
+"fqSaverSub": "Jusqu’à 16 MP · prend beaucoup moins de place",
+"fqHint": "S’applique aux photos que tu ajoutes à partir de maintenant. Les vidéos sont toujours conservées en qualité d’origine. Ton choix est enregistré dans la sauvegarde.",
 "themeHint": "Le changement est visible tout de suite. Ton choix est mémorisé et figure aussi dans la sauvegarde.",
 "th_banka": "Banque privée",
 "th_crna": "Carte noire",
@@ -11797,6 +11834,11 @@ I18N.it = {
 "Toccare la miniatura di un elemento lo seleziona (spunta), e toccare il suo nome ne apre i dettagli: da dove è stato eliminato, dove tornerà, quando è stato aggiunto ed eliminato, tipo, da cosa è stato creato e data di validità. Se l’album non esiste più, Life Archive lo ricrea con lo stesso nome al ripristino."
 ],
 [
+"Qualità delle foto",
+"Impostazioni → Qualità delle foto. «Qualità originale» (predefinita) conserva ogni foto esattamente com’è, a piena risoluzione. «Risparmio spazio di archiviazione» riduce le foto più grandi di 16 MP a 16 MP e le comprime, così occupano molto meno spazio, e sul telefono la differenza si nota appena.",
+"La scelta vale per le foto che aggiungi da quel momento; quelle già aggiunte restano come sono. I video sono sempre conservati in qualità originale. Le pagine dei documenti (scanner, documento di più pagine) vengono ancora ridotte, per restare leggere e leggibili."
+],
+[
 "Backup",
 "Impostazioni → Backup crea un file ZIP con tutti i documenti e gli album. Conservalo fuori dal telefono, ad esempio in Google Drive.",
 "Al ripristino scegli “Aggiungi a quelli esistenti” (solo ciò che manca, senza duplicati) o “Sostituisci tutto”. Un file danneggiato non viene mai importato, e con “Sostituisci tutto” non si elimina nulla finché il backup non è ripristinato con successo. Una barra in alto ti avvisa quando è passato il numero di giorni impostato dall’ultimo backup.",
@@ -12200,6 +12242,12 @@ I18N.it = {
 "cfOkDef": "OK",
 "cfCancel": "Annulla",
 "themeTile": "Tema",
+"fqTile": "Qualità delle foto",
+"fqOrig": "Qualità originale",
+"fqOrigSub": "Le foto restano esattamente come sono",
+"fqSaver": "Risparmio spazio di archiviazione",
+"fqSaverSub": "Fino a 16 MP · occupa molto meno spazio",
+"fqHint": "Vale per le foto che aggiungi da ora in poi. I video sono sempre conservati in qualità originale. La tua scelta viene salvata nel backup.",
 "themeHint": "La modifica si vede subito. La tua scelta viene ricordata ed è anche nel backup.",
 "th_banka": "Private banking",
 "th_crna": "Carta nera",
@@ -13472,6 +13520,11 @@ I18N.hr = {
 "Dodir na sličicu stavke je odabir (kvačica), a dodir na naziv otvara podatke: odakle je izbrisana, gdje će se vratiti, kada je dodana i izbrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Life Archive ga pri vraćanju ponovno izradi s istim imenom."
 ],
 [
+"Kvaliteta fotografija",
+"Postavke → Kvaliteta fotografija. „Izvorna kvaliteta“ (zadano) čuva fotografiju točno onakvu kakva jest, u punoj rezoluciji. „Ušteda prostora“ smanjuje fotografije veće od 16 MP na 16 MP i sažima ih, pa zauzimaju puno manje mjesta, a razlika se na mobitelu gotovo ne vidi.",
+"Izbor vrijedi za fotografije koje dodaš od tada; već dodane ostaju kakve jesu. Video se uvijek čuva u izvornoj kvaliteti. Stranice dokumenata (skener, dokument od više stranica) i dalje se smanjuju, da budu lagane i čitljive."
+],
+[
 "Sigurnosna kopija",
 "Postavke → Sigurnosna kopija izrađuje jednu ZIP datoteku sa svim dokumentima i albumima. Čuvaj je izvan telefona, npr. na Google Driveu.",
 "Pri vraćanju biraš „Dodaj postojećima” (samo ono što nedostaje, bez duplikata) ili „Zamijeni sve”. Oštećena datoteka iz kopije nikad se ne uvozi, a kod „Zamijeni sve” ništa se ne briše dok kopija nije uspješno vraćena. Traka na vrhu te podsjeti kad prođe zadani broj dana od posljednje kopije.",
@@ -13907,6 +13960,12 @@ I18N.hr = {
 "cfOkDef": "U redu",
 "cfCancel": "Odustani",
 "themeTile": "Tema",
+"fqTile": "Kvaliteta fotografija",
+"fqOrig": "Izvorna kvaliteta",
+"fqOrigSub": "Fotografija ostaje točno onakva kakva jest",
+"fqSaver": "Ušteda prostora",
+"fqSaverSub": "Do 16 MP · zauzima puno manje",
+"fqHint": "Vrijedi za fotografije koje dodaš od sada. Video se uvijek čuva u izvornoj kvaliteti. Izbor se čuva u sigurnosnoj kopiji.",
 "themeHint": "Promjena se vidi odmah. Odabir se pamti i čuva u sigurnosnoj kopiji.",
 "th_banka": "Privatno bankarstvo",
 "th_crna": "Crna kartica",
@@ -19594,6 +19653,13 @@ const THUMB_SHORT = 360;    /* kraća strana sličice */
 const THUMB_LONG = 1080;    /* duža strana najviše (dugi računi) */
 const THUMB_QUALITY = 0.8;
 const COMPRESS_POOL_SIZE = 3;
+/* v337 (Zoran 25.11.): Kvalitet fotografija za NOVE fotografije, kao Google Photos — 'orig' (podrazumevano): fajl se čuva
+   bajt po bajt (puna rezolucija, EXIF, PNG/GIF ostaju svoji); 'usteda': najviše 16 MP + JPEG. Stranice dokumenata (urednik,
+   skener), isečak i AI radionica i dalje koriste IMG_MAX_DIM. Ide u rezervnu kopiju (settings.fotoQ). */
+const FQ_KEY = 'galerija:fotoQ';
+const FQ_SAVER_PX = 16000000;
+function fotoQ(){ try{ return localStorage.getItem(FQ_KEY) === 'usteda' ? 'usteda' : 'orig'; }catch(e){ return 'orig'; } }
+function setFotoQ(v){ try{ localStorage.setItem(FQ_KEY, v === 'usteda' ? 'usteda' : 'orig'); }catch(e){} }
 let _compressWorkers = [];
 let _compressWorkerBroken = false;
 let _compressReqId = 0;
@@ -19603,6 +19669,7 @@ let _compressNextWorker = 0;
 const COMPRESS_WORKER_CODE = [
   "function fit(W, H, maxDim){ if(W <= maxDim && H <= maxDim) return [W, H];",
   "  return W > H ? [maxDim, Math.max(1, Math.round(H * maxDim / W))] : [Math.max(1, Math.round(W * maxDim / H)), maxDim]; }",
+  "function fitPx(W, H, maxPx){ const k = Math.min(1, Math.sqrt(maxPx / (W * H))); return [Math.max(1, Math.floor(W * k)), Math.max(1, Math.floor(H * k))]; }",
   "function thumbSize(W, H, s, l){ const k = Math.min(1, s / Math.min(W, H), l / Math.max(W, H));",
   "  return [Math.max(1, Math.round(W * k)), Math.max(1, Math.round(H * k))]; }",
   "async function draw(bitmap, w, h, q){ const c = new OffscreenCanvas(w, h); c.getContext('2d').drawImage(bitmap, 0, 0, w, h);",
@@ -19613,7 +19680,7 @@ const COMPRESS_WORKER_CODE = [
   "    const bitmap = await createImageBitmap(new Blob([d.buffer], {type: d.mime || 'image/jpeg'}));",
   "    const W = bitmap.width, H = bitmap.height;",
   "    const out = {id: d.id, w: W, h: H}; const trans = [];",
-  "    if(d.maxDim){ const s = fit(W, H, d.maxDim); out.buffer = await draw(bitmap, s[0], s[1], d.quality); out.w = s[0]; out.h = s[1]; trans.push(out.buffer); }",
+  "    if(d.maxDim || d.maxPx){ const s = d.maxPx ? fitPx(W, H, d.maxPx) : fit(W, H, d.maxDim); out.buffer = await draw(bitmap, s[0], s[1], d.quality); out.w = s[0]; out.h = s[1]; trans.push(out.buffer); }",
   "    const ts = thumbSize(W, H, d.thumbShort, d.thumbLong); out.tbuffer = await draw(bitmap, ts[0], ts[1], d.thumbQ); trans.push(out.tbuffer);",
   "    bitmap.close();",
   "    self.postMessage(out, trans);",
@@ -19653,7 +19720,8 @@ function getCompressWorker(){
   _compressNextWorker++;
   return w;
 }
-/* resize = true: nov dokument (smanjen + sličica); false: samo sličica od postojećeg fajla */
+/* resize = true: nov dokument (smanjen na IMG_MAX_DIM + sličica); false: samo sličica od postojećeg fajla;
+   v337: {maxPx} = fotografija u „Ušteda prostora“ (najviše maxPx tačaka, iste razmere) */
 async function imageViaWorker(blob, resize){
   const worker = getCompressWorker();
   if(!worker) return null;
@@ -19661,7 +19729,7 @@ async function imageViaWorker(blob, resize){
   const id = ++_compressReqId;
   const d = await new Promise((resolve, reject)=>{
     _compressPending.set(id, {resolve, reject});
-    worker.postMessage({id, buffer, mime: blob.type, maxDim: resize ? IMG_MAX_DIM : 0, quality: IMG_QUALITY,
+    worker.postMessage({id, buffer, mime: blob.type, maxDim: resize === true ? IMG_MAX_DIM : 0, maxPx: (resize && resize.maxPx) || 0, quality: IMG_QUALITY,
       thumbShort: THUMB_SHORT, thumbLong: THUMB_LONG, thumbQ: THUMB_QUALITY}, [buffer]);
   });
   return {
@@ -19690,7 +19758,12 @@ async function imageMainThread(blob, resize){
       return canvasToBlob(c, q);
     };
     let out = {blob:null, w:W, h:H};
-    if(resize){
+    if(resize && resize.maxPx){
+      const k = Math.min(1, Math.sqrt(resize.maxPx / (W * H)));
+      const w = Math.max(1, Math.floor(W * k)), h = Math.max(1, Math.floor(H * k));
+      out.blob = await draw(w, h, IMG_QUALITY);
+      out.w = w; out.h = h;
+    }else if(resize){
       let w = W, h = H;
       if(w > IMG_MAX_DIM || h > IMG_MAX_DIM){
         if(w > h){ h = Math.max(1, Math.round(h * IMG_MAX_DIM / w)); w = IMG_MAX_DIM; }
@@ -19984,8 +20057,14 @@ async function addFile(file, category, o){
     }
     if(isImage){
       try{
-        const r = await processImage(original, true);
-        page = {blob: r.blob, thumbBlob: r.tblob, w: r.w, h: r.h};
+        /* v337: „Originalni kvalitet“ — samo sličica, čuva se sam fajl; „Ušteda prostora“ — najviše 16 MP */
+        if(fotoQ() === 'orig'){
+          const r = await processImage(original, false);
+          page = {blob: original, thumbBlob: r.tblob, w: r.w, h: r.h};
+        }else{
+          const r = await processImage(original, {maxPx: FQ_SAVER_PX});
+          page = {blob: r.blob, thumbBlob: r.tblob, w: r.w, h: r.h};
+        }
       }catch(e){ console.error('slika se ne može obraditi, čuva se original', e); }
     }
     const id = newItemId(), tkInfo = {};
@@ -20685,7 +20764,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 336;
+const APP_VERSION = 337;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20841,6 +20920,7 @@ function renderSettingsTiles(){
     (drNative() ? settingsTile('☁️', t('drTile'), drTileSub(), "openSettingsSub('drive')") : '')+   /* v203: samo Android aplikacija */
     (fzNative() ? settingsTile('📱', t('fzTile'), fzTileSub(), "openSettingsSub('folders')") : '')+   /* v272: samo Android aplikacija */
     (fzNative() && fzNative().lokacija ? settingsTile('📍', t('gpsTile'), gpsTileSub(), "openSettingsSub('gps')") : '')+   /* v290 */
+    settingsTile('🖼️', t('fqTile'), t(fotoQ() === 'usteda' ? 'fqSaver' : 'fqOrig'), "openSettingsSub('foto')")+   /* v337 */
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
@@ -20874,6 +20954,10 @@ function openSettingsSub(which){
     title = t('themeTile');
     body = '<div id="themeOptList">'+themeOptionsHtml()+'</div>'+
       '<div class="settings-hint">'+escapeHtml(t('themeHint'))+'</div>';
+  }else if(which === 'foto'){   /* v337 */
+    title = t('fqTile');
+    body = '<div id="fqOptList">'+fqOptionsHtml()+'</div>'+
+      '<div class="settings-hint">'+escapeHtml(t('fqHint'))+'</div>';
   }else if(which === 'backup'){
     title = t('bkTile');
     body =
@@ -20952,6 +21036,7 @@ function openSettingsSub(which){
   if(which === 'backup'){ refreshBackupDirRow(); setSaveWire(document.getElementById('backupIntervalInput'), 1, 3650, saveBackupInterval); }
   if(which === 'expiry'){ podWire(); obWireSettings(); }
   if(which === 'ai') aiWireSettings();
+  if(which === 'foto') fqWire();
   if(which === 'lock') lkOpenSettings();
   if(which === 'drive') drWire();
   if(which === 'folders') fzWire();
@@ -20962,6 +21047,19 @@ function openSettingsSub(which){
     settingsSubOpen = true;
     pushBack(settingsBackToTiles);
   }
+}
+function fqOptionsHtml(){
+  const cur = fotoQ();
+  return [['orig', 'fqOrig', 'fqOrigSub'], ['usteda', 'fqSaver', 'fqSaverSub']].map(([id, n, sub])=>
+    '<button type="button" class="theme-opt ai-opt fq-opt' + (id === cur ? ' on' : '') + '" data-fq="' + id + '">' +
+    '<span class="t-name">' + escapeHtml(t(n)) + '<small>' + escapeHtml(t(sub)) + '</small></span>' +
+    '<span class="t-check">' + (id === cur ? '✓' : '') + '</span></button>').join('');
+}
+function fqWire(){
+  settingsPanel.querySelectorAll('.fq-opt').forEach(b=>{ b.onclick = ()=>{
+    setFotoQ(b.dataset.fq);
+    const l = document.getElementById('fqOptList'); if(l){ l.innerHTML = fqOptionsHtml(); fqWire(); }
+  }; });
 }
 /* povratak sa pod-ekrana na pločice (strelica i dugme "nazad" telefona idu kroz istoriju) */
 const settingsBackToTiles = ()=>{ settingsSubOpen = false; renderSettingsTiles(); };
@@ -21247,12 +21345,21 @@ function dosTimeDate(ts){
     date: (((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF
   };
 }
-/* entries: [{name, blob, ts}] */
+/* entries: [{name, blob, ts}]
+   v337 (1e.3): ZIP64 kad zatreba — fajl ili pomeraj ≥ 4 GB, ili više od 65.535 fajlova (kopija sa originalima fotografija).
+   Manja kopija ostaje običan ZIP, bajt po bajt kao do sada. ZIP_LIM32/ZIP_LIM16 su granice (testovi ih smanjuju). */
+let ZIP_LIM32 = 0xFFFFFFFF, ZIP_LIM16 = 0xFFFF;
+function zip64Extra(vals){   /* vals: brojevi redom (veličina, sažeta veličina, pomeraj) — samo oni koji ne staju u 32 bita */
+  const x = new DataView(new ArrayBuffer(4 + 8 * vals.length));
+  x.setUint16(0, 0x0001, true); x.setUint16(2, 8 * vals.length, true);
+  vals.forEach((v, k)=>x.setBigUint64(4 + 8 * k, BigInt(v), true));
+  return new Uint8Array(x.buffer);
+}
 async function zipBuild(entries, onProgress){
   const enc = new TextEncoder();
   const parts = [];
   const central = [];
-  let offset = 0;
+  let offset = 0, any64 = false;
   for(let i=0;i<entries.length;i++){
     const e = entries[i];
     const nameBytes = enc.encode(e.name);
@@ -21261,30 +21368,48 @@ async function zipBuild(entries, onProgress){
     if(size > 8 * 1024 * 1024) crc = await crc32Blob(e.blob);
     else{ const bytes = new Uint8Array(await e.blob.arrayBuffer()); crc = crc32(bytes); size = bytes.length; }
     const dt = dosTimeDate(e.ts);
-    if(offset + 30 + nameBytes.length + size > 0xFFFFFFFF) throw new Error('TOO_BIG');
+    const big = size >= ZIP_LIM32, far = offset >= ZIP_LIM32;
+    const lx = big ? zip64Extra([size, size]) : new Uint8Array(0);
     const lh = new DataView(new ArrayBuffer(30));
-    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, big ? 45 : 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
     lh.setUint16(10, dt.time, true); lh.setUint16(12, dt.date, true); lh.setUint32(14, crc, true);
-    lh.setUint32(18, size, true); lh.setUint32(22, size, true); lh.setUint16(26, nameBytes.length, true); lh.setUint16(28, 0, true);
-    parts.push(lh.buffer, nameBytes, e.blob);
+    lh.setUint32(18, big ? 0xFFFFFFFF : size, true); lh.setUint32(22, big ? 0xFFFFFFFF : size, true);
+    lh.setUint16(26, nameBytes.length, true); lh.setUint16(28, lx.length, true);
+    parts.push(lh.buffer, nameBytes, lx, e.blob);
+    const cv = (big ? [size, size] : []).concat(far ? [offset] : []);
+    const cx = cv.length ? zip64Extra(cv) : new Uint8Array(0);
+    if(cv.length) any64 = true;
     const ch = new DataView(new ArrayBuffer(46));
-    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, cv.length ? 45 : 20, true); ch.setUint16(6, cv.length ? 45 : 20, true); ch.setUint16(8, 0x0800, true);
     ch.setUint16(10, 0, true); ch.setUint16(12, dt.time, true); ch.setUint16(14, dt.date, true); ch.setUint32(16, crc, true);
-    ch.setUint32(20, size, true); ch.setUint32(24, size, true); ch.setUint16(28, nameBytes.length, true);
-    ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
-    ch.setUint32(38, 0, true); ch.setUint32(42, offset, true);
-    central.push(ch.buffer, nameBytes);
-    offset += 30 + nameBytes.length + size;
+    ch.setUint32(20, big ? 0xFFFFFFFF : size, true); ch.setUint32(24, big ? 0xFFFFFFFF : size, true); ch.setUint16(28, nameBytes.length, true);
+    ch.setUint16(30, cx.length, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
+    ch.setUint32(38, 0, true); ch.setUint32(42, far ? 0xFFFFFFFF : offset, true);
+    central.push(ch.buffer, nameBytes, cx);
+    offset += 30 + nameBytes.length + lx.length + size;
     if(onProgress) onProgress(i + 1, entries.length);
   }
-  if(entries.length > 0xFFFF) throw new Error('TOO_BIG');
   let cdSize = 0;
   central.forEach(p=>{ cdSize += p.byteLength; });
+  const n = entries.length, cdOff = offset;
+  const z64 = any64 || n >= ZIP_LIM16 || cdOff >= ZIP_LIM32 || cdSize >= ZIP_LIM32;
+  const tail = [];
+  if(z64){
+    const r = new DataView(new ArrayBuffer(56));   /* zapis kraja ZIP64 */
+    r.setUint32(0, 0x06064b50, true); r.setBigUint64(4, 44n, true); r.setUint16(12, 45, true); r.setUint16(14, 45, true);
+    r.setUint32(16, 0, true); r.setUint32(20, 0, true);
+    r.setBigUint64(24, BigInt(n), true); r.setBigUint64(32, BigInt(n), true);
+    r.setBigUint64(40, BigInt(cdSize), true); r.setBigUint64(48, BigInt(cdOff), true);
+    const loc = new DataView(new ArrayBuffer(20));   /* lokator */
+    loc.setUint32(0, 0x07064b50, true); loc.setUint32(4, 0, true); loc.setBigUint64(8, BigInt(cdOff + cdSize), true); loc.setUint32(16, 1, true);
+    tail.push(r.buffer, loc.buffer);
+  }
   const end = new DataView(new ArrayBuffer(22));
   end.setUint32(0, 0x06054b50, true); end.setUint16(4, 0, true); end.setUint16(6, 0, true);
-  end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true);
-  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true); end.setUint16(20, 0, true);
-  return new Blob(parts.concat(central, [end.buffer]), {type:'application/zip'});
+  end.setUint16(8, z64 && n >= ZIP_LIM16 ? 0xFFFF : n, true); end.setUint16(10, z64 && n >= ZIP_LIM16 ? 0xFFFF : n, true);
+  end.setUint32(12, z64 && cdSize >= ZIP_LIM32 ? 0xFFFFFFFF : cdSize, true); end.setUint32(16, z64 && cdOff >= ZIP_LIM32 ? 0xFFFFFFFF : cdOff, true);
+  end.setUint16(20, 0, true);
+  return new Blob(parts.concat(central, tail, [end.buffer]), {type:'application/zip'});
 }
 /* v189: čitanje fajla REDOM, jednim prolazom (file.stream()). Kopija izabrana u Android aplikaciji čita se sporo kad se
    skače po fajlu (svaki komad = novo otvaranje); uvoz traži stavke istim redom kojim ih izvoz piše, pa se fajl čita samo
@@ -21327,9 +21452,16 @@ async function zipRead(file){
   let eocd = -1;
   for(let i = tail.byteLength - 22; i >= 0; i--){ if(tail.getUint32(i, true) === 0x06054b50){ eocd = i; break; } }
   if(eocd < 0) throw new Error('NOT_ZIP');
-  const count = tail.getUint16(eocd + 10, true);
-  const cdSize = tail.getUint32(eocd + 12, true);
-  const cdOff = tail.getUint32(eocd + 16, true);
+  let count = tail.getUint16(eocd + 10, true);
+  let cdSize = tail.getUint32(eocd + 12, true);
+  let cdOff = tail.getUint32(eocd + 16, true);
+  /* v337: ZIP64 — lokator odmah ispred kraja ZIP-a pokazuje na zapis sa pravim brojevima */
+  if(eocd >= 20 && tail.getUint32(eocd - 20, true) === 0x07064b50){
+    const at = Number(tail.getBigUint64(eocd - 12, true));
+    const r = new DataView(await file.slice(at, at + 56).arrayBuffer());
+    if(r.getUint32(0, true) !== 0x06064b50) throw new Error('NOT_ZIP');
+    count = Number(r.getBigUint64(32, true)); cdSize = Number(r.getBigUint64(40, true)); cdOff = Number(r.getBigUint64(48, true));
+  }
   const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
   const dec = new TextDecoder();
   const out = new Map();
@@ -21347,9 +21479,23 @@ async function zipRead(file){
     if(cd.getUint32(p, true) !== 0x02014b50) throw new Error('NOT_ZIP');
     const method = cd.getUint16(p + 10, true);
     const crc = cd.getUint32(p + 16, true);
-    const csize = cd.getUint32(p + 20, true);
+    let csize = cd.getUint32(p + 20, true);
+    const usize = cd.getUint32(p + 24, true);
     const nlen = cd.getUint16(p + 28, true), xlen = cd.getUint16(p + 30, true), clen = cd.getUint16(p + 32, true);
-    const lho = cd.getUint32(p + 42, true);
+    let lho = cd.getUint32(p + 42, true);
+    if(usize === 0xFFFFFFFF || csize === 0xFFFFFFFF || lho === 0xFFFFFFFF){   /* v337: ZIP64 dodatak (0x0001), redom: veličina, sažeta, pomeraj */
+      for(let q = p + 46 + nlen, qe = q + xlen; q + 4 <= qe; ){
+        const id = cd.getUint16(q, true), len = cd.getUint16(q + 2, true);
+        if(id === 0x0001){
+          let r = q + 4;
+          if(usize === 0xFFFFFFFF){ r += 8; }
+          if(csize === 0xFFFFFFFF){ csize = Number(cd.getBigUint64(r, true)); r += 8; }
+          if(lho === 0xFFFFFFFF){ lho = Number(cd.getBigUint64(r, true)); }
+          break;
+        }
+        q += 4 + len;
+      }
+    }
     const name = dec.decode(new Uint8Array(cd.buffer, cd.byteOffset + p + 46, nlen));
     p += 46 + nlen + xlen + clen;
     out.set(name, {
@@ -21453,7 +21599,7 @@ async function backupManifest(bezSlicica){
     }
     const albums = categories.map((c, i)=>Object.assign(albumRecord(c, i), {createdAt:c.createdAt || 0, updatedAt:c.updatedAt || 0}));
     const templates = await tplLoad().catch(e=>{ console.error(e); return []; });
-    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:Math.max(1, getExpiryDays()), podsetnici:getPods(), lang:appLang()}, albums, docs:docOut, templates};
+    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:Math.max(1, getExpiryDays()), podsetnici:getPods(), lang:appLang(), fotoQ:fotoQ()}, albums, docs:docOut, templates};
     return {manifest, docs, fileEntries, thumbEntries};
 }
 async function exportBackup(){
@@ -21687,6 +21833,7 @@ async function bkCheckZip(zip, data, full, fileSize){
 /* v206: podešavanja i dokumenti iz arhiva.json — isto za ZIP kopiju i za Google Drive (čitanje fajla je jedina razlika) */
 function bkSettings(data){
   if(data.settings && data.settings.theme) setTheme(data.settings.theme);
+  if(data.settings && (data.settings.fotoQ === 'orig' || data.settings.fotoQ === 'usteda')) setFotoQ(data.settings.fotoQ);   /* v337 */
   if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
   if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
   if(data.settings && Array.isArray(data.settings.podsetnici) && data.settings.podsetnici.length === 3) setPods(data.settings.podsetnici);   /* v199 */
@@ -21760,6 +21907,7 @@ async function importZipBackup(file){
 function importJsonBackup(data){
   if(!data || !Array.isArray(data.items)) throw new Error('NOT_BACKUP');
   if(data.settings && data.settings.theme) setTheme(data.settings.theme);
+  if(data.settings && (data.settings.fotoQ === 'orig' || data.settings.fotoQ === 'usteda')) setFotoQ(data.settings.fotoQ);   /* v337 */
   if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
   const isV2 = data.version >= 2;
   const coverOf = {};
