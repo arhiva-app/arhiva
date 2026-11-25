@@ -15,7 +15,8 @@
    11) v252 Podeli → Arhiva (dodatak Primanje u novom APK-u; logika je u Arhivi, blok PRIJEM)
    12) v272 praćene fascikle (dodatak Fascikle; blok FASCIKLE u Arhivi)
    13) v315 skener dokumenata (dodatak Skener; skScan u Arhivi)
-   14) v316 tekst iz slike (dodatak Tekst; blok TEKST IZ SLIKE u Arhivi) */
+   14) v316 tekst iz slike (dodatak Tekst; blok TEKST IZ SLIKE u Arhivi)
+   15) v339 tip mreže za „Drive samo preko Wi-Fi“ (dodatak Network) */
 (function(){
   var C = window.Capacitor;
   if(!(C && C.isNativePlatform && C.isNativePlatform())) return;
@@ -134,6 +135,16 @@
     window.ARHIVA_DRIVE = {
       dozvola: function(o){ return GD.dozvola(o || {}); },
       prekini: function(o){ return GD.prekini(o || {}); }
+    };
+  }
+
+  /* 15) v339 mreža (zvanični dodatak @capacitor/network): tip() → 'wifi' | 'cellular' | 'none' | 'unknown'; slusaj(fn) na promenu.
+     Stariji APK bez dodatka → ARHIVA_MREZA ne postoji (Arhiva tada ne zna tip i šalje kao ranije). */
+  if(C.isPluginAvailable && C.isPluginAvailable('Network')){
+    var Mr = reg('Network');
+    window.ARHIVA_MREZA = {
+      tip: function(){ return Mr.getStatus().then(function(s){ return (s && s.connectionType) || 'unknown'; }); },
+      slusaj: function(fn){ try{ Mr.addListener('networkStatusChange', function(s){ fn((s && s.connectionType) || 'unknown'); }); }catch(e){} }
     };
   }
 

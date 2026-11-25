@@ -4391,7 +4391,7 @@ const I18N = {
       ['Korpa', 'Svako brisanje prvo traži potvrdu. Obrisano ide u korpu (Podešavanja → Korpa) i tamo čeka zadati broj dana, a zatim se trajno briše.', 'Kad obrišeš album, njegove slike i dokumenti (i iz podalbuma) idu u korpu kao jedan obrisan album. Iz korpe ga vraćaš celog ili stavku po stavku.', 'U korpi je gore red ikonica: Pretraži (delovi reči, ćirilica i latinica), Sortiraj (po datumu brisanja ili po abecedi), Izaberi sve, Isprazni i Dana (koliko dana korpa čuva obrisano). Ispod su Sve · Slike · Dokumenti.', 'Obrisani albumi su kartice na vrhu: „Vrati album“ vraća ceo album sa podalbumima i svim stavkama; dodir na karticu otvara album, gde možeš izabrati samo neke stavke i vratiti ih ili trajno obrisati.', 'Dodir na sličicu stavke je izbor (kvačica), a dodir na naziv otvara podatke: odakle je obrisana, gde će se vratiti, kada je dodata i obrisana, vrsta, od čega je nastala i rok važenja. Ako album više ne postoji, Life Archive ga pri vraćanju napravi ponovo sa istim imenom.'],
       ['Kvalitet fotografija', 'Podešavanja → Kvalitet fotografija. „Originalni kvalitet“ (podrazumevano) čuva fotografiju tačno onakvu kakva je, u punoj rezoluciji. „Ušteda prostora“ smanjuje fotografije veće od 16 MP na 16 MP i sažima ih, pa zauzimaju mnogo manje mesta, a razlika se na telefonu skoro ne vidi.', 'Izbor važi za fotografije koje dodaš od tada; već dodate ostaju kakve jesu. Video se uvek čuva u originalu. Stranice dokumenata (skener, dokument od više stranica) se i dalje smanjuju, da budu lake i čitljive.'],
       ['Rezervna kopija', 'Podešavanja → Rezervna kopija pravi jedan ZIP fajl sa svim dokumentima i albumima. Čuvaj ga van telefona, npr. na Google Drive-u.', 'Pri vraćanju biraš „Dodaj postojećim“ (samo ono što nedostaje, bez duplikata) ili „Zameni sve“. Oštećen fajl iz kopije se nikad ne uvozi, a kod „Zameni sve“ ništa se ne briše dok kopija nije uspešno vraćena. Traka na vrhu te podseti kad prođe zadati broj dana od poslednje kopije.', 'Fascikla za kopiju: izaberi je jednom, pa izvoz ide pravo u nju, bez pitanja; čuvaju se poslednje 3 kopije, starije se same brišu. Bez fascikle telefon (ili Chrome) pita gde da sačuva. Ako fascikla više nije dostupna, telefon pita, pa kopija ne propada.'],
-      ['Google Drive', 'Samo u Android aplikaciji: Podešavanja → Google Drive → „Poveži Google Drive“. Life Archive tada čuva tvoje podatke i na tvom Drive-u, u fascikli „Life Archive“, a ostale tvoje fajlove ne vidi. Prvi put prenese sve, a posle sama šalje novo i izmenjeno.', 'Svi uređaji sa istim Google nalogom imaju iste podatke: šta dodaš, izmeniš ili izbrišeš na jednom, stiže i na ostale. Kad dva uređaja izmene istu stavku, važi kasnija izmena. Na novom telefonu povežeš isti nalog i preuzmeš sve.', 'Podeli album: dugi pritisak na album → „Podeli album“, upišeš e-adresu i biraš „Samo gleda“ ili „Gleda i komentariše“. Osoba dobija e-poruku sa linkom i album gleda u Google Drive-u, bez Life Archive; pristup ukloniš na istom mestu.', '„Prekini vezu“ ne briše ništa: podaci ostaju i na telefonu i na Drive-u. Dok je Drive povezan, traka-podsetnik za rezervnu kopiju se ne pojavljuje.'],
+      ['Google Drive', 'Samo u Android aplikaciji: Podešavanja → Google Drive → „Poveži Google Drive“. Life Archive tada čuva tvoje podatke i na tvom Drive-u, u fascikli „Life Archive“, a ostale tvoje fajlove ne vidi. Prvi put prenese sve, a posle sama šalje novo i izmenjeno.', 'Svi uređaji sa istim Google nalogom imaju iste podatke: šta dodaš, izmeniš ili izbrišeš na jednom, stiže i na ostale. Kad dva uređaja izmene istu stavku, važi kasnija izmena. Na novom telefonu povežeš isti nalog i preuzmeš sve.', 'Podeli album: dugi pritisak na album → „Podeli album“, upišeš e-adresu i biraš „Samo gleda“ ili „Gleda i komentariše“. Osoba dobija e-poruku sa linkom i album gleda u Google Drive-u, bez Life Archive; pristup ukloniš na istom mestu.', '„Prekini vezu“ ne briše ništa: podaci ostaju i na telefonu i na Drive-u. Dok je Drive povezan, traka-podsetnik za rezervnu kopiju se ne pojavljuje.', 'Podrazumevano se na Drive šalje samo preko Wi-Fi-ja; to se menja u Podešavanja → Google Drive → „Samo preko Wi-Fi“. Ako se slanje velikog fajla prekine (nestane veze ili pređeš na mobilne podatke), nastavlja od mesta gde je stalo, ne iz početka.'],
       ['Jezik', 'Podešavanja → Jezik bira srpski, engleski (English), nemački (Deutsch), španski (Español), francuski (Français) italijanski (Italiano) ili hrvatski (Hrvatski). Promena se vidi odmah. Pri prvom pokretanju Life Archive sama izabere jezik telefona.'],
       ['Teme', 'Podešavanja → Tema menja izgled cele aplikacije. Izbor se pamti i čuva u rezervnoj kopiji.'],
       ['Dnevnik grešaka', 'Kad se u Life Archive desi greška, Life Archive je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Life Archive ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
@@ -4570,6 +4570,7 @@ const I18N = {
     drDone: 'Sve je na Drive-u.', drOffDone: 'Veza sa Google Drive-om je prekinuta. Podaci su ostali na telefonu i na Drive-u.',
     drConnFail: 'Povezivanje nije uspelo. Proveri internet i pokušaj ponovo.',
     drErrNet: 'Poslednje slanje nije uspelo: nema interneta. Life Archive pokušava ponovo sama.',
+    drWifi: 'Samo preko Wi-Fi', drWifiOn: 'Na mobilnim podacima se ništa ne šalje', drWifiOff: 'Šalje i preko mobilnih podataka', drSubWifi: 'Čeka Wi-Fi', drErrWifi: 'Slanje čeka Wi-Fi: telefon je na mobilnim podacima. Nastavlja samo od mesta gde je stalo čim se poveže na Wi-Fi.',
     drErrFull: 'Google Drive je pun. Oslobodi prostor na Drive-u; Life Archive posle nastavlja sama.',
     drErrSend: 'Poslednje slanje nije uspelo. Life Archive pokušava ponovo sama.',   /* v298 (K4): bio je drugi „drErr“ i prepisivao poruku pregleda dokumenta */
     drNeedTxt: 'Google traži da ponovo dozvoliš pristup Drive-u. Dok to ne uradiš, ništa se ne šalje.', drAgain: 'Ponovo poveži',
@@ -5224,7 +5225,7 @@ const I18N = {
       ['Trash', 'Every deletion asks for confirmation first. Deleted items go to the trash (Settings → Trash) and wait there for the set number of days, then they are deleted for good.', 'When you delete an album, its images and documents (also from sub-albums) go to the trash as one deleted album. From the trash you restore it whole or item by item.', 'At the top of the trash is a row of icons: Search (parts of words, Cyrillic and Latin), Sort (by deletion date or by name), Select all, Empty and Days (how many days the trash keeps deleted items). Below are All · Images · Documents.', 'Deleted albums are cards at the top: “Restore album” brings back the whole album with its sub-albums and all items; tapping the card opens the album, where you can select only some items and restore them or delete them for good.', 'Tapping an item thumbnail selects it (check mark), and tapping its name opens its details: where it was deleted from, where it will return, when it was added and deleted, type, what it was made from and validity date. If the album no longer exists, Life Archive creates it again with the same name when restoring.'],
       ['Photo quality', 'Settings → Photo quality. “Original quality” (the default) keeps each photo exactly as it is, at full resolution. “Storage saver” reduces photos larger than 16 MP to 16 MP and compresses them, so they take much less space, and on a phone the difference is hard to see.', 'The choice applies to photos you add from then on; photos already added stay as they are. Videos are always kept in original quality. Document pages (scanner, multi-page document) are still reduced, so they stay light and readable.'],
       ['Backup', 'Settings → Backup makes one ZIP file with all documents and albums. Keep it off the phone, for example on Google Drive.', 'When restoring, choose “Add to existing” (only what is missing, no duplicates) or “Replace all”. A damaged file is never imported, and with “Replace all” nothing is deleted until the backup is restored successfully. A bar at the top reminds you when the set number of days has passed since the last backup.', 'Backup folder: choose it once, and the export goes straight into it without asking; the last 3 backups are kept and older ones are deleted automatically. Without a folder the phone (or Chrome) asks where to save. If the folder is no longer available, the phone asks, so the backup is never lost.'],
-      ['Google Drive', 'Only in the Android app: Settings → Google Drive → “Connect Google Drive”. Life Archive then keeps your data on your Drive too, in the “Life Archive” folder, and does not see your other files. The first time it uploads everything, and afterwards it sends new and changed items by itself.', 'All devices with the same Google account have the same data: what you add, change or delete on one reaches the others. When two devices change the same item, the later change wins. On a new phone connect the same account and download everything.', 'Share album: long-press an album → “Share album”, type an email address and choose “View only” or “View and comment”. The person gets an email with a link and views the album in Google Drive, without Life Archive; you remove access in the same place.', '“Disconnect” deletes nothing: the data stays both on the phone and on Drive. While Drive is connected, the backup reminder bar does not appear.'],
+      ['Google Drive', 'Only in the Android app: Settings → Google Drive → “Connect Google Drive”. Life Archive then keeps your data on your Drive too, in the “Life Archive” folder, and does not see your other files. The first time it uploads everything, and afterwards it sends new and changed items by itself.', 'All devices with the same Google account have the same data: what you add, change or delete on one reaches the others. When two devices change the same item, the later change wins. On a new phone connect the same account and download everything.', 'Share album: long-press an album → “Share album”, type an email address and choose “View only” or “View and comment”. The person gets an email with a link and views the album in Google Drive, without Life Archive; you remove access in the same place.', '“Disconnect” deletes nothing: the data stays both on the phone and on Drive. While Drive is connected, the backup reminder bar does not appear.', 'By default, uploads to Drive happen only on Wi-Fi; you can change this in Settings → Google Drive → “Wi-Fi only”. If uploading a large file is interrupted (the connection drops or you switch to mobile data), it continues from where it stopped, not from the start.'],
       ['Language', 'Settings → Language chooses Serbian (Srpski), English, German (Deutsch), Spanish (Español), French (Français), Italian (Italiano) or Croatian (Hrvatski). The change is visible right away. On first start Life Archive picks the language of your phone.'],
       ['Themes', 'Settings → Theme changes the look of the whole app. The choice is remembered and saved in the backup.'],
       ['Error log', 'When an error happens in Life Archive, Life Archive records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Life Archive cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
@@ -5371,6 +5372,7 @@ const I18N = {
     drDone: 'Everything is on Drive.', drOffDone: 'Google Drive disconnected. Your data stayed on the phone and on Drive.',
     drConnFail: 'Connecting failed. Check the internet and try again.',
     drErrNet: 'The last upload failed: no internet. Life Archive will retry on its own.',
+    drWifi: 'Wi-Fi only', drWifiOn: 'Nothing is uploaded on mobile data', drWifiOff: 'Also uploads on mobile data', drSubWifi: 'Waiting for Wi-Fi', drErrWifi: 'Upload is waiting for Wi-Fi: the phone is on mobile data. It continues from where it stopped as soon as Wi-Fi is connected.',
     drErrFull: 'Google Drive is full. Free up space on Drive; Life Archive then continues on its own.',
     drErrSend: 'The last upload failed. Life Archive will retry on its own.',
     drNeedTxt: 'Google asks you to allow Drive access again. Nothing is uploaded until you do.', drAgain: 'Connect again',
@@ -6695,7 +6697,8 @@ I18N.de = {
 "Nur in der Android-App: Einstellungen → Google Drive → „Google Drive verbinden“. Life Archive speichert deine Daten dann auch in deinem Drive, im Ordner „Life Archive“, und sieht deine anderen Dateien nicht. Beim ersten Mal lädt sie alles hoch, danach sendet sie neue und geänderte Elemente von selbst.",
 "Alle Geräte mit demselben Google-Konto haben dieselben Daten: was du auf einem hinzufügst, änderst oder löschst, kommt auch auf den anderen an. Ändern zwei Geräte dasselbe Element, gewinnt die spätere Änderung. Verbinde auf einem neuen Telefon dasselbe Konto und lade alles herunter.",
 "Album teilen: lange auf ein Album drücken → „Album teilen“, eine E-Mail-Adresse eingeben und „Nur ansehen“ oder „Ansehen und kommentieren“ wählen. Die Person bekommt eine E-Mail mit einem Link und sieht das Album in Google Drive an, ohne Life Archive; den Zugriff entfernst du an derselben Stelle.",
-"„Trennen“ löscht nichts: die Daten bleiben sowohl auf dem Telefon als auch in Drive. Solange Drive verbunden ist, erscheint die Erinnerungsleiste für die Sicherung nicht."
+"„Trennen“ löscht nichts: die Daten bleiben sowohl auf dem Telefon als auch in Drive. Solange Drive verbunden ist, erscheint die Erinnerungsleiste für die Sicherung nicht.",
+"Standardmäßig wird nur über WLAN auf Drive hochgeladen; das änderst du unter Einstellungen → Google Drive → „Nur über WLAN“. Wird das Hochladen einer großen Datei unterbrochen (Verbindung weg oder Wechsel zu mobilen Daten), geht es dort weiter, wo es aufgehört hat, nicht von vorn."
 ],
 [
 "Sprache",
@@ -6908,6 +6911,11 @@ I18N.de = {
 "drOffDone": "Google Drive getrennt. Deine Daten sind auf dem Telefon und in Drive geblieben.",
 "drConnFail": "Verbinden fehlgeschlagen. Prüfe das Internet und versuche es erneut.",
 "drErrNet": "Das letzte Hochladen ist fehlgeschlagen: kein Internet. Life Archive versucht es von selbst erneut.",
+"drWifi": "Nur über WLAN",
+"drWifiOn": "Über mobile Daten wird nichts hochgeladen",
+"drWifiOff": "Lädt auch über mobile Daten hoch",
+"drSubWifi": "Wartet auf WLAN",
+"drErrWifi": "Das Hochladen wartet auf WLAN: Das Telefon nutzt mobile Daten. Es geht dort weiter, wo es aufgehört hat, sobald WLAN verbunden ist.",
 "drErrFull": "Google Drive ist voll. Schaffe Platz in Drive; Life Archive macht dann von selbst weiter.",
 "drErrSend": "Das letzte Hochladen ist fehlgeschlagen. Life Archive versucht es von selbst erneut.",
 "drNeedTxt": "Google bittet dich, den Zugriff auf Drive erneut zu erlauben. Bis dahin wird nichts hochgeladen.",
@@ -8413,7 +8421,8 @@ I18N.es = {
 "Solo en la app de Android: Ajustes → Google Drive → “Conectar Google Drive”. Life Archive guarda entonces tus datos también en tu Drive, en la carpeta “Life Archive”, y no ve tus demás archivos. La primera vez lo sube todo, y después envía sola los elementos nuevos y cambiados.",
 "Todos los dispositivos con la misma cuenta de Google tienen los mismos datos: lo que añades, cambias o eliminas en uno llega a los demás. Cuando dos dispositivos cambian el mismo elemento, gana el cambio más reciente. En un teléfono nuevo conecta la misma cuenta y descárgalo todo.",
 "Compartir álbum: mantén pulsado un álbum → “Compartir álbum”, escribe una dirección de correo y elige “Solo ver” o “Ver y comentar”. La persona recibe un correo con un enlace y ve el álbum en Google Drive, sin Life Archive; quitas el acceso en el mismo lugar.",
-"“Desconectar” no elimina nada: los datos se quedan tanto en el teléfono como en Drive. Mientras Drive está conectado, no aparece la barra de aviso de la copia de seguridad."
+"“Desconectar” no elimina nada: los datos se quedan tanto en el teléfono como en Drive. Mientras Drive está conectado, no aparece la barra de aviso de la copia de seguridad.",
+"Por defecto, a Drive solo se sube con Wi-Fi; puedes cambiarlo en Ajustes → Google Drive → «Solo con Wi-Fi». Si la subida de un archivo grande se interrumpe (se corta la conexión o pasas a datos móviles), continúa desde donde se quedó, no desde el principio."
 ],
 [
 "Idioma",
@@ -8626,6 +8635,11 @@ I18N.es = {
 "drOffDone": "Google Drive desconectado. Tus datos se quedaron en el teléfono y en Drive.",
 "drConnFail": "No se pudo conectar. Comprueba internet e inténtalo de nuevo.",
 "drErrNet": "La última subida falló: no hay internet. Life Archive lo volverá a intentar sola.",
+"drWifi": "Solo con Wi-Fi",
+"drWifiOn": "No se sube nada con datos móviles",
+"drWifiOff": "También sube con datos móviles",
+"drSubWifi": "Esperando Wi-Fi",
+"drErrWifi": "La subida espera el Wi-Fi: el teléfono usa datos móviles. Continúa desde donde se quedó en cuanto se conecte al Wi-Fi.",
 "drErrFull": "Google Drive está lleno. Libera espacio en Drive; Life Archive continuará sola.",
 "drErrSend": "La última subida falló. Life Archive lo volverá a intentar sola.",
 "drNeedTxt": "Google te pide que vuelvas a permitir el acceso a Drive. No se sube nada hasta que lo hagas.",
@@ -10131,7 +10145,8 @@ I18N.fr = {
 "Uniquement dans l’app Android : Réglages → Google Drive → « Connecter Google Drive ». Life Archive enregistre alors aussi tes données dans ton Drive, dans le dossier « Life Archive », et ne voit pas tes autres fichiers. La première fois, elle envoie tout, puis elle envoie d’elle-même les éléments nouveaux et modifiés.",
 "Tous les appareils avec le même compte Google ont les mêmes données : ce que tu ajoutes, modifies ou supprimes sur l’un arrive sur les autres. Quand deux appareils modifient le même élément, c’est la modification la plus récente qui l’emporte. Sur un nouveau téléphone, connecte le même compte et télécharge tout.",
 "Partager un album : appui long sur un album → « Partager l’album », saisis une adresse e-mail et choisis « Lecture seule » ou « Lecture et commentaires ». La personne reçoit un e-mail avec un lien et voit l’album dans Google Drive, sans Life Archive ; tu retires l’accès au même endroit.",
-"« Déconnecter » ne supprime rien : les données restent à la fois sur le téléphone et dans Drive. Tant que Drive est connecté, la barre de rappel de sauvegarde n’apparaît pas."
+"« Déconnecter » ne supprime rien : les données restent à la fois sur le téléphone et dans Drive. Tant que Drive est connecté, la barre de rappel de sauvegarde n’apparaît pas.",
+"Par défaut, l’envoi vers Drive se fait uniquement en Wi-Fi ; tu peux le changer dans Paramètres → Google Drive → « Wi-Fi uniquement ». Si l’envoi d’un gros fichier est interrompu (connexion perdue ou passage aux données mobiles), il reprend là où il s’est arrêté, pas depuis le début."
 ],
 [
 "Langue",
@@ -10344,6 +10359,11 @@ I18N.fr = {
 "drOffDone": "Google Drive déconnecté. Tes données sont restées sur le téléphone et dans Drive.",
 "drConnFail": "La connexion a échoué. Vérifie Internet et réessaie.",
 "drErrNet": "Le dernier envoi a échoué : pas d’Internet. Life Archive réessaiera d’elle-même.",
+"drWifi": "Wi-Fi uniquement",
+"drWifiOn": "Rien n’est envoyé avec les données mobiles",
+"drWifiOff": "Envoie aussi avec les données mobiles",
+"drSubWifi": "En attente du Wi-Fi",
+"drErrWifi": "L’envoi attend le Wi-Fi : le téléphone utilise les données mobiles. Il reprend là où il s’est arrêté dès que le Wi-Fi est connecté.",
 "drErrFull": "Google Drive est plein. Libère de l’espace dans Drive ; Life Archive continuera d’elle-même.",
 "drErrSend": "Le dernier envoi a échoué. Life Archive réessaiera d’elle-même.",
 "drNeedTxt": "Google te demande d’autoriser à nouveau l’accès à Drive. Rien n’est envoyé avant cela.",
@@ -11849,7 +11869,8 @@ I18N.it = {
 "Solo nell’app Android: Impostazioni → Google Drive → “Collega Google Drive”. Life Archive salva allora i tuoi dati anche nel tuo Drive, nella cartella “Life Archive”, e non vede gli altri tuoi file. La prima volta carica tutto, poi invia da sola gli elementi nuovi e modificati.",
 "Tutti i dispositivi con lo stesso account Google hanno gli stessi dati: ciò che aggiungi, modifichi o elimini su uno arriva sugli altri. Quando due dispositivi modificano lo stesso elemento, vince la modifica più recente. Su un nuovo telefono collega lo stesso account e scarica tutto.",
 "Condividi album: tieni premuto un album → “Condividi album”, inserisci un indirizzo e-mail e scegli “Solo visualizzazione” o “Visualizzazione e commenti”. La persona riceve un’e-mail con un link e vede l’album in Google Drive, senza Life Archive; togli l’accesso nello stesso punto.",
-"“Scollega” non elimina nulla: i dati restano sia sul telefono sia in Drive. Finché Drive è collegato, la barra di promemoria del backup non compare."
+"“Scollega” non elimina nulla: i dati restano sia sul telefono sia in Drive. Finché Drive è collegato, la barra di promemoria del backup non compare.",
+"Per impostazione predefinita su Drive si carica solo con il Wi-Fi; puoi cambiarlo in Impostazioni → Google Drive → «Solo con Wi-Fi». Se il caricamento di un file grande si interrompe (cade la connessione o passi ai dati mobili), riprende da dove si era fermato, non dall’inizio."
 ],
 [
 "Lingua",
@@ -12062,6 +12083,11 @@ I18N.it = {
 "drOffDone": "Google Drive scollegato. I tuoi dati sono rimasti sul telefono e in Drive.",
 "drConnFail": "Collegamento non riuscito. Controlla Internet e riprova.",
 "drErrNet": "L’ultimo caricamento non è riuscito: niente Internet. Life Archive riproverà da sola.",
+"drWifi": "Solo con Wi-Fi",
+"drWifiOn": "Con i dati mobili non viene caricato nulla",
+"drWifiOff": "Carica anche con i dati mobili",
+"drSubWifi": "In attesa del Wi-Fi",
+"drErrWifi": "Il caricamento aspetta il Wi-Fi: il telefono usa i dati mobili. Riprende da dove si era fermato appena il Wi-Fi è connesso.",
 "drErrFull": "Google Drive è pieno. Libera spazio in Drive; Life Archive continuerà da sola.",
 "drErrSend": "L’ultimo caricamento non è riuscito. Life Archive riproverà da sola.",
 "drNeedTxt": "Google ti chiede di consentire di nuovo l’accesso a Drive. Finché non lo fai, non viene caricato nulla.",
@@ -13535,7 +13561,8 @@ I18N.hr = {
 "Samo u Android aplikaciji: Postavke → Google Drive → „Poveži Google Drive”. Life Archive tada čuva tvoje podatke i na tvom Driveu, u mapi „Life Archive”, a ostale tvoje datoteke ne vidi. Prvi put prenese sve, a poslije sama šalje novo i izmijenjeno.",
 "Svi uređaji s istim Google računom imaju iste podatke: što dodaš, izmijeniš ili izbrišeš na jednom, stiže i na ostale. Kad dva uređaja izmijene istu stavku, vrijedi kasnija izmjena. Na novom telefonu povežeš isti račun i preuzmeš sve.",
 "Podijeli album: dugi pritisak na album → „Podijeli album”, upišeš e-adresu i biraš „Samo gleda” ili „Gleda i komentira”. Osoba dobiva e-poruku s poveznicom i album gleda u Google Driveu, bez Life Archive; pristup ukloniš na istom mjestu.",
-"„Prekini vezu” ne briše ništa: podaci ostaju i na telefonu i na Driveu. Dok je Drive povezan, traka-podsjetnik za sigurnosnu kopiju ne pojavljuje se."
+"„Prekini vezu” ne briše ništa: podaci ostaju i na telefonu i na Driveu. Dok je Drive povezan, traka-podsjetnik za sigurnosnu kopiju ne pojavljuje se.",
+"Zadano se na Drive šalje samo preko Wi-Fi-ja; to mijenjaš u Postavke → Google Drive → „Samo preko Wi-Fi-ja“. Ako se slanje velike datoteke prekine (nestane veze ili prijeđeš na mobilne podatke), nastavlja od mjesta gdje je stalo, ne iz početka."
 ],
 [
 "Jezik",
@@ -13780,6 +13807,11 @@ I18N.hr = {
 "drOffDone": "Veza s Google Driveom je prekinuta. Podaci su ostali na telefonu i na Driveu.",
 "drConnFail": "Povezivanje nije uspjelo. Provjeri internet i pokušaj ponovno.",
 "drErrNet": "Posljednje slanje nije uspjelo: nema interneta. Life Archive sama pokušava ponovno.",
+"drWifi": "Samo preko Wi-Fi-ja",
+"drWifiOn": "Na mobilnim podacima se ništa ne šalje",
+"drWifiOff": "Šalje i preko mobilnih podataka",
+"drSubWifi": "Čeka Wi-Fi",
+"drErrWifi": "Slanje čeka Wi-Fi: mobitel je na mobilnim podacima. Nastavlja od mjesta gdje je stalo čim se spoji na Wi-Fi.",
 "drErrFull": "Google Drive je pun. Oslobodi prostor na Driveu; Life Archive poslije sama nastavlja.",
 "drErrSend": "Posljednje slanje nije uspjelo. Life Archive sama pokušava ponovno.",
 "drNeedTxt": "Google traži da ponovno dopustiš pristup Driveu. Dok to ne učiniš, ništa se ne šalje.",
@@ -20802,7 +20834,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 338;
+const APP_VERSION = 339;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -32247,7 +32279,37 @@ async function drMkdir(name, parent, kind){
   if(parent) meta.parents = [parent];
   return (await drJson(DR_API + '?fields=id', {method:'POST', headers:DR_JSON, body:JSON.stringify(meta)})).id;
 }
-/* do 5 MB jednim pozivom (multipart), veće u dva (resumable) — zvanična uputstva Drive API v3 */
+/* v339 (Zoran 25.11.): „Samo preko Wi-Fi“ (podrazumevano uključeno). Tip mreže daje APK (ARHIVA_MREZA, @capacitor/network);
+   bez njega (stariji APK) Arhiva ne zna tip → šalje kao ranije. Blokira se samo 'cellular'. */
+function drWifiOnly(){ return _dr.wifi !== false; }
+async function drNetType(){
+  try{ if(window.ARHIVA_MREZA) return await ARHIVA_MREZA.tip(); }catch(e){}
+  return 'unknown';
+}
+async function drWifiBlocked(){ return drWifiOnly() && (await drNetType()) === 'cellular'; }
+function drWifiErr(){ const e = new Error('drive: čeka Wi-Fi'); e.drWifi = true; return e; }
+/* v339: nastavljivo slanje u delovima (zvanično Drive API „Resumable upload“: delovi su umnožak 256 KB; posle prekida PUT sa
+   „Content-Range: bytes * /ukupno“ → 308 + Range = šta je stiglo, 404 = sesija istekla; sesija važi nedelju dana).
+   Adresa sesije se pamti (galerija:drUp) pa se posle prekida, gašenja aplikacije ili prelaska na mobilne podatke nastavlja
+   od prvog bajta koji nije stigao. */
+const DR_CHUNK = 32 * 262144;   /* 8 MB */
+const DR_UPS = 'galerija:drUp';
+function drUps(){ try{ const o = JSON.parse(localStorage.getItem(DR_UPS) || '{}'); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } }
+function drUpsSet(key, v){ const o = drUps(); if(v) o[key] = v; else delete o[key]; const now = Date.now(); Object.keys(o).forEach(k=>{ if(!o[k] || now - o[k].t > 6 * 86400000) delete o[k]; }); try{ localStorage.setItem(DR_UPS, JSON.stringify(o)); }catch(e){} }
+async function drPut(url, headers, body){
+  for(let a = 0; ; a++){
+    let r;
+    const tok = await drToken(false);
+    try{ r = await fetch(url, {method:'PUT', headers:Object.assign({}, headers, {Authorization:'Bearer ' + tok}), body}); }
+    catch(e){ if(a < 2){ await drWait(1500 * (a + 1)); continue; } const er = new Error('drive: nema veze'); er.drNet = true; throw er; }
+    if(r.status === 308 || r.ok || r.status === 404) return r;
+    const txt = await r.text().catch(()=>'');
+    if((r.status === 429 || r.status >= 500) && a < 4){ await drWait(1000 * Math.pow(2, a) + Math.random() * 500); continue; }
+    const er = new Error('drive ' + r.status + ' ' + txt.slice(0, 200)); er.status = r.status; er.body = txt; throw er;
+  }
+}
+function drRangeEnd(r){ const m = /bytes=0-(\d+)/.exec(r.headers.get('Range') || ''); return m ? Number(m[1]) + 1 : 0; }
+/* do 5 MB jednim pozivom (multipart), veće nastavljivo u delovima — zvanična uputstva Drive API v3 */
 async function drUpload(name, parent, blob, props){
   const meta = {name, parents:[parent], appProperties:props}, mime = blob.type || 'application/octet-stream';
   if(blob.size <= 5 * 1048576){
@@ -32255,10 +32317,28 @@ async function drUpload(name, parent, blob, props){
     const body = new Blob(['--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: ' + mime + '\r\n\r\n', blob, '\r\n--' + b + '--'], {type:'multipart/related; boundary=' + b});
     return (await drJson(DR_UP + '?uploadType=multipart&fields=id,size', {method:'POST', headers:{'Content-Type':'multipart/related; boundary=' + b}, body})).id;
   }
-  const s = await drFetch(DR_UP + '?uploadType=resumable&fields=id,size', {method:'POST', headers:Object.assign({'X-Upload-Content-Type':mime, 'X-Upload-Content-Length':String(blob.size)}, DR_JSON), body:JSON.stringify(meta)});
-  const loc = s.headers.get('Location');
-  if(!loc) throw new Error('drive: nema adrese za slanje');
-  return (await drJson(loc, {method:'PUT', headers:{'Content-Type':mime}, body:blob})).id;
+  const total = blob.size, key = (props && props.k ? props.k : parent + '/' + name) + '|' + total;
+  let ses = drUps()[key], loc = ses && ses.u, start = 0;
+  if(loc){   /* prekinuto ranije: koliko je stiglo */
+    const r = await drPut(loc, {'Content-Range':'bytes */' + total}, null);
+    if(r.ok) { drUpsSet(key, null); return (await r.json()).id; }
+    if(r.status === 308) start = drRangeEnd(r); else loc = null;   /* 404: sesija istekla → iz početka */
+  }
+  if(!loc){
+    const s = await drFetch(DR_UP + '?uploadType=resumable&fields=id,size', {method:'POST', headers:Object.assign({'X-Upload-Content-Type':mime, 'X-Upload-Content-Length':String(total)}, DR_JSON), body:JSON.stringify(meta)});
+    loc = s.headers.get('Location');
+    if(!loc) throw new Error('drive: nema adrese za slanje');
+    drUpsSet(key, {u:loc, t:Date.now()}); start = 0;
+  }
+  for(let guard = Math.ceil(total / DR_CHUNK) * 3 + 3; ; guard--){
+    if(guard <= 0) throw new Error('drive: slanje u delovima ne napreduje');   /* zaštita od beskonačne petlje */
+    if(await drWifiBlocked()) throw drWifiErr();   /* prešao na mobilne podatke: staje, nastavlja na Wi-Fi-ju */
+    const end = Math.min(start + DR_CHUNK, total);
+    const r = await drPut(loc, {'Content-Range':'bytes ' + start + '-' + (end - 1) + '/' + total}, blob.slice(start, end));
+    if(r.ok){ drUpsSet(key, null); return (await r.json()).id; }
+    if(r.status === 404){ drUpsSet(key, null); const e = new Error('drive: sesija slanja istekla'); e.drNet = true; throw e; }
+    start = r.headers.get('Range') ? drRangeEnd(r) : end;   /* bez zaglavlja (ako ga pregledač ne pokaže): deo je primljen */
+  }
 }
 async function drMove(f, name, par){
   let u = DR_API + '/' + f.id + '?fields=id';
@@ -32699,6 +32779,8 @@ async function drSync(){
   if(_drBusy){ _drAgain = true; return; }
   if(navigator.onLine === false){ _dr.err = 'net'; drSave(); drRefresh(); return; }
   _drBusy = true; _drAgain = false; clearTimeout(_drRetry);
+  /* v339: čeka Wi-Fi (javlja ARHIVA_MREZA); provera tek posle _drBusy — bez await-a pre zauzimanja (dva drSync istovremeno) */
+  if(window.ARHIVA_MREZA && await drWifiBlocked()){ _drBusy = false; _dr.err = 'wifi'; drSave(); drRefresh(); return; }
   const first = !_dr.full;
   try{
     await drRoot();
@@ -32739,6 +32821,7 @@ async function drSync(){
     const worker = async ()=>{
       while(!fail && drOn() && next < todo.length){
         const e = todo[next++];
+        if(window.ARHIVA_MREZA && await drWifiBlocked()){ fail = fail || drWifiErr(); break; }   /* v339: prešao na mobilne podatke usred slanja */
         try{ await one(e); }catch(er){ fail = fail || er; }
       }
     };
@@ -32780,6 +32863,7 @@ async function drSync(){
     console.error('drive', e);
     _drDirty = true;
     if(e.drAuth === 'potrebna') _dr.need = true;
+    else if(e.drWifi) _dr.err = 'wifi';
     else if(e.drNet || navigator.onLine === false) _dr.err = 'net';
     else if(e.status === 403 && /storageQuotaExceeded/.test(e.body || '')) _dr.err = 'full';
     else{ _dr.err = 'other'; if(e.status === 404) _dr.check = true; try{ logError('Google Drive', String(e && e.message || e).slice(0, 300)); }catch(_){} }
@@ -32985,6 +33069,7 @@ function drTileSub(){
   if(!_dr.on) return t('drSubOff');
   if(_dr.need) return t('drSubNeed');
   if(_drProg && _drProg.total) return t('drSubRun', {n:_drProg.n, total:_drProg.total});
+  if(_dr.err === 'wifi') return t('drSubWifi');
   if(_dr.err) return t('drSubErr');
   return _dr.last ? t('drSubOn', {d:drAgo(_dr.last)}) : t('drSubOnNew');
 }
@@ -33013,17 +33098,23 @@ function drSettingsHtml(){
       '<div class="dr-bar"><i style="width:' + pc + '%"></i></div><div class="dr-run-hint">' + escapeHtml(t('drRunHint')) + '</div>' +
       row('drAcc', _dr.email || '—') + '</div>' + btn('drOffBtn', t('drOff'), true) + hint('drHintSafe');   /* v278: vidi se nalog i prenos može da se prekine */
   }
-  const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErrSend' : null;
+  const err = _dr.err === 'net' ? 'drErrNet' : _dr.err === 'wifi' ? 'drErrWifi' : _dr.err === 'full' ? 'drErrFull' : _dr.err ? 'drErrSend' : null;
+  const wo = drWifiOnly();
+  const wifiRow = '<div class="settings-card" style="margin-top:14px"><button type="button" class="settings-row" id="drWifiRow" role="switch" aria-checked="'+(wo ? 'true' : 'false')+'">'+
+      '<span class="row-icon">📶</span><span class="row-label">'+escapeHtml(t('drWifi'))+'<span class="lk-row-sub">'+escapeHtml(t(wo ? 'drWifiOn' : 'drWifiOff'))+'</span></span>'+
+      '<span class="lk-sw-t'+(wo ? ' on' : '')+'"></span></button></div>';
   return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drOk')) + '</div>' +
     row('drAcc', _dr.email || '—') + row('drLast', _dr.last ? drAgo(_dr.last) : t('drNever')) +
     row('drOnDrive', (_dr.docs || 0) + ' · ' + drMb(drDriveBytes())) +
     (_dr.devN > 1 ? row('drDevs', t(_dr.devN > 2 ? 'drDevsV3' : 'drDevsV', {n:_dr.devN, d:drAgo(_dr.devLast)})) : '') + '</div>' +
-    (err ? '<div class="dr-card"><div class="dr-ok warn">' + escapeHtml(t(err)) + '</div></div>' : '') +
+    (err ? '<div class="dr-card"><div class="dr-ok warn">' + escapeHtml(t(err)) + '</div></div>' : '') + wifiRow +
     btn('drOffBtn', t('drOff'), true) + hint('drSync1') + hint('drSync2') + hint('drOffHint') + hint('drHintSafe');
 }
 function drWire(){
   const a = document.getElementById('drConnBtn'); if(a) a.onclick = drConnect;
   const b = document.getElementById('drOffBtn'); if(b) b.onclick = drDisconnect;
+  const w = document.getElementById('drWifiRow');
+  if(w) w.onclick = ()=>{ _dr.wifi = !drWifiOnly(); if(!_dr.wifi && _dr.err === 'wifi') _dr.err = null; drSave(); drRefresh(); drSoon(500); };
 }
 function drRefresh(){ const b = document.getElementById('drSet'); if(b){ b.innerHTML = drSettingsHtml(); drWire(); } }
 /* tok prvog prenosa: kartica, a dok je ekran Drive-a otvoren i obaveštenje gore */
@@ -33039,6 +33130,7 @@ async function drBoot(){
   Skladiste.kadIzmena = ()=>{ _drDirty = true; drSoon(); };
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') drSoon(1500); });
   window.addEventListener('online', ()=>drSoon(1000));
+  if(window.ARHIVA_MREZA) ARHIVA_MREZA.slusaj(tip=>{ if(tip === 'wifi' && drOn()) drSoon(1500); });   /* v339: stigao Wi-Fi → nastavi slanje */
   /* v212: dok je Arhiva otvorena, na minut se proveri šta je novo na drugim uređajima (jedan mali poziv kad nema ničeg) */
   clearInterval(_drTick); _drTick = setInterval(()=>{ if(document.visibilityState === 'visible' && drOn() && !_drBusy) drSoon(0); }, 60000);
   if(_dr.on) drSoon(3000);
