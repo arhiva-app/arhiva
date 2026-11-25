@@ -4570,7 +4570,7 @@ const I18N = {
     drDone: 'Sve je na Drive-u.', drOffDone: 'Veza sa Google Drive-om je prekinuta. Podaci su ostali na telefonu i na Drive-u.',
     drConnFail: 'Povezivanje nije uspelo. Proveri internet i pokušaj ponovo.',
     drErrNet: 'Poslednje slanje nije uspelo: nema interneta. Life Archive pokušava ponovo sama.',
-    drWifi: 'Samo preko Wi-Fi', drWifiOn: 'Na mobilnim podacima se ništa ne šalje', drWifiOff: 'Šalje i preko mobilnih podataka', drSubWifi: 'Čeka Wi-Fi', drErrWifi: 'Slanje čeka Wi-Fi: telefon je na mobilnim podacima. Nastavlja samo od mesta gde je stalo čim se poveže na Wi-Fi.',
+    drWifi: 'Samo preko Wi-Fi', drWifiOn: 'Na mobilnim podacima se ništa ne šalje', drWifiOff: 'Šalje i preko mobilnih podataka', drSubWifi: 'Čeka Wi-Fi', drErrWifi: 'Slanje čeka Wi-Fi: telefon je na mobilnim podacima. Čim se poveže na Wi-Fi, slanje se nastavlja od mesta gde je stalo.', drHdrWifi: '⏸ Čeka Wi-Fi', drHdrErr: '⚠ Usklađivanje nije završeno', drHdrNever: 'Usklađivanje još nije završeno',
     drErrFull: 'Google Drive je pun. Oslobodi prostor na Drive-u; Life Archive posle nastavlja sama.',
     drErrSend: 'Poslednje slanje nije uspelo. Life Archive pokušava ponovo sama.',   /* v298 (K4): bio je drugi „drErr“ i prepisivao poruku pregleda dokumenta */
     drNeedTxt: 'Google traži da ponovo dozvoliš pristup Drive-u. Dok to ne uradiš, ništa se ne šalje.', drAgain: 'Ponovo poveži',
@@ -5372,7 +5372,7 @@ const I18N = {
     drDone: 'Everything is on Drive.', drOffDone: 'Google Drive disconnected. Your data stayed on the phone and on Drive.',
     drConnFail: 'Connecting failed. Check the internet and try again.',
     drErrNet: 'The last upload failed: no internet. Life Archive will retry on its own.',
-    drWifi: 'Wi-Fi only', drWifiOn: 'Nothing is uploaded on mobile data', drWifiOff: 'Also uploads on mobile data', drSubWifi: 'Waiting for Wi-Fi', drErrWifi: 'Upload is waiting for Wi-Fi: the phone is on mobile data. It continues from where it stopped as soon as Wi-Fi is connected.',
+    drWifi: 'Wi-Fi only', drWifiOn: 'Nothing is uploaded on mobile data', drWifiOff: 'Also uploads on mobile data', drSubWifi: 'Waiting for Wi-Fi', drErrWifi: 'Upload is waiting for Wi-Fi: the phone is on mobile data. As soon as it connects to Wi-Fi, the upload continues from where it stopped.', drHdrWifi: '⏸ Waiting for Wi-Fi', drHdrErr: '⚠ Sync not finished', drHdrNever: 'Sync not finished yet',
     drErrFull: 'Google Drive is full. Free up space on Drive; Life Archive then continues on its own.',
     drErrSend: 'The last upload failed. Life Archive will retry on its own.',
     drNeedTxt: 'Google asks you to allow Drive access again. Nothing is uploaded until you do.', drAgain: 'Connect again',
@@ -6915,7 +6915,10 @@ I18N.de = {
 "drWifiOn": "Über mobile Daten wird nichts hochgeladen",
 "drWifiOff": "Lädt auch über mobile Daten hoch",
 "drSubWifi": "Wartet auf WLAN",
-"drErrWifi": "Das Hochladen wartet auf WLAN: Das Telefon nutzt mobile Daten. Es geht dort weiter, wo es aufgehört hat, sobald WLAN verbunden ist.",
+"drErrWifi": "Das Hochladen wartet auf WLAN: Das Telefon nutzt mobile Daten. Sobald es mit WLAN verbunden ist, geht das Hochladen dort weiter, wo es aufgehört hat.",
+"drHdrWifi": "⏸ Wartet auf WLAN",
+"drHdrErr": "⚠ Abgleich nicht abgeschlossen",
+"drHdrNever": "Abgleich noch nicht abgeschlossen",
 "drErrFull": "Google Drive ist voll. Schaffe Platz in Drive; Life Archive macht dann von selbst weiter.",
 "drErrSend": "Das letzte Hochladen ist fehlgeschlagen. Life Archive versucht es von selbst erneut.",
 "drNeedTxt": "Google bittet dich, den Zugriff auf Drive erneut zu erlauben. Bis dahin wird nichts hochgeladen.",
@@ -8639,7 +8642,10 @@ I18N.es = {
 "drWifiOn": "No se sube nada con datos móviles",
 "drWifiOff": "También sube con datos móviles",
 "drSubWifi": "Esperando Wi-Fi",
-"drErrWifi": "La subida espera el Wi-Fi: el teléfono usa datos móviles. Continúa desde donde se quedó en cuanto se conecte al Wi-Fi.",
+"drErrWifi": "La subida espera el Wi-Fi: el teléfono usa datos móviles. En cuanto se conecte al Wi-Fi, la subida continúa desde donde se quedó.",
+"drHdrWifi": "⏸ Esperando Wi-Fi",
+"drHdrErr": "⚠ Sincronización sin terminar",
+"drHdrNever": "La sincronización aún no ha terminado",
 "drErrFull": "Google Drive está lleno. Libera espacio en Drive; Life Archive continuará sola.",
 "drErrSend": "La última subida falló. Life Archive lo volverá a intentar sola.",
 "drNeedTxt": "Google te pide que vuelvas a permitir el acceso a Drive. No se sube nada hasta que lo hagas.",
@@ -10363,7 +10369,10 @@ I18N.fr = {
 "drWifiOn": "Rien n’est envoyé avec les données mobiles",
 "drWifiOff": "Envoie aussi avec les données mobiles",
 "drSubWifi": "En attente du Wi-Fi",
-"drErrWifi": "L’envoi attend le Wi-Fi : le téléphone utilise les données mobiles. Il reprend là où il s’est arrêté dès que le Wi-Fi est connecté.",
+"drErrWifi": "L’envoi attend le Wi-Fi : le téléphone utilise les données mobiles. Dès qu’il se connecte au Wi-Fi, l’envoi reprend là où il s’est arrêté.",
+"drHdrWifi": "⏸ En attente du Wi-Fi",
+"drHdrErr": "⚠ Synchronisation non terminée",
+"drHdrNever": "Synchronisation pas encore terminée",
 "drErrFull": "Google Drive est plein. Libère de l’espace dans Drive ; Life Archive continuera d’elle-même.",
 "drErrSend": "Le dernier envoi a échoué. Life Archive réessaiera d’elle-même.",
 "drNeedTxt": "Google te demande d’autoriser à nouveau l’accès à Drive. Rien n’est envoyé avant cela.",
@@ -12087,7 +12096,10 @@ I18N.it = {
 "drWifiOn": "Con i dati mobili non viene caricato nulla",
 "drWifiOff": "Carica anche con i dati mobili",
 "drSubWifi": "In attesa del Wi-Fi",
-"drErrWifi": "Il caricamento aspetta il Wi-Fi: il telefono usa i dati mobili. Riprende da dove si era fermato appena il Wi-Fi è connesso.",
+"drErrWifi": "Il caricamento aspetta il Wi-Fi: il telefono usa i dati mobili. Appena si connette al Wi-Fi, il caricamento riprende da dove si era fermato.",
+"drHdrWifi": "⏸ In attesa del Wi-Fi",
+"drHdrErr": "⚠ Sincronizzazione non completata",
+"drHdrNever": "Sincronizzazione non ancora completata",
 "drErrFull": "Google Drive è pieno. Libera spazio in Drive; Life Archive continuerà da sola.",
 "drErrSend": "L’ultimo caricamento non è riuscito. Life Archive riproverà da sola.",
 "drNeedTxt": "Google ti chiede di consentire di nuovo l’accesso a Drive. Finché non lo fai, non viene caricato nulla.",
@@ -13811,7 +13823,10 @@ I18N.hr = {
 "drWifiOn": "Na mobilnim podacima se ništa ne šalje",
 "drWifiOff": "Šalje i preko mobilnih podataka",
 "drSubWifi": "Čeka Wi-Fi",
-"drErrWifi": "Slanje čeka Wi-Fi: mobitel je na mobilnim podacima. Nastavlja od mjesta gdje je stalo čim se spoji na Wi-Fi.",
+"drErrWifi": "Slanje čeka Wi-Fi: mobitel je na mobilnim podacima. Čim se spoji na Wi-Fi, slanje se nastavlja od mjesta gdje je stalo.",
+"drHdrWifi": "⏸ Čeka Wi-Fi",
+"drHdrErr": "⚠ Usklađivanje nije završeno",
+"drHdrNever": "Usklađivanje još nije završeno",
 "drErrFull": "Google Drive je pun. Oslobodi prostor na Driveu; Life Archive poslije sama nastavlja.",
 "drErrSend": "Posljednje slanje nije uspjelo. Life Archive sama pokušava ponovno.",
 "drNeedTxt": "Google traži da ponovno dopustiš pristup Driveu. Dok to ne učiniš, ništa se ne šalje.",
@@ -20834,7 +20849,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 339;
+const APP_VERSION = 340;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -33103,7 +33118,9 @@ function drSettingsHtml(){
   const wifiRow = '<div class="settings-card" style="margin-top:14px"><button type="button" class="settings-row" id="drWifiRow" role="switch" aria-checked="'+(wo ? 'true' : 'false')+'">'+
       '<span class="row-icon">📶</span><span class="row-label">'+escapeHtml(t('drWifi'))+'<span class="lk-row-sub">'+escapeHtml(t(wo ? 'drWifiOn' : 'drWifiOff'))+'</span></span>'+
       '<span class="lk-sw-t'+(wo ? ' on' : '')+'"></span></button></div>';
-  return '<div class="dr-card"><div class="dr-ok">' + escapeHtml(t('drOk')) + '</div>' +
+  /* v340: naslov pokazuje stvarno stanje — „✓ Usklađeno“ samo kad je usklađivanje završeno i nema greške */
+  const hdr = _dr.err === 'wifi' ? 'drHdrWifi' : _dr.err ? 'drHdrErr' : !_dr.last ? 'drHdrNever' : 'drOk';
+  return '<div class="dr-card"><div class="dr-ok' + (hdr === 'drOk' ? '' : ' warn') + '">' + escapeHtml(t(hdr)) + '</div>' +
     row('drAcc', _dr.email || '—') + row('drLast', _dr.last ? drAgo(_dr.last) : t('drNever')) +
     row('drOnDrive', (_dr.docs || 0) + ' · ' + drMb(drDriveBytes())) +
     (_dr.devN > 1 ? row('drDevs', t(_dr.devN > 2 ? 'drDevsV3' : 'drDevsV', {n:_dr.devN, d:drAgo(_dr.devLast)})) : '') + '</div>' +
