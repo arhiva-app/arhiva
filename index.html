@@ -3425,7 +3425,6 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
 <div class="set-screen" id="vzScreen"><div id="vzPanel"></div></div>
 <div class="set-screen" id="vzWin"><div id="vwPanel"></div></div>
 <input type="file" id="importInput" accept=".zip,.json,application/zip,application/json" style="display:none">
-<div class="set-screen" id="migrateScreen" style="z-index:75;"><div id="migratePanel"></div></div>
 
 <div class="exit-modal-backdrop" id="delBackdrop">
   <div class="exit-modal">
@@ -4397,31 +4396,8 @@ const I18N = {
       ['Dnevnik grešaka', 'Kad se u Life Archive desi greška, Life Archive je sama zapiše. Tada na dnu Podešavanja, pored broja verzije, stoji crvena oznaka „N greške“. Dodir otvara dnevnik: „kopiraj dnevnik“ kopira sve zapise da ih nalepiš u čet sa Claude-om, „obriši dnevnik“ ih briše. Čuva se poslednjih 20 grešaka; dnevnik ne ide u rezervnu kopiju.', 'Ako Life Archive ne uspe nešto da upiše (npr. memorija telefona je puna), gore se pojavi crveno „NIJE SAČUVANO!“. Tada odmah napravi rezervnu kopiju i oslobodi mesto na telefonu.'],
       ['Povratne informacije', 'Podešavanja → „Pošalji povratne informacije“ (poslednja stavka) otvara e-poštu sa već upisanim primaocem i naslovom. Napiši pohvalu, predlog ili problem i pošalji.', 'Na dnu poruke Life Archive sama doda verziju, Android i model telefona i jezik, a ako u Dnevniku grešaka ima zapisa, i poslednje greške — da bismo lakše pronašli problem. Sve vidiš pre slanja i možeš da obrišeš šta nećeš.'],
       ['Novosti', 'Kad u Life Archive ima nešto novo, na početnom ekranu ispod panela pojavi se kartica „Novo u Life Archive“. „Pogledaj“ vodi do te mogućnosti, „Zatvori“ sklanja karticu i ona se više ne pojavljuje.', 'Sve novosti su u Podešavanjima → Novosti. Stižu sa sajta Life Archive kad je telefon na internetu; sa telefona se ništa ne šalje.'],
-      ['Obriši sve podatke', 'Podešavanja → „Obriši sve podatke“ briše sve iz Life Archive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Life Archive se zatim pokrene kao tek instalirana.', 'Rezervne kopije (ZIP) u fascikli telefona i kopija na Google Drive-u ostaju, pa ih kasnije možeš vratiti. U prvom prozoru možeš izabrati „Prvo napravi kopiju“.'],
-      ['Stari podaci', 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni kao osiguranje. Kad proveriš da je sve na mestu, obriši ih u Podešavanjima da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje.']
+      ['Obriši sve podatke', 'Podešavanja → „Obriši sve podatke“ briše sve iz Life Archive na ovom uređaju: slike, dokumente, albume, šablone, vidžet i sva podešavanja (tema, jezik, PIN, AI ključ). Life Archive se zatim pokrene kao tek instalirana.', 'Rezervne kopije (ZIP) u fascikli telefona i kopija na Google Drive-u ostaju, pa ih kasnije možeš vratiti. U prvom prozoru možeš izabrati „Prvo napravi kopiju“.']
     ],
-    migTitle: 'Nov način čuvanja',
-    migIntro: 'Life Archive prelazi na brži način čuvanja, pripremljen za stotine dokumenata: brže otvaranje, male sličice za prikaz, a pun fajl tek kad ga otvoriš.',
-    migWhat: 'Za prenos: {items} stavki i {albums} albuma.',
-    migSafe: 'Ništa staro se ne briše. Stari podaci ostaju netaknuti dok sam ne potvrdiš da je sve u redu.',
-    migStep1: '1. Napravi rezervnu kopiju',
-    migStep1Sub: 'Poslednja kopija: {when}',
-    migStep1Done: 'Kopija napravljena: {when}',
-    migStep2: '2. Započni prelazak',
-    migResume: 'Nastavi prelazak',
-    migNeedBackup: 'Prelazak počinje tek kad napraviš rezervnu kopiju (važi kopija iz poslednja 24 sata).',
-    migResumeHint: 'Prelazak je već započet i biće nastavljen tamo gde je stao.',
-    migCheckingSpace: 'Proveravam slobodan prostor…',
-    migNoSpace: 'Nema dovoljno slobodnog prostora. Potrebno je oko {need} MB, a slobodno je oko {free} MB. Oslobodi prostor na telefonu pa pokušaj ponovo.',
-    migRunning: 'Prenosim {n} / {total}',
-    migRunningHint: 'Ne zatvaraj aplikaciju. Ako se ipak prekine, sledeći put nastavlja tamo gde je stao.',
-    migVerifying: 'Proveravam prenete podatke…',
-    migDoneTitle: 'Prelazak je završen ✓',
-    migDoneText: 'Preneto: {items} stavki i {albums} albuma. Svaki fajl je upisan i pročitan nazad radi provere.',
-    migSkipped: 'Nije preneto ({n}): {names}. Ove stavke su i dalje u starim podacima i u rezervnoj kopiji.',
-    migOpen: 'Otvori Life Archive',
-    migError: 'Prelazak nije završen: {msg}. Ništa nije izgubljeno. Pokušaj ponovo.',
-    migRetry: 'Pokušaj ponovo',
     never: 'nikad',
     bkBuilding: 'Pravim rezervnu kopiju: {n} / {total}…',
     bkReading: 'Čitam kopiju…',
@@ -4452,16 +4428,6 @@ const I18N = {
     persistOn: 'Zaštita od automatskog brisanja: uključena',
     persistOff: 'Zaštita od automatskog brisanja: Chrome je nije odobrio (rezervna kopija je zato još važnija)',
     persistApp: 'Podaci su u aplikaciji na ovom telefonu; brišu se ako obrišeš podatke aplikacije ili je deinstaliraš (zato rezervna kopija)',
-    oldTile: 'Stari podaci (pre prelaska)',
-    oldTileSub: 'Obriši kad sve proveriš',
-    oldTitle: 'Stari podaci',
-    oldText: 'Posle prelaska na nov način čuvanja stari podaci su ostavljeni netaknuti, kao osiguranje. Kad se uveriš da su sve slike, dokumenti i albumi na mestu, obriši ih da oslobodiš prostor.',
-    oldCount: 'U starim podacima: {n} stavki',
-    oldDelete: 'Obriši stare podatke',
-    oldConfirmTitle: 'Obriši stare podatke',
-    oldConfirmText: 'Trajno obrisati stare podatke (od pre prelaska)? Tvoji trenutni dokumenti i albumi ostaju.',
-    oldDeleted: 'Stari podaci su obrisani.',
-    oldBlocked: 'Zatvori druge otvorene prozore Life Archive pa pokušaj ponovo.',
     expTitle: 'Podsetnik',
     expLbl: 'Datum podsetnika',
     expSave: 'Sačuvaj',
@@ -5231,31 +5197,8 @@ const I18N = {
       ['Error log', 'When an error happens in Life Archive, Life Archive records it itself. Then at the bottom of Settings, next to the version number, a red label “N errors” appears. Tapping it opens the log: “copy log” copies all records so you can paste them into the chat with Claude, “clear log” removes them. The last 20 errors are kept; the log is not part of the backup.', 'If Life Archive cannot save something (e.g. the phone storage is full), a red “NOT SAVED!” appears at the top. Then make a backup right away and free up space on the phone.'],
       ['Feedback', 'Settings → “Send feedback” (the last item) opens an email with the recipient and subject already filled in. Write praise, a suggestion or a problem and send it.', 'At the bottom of the message Life Archive adds the version, Android and phone model and the language, and if the Error log has records, the latest errors too — so we can find the problem more easily. You see everything before sending and can delete what you don’t want.'],
       ['News', 'When there is something new in Life Archive, a “New in Life Archive” card appears on the home screen below the panel. “Show me” takes you to that feature, “Close” removes the card and it does not come back.', 'All news is in Settings → News. It comes from the Life Archive website when the phone is online; nothing is sent from the phone.'],
-      ['Delete all data', 'Settings → “Delete all data” deletes everything in Life Archive on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Life Archive then starts as if freshly installed.', 'Backups (ZIP) in the phone folder and the copy on Google Drive stay, so you can restore them later. In the first window you can choose “Back up first”.'],
-      ['Old data', 'After the move to the new storage the old data was kept as a safety net. Once you have checked everything is in place, delete it in Settings to free up space. The tile is shown only while old data exists.']
+      ['Delete all data', 'Settings → “Delete all data” deletes everything in Life Archive on this device: images, documents, albums, templates, the widget and all settings (theme, language, PIN, AI key). Life Archive then starts as if freshly installed.', 'Backups (ZIP) in the phone folder and the copy on Google Drive stay, so you can restore them later. In the first window you can choose “Back up first”.']
     ],
-    migTitle: 'New storage',
-    migIntro: 'Life Archive is moving to a faster storage built for hundreds of documents: quicker start, small previews, the full file only when you open it.',
-    migWhat: 'To move: {items} items and {albums} albums.',
-    migSafe: 'Nothing old is deleted. Your old data stays untouched until you confirm everything is fine.',
-    migStep1: '1. Make a backup',
-    migStep1Sub: 'Last backup: {when}',
-    migStep1Done: 'Backup made: {when}',
-    migStep2: '2. Start the move',
-    migResume: 'Continue the move',
-    migNeedBackup: 'The move starts only after you make a backup (a backup from the last 24 hours counts).',
-    migResumeHint: 'The move has already started and will continue where it stopped.',
-    migCheckingSpace: 'Checking free space…',
-    migNoSpace: 'Not enough free space. About {need} MB is needed and about {free} MB is free. Free up space and try again.',
-    migRunning: 'Moving {n} / {total}',
-    migRunningHint: 'Do not close the app. If it stops anyway, next time it continues where it stopped.',
-    migVerifying: 'Checking the moved data…',
-    migDoneTitle: 'The move is complete ✓',
-    migDoneText: 'Moved: {items} items and {albums} albums. Every file was written and read back to check it.',
-    migSkipped: 'Not moved ({n}): {names}. These items are still in the old data and in the backup.',
-    migOpen: 'Open Life Archive',
-    migError: 'The move did not finish: {msg}. Nothing was lost. Try again.',
-    migRetry: 'Try again',
     never: 'never',
     bkBuilding: 'Making backup: {n} / {total}…',
     bkReading: 'Reading backup…',
@@ -5286,16 +5229,6 @@ const I18N = {
     persistOn: 'Protection from automatic deletion: on',
     persistOff: 'Protection from automatic deletion: not granted by Chrome (backups matter even more)',
     persistApp: 'Data is kept in the app on this phone; it is deleted if you clear the app’s data or uninstall it (hence backups)',
-    oldTile: 'Old data (before the move)',
-    oldTileSub: 'Delete once you have checked',
-    oldTitle: 'Old data',
-    oldText: 'After the move to the new storage the old data was kept untouched as a safety net. Once you are sure all images, documents and albums are in place, delete it to free space.',
-    oldCount: 'In the old data: {n} items',
-    oldDelete: 'Delete old data',
-    oldConfirmTitle: 'Delete old data',
-    oldConfirmText: 'Permanently delete the old data (from before the move)? Your current documents and albums stay.',
-    oldDeleted: 'Old data deleted.',
-    oldBlocked: 'Close other open Life Archive windows and try again.',
     expTitle: 'Reminder',
     expLbl: 'Reminder date',
     expSave: 'Save',
@@ -6728,33 +6661,7 @@ I18N.de = {
 "Einstellungen → „Alle Daten löschen“ löscht alles in Life Archive auf diesem Gerät: Bilder, Dokumente, Alben, Vorlagen, das Widget und alle Einstellungen (Design, Sprache, PIN, KI-Schlüssel). Life Archive startet danach wie frisch installiert.",
 "Sicherungen (ZIP) im Telefonordner und die Kopie in Google Drive bleiben, du kannst sie also später wiederherstellen. Im ersten Fenster kannst du „Zuerst sichern“ wählen."
 ],
-[
-"Alte Daten",
-"Nach dem Umstieg auf die neue Speicherung wurden die alten Daten als Absicherung behalten. Wenn du geprüft hast, dass alles an seinem Platz ist, lösche sie in den Einstellungen, um Platz zu schaffen. Die Kachel ist nur sichtbar, solange alte Daten existieren."
-]
 ],
-"migTitle": "Neue Speicherung",
-"migIntro": "Life Archive steigt auf eine schnellere Speicherung um, gebaut für Hunderte von Dokumenten: schnellerer Start, kleine Vorschauen, die ganze Datei erst beim Öffnen.",
-"migWhat": "Zu übertragen: {items} Elemente und {albums} Alben.",
-"migSafe": "Nichts Altes wird gelöscht. Deine alten Daten bleiben unberührt, bis du bestätigst, dass alles in Ordnung ist.",
-"migStep1": "1. Sicherung erstellen",
-"migStep1Sub": "Letzte Sicherung: {when}",
-"migStep1Done": "Sicherung erstellt: {when}",
-"migStep2": "2. Übertragung starten",
-"migResume": "Übertragung fortsetzen",
-"migNeedBackup": "Die Übertragung startet erst, nachdem du eine Sicherung erstellt hast (eine Sicherung aus den letzten 24 Stunden zählt).",
-"migResumeHint": "Die Übertragung hat schon begonnen und wird dort fortgesetzt, wo sie stehen geblieben ist.",
-"migCheckingSpace": "Freier Speicher wird geprüft…",
-"migNoSpace": "Nicht genug freier Speicher. Benötigt werden etwa {need} MB, frei sind etwa {free} MB. Schaffe Platz und versuche es erneut.",
-"migRunning": "Übertragung {n} / {total}",
-"migRunningHint": "Schließe die App nicht. Bricht sie trotzdem ab, geht es beim nächsten Mal dort weiter, wo sie stehen geblieben ist.",
-"migVerifying": "Übertragene Daten werden geprüft…",
-"migDoneTitle": "Die Übertragung ist abgeschlossen ✓",
-"migDoneText": "Übertragen: {items} Elemente und {albums} Alben. Jede Datei wurde geschrieben und zur Prüfung zurückgelesen.",
-"migSkipped": "Nicht übertragen ({n}): {names}. Diese Elemente sind weiterhin in den alten Daten und in der Sicherung.",
-"migOpen": "Life Archive öffnen",
-"migError": "Die Übertragung wurde nicht abgeschlossen: {msg}. Nichts ging verloren. Versuche es erneut.",
-"migRetry": "Erneut versuchen",
 "never": "nie",
 "bkBuilding": "Sicherung wird erstellt: {n} / {total}…",
 "bkReading": "Sicherung wird gelesen…",
@@ -6785,16 +6692,6 @@ I18N.de = {
 "persistOn": "Schutz vor automatischem Löschen: an",
 "persistOff": "Schutz vor automatischem Löschen: von Chrome nicht gewährt (Sicherungen sind umso wichtiger)",
 "persistApp": "Die Daten liegen in der App auf diesem Telefon; sie werden gelöscht, wenn du die App-Daten löschst oder die App deinstallierst (daher Sicherungen)",
-"oldTile": "Alte Daten (vor dem Umstieg)",
-"oldTileSub": "Löschen, wenn du alles geprüft hast",
-"oldTitle": "Alte Daten",
-"oldText": "Nach dem Umstieg auf die neue Speicherung wurden die alten Daten unberührt als Absicherung behalten. Wenn du sicher bist, dass alle Bilder, Dokumente und Alben an ihrem Platz sind, lösche sie, um Platz zu schaffen.",
-"oldCount": "In den alten Daten: {n} Elemente",
-"oldDelete": "Alte Daten löschen",
-"oldConfirmTitle": "Alte Daten löschen",
-"oldConfirmText": "Die alten Daten (von vor dem Umstieg) endgültig löschen? Deine aktuellen Dokumente und Alben bleiben.",
-"oldDeleted": "Alte Daten gelöscht.",
-"oldBlocked": "Schließe andere geöffnete Life Archive-Fenster und versuche es erneut.",
 "expTitle": "Erinnerung",
 "expLbl": "Datum der Erinnerung",
 "expSave": "Speichern",
@@ -8455,33 +8352,7 @@ I18N.es = {
 "Ajustes → “Eliminar todos los datos” elimina todo lo que hay en Life Archive en este dispositivo: imágenes, documentos, álbumes, plantillas, el widget y todos los ajustes (tema, idioma, PIN, clave de IA). Después Life Archive se inicia como recién instalada.",
 "Las copias de seguridad (ZIP) de la carpeta del teléfono y la copia de Google Drive se quedan, así que puedes restaurarlas más tarde. En la primera ventana puedes elegir “Hacer copia primero”."
 ],
-[
-"Datos antiguos",
-"Tras el paso al nuevo almacenamiento, los datos antiguos se conservaron como seguridad. Cuando hayas comprobado que todo está en su sitio, elimínalos en Ajustes para liberar espacio. El mosaico solo se ve mientras existan datos antiguos."
-]
 ],
-"migTitle": "Nuevo almacenamiento",
-"migIntro": "Life Archive pasa a un almacenamiento más rápido, hecho para cientos de documentos: inicio más rápido, vistas previas pequeñas y el archivo completo solo al abrirlo.",
-"migWhat": "Por trasladar: {items} elementos y {albums} álbumes.",
-"migSafe": "No se elimina nada antiguo. Tus datos antiguos quedan intactos hasta que confirmes que todo está bien.",
-"migStep1": "1. Haz una copia de seguridad",
-"migStep1Sub": "Última copia: {when}",
-"migStep1Done": "Copia hecha: {when}",
-"migStep2": "2. Iniciar el traslado",
-"migResume": "Continuar el traslado",
-"migNeedBackup": "El traslado empieza solo después de que hagas una copia de seguridad (cuenta una copia de las últimas 24 horas).",
-"migResumeHint": "El traslado ya empezó y continuará donde se detuvo.",
-"migCheckingSpace": "Comprobando el espacio libre…",
-"migNoSpace": "No hay suficiente espacio libre. Se necesitan unos {need} MB y hay unos {free} MB libres. Libera espacio e inténtalo de nuevo.",
-"migRunning": "Trasladando {n} / {total}",
-"migRunningHint": "No cierres la app. Si aun así se detiene, la próxima vez continúa donde se detuvo.",
-"migVerifying": "Comprobando los datos trasladados…",
-"migDoneTitle": "El traslado ha terminado ✓",
-"migDoneText": "Trasladados: {items} elementos y {albums} álbumes. Cada archivo se escribió y se volvió a leer para comprobarlo.",
-"migSkipped": "No trasladados ({n}): {names}. Estos elementos siguen en los datos antiguos y en la copia de seguridad.",
-"migOpen": "Abrir Life Archive",
-"migError": "El traslado no terminó: {msg}. No se perdió nada. Inténtalo de nuevo.",
-"migRetry": "Reintentar",
 "never": "nunca",
 "bkBuilding": "Creando copia: {n} / {total}…",
 "bkReading": "Leyendo la copia…",
@@ -8512,16 +8383,6 @@ I18N.es = {
 "persistOn": "Protección contra el borrado automático: activada",
 "persistOff": "Protección contra el borrado automático: Chrome no la concedió (las copias son aún más importantes)",
 "persistApp": "Los datos se guardan en la app de este teléfono; se borran si borras los datos de la app o la desinstalas (de ahí las copias)",
-"oldTile": "Datos antiguos (antes del traslado)",
-"oldTileSub": "Elimínalos cuando hayas comprobado",
-"oldTitle": "Datos antiguos",
-"oldText": "Tras el paso al nuevo almacenamiento, los datos antiguos se conservaron intactos como seguridad. Cuando estés seguro de que todas las imágenes, documentos y álbumes están en su sitio, elimínalos para liberar espacio.",
-"oldCount": "En los datos antiguos: {n} elementos",
-"oldDelete": "Eliminar datos antiguos",
-"oldConfirmTitle": "Eliminar datos antiguos",
-"oldConfirmText": "¿Eliminar definitivamente los datos antiguos (de antes del traslado)? Tus documentos y álbumes actuales se quedan.",
-"oldDeleted": "Datos antiguos eliminados.",
-"oldBlocked": "Cierra las demás ventanas abiertas de Life Archive e inténtalo de nuevo.",
 "expTitle": "Recordatorio",
 "expLbl": "Fecha del recordatorio",
 "expSave": "Guardar",
@@ -10182,33 +10043,7 @@ I18N.fr = {
 "Réglages → « Supprimer toutes les données » supprime tout ce qui est dans Life Archive sur cet appareil : images, documents, albums, modèles, le widget et tous les réglages (thème, langue, PIN, clé IA). Life Archive redémarre ensuite comme fraîchement installée.",
 "Les sauvegardes (ZIP) dans le dossier du téléphone et la copie dans Google Drive restent, tu peux donc les restaurer plus tard. Dans la première fenêtre, tu peux choisir « Sauvegarder d’abord »."
 ],
-[
-"Anciennes données",
-"Après le passage au nouveau stockage, les anciennes données ont été conservées par sécurité. Quand tu as vérifié que tout est à sa place, supprime-les dans les Réglages pour libérer de l’espace. La vignette n’est visible que tant qu’il existe d’anciennes données."
-]
 ],
-"migTitle": "Nouveau stockage",
-"migIntro": "Life Archive passe à un stockage plus rapide, conçu pour des centaines de documents : démarrage plus rapide, petits aperçus, et le fichier complet seulement à l’ouverture.",
-"migWhat": "À transférer : {items} éléments et {albums} albums.",
-"migSafe": "Rien d’ancien n’est supprimé. Tes anciennes données restent intactes jusqu’à ce que tu confirmes que tout va bien.",
-"migStep1": "1. Faire une sauvegarde",
-"migStep1Sub": "Dernière sauvegarde : {when}",
-"migStep1Done": "Sauvegarde faite : {when}",
-"migStep2": "2. Lancer le transfert",
-"migResume": "Reprendre le transfert",
-"migNeedBackup": "Le transfert ne commence qu’après une sauvegarde (une sauvegarde des dernières 24 heures compte).",
-"migResumeHint": "Le transfert a déjà commencé et reprendra là où il s’est arrêté.",
-"migCheckingSpace": "Vérification de l’espace libre…",
-"migNoSpace": "Pas assez d’espace libre. Il faut environ {need} Mo, et environ {free} Mo sont libres. Libère de l’espace et réessaie.",
-"migRunning": "Transfert {n} / {total}",
-"migRunningHint": "Ne ferme pas l’app. Si elle s’arrête quand même, le transfert reprendra la prochaine fois là où il s’est arrêté.",
-"migVerifying": "Vérification des données transférées…",
-"migDoneTitle": "Le transfert est terminé ✓",
-"migDoneText": "Transférés : {items} éléments et {albums} albums. Chaque fichier a été écrit puis relu pour vérification.",
-"migSkipped": "Non transférés ({n}) : {names}. Ces éléments sont toujours dans les anciennes données et dans la sauvegarde.",
-"migOpen": "Ouvrir Life Archive",
-"migError": "Le transfert n’a pas abouti : {msg}. Rien n’a été perdu. Réessaie.",
-"migRetry": "Réessayer",
 "never": "jamais",
 "bkBuilding": "Création de la sauvegarde : {n} / {total}…",
 "bkReading": "Lecture de la sauvegarde…",
@@ -10239,16 +10074,6 @@ I18N.fr = {
 "persistOn": "Protection contre l’effacement automatique : activée",
 "persistOff": "Protection contre l’effacement automatique : non accordée par Chrome (les sauvegardes sont d’autant plus importantes)",
 "persistApp": "Les données sont stockées dans l’app sur ce téléphone ; elles sont effacées si tu effaces les données de l’app ou la désinstalles (d’où les sauvegardes)",
-"oldTile": "Anciennes données (avant le transfert)",
-"oldTileSub": "À supprimer une fois tout vérifié",
-"oldTitle": "Anciennes données",
-"oldText": "Après le passage au nouveau stockage, les anciennes données ont été conservées intactes par sécurité. Quand tu es sûr que toutes les images, tous les documents et albums sont en place, supprime-les pour libérer de l’espace.",
-"oldCount": "Dans les anciennes données : {n} éléments",
-"oldDelete": "Supprimer les anciennes données",
-"oldConfirmTitle": "Supprimer les anciennes données",
-"oldConfirmText": "Supprimer définitivement les anciennes données (d’avant le transfert) ? Tes documents et albums actuels restent.",
-"oldDeleted": "Anciennes données supprimées.",
-"oldBlocked": "Ferme les autres fenêtres ouvertes de Life Archive et réessaie.",
 "expTitle": "Rappel",
 "expLbl": "Date du rappel",
 "expSave": "Enregistrer",
@@ -11909,33 +11734,7 @@ I18N.it = {
 "Impostazioni → “Elimina tutti i dati” elimina tutto ciò che c’è in Life Archive su questo dispositivo: immagini, documenti, album, modelli, il widget e tutte le impostazioni (tema, lingua, PIN, chiave IA). Poi Life Archive si avvia come appena installata.",
 "I backup (ZIP) nella cartella del telefono e la copia su Google Drive restano, quindi puoi ripristinarli più tardi. Nella prima finestra puoi scegliere “Prima fai un backup”."
 ],
-[
-"Dati vecchi",
-"Dopo il passaggio alla nuova archiviazione, i dati vecchi sono stati conservati per sicurezza. Quando hai verificato che tutto è al suo posto, eliminali nelle Impostazioni per liberare spazio. Il riquadro è visibile solo finché esistono dati vecchi."
-]
 ],
-"migTitle": "Nuova archiviazione",
-"migIntro": "Life Archive passa a un’archiviazione più veloce, pensata per centinaia di documenti: avvio più rapido, anteprime piccole, e il file intero solo all’apertura.",
-"migWhat": "Da trasferire: {items} elementi e {albums} album.",
-"migSafe": "Non viene eliminato nulla di vecchio. I tuoi dati vecchi restano intatti finché non confermi che è tutto a posto.",
-"migStep1": "1. Fai un backup",
-"migStep1Sub": "Ultimo backup: {when}",
-"migStep1Done": "Backup fatto: {when}",
-"migStep2": "2. Avvia il trasferimento",
-"migResume": "Riprendi il trasferimento",
-"migNeedBackup": "Il trasferimento inizia solo dopo che hai fatto un backup (vale un backup delle ultime 24 ore).",
-"migResumeHint": "Il trasferimento è già iniziato e riprenderà da dove si era fermato.",
-"migCheckingSpace": "Verifica dello spazio libero…",
-"migNoSpace": "Spazio libero insufficiente. Servono circa {need} MB e ne sono liberi circa {free} MB. Libera spazio e riprova.",
-"migRunning": "Trasferimento {n} / {total}",
-"migRunningHint": "Non chiudere l’app. Se comunque si interrompe, la prossima volta riprende da dove si era fermata.",
-"migVerifying": "Verifica dei dati trasferiti…",
-"migDoneTitle": "Il trasferimento è terminato ✓",
-"migDoneText": "Trasferiti: {items} elementi e {albums} album. Ogni file è stato scritto e riletto per verifica.",
-"migSkipped": "Non trasferiti ({n}): {names}. Questi elementi sono ancora nei dati vecchi e nel backup.",
-"migOpen": "Apri Life Archive",
-"migError": "Il trasferimento non è terminato: {msg}. Non è andato perso nulla. Riprova.",
-"migRetry": "Riprova",
 "never": "mai",
 "bkBuilding": "Creazione del backup: {n} / {total}…",
 "bkReading": "Lettura del backup…",
@@ -11966,16 +11765,6 @@ I18N.it = {
 "persistOn": "Protezione dalla cancellazione automatica: attiva",
 "persistOff": "Protezione dalla cancellazione automatica: non concessa da Chrome (i backup sono ancora più importanti)",
 "persistApp": "I dati sono nell’app su questo telefono; vengono cancellati se cancelli i dati dell’app o la disinstalli (per questo servono i backup)",
-"oldTile": "Dati vecchi (prima del trasferimento)",
-"oldTileSub": "Eliminali dopo aver controllato tutto",
-"oldTitle": "Dati vecchi",
-"oldText": "Dopo il passaggio alla nuova archiviazione, i dati vecchi sono stati conservati intatti per sicurezza. Quando sei sicuro che tutte le immagini, i documenti e gli album sono al loro posto, eliminali per liberare spazio.",
-"oldCount": "Nei dati vecchi: {n} elementi",
-"oldDelete": "Elimina i dati vecchi",
-"oldConfirmTitle": "Elimina i dati vecchi",
-"oldConfirmText": "Eliminare definitivamente i dati vecchi (di prima del trasferimento)? I tuoi documenti e album attuali restano.",
-"oldDeleted": "Dati vecchi eliminati.",
-"oldBlocked": "Chiudi le altre finestre aperte di Life Archive e riprova.",
 "expTitle": "Promemoria",
 "expLbl": "Data del promemoria",
 "expSave": "Salva",
@@ -13604,33 +13393,7 @@ I18N.hr = {
 "Postavke → „Izbriši sve podatke” briše sve iz Life Archive na ovom uređaju: slike, dokumente, albume, predloške, widget i sve postavke (tema, jezik, PIN, AI ključ). Life Archive se zatim pokrene kao tek instalirana.",
 "Sigurnosne kopije (ZIP) u mapi telefona i kopija na Google Driveu ostaju, pa ih poslije možeš vratiti. U prvom prozoru možeš odabrati „Prvo napravi kopiju”."
 ],
-[
-"Stari podaci",
-"Nakon prelaska na novi način spremanja stari podaci ostavljeni su kao osiguranje. Kad provjeriš da je sve na mjestu, izbriši ih u Postavkama da oslobodiš prostor. Pločica se vidi samo dok stari podaci postoje."
-]
 ],
-"migTitle": "Novi način spremanja",
-"migIntro": "Life Archive prelazi na brži način spremanja, pripremljen za stotine dokumenata: brže otvaranje, male sličice za prikaz, a puna datoteka tek kad je otvoriš.",
-"migWhat": "Za prijenos: {items} stavki i {albums} albuma.",
-"migSafe": "Ništa staro se ne briše. Stari podaci ostaju netaknuti dok sam ne potvrdiš da je sve u redu.",
-"migStep1": "1. Napravi sigurnosnu kopiju",
-"migStep1Sub": "Posljednja kopija: {when}",
-"migStep1Done": "Kopija napravljena: {when}",
-"migStep2": "2. Započni prelazak",
-"migResume": "Nastavi prelazak",
-"migNeedBackup": "Prelazak počinje tek kad napraviš sigurnosnu kopiju (vrijedi kopija iz posljednja 24 sata).",
-"migResumeHint": "Prelazak je već započet i bit će nastavljen ondje gdje je stao.",
-"migCheckingSpace": "Provjeravam slobodan prostor…",
-"migNoSpace": "Nema dovoljno slobodnog prostora. Potrebno je oko {need} MB, a slobodno je oko {free} MB. Oslobodi prostor na telefonu pa pokušaj ponovno.",
-"migRunning": "Prenosim {n} / {total}",
-"migRunningHint": "Ne zatvaraj aplikaciju. Ako se ipak prekine, sljedeći put nastavlja ondje gdje je stao.",
-"migVerifying": "Provjeravam prenesene podatke…",
-"migDoneTitle": "Prelazak je završen ✓",
-"migDoneText": "Preneseno: {items} stavki i {albums} albuma. Svaka je datoteka zapisana i pročitana natrag radi provjere.",
-"migSkipped": "Nije preneseno ({n}): {names}. Ove stavke su i dalje u starim podacima i u sigurnosnoj kopiji.",
-"migOpen": "Otvori Life Archive",
-"migError": "Prelazak nije završen: {msg}. Ništa nije izgubljeno. Pokušaj ponovno.",
-"migRetry": "Pokušaj ponovno",
 "never": "nikad",
 "bkBuilding": "Izrađujem sigurnosnu kopiju: {n} / {total}…",
 "bkReading": "Čitam kopiju…",
@@ -13661,16 +13424,6 @@ I18N.hr = {
 "persistOn": "Zaštita od automatskog brisanja: uključena",
 "persistOff": "Zaštita od automatskog brisanja: Chrome je nije odobrio (sigurnosna kopija je zato još važnija)",
 "persistApp": "Podaci su u aplikaciji na ovom telefonu; brišu se ako izbrišeš podatke aplikacije ili je deinstaliraš (zato sigurnosna kopija)",
-"oldTile": "Stari podaci (prije prelaska)",
-"oldTileSub": "Izbriši kad sve provjeriš",
-"oldTitle": "Stari podaci",
-"oldText": "Nakon prelaska na novi način spremanja stari podaci ostavljeni su netaknuti, kao osiguranje. Kad se uvjeriš da su sve slike, dokumenti i albumi na mjestu, izbriši ih da oslobodiš prostor.",
-"oldCount": "U starim podacima: {n} stavki",
-"oldDelete": "Izbriši stare podatke",
-"oldConfirmTitle": "Izbriši stare podatke",
-"oldConfirmText": "Trajno izbrisati stare podatke (od prije prelaska)? Tvoji trenutni dokumenti i albumi ostaju.",
-"oldDeleted": "Stari podaci su izbrisani.",
-"oldBlocked": "Zatvori druge otvorene prozore Life Archive pa pokušaj ponovno.",
 "expTitle": "Podsjetnik",
 "expLbl": "Datum podsjetnika",
 "expSave": "Spremi",
@@ -14950,8 +14703,7 @@ document.getElementById('pgExpField').addEventListener('keydown', (e)=>{ if(e.ke
      albums – albumi · docs – podaci o dokumentu · files – sadržaj (Blob, ključ = ID fajla)
      thumbs – sličice (ključ = ID fajla) · texts – tekst za pretragu (ključ = ID dokumenta) · meta – ostalo (šabloni tpl:<id>…)
    Trajno brisanje ostavlja oznaku (purged) — zbog kasnije sinhronizacije.
-   Stara baza galerijaDB (pre v59) se samo čita za prelazak (Skladiste.stara), a fascikla za kopiju je podatak samo ovog
-   uređaja (Skladiste.uredjaj). */
+   Fascikla za kopiju je podatak samo ovog uređaja (Skladiste.uredjaj). v341: prelazak sa stare baze galerijaDB (pre v59) izbačen. */
 const REC_SCHEMA = 1;
 const Skladiste = (()=>{
   const DB = 'arhivaDB';
@@ -14998,31 +14750,6 @@ const Skladiste = (()=>{
   const get = (store, key)=>run([store], 'readonly', (st, o)=>{ const r = st(store).get(key); r.onsuccess = ()=>{ o.v = r.result; }; });
   const getAll = (store)=>run([store], 'readonly', (st, o)=>{ const r = st(store).getAll(); r.onsuccess = ()=>{ o.v = r.result || []; }; });
   const blobOf = (r)=>(r && r.blob) || null;
-
-  /* ---- stara baza (pre v59): samo čitanje za prelazak, i brisanje na zahtev ---- */
-  const OLD_DB = 'galerijaDB', OLD_STORE = 'items';
-  function oldOpen(){
-    return new Promise((resolve, reject)=>{
-      const req = indexedDB.open(OLD_DB, 1);
-      req.onupgradeneeded = ()=>{ const db = req.result; if(!db.objectStoreNames.contains(OLD_STORE)) db.createObjectStore(OLD_STORE, {keyPath:'id'}); };
-      req.onsuccess = ()=>resolve(req.result);
-      req.onerror = ()=>reject(req.error);
-    });
-  }
-  async function oldReq(fn){
-    const db = await oldOpen();
-    try{
-      return await new Promise((resolve, reject)=>{
-        const r = fn(db.transaction(OLD_STORE, 'readonly').objectStore(OLD_STORE));
-        r.onsuccess = ()=>resolve(r.result);
-        r.onerror = ()=>reject(r.error);
-      });
-    }finally{ db.close(); }
-  }
-  async function listed(name){
-    if(!indexedDB.databases) return null;
-    try{ return (await indexedDB.databases()).some(d=>d.name === name); }catch(e){ return null; }
-  }
 
   /* ---- fascikla za kopiju: podatak samo ovog uređaja (posebna mala baza) ---- */
   const DIR_DB = 'arhivaBackupDir';
@@ -15160,45 +14887,6 @@ const Skladiste = (()=>{
     /* {usage, quota} u bajtovima ili null */
     async zauzece(){
       try{ return (navigator.storage && navigator.storage.estimate) ? await navigator.storage.estimate() : null; }catch(e){ return null; }
-    },
-
-    /* ---------- stara baza (pre v59) ---------- */
-    stara: {
-      postoji(){ return listed(OLD_DB); },   /* true / false / null (ne zna se) */
-      async broj(){ try{ return await oldReq(s=>s.count()); }catch(e){ return 0; } },
-      kljucevi(){ return oldReq(s=>s.getAllKeys()); },
-      stavka(key){ return oldReq(s=>s.get(key)); },
-      /* vrlo stare verzije su stavke držale u localStorage: prebaci ih u staru bazu */
-      async uvuciIzLocalStorage(prefix){
-        const raw = localStorage.getItem(prefix + 'item-ids');
-        if(!raw) return;
-        const ids = JSON.parse(raw);
-        if(Array.isArray(ids) && ids.length){
-          const db = await oldOpen();
-          for(const id of ids){
-            const raw2 = localStorage.getItem(prefix + 'item:' + id);
-            if(raw2){
-              await new Promise((res)=>{
-                const tx = db.transaction(OLD_STORE, 'readwrite');
-                try{ tx.objectStore(OLD_STORE).put(JSON.parse(raw2)); }catch(e){ console.error(e); }
-                tx.oncomplete = res; tx.onerror = res; tx.onabort = res;
-              });
-              localStorage.removeItem(prefix + 'item:' + id);
-            }
-          }
-          db.close();
-        }
-        localStorage.removeItem(prefix + 'item-ids');
-      },
-      obrisi(){
-        return new Promise((resolve, reject)=>{
-          const r = indexedDB.deleteDatabase(OLD_DB);
-          let blockedTimer = null;
-          r.onsuccess = ()=>{ clearTimeout(blockedTimer); resolve(); };
-          r.onerror = ()=>{ clearTimeout(blockedTimer); reject(r.error); };
-          r.onblocked = ()=>{ blockedTimer = setTimeout(()=>reject(new Error('BLOCKED')), 4000); };
-        });
-      }
     },
 
     /* ---------- podaci samo ovog uređaja ---------- */
@@ -15454,40 +15142,12 @@ function saveCategories(){
     .catch(e=>{ console.error(e); toast(t('saveErr')); });
 }
 
-/* ---------- Stara baza (samo za prelazak, staru kopiju i brisanje starih podataka): Skladiste.stara ---------- */
-async function migrateLegacyLocalStorageItems(){
-  try{ await Skladiste.stara.uvuciIzLocalStorage(LS_PREFIX); }catch(e){ console.error(e); }
-}
-/* Albumi iz starog zapisa (localStorage), sređeni isto kao ranije */
-function legacyCategories(){
-  let parsed = [];
-  try{ const raw = localStorage.getItem(LS_PREFIX+'categories'); parsed = raw ? JSON.parse(raw) : []; }catch(e){ parsed = []; }
-  if(!Array.isArray(parsed)) parsed = [];
-  let cats = parsed.map(c=> typeof c === 'string' ? {name:c, pinned:false, cover:null} : c).filter(c=>c && c.name);
-  cats = cats.filter(c=>!(!c.id && cats.some(o=>o.id && o.id === c.name)));
-  cats.forEach(c=>{ if(!c.id) c.id = newCatId(); if(c.parent === undefined) c.parent = null; });
-  cats.forEach(c=>{
-    if(!c.parent) return;
-    const par = cats.find(o=>o.id === c.parent);
-    if(!par || par.parent || par === c) c.parent = null;
-  });
-  return cats;
-}
-function dataUrlToBlob(dataUrl){
-  const m = /^data:([^;,]*)(;base64)?,/.exec(dataUrl || '');
-  if(!m || !m[2]) throw new Error('neispravan zapis');
-  const raw = atob(dataUrl.slice(m[0].length));
-  const bytes = new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++) bytes[i] = raw.charCodeAt(i);
-  return new Blob([bytes], {type: m[1] || 'application/octet-stream'});
-}
 /* v322 (Zoran 13.11.: video sa Drive-a na tabletu = crn ekran): 'video' je izostao od v254 — video iz kopije/Drive-a postajao je „slika“ */
 function normKind(tp){ return tp === 'pdf' ? 'pdf' : tp === 'doc' ? 'doc' : tp === 'video' ? 'video' : 'image'; }
 
 /* ---------- Učitavanje ---------- */
 async function loadAll(){
   try{
-    await ensureMigrated();
     const {albums:albumRecs, docs:docRecs, thumbs:thumbRecs} = await Skladiste.ucitajSve();
     const liveAlbums = albumRecs.filter(a=>!a.deletedAt).sort((a,b)=>(a.order||0)-(b.order||0));
     categories = liveAlbums.map(a=>({id:a.id, name:a.name, pinned:!!a.pinned, cover:a.cover || null, parent:a.parent || null, createdAt:a.createdAt || 0, updatedAt:a.updatedAt || 0}));
@@ -15767,191 +15427,6 @@ async function ocrRun(){
   }
 }
 
-/* ================= PRELAZAK NA NOVU BAZU =================
-   Pravila: 1) prvo rezervna kopija; 2) prenos stavku po stavku, svaka u jednoj transakciji
-   (podaci + fajl + sličica + tekst zajedno), pa se prekid može nastaviti; 3) svaki fajl se
-   pročita nazad i uporedi veličina; 4) stara baza ostaje netaknuta. */
-async function ensureMigrated(){
-  const m = await Skladiste.meta('migration');
-  if(m && m.state === 'done') return;
-  await migrateLegacyLocalStorageItems();
-  let count = 0;
-  const listed = await Skladiste.stara.postoji();
-  if(listed !== false) count = await Skladiste.stara.broj();
-  const cats = legacyCategories();
-  if(count === 0){
-    /* nema slika: albumi (ako ih ima) se prenose odmah, bez rizika */
-    await migrateAlbums(cats);
-    await Skladiste.sacuvajMeta({key:'migration', state:'done', doneAt:Date.now(), count:0, albums:cats.length});
-    return;
-  }
-  await new Promise(resolve=>showMigrationScreen({count, albums:cats.length, resumed: !!(m && m.state === 'running')}, resolve));
-}
-async function migrateAlbums(cats){
-  const have = new Set((await Skladiste.albumi()).map(a=>a.id));
-  const now = Date.now();
-  await Skladiste.sacuvajAlbume(cats.map((c, i)=>have.has(c.id) ? null :
-    {id:c.id, schema:REC_SCHEMA, name:c.name, parent:c.parent || null, pinned:!!c.pinned, cover:c.cover || null, order:i, createdAt:now, updatedAt:now}).filter(Boolean));
-}
-function backupRecent(){
-  const last = getLastBackupDate();
-  return !!last && (Date.now() - last.getTime()) < 86400000;
-}
-function fmtDateTime(d){
-  if(!d) return t('never');
-  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()+'. '+
-    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-}
-function showMigrationScreen(info, onDone){
-  const scr = document.getElementById('migrateScreen');
-  const panel = document.getElementById('migratePanel');
-  scr.classList.add('open');
-  let busy = false;
-  const head = '<div class="set-header"><h2 class="set-title" style="padding-left:12px;">'+escapeHtml(t('migTitle'))+'</h2></div>';
-  const intro = ()=>{
-    const ok = info.resumed || backupRecent();
-    const last = getLastBackupDate();
-    panel.innerHTML = head + '<div class="set-body">'+
-      '<p class="mig-p">'+escapeHtml(t('migIntro'))+'</p>'+
-      '<p class="mig-p mig-strong">'+escapeHtml(t('migWhat', {items:info.count, albums:info.albums}))+'</p>'+
-      '<p class="mig-p">'+escapeHtml(t('migSafe'))+'</p>'+
-      '<div class="settings-card" style="margin-top:16px;">'+
-        '<button type="button" class="settings-row" id="migBackupBtn"><span class="row-icon">💾</span><span class="row-label">'+escapeHtml(t('migStep1'))+
-        '<span class="mig-sub">'+escapeHtml(backupRecent() ? t('migStep1Done', {when:fmtDateTime(last)}) : t('migStep1Sub', {when:fmtDateTime(last)}))+'</span></span>'+
-        '<span class="chevron">'+(backupRecent() ? '✓' : '›')+'</span></button>'+
-      '</div>'+
-      '<button type="button" class="sheet-cta mig-cta" id="migStartBtn"'+(ok ? '' : ' disabled')+'>'+escapeHtml(info.resumed ? t('migResume') : t('migStep2'))+'</button>'+
-      '<div class="settings-hint">'+escapeHtml(info.resumed ? t('migResumeHint') : (ok ? '' : t('migNeedBackup')))+'</div>'+
-      '</div>';
-    document.getElementById('migBackupBtn').onclick = async ()=>{
-      if(busy) return;
-      busy = true;
-      try{ await legacyExportBackup(); }finally{ busy = false; }
-      intro();
-    };
-    document.getElementById('migStartBtn').onclick = ()=>{ if(!busy && (info.resumed || backupRecent())) start(); };
-  };
-  const progress = (label, n, total, hint)=>{
-    const pct = total ? Math.round(n * 100 / total) : 0;
-    panel.innerHTML = head + '<div class="set-body">'+
-      '<p class="mig-p mig-strong">'+escapeHtml(label)+'</p>'+
-      '<div class="mig-bar"><i style="width:'+pct+'%"></i></div>'+
-      '<div class="settings-hint">'+escapeHtml(hint || '')+'</div></div>';
-  };
-  const start = async ()=>{
-    busy = true;
-    requestPersistOnce();
-    try{
-      progress(t('migCheckingSpace'), 0, 0, '');
-      const est = await Skladiste.zauzece();
-      if(est && est.quota){
-        const need = (est.usage || 0) * 0.8 + info.count * 60 * 1024;
-        const free = est.quota - (est.usage || 0);
-        if(free < need){
-          busy = false;
-          panel.innerHTML = head + '<div class="set-body"><p class="mig-p">'+escapeHtml(t('migNoSpace', {need:Math.ceil(need/1048576), free:Math.floor(free/1048576)}))+'</p>'+
-            '<button type="button" class="sheet-cta mig-cta" id="migRetryBtn">'+escapeHtml(t('migRetry'))+'</button></div>';
-          document.getElementById('migRetryBtn').onclick = ()=>{ info.resumed = true; intro(); };
-          return;
-        }
-      }
-      const res = await migrateAllItems((n, total)=>progress(t('migRunning', {n, total}), n, total, t('migRunningHint')));
-      busy = false;
-      panel.innerHTML = head + '<div class="set-body">'+
-        '<p class="mig-p mig-strong">'+escapeHtml(t('migDoneTitle'))+'</p>'+
-        '<p class="mig-p">'+escapeHtml(t('migDoneText', {items:res.count, albums:res.albums}))+'</p>'+
-        (res.skipped.length ? '<p class="mig-p mig-warn">'+escapeHtml(t('migSkipped', {n:res.skipped.length, names:res.skipped.slice(0,8).join(', ') + (res.skipped.length > 8 ? '…' : '')}))+'</p>' : '')+
-        '<button type="button" class="sheet-cta mig-cta" id="migOpenBtn">'+escapeHtml(t('migOpen'))+'</button></div>';
-      document.getElementById('migOpenBtn').onclick = ()=>{ scr.classList.remove('open'); onDone(); };
-    }catch(e){
-      console.error(e);
-      busy = false;
-      info.resumed = true;
-      panel.innerHTML = head + '<div class="set-body"><p class="mig-p">'+escapeHtml(t('migError', {msg:(e && e.message) || String(e)}))+'</p>'+
-        '<button type="button" class="sheet-cta mig-cta" id="migRetryBtn">'+escapeHtml(t('migRetry'))+'</button></div>';
-      document.getElementById('migRetryBtn').onclick = ()=>start();
-    }
-  };
-  intro();
-}
-async function migrateAllItems(onProgress){
-  const prev = await Skladiste.meta('migration');
-  await Skladiste.sacuvajMeta({key:'migration', state:'running', startedAt:(prev && prev.startedAt) || Date.now()});
-  const cats = legacyCategories();
-  await migrateAlbums(cats);
-  {
-    const keys = await Skladiste.stara.kljucevi();
-    const done = new Set((await Skladiste.dokumenti()).map(d=>d.id));
-    const skipped = [];
-    let n = 0;
-    for(const key of keys){
-      n++;
-      if(n === 1 || n % 3 === 0 || n === keys.length) onProgress(n, keys.length);
-      if(done.has(key)) continue;   /* već prenet (podaci i fajl su upisani zajedno) */
-      const it = await Skladiste.stara.stavka(key);
-      if(!it) continue;
-      try{ await migrateOneItem(it); }
-      catch(e){ console.error('prelazak stavke', key, e); skipped.push(it.name || String(key)); }
-    }
-    onProgress(keys.length, keys.length);
-    const now = new Set((await Skladiste.dokumenti()).map(d=>d.id));
-    const moved = keys.filter(k=>now.has(k)).length;
-    await Skladiste.sacuvajMeta({key:'migration', state:'done', doneAt:Date.now(), count:moved, total:keys.length, albums:cats.length});
-    return {count:moved, albums:cats.length, skipped};
-  }
-}
-async function migrateOneItem(it){
-  let blob;
-  try{ blob = dataUrlToBlob(it.dataUrl); }
-  catch(e){ blob = await (await fetch(it.dataUrl)).blob(); }
-  if(!blob || !blob.size) throw new Error('prazan fajl');
-  const kind = normKind(it.type);
-  let thumbBlob = null, w = 0, h = 0;
-  if(kind === 'image'){
-    try{ const r = await makeThumb(blob); thumbBlob = r.tblob; w = r.w; h = r.h; }catch(e){ console.error(e); }
-  }
-  const item = {id:it.id, name:it.name || t('itemDefault'), category:it.category || null, type:kind, ts:it.ts || Date.now(), sourceSig:it.sourceSig || null};
-  if(it.ext) item.ext = it.ext;
-  if(it.deletedAt) item.deletedAt = it.deletedAt;
-  await db2AddDoc(item, [{blob, thumbBlob, w, h}], it.content || null, {noUrl:true, keepName:true});
-  /* provera: fajl se čita nazad i veličina mora biti ista */
-  const back = await Skladiste.fajl(item.pages[0].file);
-  if(!back || back.size !== blob.size){
-    await Skladiste.upisi({brisi:{docs:[item.id], files:[item.pages[0].file], thumbs:[item.pages[0].file], texts:[item.id]}});
-    throw new Error('provera fajla nije prošla');
-  }
-}
-/* Rezervna kopija starim načinom (JSON verzija 2), direktno iz starih podataka.
-   Pravi se deo po deo, bez jednog ogromnog teksta u memoriji. */
-async function legacyExportBackup(){
-  const dirOk = backupDirHandle ? await ensureDirPermission(backupDirHandle) : false;
-  toastPersist(t('bkBuilding', {n:0, total:'…'}));
-  try{
-    const keys = await Skladiste.stara.kljucevi();
-    const parts = [];
-    const cats = legacyCategories().map(c=>({id:c.id, name:c.name, pinned:!!c.pinned, cover:c.cover || null, parent:c.parent || null}));
-    parts.push('{"version":2,"exportedAt":'+JSON.stringify(new Date().toISOString())+',"categories":'+JSON.stringify(cats)+',"items":[');
-    let first = true, n = 0;
-    for(const key of keys){
-      n++;
-      const it = await Skladiste.stara.stavka(key);
-      if(it && !it.deletedAt && it.dataUrl){
-        parts.push((first ? '' : ',') + JSON.stringify(it));
-        first = false;
-      }
-      if(n % 5 === 0) toastPersist(t('bkBuilding', {n, total:keys.length}), {n, total:keys.length});
-    }
-    parts.push('],"settings":'+JSON.stringify({theme:getTheme(), lang:appLang()})+'}');
-    const blob = new Blob(parts, {type:'application/json'});
-    const msg = await saveBackupFile(blob, backupFileName('json'), dirOk);
-    toastHide();
-    toast(msg);
-  }catch(e){
-    console.error(e);
-    toastHide();
-    toast(t('bkFailed'));
-  }
-}
 function newCatId(){ return 'alb_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 function catById(id){ return categories.find(c=>c.id===id) || null; }
 function stavkeTxt(n){ if(!isSr()) return n + ' ' + plw('item', n);
@@ -16528,7 +16003,7 @@ let _note = null, _noteTimer = null, _notePoll = null, _noteWarn = null;
 /* v148: --pop-top = donja ivica zamrznutog zaglavlja ekrana ispod prozora koji se otvara (merenje u trenutku otvaranja). */
 const POP_HEADS = { modalBg:['#modalPath','#modalBar'], pageEditor:['.set-header'], pgView:['.pv-head','#pvHint'],
   aiWs:['.set-header','#wsTop'], wsResScr:['.set-header'], wsFill:['.set-header','.wf-top'], wsEditW:['.set-header'],
-  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'], migrateScreen:['.set-header'] };
+  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'] };
 function popTopFor(pop){
   const pz = pop ? (parseInt(getComputedStyle(pop).zIndex, 10) || 0) : 1e9;
   let host = null, hz = -1;
@@ -16560,7 +16035,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','migrateScreen','zsScr'];
+const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','zsScr'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -20433,7 +19908,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); refreshOldDbPresent().catch(()=>{}); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   let wp = null; try{ wp = sessionStorage.getItem('galerija:wiped'); sessionStorage.removeItem('galerija:wiped'); }catch(e){}
@@ -20849,7 +20324,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 340;
+const APP_VERSION = 341;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21009,7 +20484,6 @@ function renderSettingsTiles(){
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
-    (_oldDbPresent ? settingsTile('🗄️', t('oldTile'), t('oldTileSub'), "openSettingsSub('old')") : '')+
     settingsTile('🗑', t('wipeTile'), t('wipeSub'), 'wipeAllData()', 'danger')+
     settingsTile('💬', t('fbTile'), t('fbSub'), 'sendFeedback()', 'fb-tile')+   /* v317: poslednja stavka (Zoran 13.11.) */
     '<div class="settings-hint" id="storageInfo"></div>'+
@@ -21022,9 +20496,6 @@ function renderSettingsTiles(){
 function openSettings(){
   settingsSubOpen = false;
   renderSettingsTiles();
-  /* ako stari podaci još postoje, pločica se pojavi čim se to proveri */
-  const had = _oldDbPresent;
-  refreshOldDbPresent().then(now=>{ if(now !== had && !settingsSubOpen && settingsScreen.classList.contains('open')) renderSettingsTiles(); });
   settingsScreen.classList.add('open');
   pushBack(closeSettings);
 }
@@ -21064,14 +20535,6 @@ function openSettingsSub(which){
       setSaveBtnHtml()+'</div>'+
       '<div class="settings-hint">'+escapeHtml(t('bkEveryHint'))+'</div>'+
       '<div class="settings-hint" id="lastBackupHint">'+lastBackupDisplay()+'</div>';
-  }else if(which === 'old'){
-    title = t('oldTitle');
-    body =
-      '<p class="mig-p">'+escapeHtml(t('oldText'))+'</p>'+
-      '<div class="settings-hint" id="oldCountHint"></div>'+
-      '<div class="settings-card" style="margin-top:14px;">'+
-      '<button type="button" class="settings-row" onclick="confirmDeleteOldData()"><span class="row-icon">🗑️</span><span class="row-label" style="color:var(--danger);">'+escapeHtml(t('oldDelete'))+'</span><span class="chevron">›</span></button>'+
-      '</div>';
   }else if(which === 'trash'){
     title = t('trTitle');
     trashSel = new Set(); trView = null; trSearchOn = false; trQ = ''; trDaysOn = false;
@@ -21126,7 +20589,6 @@ function openSettingsSub(which){
   if(which === 'drive') drWire();
   if(which === 'folders') fzWire();
   if(which === 'gps'){ gpsWire(); gpsStanje().then(gpsRefresh); }
-  if(which === 'old') oldDataCount().then(n=>{ const el = document.getElementById('oldCountHint'); if(el) el.textContent = t('oldCount', {n}); });
   settingsScreen.scrollTop = 0;
   if(!settingsSubOpen){
     settingsSubOpen = true;
@@ -21989,25 +21451,6 @@ async function importZipBackup(file){
   if(replace) currentFolder = null;
   await mergeBackup(src, {replace});
 }
-function importJsonBackup(data){
-  if(!data || !Array.isArray(data.items)) throw new Error('NOT_BACKUP');
-  if(data.settings && data.settings.theme) setTheme(data.settings.theme);
-  if(data.settings && (data.settings.fotoQ === 'orig' || data.settings.fotoQ === 'usteda')) setFotoQ(data.settings.fotoQ);   /* v337 */
-  if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
-  const isV2 = data.version >= 2;
-  const coverOf = {};
-  const albums = (data.categories || []).map(c=> typeof c === 'string' ? {name:c} : c).filter(c=>c && c.name).map(c=>{
-    const key = isV2 ? c.id : c.name;
-    if(c.cover) coverOf[key] = c.cover;
-    return {key, id: isV2 ? c.id : null, name:c.name, parentKey: isV2 ? (c.parent || null) : null, pinned:!!c.pinned, updatedAt:0};
-  });
-  const docs = data.items.filter(it=>it && it.dataUrl && !it.deletedAt).map(it=>({
-    id: it.id || null, name: it.name || t('itemDefault'), albumKey: it.category || null, kind: normKind(it.type), ext: it.ext || null,
-    createdAt: it.ts || Date.now(), updatedAt: 0, sourceSig: it.sourceSig || null, text: it.content || null,
-    pages:[{getBlob: async ()=>{ try{ return dataUrlToBlob(it.dataUrl); }catch(e){ return await (await fetch(it.dataUrl)).blob(); } }}]
-  }));
-  return mergeBackup({albums, docs, coverOf});
-}
 
 const importInput = document.getElementById('importInput');
 function isZipFile(file){
@@ -22022,10 +21465,7 @@ importInput.addEventListener('change', async (e)=>{
   try{
     if(isZipFile(file)){
       await importZipBackup(file);
-    }else{
-      const text = await file.text();
-      await importJsonBackup(JSON.parse(text));
-    }
+    }else throw new Error('NOT_BACKUP');   /* v341: stare .json kopije (pre ZIP-a) se više ne uvoze */
   }catch(err){
     console.error(err);
     toastHide();
@@ -22074,8 +21514,6 @@ async function wipeAllData(){
   }
   try{
     await storeWipeAll();
-    /* i stari podaci od pre prelaska, da se ništa ne bi vratilo samo */
-    await deleteOldDb().catch(e=>console.error(e));
     await wipeDeviceRest();
     wipeSettingsAndRestart(drWas ? 'dr' : '1');
   }catch(e){
@@ -22188,29 +21626,6 @@ function wipeSettingsAndRestart(how){
 }
 
 /* ---------- Stari podaci (od pre prelaska) ---------- */
-let _oldDbPresent = false;
-async function refreshOldDbPresent(){
-  const listed = await Skladiste.stara.postoji();
-  _oldDbPresent = listed === true;
-  return _oldDbPresent;
-}
-async function deleteOldDb(){
-  await Skladiste.stara.obrisi();
-  try{ localStorage.removeItem(LS_PREFIX+'categories'); }catch(e){}
-  _oldDbPresent = false;
-}
-function oldDataCount(){ return Skladiste.stara.broj(); }
-async function confirmDeleteOldData(){
-  if(!await askConfirm({icon:'🗄️', title:t('oldConfirmTitle'), text:t('oldConfirmText'), okIcon:'🗑️', okLabel:t('oldDelete')})) return;
-  try{
-    await deleteOldDb();
-    toast(t('oldDeleted'));
-    requestClose();
-  }catch(e){
-    console.error(e);
-    toast(e && e.message === 'BLOCKED' ? t('oldBlocked') : t('wipeErr'));
-  }
-}
 
 /* =====================================================================
    KORAK 2: DOKUMENT OD VIŠE STRANICA
