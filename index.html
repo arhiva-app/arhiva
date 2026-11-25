@@ -720,6 +720,45 @@ html.sc-peek #modalUnlock{ display:flex; }
 .set-tile.danger{ margin-top:24px; }
 .set-tile.fb-tile{ margin-top:24px; }   /* v317: odvojeno od „Obriši sve podatke“ */
 .set-tile.danger .tile-title{ color:var(--danger); }
+/* v344 PROBA I PRO: kartica u Podešavanjima i ekran „Life Archive Pro“ (iznad ostalih ekrana, ispod obaveštenja 86) */
+#proScreen{ z-index:84; }
+.pro-card{ display:flex; align-items:center; gap:14px; width:100%; min-height:60px; padding:10px 16px; margin:0 0 16px; background:var(--surface); border:1.5px solid var(--brass); border-radius:16px; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer; box-sizing:border-box; }
+.pro-card:active{ background:var(--surface-2); }
+.pro-card.end{ border-color:var(--danger); }
+.pro-card .pi{ font-size:26px; width:36px; text-align:center; flex:none; line-height:1; }
+.pro-card .pro-ct{ flex:1; min-width:0; }
+.pro-card b{ display:block; font-size:16px; line-height:1.25; }
+.pro-card small{ display:block; font-size:12.5px; font-weight:600; color:var(--brass); margin-top:2px; }
+.pro-card.end small{ color:var(--danger); }
+.pro-card .tile-chev{ color:var(--ink-dim); font-size:22px; flex:none; line-height:1; }
+.pro-st{ background:var(--surface); border:1.5px solid var(--brass); border-radius:16px; padding:16px; margin:0 0 18px; color:var(--ink); }
+.pro-st.end{ border-color:var(--danger); }
+.pro-st h3{ margin:0; font-size:18px; line-height:1.3; }
+.pro-st .d{ font-size:14px; font-weight:700; color:var(--brass); margin-top:4px; }
+.pro-st.end .d{ color:var(--danger); }
+.pro-bar{ height:8px; border-radius:4px; background:var(--surface-2); margin:12px 0 10px; overflow:hidden; }
+.pro-bar i{ display:block; height:100%; min-width:6px; background:var(--brass); border-radius:4px; }
+.pro-st p{ margin:8px 0 0; font-size:14px; line-height:1.45; color:var(--ink-dim); }
+.pro-lbl{ font-size:12px; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-dim); margin:0 2px 12px; }
+.pro-plan{ position:relative; display:flex; align-items:center; gap:12px; width:100%; min-height:64px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px 16px; margin:0 0 12px; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer; box-sizing:border-box; }
+.pro-plan.sel{ border:2px solid var(--accent); padding:11px 15px; }
+.pro-plan .rb{ width:22px; height:22px; border-radius:50%; border:2px solid var(--ink-dim); flex:none; box-sizing:border-box; }
+.pro-plan.sel .rb{ border:6px solid var(--accent); }
+.pro-plan .t{ flex:1; min-width:0; }
+.pro-plan .t b{ display:block; font-size:16px; }
+.pro-plan .t small{ display:block; font-size:12.5px; color:var(--ink-dim); margin-top:2px; }
+.pro-plan .c{ font-size:17px; font-weight:700; text-align:right; flex:none; }
+.pro-plan .c small{ display:block; font-size:12px; font-weight:500; color:var(--ink-dim); }
+.pro-tag{ position:absolute; top:-10px; right:14px; background:var(--accent); color:var(--on-accent); font-size:11px; font-weight:700; padding:3px 9px; border-radius:10px; }
+.pro-go{ width:100%; min-height:54px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font:700 17px var(--font-ui); margin:4px 0 8px; cursor:pointer; }
+.pro-fine{ font-size:12.5px; color:var(--ink-dim); text-align:center; margin:0 0 18px; }
+.pro-trust{ display:flex; gap:6px; margin:0 0 16px; }
+.pro-trust div{ flex:1; min-width:0; text-align:center; font-size:12px; color:var(--ink-dim); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 4px; line-height:1.3; }
+.pro-trust div span{ display:block; font-size:20px; margin-bottom:4px; }
+.pro-keep{ display:flex; align-items:center; gap:10px; width:100%; min-height:52px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 14px; font:inherit; font-size:14px; color:var(--ink); text-align:left; cursor:pointer; box-sizing:border-box; }
+.pro-keep .i{ margin-left:auto; width:28px; height:28px; border-radius:50%; border:1.5px solid var(--brass); color:var(--brass); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:none; }
+.pro-keep-t{ font-size:13.5px; line-height:1.5; color:var(--ink-dim); padding:10px 4px 0; }
+.pro-restore{ display:block; width:100%; min-height:48px; margin-top:10px; background:none; border:0; color:var(--brass); font:600 15px var(--font-ui); text-decoration:underline; cursor:pointer; }
 .settings-card{ background:var(--surface); border-radius:13px; border:1px solid var(--line); overflow:hidden; }
 .settings-field{ padding:12px 14px; border-bottom:1px solid var(--line); }
 .settings-field:last-child{ border-bottom:none; }
@@ -3424,6 +3463,7 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
 <div class="set-screen" id="syncScreen"><div id="syncPanel"></div></div>
 <div class="set-screen" id="vzScreen"><div id="vzPanel"></div></div>
 <div class="set-screen" id="vzWin"><div id="vwPanel"></div></div>
+<div class="set-screen" id="proScreen"><div id="proPanel"></div></div>
 <input type="file" id="importInput" accept=".zip,.json,application/zip,application/json" style="display:none">
 
 <div class="exit-modal-backdrop" id="delBackdrop">
@@ -14048,6 +14088,89 @@ I18N.hr = {
 "dupText": "Izgleda da \"{name}\" već postoji u arhivi (isti naziv i veličina datoteke). Ipak dodati?",
 "dupOk": "Ipak dodaj"
 };
+/* v344 PROBA I PRO: tekstovi za sve jezike (ekran „Life Archive Pro“, kartica u Podešavanjima, obaveštenja, uputstvo) */
+(function(){
+  const P = {
+    sr: {proTileTrial:'Proba: još {n} {d}', proTileEnd:'Proba završena — izaberi pretplatu', proTileOn:'Pretplata je aktivna',
+      proTrialH:'Proba u toku', proTrialD:'Još {n} {d} · do {date}', proTrialP:'Do tada je sve otvoreno. Bez kartice i bez automatske naplate.',
+      proEndH:'Proba je završena', proEndD:'Tvoji podaci su sačuvani i dostupni', proEndP:'Gledanje, pretraga, deljenje, izvoz i kopija rade i dalje. Za dodavanje i izmene izaberi pretplatu.',
+      proOnH:'Pro je aktivan', proOnP:'Sve mogućnosti su otvorene. Hvala!',
+      proPick:'Izaberi pretplatu', proYear:'Godišnja', proYearSub:'{p} mesečno', proYearPer:'godišnje', proBest:'Najisplativije',
+      proMonth:'Mesečna', proMonthSub:'otkaži bilo kad', proMonthPer:'mesečno', proGo:'Nastavi', proFine:'Naplata i otkazivanje preko Google Play-a.',
+      proT1:'Podaci ostaju na telefonu', proT2:'Bez reklama', proT3:'Bez naloga', proKeep:'Šta ostaje i bez pretplate',
+      proKeepTxt:'Bez pretplate uvek možeš da gledaš, pretražuješ i otvaraš sve, deliš i izvoziš, brišeš i vraćaš iz korpe, praviš rezervnu kopiju i vraćaš je (i na Google Drive), koristiš vidžet, prečice i podsetnike i menjaš podešavanja. Zaključano je samo dodavanje, izmene, preimenovanje, premeštanje i novi albumi.',
+      proRestore:'Vrati kupovinu', proBuySoon:'Kupovina će raditi u verziji sa Google Play-a.', proSoonNote:'Proba ističe za {n} {d}. Tvoji podaci ostaju sačuvani.',
+      proEndNote:'Proba je završena. Tvoji podaci su sačuvani i dostupni.', proAct:'Pro',
+      g:['Proba i Life Archive Pro', 'Prvih 14 dana sve u Life Archive je otvoreno, bez kartice i bez automatske naplate. Koliko je ostalo vidiš u Podešavanjima → Life Archive Pro. Tri dana pre kraja probe i kad se završi, na vrhu se pojavi obaveštenje. Posle probe, bez pretplate, sve što si uneo ostaje tvoje: gledanje, pretraga, deljenje, izvoz, korpa, rezervna kopija i njeno vraćanje, vidžet, prečice, podsetnici i podešavanja rade i dalje. Zaključano je samo dodavanje, izmene, preimenovanje, premeštanje i novi albumi — dodir na takvu radnju otvara ekran Life Archive Pro. Datum početka probe se čuva u rezervnoj kopiji, a „Obriši sve podatke“ ne počinje novu probu.']},
+    en: {proTileTrial:'Trial: {n} {d} left', proTileEnd:'Trial ended — choose a subscription', proTileOn:'Subscription active',
+      proTrialH:'Free trial', proTrialD:'{n} {d} left · until {date}', proTrialP:'Everything is open until then. No card and no automatic charge.',
+      proEndH:'The trial has ended', proEndD:'Your data is saved and available', proEndP:'Viewing, search, sharing, export and backup keep working. To add and edit, choose a subscription.',
+      proOnH:'Pro is active', proOnP:'All features are open. Thank you!',
+      proPick:'Choose a subscription', proYear:'Yearly', proYearSub:'{p} per month', proYearPer:'per year', proBest:'Best value',
+      proMonth:'Monthly', proMonthSub:'cancel anytime', proMonthPer:'per month', proGo:'Continue', proFine:'Billing and cancellation through Google Play.',
+      proT1:'Data stays on your phone', proT2:'No ads', proT3:'No account', proKeep:'What stays without a subscription',
+      proKeepTxt:'Without a subscription you can always view, search and open everything, share and export, delete and restore from the trash, make a backup and restore it (also on Google Drive), use the widget, shortcuts and reminders, and change settings. Only adding, editing, renaming, moving and new albums are locked.',
+      proRestore:'Restore purchase', proBuySoon:'Purchases will work in the Google Play version.', proSoonNote:'Your trial ends in {n} {d}. Your data stays saved.',
+      proEndNote:'The trial has ended. Your data is saved and available.', proAct:'Pro',
+      g:['Trial and Life Archive Pro', 'For the first 14 days everything in Life Archive is open, with no card and no automatic charge. See how much is left in Settings → Life Archive Pro. Three days before the trial ends, and when it ends, a notice appears at the top. After the trial, without a subscription, everything you added stays yours: viewing, search, sharing, export, the trash, backup and restoring it, the widget, shortcuts, reminders and settings keep working. Only adding, editing, renaming, moving and new albums are locked — tapping such an action opens the Life Archive Pro screen. The trial start date is kept in the backup, and “Delete all data” does not start a new trial.']},
+    de: {proTileTrial:'Testphase: endet in {n} {d}', proTileEnd:'Testphase beendet – Abo wählen', proTileOn:'Abo aktiv',
+      proTrialH:'Kostenlose Testphase', proTrialD:'Endet in {n} {d} · bis {date}', proTrialP:'Bis dahin ist alles freigeschaltet. Ohne Karte und ohne automatische Abbuchung.',
+      proEndH:'Die Testphase ist beendet', proEndD:'Deine Daten sind gespeichert und verfügbar', proEndP:'Ansehen, Suche, Teilen, Export und Sicherung funktionieren weiter. Zum Hinzufügen und Bearbeiten wähle ein Abo.',
+      proOnH:'Pro ist aktiv', proOnP:'Alle Funktionen sind freigeschaltet. Danke!',
+      proPick:'Abo wählen', proYear:'Jährlich', proYearSub:'{p} pro Monat', proYearPer:'pro Jahr', proBest:'Bester Preis',
+      proMonth:'Monatlich', proMonthSub:'jederzeit kündbar', proMonthPer:'pro Monat', proGo:'Weiter', proFine:'Abrechnung und Kündigung über Google Play.',
+      proT1:'Daten bleiben auf dem Handy', proT2:'Keine Werbung', proT3:'Kein Konto', proKeep:'Was auch ohne Abo bleibt',
+      proKeepTxt:'Ohne Abo kannst du immer alles ansehen, durchsuchen und öffnen, teilen und exportieren, löschen und aus dem Papierkorb wiederherstellen, eine Sicherung erstellen und wiederherstellen (auch auf Google Drive), Widget, Verknüpfungen und Erinnerungen nutzen und Einstellungen ändern. Gesperrt sind nur Hinzufügen, Bearbeiten, Umbenennen, Verschieben und neue Alben.',
+      proRestore:'Kauf wiederherstellen', proBuySoon:'Käufe funktionieren in der Version aus Google Play.', proSoonNote:'Deine Testphase endet in {n} {d}. Deine Daten bleiben gespeichert.',
+      proEndNote:'Die Testphase ist beendet. Deine Daten sind gespeichert und verfügbar.', proAct:'Pro',
+      g:['Testphase und Life Archive Pro', 'In den ersten 14 Tagen ist in Life Archive alles freigeschaltet, ohne Karte und ohne automatische Abbuchung. Wie viel übrig ist, siehst du unter Einstellungen → Life Archive Pro. Drei Tage vor dem Ende und wenn die Testphase endet, erscheint oben ein Hinweis. Nach der Testphase bleibt ohne Abo alles, was du hinzugefügt hast, deins: Ansehen, Suche, Teilen, Export, Papierkorb, Sicherung und Wiederherstellung, Widget, Verknüpfungen, Erinnerungen und Einstellungen funktionieren weiter. Gesperrt sind nur Hinzufügen, Bearbeiten, Umbenennen, Verschieben und neue Alben – ein Tippen auf so eine Aktion öffnet den Bildschirm Life Archive Pro. Das Startdatum der Testphase wird in der Sicherung gespeichert, und „Alle Daten löschen“ startet keine neue Testphase.']},
+    es: {proTileTrial:'Prueba: quedan {n} {d}', proTileEnd:'Prueba terminada: elige una suscripción', proTileOn:'Suscripción activa',
+      proTrialH:'Prueba gratuita', proTrialD:'Quedan {n} {d} · hasta el {date}', proTrialP:'Hasta entonces todo está disponible. Sin tarjeta y sin cobro automático.',
+      proEndH:'La prueba ha terminado', proEndD:'Tus datos están guardados y disponibles', proEndP:'Ver, buscar, compartir, exportar y hacer copias de seguridad sigue funcionando. Para añadir y editar, elige una suscripción.',
+      proOnH:'Pro está activo', proOnP:'Todas las funciones están disponibles. ¡Gracias!',
+      proPick:'Elige una suscripción', proYear:'Anual', proYearSub:'{p} al mes', proYearPer:'al año', proBest:'Mejor precio',
+      proMonth:'Mensual', proMonthSub:'cancela cuando quieras', proMonthPer:'al mes', proGo:'Continuar', proFine:'Cobro y cancelación a través de Google Play.',
+      proT1:'Los datos se quedan en tu teléfono', proT2:'Sin anuncios', proT3:'Sin cuenta', proKeep:'Qué sigue disponible sin suscripción',
+      proKeepTxt:'Sin suscripción siempre puedes ver, buscar y abrir todo, compartir y exportar, eliminar y restaurar desde la papelera, hacer una copia de seguridad y restaurarla (también en Google Drive), usar el widget, los accesos directos y los recordatorios, y cambiar los ajustes. Solo se bloquean añadir, editar, renombrar, mover y crear álbumes nuevos.',
+      proRestore:'Restaurar compra', proBuySoon:'Las compras funcionarán en la versión de Google Play.', proSoonNote:'Tu prueba termina en {n} {d}. Tus datos siguen guardados.',
+      proEndNote:'La prueba ha terminado. Tus datos están guardados y disponibles.', proAct:'Pro',
+      g:['Prueba y Life Archive Pro', 'Durante los primeros 14 días todo en Life Archive está disponible, sin tarjeta y sin cobro automático. Lo que queda lo ves en Ajustes → Life Archive Pro. Tres días antes del final de la prueba, y cuando termina, aparece un aviso arriba. Después de la prueba, sin suscripción, todo lo que añadiste sigue siendo tuyo: ver, buscar, compartir, exportar, la papelera, la copia de seguridad y su restauración, el widget, los accesos directos, los recordatorios y los ajustes siguen funcionando. Solo se bloquean añadir, editar, renombrar, mover y crear álbumes nuevos: al tocar una de esas acciones se abre la pantalla Life Archive Pro. La fecha de inicio de la prueba se guarda en la copia de seguridad, y «Eliminar todos los datos» no inicia una prueba nueva.']},
+    fr: {proTileTrial:'Essai : encore {n} {d}', proTileEnd:'Essai terminé — choisis un abonnement', proTileOn:'Abonnement actif',
+      proTrialH:'Essai gratuit', proTrialD:'Encore {n} {d} · jusqu’au {date}', proTrialP:'Jusque-là, tout est ouvert. Sans carte et sans prélèvement automatique.',
+      proEndH:'L’essai est terminé', proEndD:'Tes données sont enregistrées et disponibles', proEndP:'L’affichage, la recherche, le partage, l’export et la sauvegarde continuent de fonctionner. Pour ajouter et modifier, choisis un abonnement.',
+      proOnH:'Pro est actif', proOnP:'Toutes les fonctions sont ouvertes. Merci !',
+      proPick:'Choisis un abonnement', proYear:'Annuel', proYearSub:'{p} par mois', proYearPer:'par an', proBest:'Le plus avantageux',
+      proMonth:'Mensuel', proMonthSub:'résiliable à tout moment', proMonthPer:'par mois', proGo:'Continuer', proFine:'Paiement et résiliation via Google Play.',
+      proT1:'Les données restent sur ton téléphone', proT2:'Sans publicité', proT3:'Sans compte', proKeep:'Ce qui reste sans abonnement',
+      proKeepTxt:'Sans abonnement, tu peux toujours afficher, rechercher et ouvrir tout, partager et exporter, supprimer et restaurer depuis la corbeille, faire une sauvegarde et la restaurer (aussi sur Google Drive), utiliser le widget, les raccourcis et les rappels, et modifier les réglages. Seuls l’ajout, la modification, le renommage, le déplacement et les nouveaux albums sont verrouillés.',
+      proRestore:'Restaurer l’achat', proBuySoon:'Les achats fonctionneront dans la version Google Play.', proSoonNote:'Ton essai se termine dans {n} {d}. Tes données restent enregistrées.',
+      proEndNote:'L’essai est terminé. Tes données sont enregistrées et disponibles.', proAct:'Pro',
+      g:['Essai et Life Archive Pro', 'Pendant les 14 premiers jours, tout est ouvert dans Life Archive, sans carte et sans prélèvement automatique. Le temps restant est dans Réglages → Life Archive Pro. Trois jours avant la fin de l’essai, et quand il se termine, un avis apparaît en haut. Après l’essai, sans abonnement, tout ce que tu as ajouté reste à toi : l’affichage, la recherche, le partage, l’export, la corbeille, la sauvegarde et sa restauration, le widget, les raccourcis, les rappels et les réglages continuent de fonctionner. Seuls l’ajout, la modification, le renommage, le déplacement et les nouveaux albums sont verrouillés — toucher une telle action ouvre l’écran Life Archive Pro. La date de début de l’essai est conservée dans la sauvegarde, et « Supprimer toutes les données » ne relance pas l’essai.']},
+    it: {proTileTrial:'Prova: ancora {n} {d}', proTileEnd:'Prova terminata — scegli un abbonamento', proTileOn:'Abbonamento attivo',
+      proTrialH:'Prova gratuita', proTrialD:'Ancora {n} {d} · fino al {date}', proTrialP:'Fino ad allora tutto è sbloccato. Senza carta e senza addebito automatico.',
+      proEndH:'La prova è terminata', proEndD:'I tuoi dati sono salvati e disponibili', proEndP:'Visualizzazione, ricerca, condivisione, esportazione e backup continuano a funzionare. Per aggiungere e modificare, scegli un abbonamento.',
+      proOnH:'Pro è attivo', proOnP:'Tutte le funzioni sono sbloccate. Grazie!',
+      proPick:'Scegli un abbonamento', proYear:'Annuale', proYearSub:'{p} al mese', proYearPer:'all’anno', proBest:'Più conveniente',
+      proMonth:'Mensile', proMonthSub:'disdici quando vuoi', proMonthPer:'al mese', proGo:'Continua', proFine:'Pagamento e disdetta tramite Google Play.',
+      proT1:'I dati restano sul telefono', proT2:'Niente pubblicità', proT3:'Nessun account', proKeep:'Cosa resta senza abbonamento',
+      proKeepTxt:'Senza abbonamento puoi sempre vedere, cercare e aprire tutto, condividere ed esportare, eliminare e ripristinare dal cestino, fare un backup e ripristinarlo (anche su Google Drive), usare il widget, le scorciatoie e i promemoria e cambiare le impostazioni. Sono bloccati solo aggiunta, modifica, rinomina, spostamento e nuovi album.',
+      proRestore:'Ripristina acquisto', proBuySoon:'Gli acquisti funzioneranno nella versione di Google Play.', proSoonNote:'La tua prova termina tra {n} {d}. I tuoi dati restano salvati.',
+      proEndNote:'La prova è terminata. I tuoi dati sono salvati e disponibili.', proAct:'Pro',
+      g:['Prova e Life Archive Pro', 'Nei primi 14 giorni in Life Archive è tutto sbloccato, senza carta e senza addebito automatico. Quanto manca lo vedi in Impostazioni → Life Archive Pro. Tre giorni prima della fine della prova, e quando finisce, compare un avviso in alto. Dopo la prova, senza abbonamento, tutto ciò che hai aggiunto resta tuo: visualizzazione, ricerca, condivisione, esportazione, cestino, backup e ripristino, widget, scorciatoie, promemoria e impostazioni continuano a funzionare. Sono bloccati solo aggiunta, modifica, rinomina, spostamento e nuovi album: toccando una di queste azioni si apre la schermata Life Archive Pro. La data di inizio della prova è salvata nel backup, ed «Elimina tutti i dati» non avvia una nuova prova.']},
+    hr: {proTileTrial:'Proba: još {n} {d}', proTileEnd:'Proba je završila — odaberi pretplatu', proTileOn:'Pretplata je aktivna',
+      proTrialH:'Proba je u tijeku', proTrialD:'Još {n} {d} · do {date}', proTrialP:'Do tada je sve otvoreno. Bez kartice i bez automatske naplate.',
+      proEndH:'Proba je završila', proEndD:'Tvoji podaci su spremljeni i dostupni', proEndP:'Pregled, pretraživanje, dijeljenje, izvoz i sigurnosna kopija i dalje rade. Za dodavanje i izmjene odaberi pretplatu.',
+      proOnH:'Pro je aktivan', proOnP:'Sve su mogućnosti otvorene. Hvala!',
+      proPick:'Odaberi pretplatu', proYear:'Godišnja', proYearSub:'{p} mjesečno', proYearPer:'godišnje', proBest:'Najisplativije',
+      proMonth:'Mjesečna', proMonthSub:'otkaži bilo kada', proMonthPer:'mjesečno', proGo:'Nastavi', proFine:'Naplata i otkazivanje putem Google Playa.',
+      proT1:'Podaci ostaju na telefonu', proT2:'Bez oglasa', proT3:'Bez računa', proKeep:'Što ostaje i bez pretplate',
+      proKeepTxt:'Bez pretplate uvijek možeš pregledavati, pretraživati i otvarati sve, dijeliti i izvoziti, brisati i vraćati iz koša, raditi sigurnosnu kopiju i vraćati je (i na Google Drive), koristiti widget, prečace i podsjetnike te mijenjati postavke. Zaključano je samo dodavanje, izmjene, preimenovanje, premještanje i novi albumi.',
+      proRestore:'Vrati kupnju', proBuySoon:'Kupnja će raditi u verziji s Google Playa.', proSoonNote:'Proba završava za {n} {d}. Tvoji podaci ostaju spremljeni.',
+      proEndNote:'Proba je završila. Tvoji podaci su spremljeni i dostupni.', proAct:'Pro',
+      g:['Proba i Life Archive Pro', 'Prvih 14 dana sve je u Life Archive otvoreno, bez kartice i bez automatske naplate. Koliko je ostalo vidiš u Postavkama → Life Archive Pro. Tri dana prije kraja probe i kad završi, na vrhu se pojavi obavijest. Nakon probe, bez pretplate, sve što si dodao ostaje tvoje: pregled, pretraživanje, dijeljenje, izvoz, koš, sigurnosna kopija i njezino vraćanje, widget, prečaci, podsjetnici i postavke i dalje rade. Zaključano je samo dodavanje, izmjene, preimenovanje, premještanje i novi albumi — dodir na takvu radnju otvara zaslon Life Archive Pro. Datum početka probe sprema se u sigurnosnu kopiju, a „Izbriši sve podatke“ ne pokreće novu probu.']}
+  };
+  Object.keys(P).forEach(l=>{ if(!I18N[l]) return; const g = P[l].g; delete P[l].g; P[l].proTitle = 'Life Archive Pro'; Object.assign(I18N[l], P[l]); if(Array.isArray(I18N[l].guide)) I18N[l].guide.push(g); });
+})();
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'bs', 'sh', 'me', 'cnr'];   /* v332: hr ima svoj rečnik */
@@ -14218,6 +14341,7 @@ const expNote = document.getElementById('expNote');
 /* napomena uz rok: jedan red, bez suvišnih razmaka; prazna = null */
 function cleanNote(v){ const x = String(v || '').replace(/\s+/g, ' ').trim().slice(0, 140); return x || null; }
 function openExpirySheet(o){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   _expCtx = o;
   document.getElementById('expTitle').textContent = t('expTitle');
   document.getElementById('expDoc').textContent = o.name || '';
@@ -14528,7 +14652,7 @@ function openFromExpiry(item){
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden) return;
   if(_expRenderDay && _expRenderDay !== todayYmd()) render();
-  checkExpNotices();
+  checkExpNotices().finally(proNotice);   /* v344 */
 });
 
 /* ---------- Oznaka roka na sličici ---------- */
@@ -14585,6 +14709,7 @@ const nameSheet = document.getElementById('nameSheet');
 const nameInput = document.getElementById('nameInput');
 let _nameCtx = null;   /* {item, after(ok)} */
 function openNameSheet(item, after){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   _nameCtx = {item, after: after || null};
   document.getElementById('nameTitle').textContent = t('renTitle');
   document.getElementById('nameLbl').textContent = t('renLbl');
@@ -15525,6 +15650,7 @@ const MERGE_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" s
 /* v105: Spoji — izbor slika redom (broj na sličici), lupa za pregled, „Dalje“ otvara ekran stranica novog dokumenta.
    Ništa se ne pravi dok se ne dodirne „Sačuvaj“; korak nazad sa ekrana stranica vraća izbor (izabrano ostaje). */
 function startMerge(){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   if(searchOpen) closeSearch();
   selectionMode = true; mergeMode = true; selectedIds = new Set();
   const mi = document.getElementById('mergeInfo');
@@ -16008,7 +16134,7 @@ let _note = null, _noteTimer = null, _notePoll = null, _noteWarn = null;
 /* v148: --pop-top = donja ivica zamrznutog zaglavlja ekrana ispod prozora koji se otvara (merenje u trenutku otvaranja). */
 const POP_HEADS = { modalBg:['#modalPath','#modalBar'], pageEditor:['.set-header'], pgView:['.pv-head','#pvHint'],
   aiWs:['.set-header','#wsTop'], wsResScr:['.set-header'], wsFill:['.set-header','.wf-top'], wsEditW:['.set-header'],
-  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'] };
+  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'], proScreen:['.set-header'] };
 function popTopFor(pop){
   const pz = pop ? (parseInt(getComputedStyle(pop).zIndex, 10) || 0) : 1e9;
   let host = null, hz = -1;
@@ -16040,7 +16166,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','zsScr'];
+const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','zsScr','proScreen'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -16807,6 +16933,7 @@ function moveTargetsFor(cat){
   return categories.filter(c=>!c.parent && c.id !== cat.id && c.id !== cat.parent);
 }
 function moveAlbumTo(catId, parentId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const cat = catById(catId);
   if(!cat) return;
   if(parentId && childrenOf(cat.id).length > 0){ toast(t('mvNoNest')); return; }
@@ -16823,6 +16950,7 @@ function moveAlbumTo(catId, parentId){
   toast(parentId ? t('mvDone', {name:catLabel(parentId)}) : t('mvHome'));
 }
 function openMoveAlbumSheet(catId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const cat = catById(catId);
   if(!cat) return;
   sheetTitle.textContent = t('mvAlbTitle', {name:cat.name});
@@ -16849,6 +16977,7 @@ document.getElementById('acBack').onclick = ()=>requestClose();
 document.getElementById('albumContextSheet').onclick = (e)=>{ if(e.target===document.getElementById('albumContextSheet')) requestClose(); };
 
 function openCoverPicker(catId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const poolIds = albumIdSet(catId);
   const pool = items.filter(i=>poolIds.has(i.category) && i.type === 'image');
   const grid = document.getElementById('coverPickerGrid');
@@ -18731,6 +18860,7 @@ function deleteModalItem(id){
 }
 
 function openMoveSheet(){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   sheetTitle.textContent = t('addToAlb');
   sheetList.innerHTML = '';
 
@@ -18776,6 +18906,7 @@ function openMoveSheet(){
 const closeSheetBg = ()=>sheetBg.classList.remove('open');
 
 function openMoveCopySheet(folderKey, label){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   pendingBulkFolder = folderKey;
   moveCopyTitle.textContent = t('mcTitle', {name:label});
   moveCopySheet.classList.add('open');
@@ -18788,6 +18919,7 @@ document.getElementById('moveCopyBack').onclick = ()=>requestClose();
 moveCopySheet.onclick = (e)=>{ if(e.target === moveCopySheet) requestClose(); };
 
 function moveSelectedToFolder(catId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const ids = Array.from(selectedIds);
   const prev = [];
   const target = catById(catId);
@@ -19026,6 +19158,7 @@ sheetBg.onclick = (e)=>{ if(e.target === sheetBg) requestClose(); };
 document.getElementById('sheetBgBack').onclick = ()=>requestClose();
 
 function openNewFolderSheet(assignToItemId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   pendingAssignItemId = assignToItemId;
   renamingAlbum = null;
   newFolderParent = null;
@@ -19038,6 +19171,7 @@ function openNewFolderSheet(assignToItemId){
   setTimeout(()=>newFolderInput.focus(), 50);
 }
 function openNewSubalbumSheet(parentId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   if(!catById(parentId)) return;
   pendingAssignItemId = null;
   renamingAlbum = null;
@@ -19051,6 +19185,7 @@ function openNewSubalbumSheet(parentId){
   setTimeout(()=>newFolderInput.focus(), 50);
 }
 function openRenameSheet(catId){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const cat = catById(catId);
   if(!cat) return;
   pendingAssignItemId = null;
@@ -19199,6 +19334,7 @@ docInput.addEventListener('change', async (e)=>{
 const addSheet = document.getElementById('addSheet');
 const closeAddSheet = ()=>addSheet.classList.remove('open');
 function openAddSheet(){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   addSheet.classList.add('open');
   pushBack(closeAddSheet);
   gpsDozvola();   /* v289 */
@@ -19913,7 +20049,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); checkDeepLink(); checkExpNotices(); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); checkDeepLink(); checkExpNotices().finally(proNotice); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   let wp = null; try{ wp = sessionStorage.getItem('galerija:wiped'); sessionStorage.removeItem('galerija:wiped'); }catch(e){}
@@ -20329,7 +20465,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 343;
+const APP_VERSION = 344;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20477,6 +20613,7 @@ function renderSettingsTiles(){
   /* v183 (Zoran): jezik · uputstvo · tema · podsetnik · rezervna kopija · AI obrada · korpa · obriši sve */
   settingsPanel.innerHTML = settingsHeader(t('setTitle'))+
     '<div class="set-body">'+
+    proTileHtml()+   /* v344: proba / Pro */
     settingsTile('🌐', t('langTile'), LANG_NAMES[appLang()], "openSettingsSub('lang')")+
     settingsTile('📖', t('guideTile'), t('guideTileSub'), "openSettingsSub('guide')")+
     settingsTile('📣', t('novTile'), novTileSub(), "openSettingsSub('news')")+   /* v326 */
@@ -20498,6 +20635,107 @@ function renderSettingsTiles(){
   settingsScreen.scrollTop = 0;
   updateStorageInfo();
 }
+/* =====================================================================
+   PROBA I PRO (v344; odluke Zoran 24–25.11., `arhiva-naplata.md`)
+   - Proba 14 kalendarskih dana od prvog pokretanja, bez kartice: sve otvoreno. Posle, bez pretplate, zaključano je SAMO
+     dodavanje, izmena, preimenovanje, premeštanje i novi albumi (proBlok() na početku tih radnji → ekran „Life Archive Pro“).
+     Gledanje, pretraga, deljenje, izvoz, brisanje/korpa, kopija i vraćanje, vidžet, prečice, podsetnici i podešavanja rade uvek.
+   - Početak probe (`la:probaOd`, GGGG-MM-DD) ide u kopiju (settings.probaOd); vraćanje uzima RANIJI datum (vraćanje ne daje novu probu).
+     Ključ nije `galerija:*` → „Obriši sve podatke“ ga ne briše. `la:probaVid` = najkasniji viđeni dan (vraćanje sata unazad ne produžava).
+   - Prava kupovina (Play Billing) dolazi u C2: tada proKupljeno() čita stanje kupovine, a cene stižu iz Play-a (PRO_CENE su privremene).
+   - Proba stanja samo za proveru u Chrome-u: ?proba=kraj ili ?proba=N (ostalo N dana) — ne pamti se i može samo da SKRATI probu.
+   ===================================================================== */
+const PRO_DANA = 14, PRO_OD = 'la:probaOd', PRO_VID = 'la:probaVid', PRO_OBAV = LS_PREFIX + 'probaObav';
+const PRO_CENE = {god:14.99, mes:2.49, valuta:'EUR'};   /* privremeno, do Play Billing-a (konačne cene pred objavu) */
+let _proSim = null, _proObavSim = '', _proPlan = 'god';
+function proYmdAdd(ymd, n){ const [y, m, d] = ymdParts(ymd); const x = new Date(Date.UTC(y, m - 1, d + n)); return x.getUTCFullYear() + '-' + String(x.getUTCMonth() + 1).padStart(2, '0') + '-' + String(x.getUTCDate()).padStart(2, '0'); }
+function proYmdDiff(a, b){ const [y1, m1, d1] = ymdParts(a), [y2, m2, d2] = ymdParts(b); return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000); }
+function proLs(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function proLsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+function proOd(){
+  let od = proLs(PRO_OD);
+  if(!isYmd(od)){ od = todayYmd(); proLsSet(PRO_OD, od); }
+  return od;
+}
+/* vraćanje kopije (ZIP ili Drive): raniji početak probe pobeđuje */
+function proOdIzKopije(v){ if(isYmd(v) && v < proOd()) proLsSet(PRO_OD, v); }
+(function proInit(){
+  proOd();
+  try{ const m = location.search.match(/[?&]proba=(kraj|\d{1,2})(?:&|$)/); if(m) _proSim = m[1] === 'kraj' ? 0 : parseInt(m[1], 10); }catch(e){}
+})();
+function proKupljeno(){ return false; }   /* C2: Play Billing */
+function proStanje(){
+  const od = proOd(), kraj = proYmdAdd(od, PRO_DANA - 1);   /* poslednji dan probe */
+  let danas = todayYmd();
+  const vid = proLs(PRO_VID);
+  if(isYmd(vid) && vid > danas) danas = vid; else proLsSet(PRO_VID, danas);
+  let ostalo = Math.max(0, proYmdDiff(danas, kraj) + 1);
+  if(_proSim !== null) ostalo = Math.min(ostalo, _proSim);
+  return {kupljeno:proKupljeno(), od, kraj, ostalo, istekla:ostalo <= 0};
+}
+function proZakljucano(){ const s = proStanje(); return !s.kupljeno && s.istekla; }
+/* poziva se na početku svake zaključane radnje: zaključano → ekran Pro i radnja se ne izvršava */
+function proBlok(){
+  if(!proZakljucano()) return false;
+  openProScreen();
+  return true;
+}
+function proTileSub(){ const s = proStanje(); return s.kupljeno ? t('proTileOn') : s.istekla ? t('proTileEnd') : t('proTileTrial', {n:s.ostalo, d:dayWord(s.ostalo)}); }
+function proTileHtml(){
+  const s = proStanje();
+  return '<button type="button" class="pro-card'+(s.istekla && !s.kupljeno ? ' end' : '')+'" onclick="openProScreen()"><span class="pi">⭐</span>'+
+    '<span class="pro-ct"><b>'+escapeHtml(t('proTitle'))+'</b><small>'+escapeHtml(proTileSub())+'</small></span><span class="tile-chev">›</span></button>';
+}
+function proCena(v){ try{ return v.toLocaleString(langLoc(), {style:'currency', currency:PRO_CENE.valuta}); }catch(e){ return v.toFixed(2) + ' €'; } }
+const proScreen = document.getElementById('proScreen');
+function openProScreen(){
+  if(proScreen.classList.contains('open')){ proRender(); return; }
+  proRender(); proScreen.classList.add('open'); proScreen.scrollTop = 0; pushBack(closeProScreen);
+}
+const closeProScreen = ()=>{ proScreen.classList.remove('open'); if(settingsScreen.classList.contains('open') && !settingsSubOpen) renderSettingsTiles(); };
+function proRender(){
+  const s = proStanje();
+  let st;
+  if(s.kupljeno) st = '<div class="pro-st"><h3>⭐ '+escapeHtml(t('proOnH'))+'</h3><p>'+escapeHtml(t('proOnP'))+'</p></div>';
+  else if(s.istekla) st = '<div class="pro-st end"><h3>⏳ '+escapeHtml(t('proEndH'))+'</h3><div class="d">'+escapeHtml(t('proEndD'))+'</div><p>'+escapeHtml(t('proEndP'))+'</p></div>';
+  else st = '<div class="pro-st"><h3>⭐ '+escapeHtml(t('proTrialH'))+'</h3><div class="d">'+escapeHtml(t('proTrialD', {n:s.ostalo, d:dayWord(s.ostalo), date:fmtExpDate(s.kraj, true)}))+'</div>'+
+    '<div class="pro-bar"><i style="width:'+Math.round(100 * (PRO_DANA - s.ostalo) / PRO_DANA)+'%"></i></div><p>'+escapeHtml(t('proTrialP'))+'</p></div>';
+  const plan = (k, naziv, sub, cena, per, tag)=>'<button type="button" class="pro-plan'+(_proPlan === k ? ' sel' : '')+'" data-plan="'+k+'" role="radio" aria-checked="'+(_proPlan === k)+'">'+
+    (tag ? '<span class="pro-tag">'+escapeHtml(tag)+'</span>' : '')+'<span class="rb"></span><span class="t"><b>'+escapeHtml(naziv)+'</b><small>'+escapeHtml(sub)+'</small></span>'+
+    '<span class="c">'+escapeHtml(cena)+'<small>'+escapeHtml(per)+'</small></span></button>';
+  document.getElementById('proPanel').innerHTML = settingsHeader(t('proTitle')) + '<div class="set-body">' + st +
+    (s.kupljeno ? '' : '<div class="pro-lbl">'+escapeHtml(t('proPick'))+'</div>'+
+      '<div role="radiogroup">'+plan('god', t('proYear'), t('proYearSub', {p:proCena(Math.ceil(PRO_CENE.god / 12 * 100) / 100)}), proCena(PRO_CENE.god), t('proYearPer'), t('proBest'))+
+      plan('mes', t('proMonth'), t('proMonthSub'), proCena(PRO_CENE.mes), t('proMonthPer'))+'</div>'+
+      '<button type="button" class="pro-go" id="proGo">'+escapeHtml(t('proGo'))+'</button>'+
+      '<div class="pro-fine">'+escapeHtml(t('proFine'))+'</div>')+
+    '<div class="pro-trust"><div><span>📱</span>'+escapeHtml(t('proT1'))+'</div><div><span>🚫</span>'+escapeHtml(t('proT2'))+'</div><div><span>👤</span>'+escapeHtml(t('proT3'))+'</div></div>'+
+    '<button type="button" class="pro-keep" id="proKeep" aria-expanded="false"><span>♾️ '+escapeHtml(t('proKeep'))+'</span><span class="i">i</span></button>'+
+    '<div class="pro-keep-t" id="proKeepT" hidden>'+escapeHtml(t('proKeepTxt'))+'</div>'+
+    '<button type="button" class="pro-restore" id="proRestore">'+escapeHtml(t('proRestore'))+'</button></div>';
+  const p = document.getElementById('proPanel');
+  p.querySelectorAll('.pro-plan').forEach(b=>b.onclick = ()=>{ _proPlan = b.dataset.plan; p.querySelectorAll('.pro-plan').forEach(x=>{ const on = x === b; x.classList.toggle('sel', on); x.setAttribute('aria-checked', String(on)); }); });
+  const go = document.getElementById('proGo'); if(go) go.onclick = ()=>toast(t('proBuySoon'));
+  document.getElementById('proRestore').onclick = ()=>toast(t('proBuySoon'));
+  document.getElementById('proKeep').onclick = (e)=>{ const tx = document.getElementById('proKeepT'); tx.hidden = !tx.hidden; e.currentTarget.setAttribute('aria-expanded', String(!tx.hidden)); };
+}
+/* obaveštenje na vrhu: jednom 3 dana pre kraja i jednom kad proba istekne (posle pretplate nikad) */
+function proNotice(){
+  if(document.hidden) return;
+  const s = proStanje();
+  if(s.kupljeno) return;
+  const bg = document.getElementById('expNoticeBackdrop');
+  if(bg && bg.classList.contains('open')) return;   /* prvo prozor podsetnika; Pro dolazi pri sledećem povratku */
+  if(document.getElementById('introOv') || (typeof lkState !== 'undefined' && lkState === 'locked')) return;   /* upoznavanje / zaključano: pri sledećem povratku */
+  const bilo = _proSim !== null ? _proObavSim : (proLs(PRO_OBAV) || '');
+  let sta = '';
+  if(s.istekla && bilo !== 'kraj') sta = 'kraj';
+  else if(!s.istekla && s.ostalo <= 3 && !bilo) sta = 'uskoro';
+  if(!sta) return;
+  if(_proSim !== null) _proObavSim = sta; else proLsSet(PRO_OBAV, sta);
+  showNote(sta === 'kraj' ? t('proEndNote') : t('proSoonNote', {n:s.ostalo, d:dayWord(s.ostalo)}), 9000, {warn:sta === 'kraj', action:{label:t('proAct'), fn:openProScreen}});
+}
+/* ===================== kraj PROBA I PRO ===================== */
 function openSettings(){
   settingsSubOpen = false;
   renderSettingsTiles();
@@ -21151,7 +21389,7 @@ async function backupManifest(bezSlicica){
     }
     const albums = categories.map((c, i)=>Object.assign(albumRecord(c, i), {createdAt:c.createdAt || 0, updatedAt:c.updatedAt || 0}));
     const templates = await tplLoad().catch(e=>{ console.error(e); return []; });
-    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:Math.max(1, getExpiryDays()), podsetnici:getPods(), lang:appLang(), fotoQ:fotoQ()}, albums, docs:docOut, templates};
+    const manifest = {app:'Arhiva', format:3, exportedAt:new Date().toISOString(), settings:{theme:getTheme(), expiryDays:Math.max(1, getExpiryDays()), podsetnici:getPods(), lang:appLang(), fotoQ:fotoQ(), probaOd:proOd()}, albums, docs:docOut, templates};
     return {manifest, docs, fileEntries, thumbEntries};
 }
 async function exportBackup(){
@@ -21389,6 +21627,7 @@ function bkSettings(data){
   if(data.settings && I18N[data.settings.lang]){ try{ localStorage.setItem('galerija:lang', data.settings.lang); }catch(e){} }
   if(data.settings && parseInt(data.settings.expiryDays) > 0){ try{ localStorage.setItem(LS_PREFIX+'expiryDays', String(parseInt(data.settings.expiryDays))); }catch(e){} }
   if(data.settings && Array.isArray(data.settings.podsetnici) && data.settings.podsetnici.length === 3) setPods(data.settings.podsetnici);   /* v199 */
+  if(data.settings) proOdIzKopije(data.settings.probaOd);   /* v344: raniji početak probe pobeđuje */
 }
 function bkSource(liveAlbums, liveDocs, readFile, readThumb){
   const coverOf = {};
@@ -21811,6 +22050,7 @@ const pgCamInput = document.getElementById('pgCamInput');
 const pgGalInput = document.getElementById('pgGalInput');
 
 function openPageEditor(item){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   const cat = item ? item.category : (realAlbum(currentFolder));
   ed = {item: item || null, category: cat, name: item ? item.name : t('pgDefaultName'), pages: [], dirty: false, busy: false,
     validUntil: (item && isYmd(item.validUntil)) ? item.validUntil : null,
@@ -22593,6 +22833,7 @@ async function ceOrigGetter(page){
 document.getElementById('modalCrop').setAttribute('aria-label', t('ceTitle'));
 document.getElementById('modalCrop').onclick = async (e)=>{
   e.stopPropagation();
+  if(proBlok()) return;   /* v344 */
   const it = items.find(i=>i.id === modalItemId);
   if(!it || it.type !== 'image') return;
   const pi = modalPage, pg = it.pages[pi];
@@ -23613,6 +23854,7 @@ function wsJumpGo(){
   navToAlbum(it.category || INBOX, ()=>openModal(it));
 }
 function wsOpen(src){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   if(_ws){ if(src && (!_ws.src || _ws.src.id !== src.id)) wsSetSource(src); return; }
   _ws = {src:src || null, vers:[], cur:-1, busy:null, err:null, dirty:false, saved:null, discard:false, urls:[], origReq:0, edit:null, resOpen:false, tplId:null};
   tplLoad().then(()=>{ if(_ws) wsRender(); }).catch(e=>console.error(e));
@@ -26385,6 +26627,7 @@ function zsAlbumId(){
 }
 function zsAlbumName(id){ return id ? catLabel(id) : t('wsAllImages'); }
 function zsOpen(chosen){
+  if(proBlok()) return;   /* v344: posle probe bez pretplate zaključano */
   if(_zs) return;
   const docs = chosen.filter(it=>it && !it.deletedAt).map(it=>it.id);
   if(docs.length < 2) return;
@@ -30580,6 +30823,8 @@ function rcvFile(blob, name, mime, mod){   /* v284: mod = vreme fajla (praćena 
 async function rcvSave(files, done){
   if(!files.length){ await done([]); return; }
   await scWaitOpen();
+  /* v344: posle probe bez pretplate deljenje u Life Archive je zaključano — ekran Pro, primljeno se odbacuje (original je u drugoj aplikaciji) */
+  if(proZakljucano()){ openProScreen(); await done(files.map(()=>null)); return; }
   await new Promise(res=>navToAlbum(INBOX, res));
   const res = await addFilesWithProgress(files, null, n=>n === 1 ? t('rcvOne', {name:files[0].name}) : t('rcvN', {n}), {retry:true});
   await done(res);
@@ -30769,6 +31014,7 @@ function fzUpdate(uri, fn){
 }
 async function fzCheck(){
   const n = fzNative(); if(!n || !fzList(fzCfg()).length) return;
+  if(proZakljucano()) return;   /* v344: bez uvoza posle probe; novo iz fascikle stiže kad Pro bude aktivan */
   await scWaitOpen();
   _fzLast = Date.now();
   let again = false;
