@@ -759,6 +759,22 @@ html.sc-peek #modalUnlock{ display:flex; }
 .pro-keep .i{ margin-left:auto; width:28px; height:28px; border-radius:50%; border:1.5px solid var(--brass); color:var(--brass); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:none; }
 .pro-keep-t{ font-size:13.5px; line-height:1.5; color:var(--ink-dim); padding:10px 4px 0; }
 .pro-restore{ display:block; width:100%; min-height:48px; margin-top:10px; background:none; border:0; color:var(--brass); font:600 15px var(--font-ui); text-decoration:underline; cursor:pointer; }
+/* v345 PRIVATNOST: prvo pokretanje (stil upoznavanja), prozor saglasnosti (iznad svega), Podešavanja → Privatnost, politika */
+#pvSheet{ z-index:93; }
+#pvPolScreen{ z-index:88; }
+.ob-list li.pv-li{ flex:none; height:auto; min-height:0; align-items:flex-start; margin:0 0 clamp(6px, 1.4vh, 12px); font-size:clamp(14.5px, 2.05vh, 16.5px); line-height:1.35; }
+.pv-li .ob-ic{ font-size:15px; margin-top:1px; }
+.pv-note{ font-size:12.5px; color:#6B6252; line-height:1.4; margin:8px 0 0; text-align:center; }
+.cs-li{ display:flex; gap:10px; margin:0 0 12px; font-size:14.5px; line-height:1.4; color:var(--ink); }
+.cs-li b{ display:block; }
+.cs-li .k{ flex:none; width:22px; text-align:center; }
+.pv-btn{ min-height:40px; padding:0 14px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font:600 13.5px var(--font-ui); flex:none; cursor:pointer; }
+.pv-sec{ font-size:12px; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-dim); margin:18px 2px 8px; }
+.pv-top{ font-size:14px; line-height:1.45; color:var(--ink-dim); background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:14px; }
+.pv-top b{ color:var(--ink); }
+.pv-pol-p{ font-size:14.5px; line-height:1.5; color:var(--ink); margin:0 0 10px; }
+.pv-pol{ margin:0; padding:0 0 0 20px; font-size:14.5px; line-height:1.5; color:var(--ink); }
+.pv-pol li{ margin:0 0 10px; }
 .settings-card{ background:var(--surface); border-radius:13px; border:1px solid var(--line); overflow:hidden; }
 .settings-field{ padding:12px 14px; border-bottom:1px solid var(--line); }
 .settings-field:last-child{ border-bottom:none; }
@@ -3464,6 +3480,8 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
 <div class="set-screen" id="vzScreen"><div id="vzPanel"></div></div>
 <div class="set-screen" id="vzWin"><div id="vwPanel"></div></div>
 <div class="set-screen" id="proScreen"><div id="proPanel"></div></div>
+<div class="set-screen" id="pvPolScreen"><div id="pvPolPanel"></div></div>
+<div class="sheet-bg" id="pvSheet"><div class="sheet"><div class="sheet-head"><button class="back-btn" id="pvSheetBack" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h3 id="pvSheetT"></h3></div><div id="pvSheetB"></div></div></div>
 <input type="file" id="importInput" accept=".zip,.json,application/zip,application/json" style="display:none">
 
 <div class="exit-modal-backdrop" id="delBackdrop">
@@ -14171,6 +14189,173 @@ I18N.hr = {
   };
   Object.keys(P).forEach(l=>{ if(!I18N[l]) return; const g = P[l].g; delete P[l].g; P[l].proTitle = 'Life Archive Pro'; Object.assign(I18N[l], P[l]); if(Array.isArray(I18N[l].guide)) I18N[l].guide.push(g); });
 })();
+/* v345 PRIVATNOST: tekstovi za sve jezike (prvo pokretanje, Podešavanja → Privatnost, politika, saglasnosti AI / Drive / nazivi mesta) */
+(function(){
+  const P = {
+    sr: {pvHi:'Pre nego što počneš', pvName:'Tvoja privatnost', pvSub:'Kratko i jasno.', pvH:'Kako čuvamo tvoje podatke',
+      pv1:'Sve što dodaš ostaje na ovom telefonu.', pv2:'Bez naloga, bez e-adrese, bez reklama i bez praćenja.',
+      pv3:'Ništa ne napušta telefon dok sam ne izabereš — AI obradu ili Google Drive. Tada te prvo pitamo.', pv4:'Rezervna kopija ide samo tamo gde je ti sačuvaš.',
+      pvAccept:'Prihvatam', pvRead:'Pročitaj politiku privatnosti ›', pvNote:'Ovim ne daješ pristanak za slanje podataka — za to te pitamo posebno, tek kad zatreba.',
+      pvTile:'Privatnost', pvTileSub:'Politika i saglasnosti', pvTopB:'Tvoji podaci su na ovom telefonu.', pvTopT:'Bez naloga, reklama i praćenja. Van telefona ide samo ono za šta daš pristanak.',
+      pvPolicy:'Politika privatnosti', pvAccepted:'Prihvaćena {d}', pvConsents:'Saglasnosti', pvAi:'AI obrada', pvAiOn:'Data {d} · izabrani dokument ide Google-u', pvAiOn0:'Data · izabrani dokument ide Google-u',
+      pvAiOff:'Nije data · pitamo pre prvog slanja', pvRevoke:'Povuci', pvAllow:'Dozvoli', pvMesta:'Nazivi mesta', pvMestaOn:'Data {d} · koordinate fotografije idu usluzi za nazive mesta',
+      pvMestaOff:'Nije data · mesto se ne prikazuje', pvMestaAsk:'Nije data · pitamo kad zatreba', pvOcr:'Tekst iz slike', pvOcrSub:'Radi na telefonu · slike se ne šalju',
+      pvHint:'Povlačenje saglasnosti ne briše ništa iz Life Archive.', pvRevoked:'Saglasnost je povučena.', pvAllowed:'Saglasnost je data.',
+      pvPolDraft:'Konačan tekst politike privatnosti biće objavljen pre izlaska Life Archive na Google Play. Do tada važi ovaj kratak pregled:',
+      pvPolAi:'AI obrada: tek kad je pokreneš i pristaneš, izabrani dokument ide Google-ovom servisu Gemini.',
+      pvPolDr:'Google Drive: tek kad ga povežeš, kopija ide u posebnu fasciklu na tvom Drive-u; Life Archive vidi samo fajlove koje je sama napravila.',
+      pvPolMesta:'Nazivi mesta: uz tvoj pristanak, koordinate fotografije idu Androidovoj usluzi za nazive mesta (na većini telefona to je Google).',
+      pvPolOcr:'Tekst iz slike: radi na telefonu (Google ML Kit); slike se ne šalju, Google prima samo tehničke podatke o radu.',
+      csWhat:'Šta se šalje', csWho:'Kome', csImp:'Važno', csBack:'Povlačenje', csSees:'Šta Life Archive vidi', csWhen:'Kada', csStop:'Prekid', csWhy:'Zašto',
+      aiCsWhat:'Samo dokument (ili dokumenti) sa kojima AI radi — stranice ili tekst.', aiCsWho:'Google-ovom servisu Gemini, preko tvog ključa.',
+      aiCsImp:'Na besplatnom nivou Google može da koristi taj sadržaj za unapređenje svojih proizvoda. Ne šalji lične i poverljive dokumente.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Povezivanje sa Google Drive-om', drCsWhat:'Kopija tvojih slika, dokumenata i albuma — u posebnu fasciklu na TVOM Google Drive-u.',
+      drCsSees:'Samo fajlove koje je sama napravila. Ostatak tvog Drive-a ne vidi.', drCsWhen:'Samo preko Wi-Fi mreže (može da se promeni).',
+      drCsStop:'{set} → Google Drive → {off}. Ništa se ne briše sa telefona.', drCsOk:'Nastavi na Google prijavu',
+      msCsT:'Nazivi mesta za fotografije', msCsWhat:'Koordinate fotografije (gde je snimljena) — ne i sama slika.', msCsWho:'Androidovoj usluzi za nazive mesta (na većini telefona to je Google).',
+      msCsWhy:'Da uz fotografiju piše mesto, npr. „Kalamici, Grčka“.', msCsOk:'Pristajem', msCsNo:'Ne, hvala',
+      g:['Privatnost', 'Pri prvom pokretanju Life Archive ukratko kaže kako čuva tvoje podatke: sve je na telefonu, bez naloga, reklama i praćenja. Ništa ne napušta telefon dok sam ne izabereš — pre AI obrade, pre povezivanja Google Drive-a i pre prvog određivanja naziva mesta za fotografije prvo se otvori prozor koji kaže šta se šalje i kome, i tek posle tvog pristanka nešto se šalje. Podešavanja → Privatnost: politika privatnosti i sve saglasnosti na jednom mestu; svaku možeš da povučeš, a povlačenje ne briše ništa iz Life Archive. Tekst iz slike radi na telefonu i slike se ne šalju.']},
+    en: {pvHi:'Before you start', pvName:'Your privacy', pvSub:'Short and clear.', pvH:'How we keep your data',
+      pv1:'Everything you add stays on this phone.', pv2:'No account, no email, no ads and no tracking.',
+      pv3:'Nothing leaves the phone until you choose it — AI processing or Google Drive. Then we ask you first.', pv4:'A backup goes only where you save it.',
+      pvAccept:'I accept', pvRead:'Read the privacy policy ›', pvNote:'This is not consent to send any data — we ask for that separately, only when it is needed.',
+      pvTile:'Privacy', pvTileSub:'Policy and consents', pvTopB:'Your data is on this phone.', pvTopT:'No account, ads or tracking. Only what you consent to leaves the phone.',
+      pvPolicy:'Privacy policy', pvAccepted:'Accepted {d}', pvConsents:'Consents', pvAi:'AI processing', pvAiOn:'Given {d} · the chosen document goes to Google', pvAiOn0:'Given · the chosen document goes to Google',
+      pvAiOff:'Not given · we ask before the first send', pvRevoke:'Withdraw', pvAllow:'Allow', pvMesta:'Place names', pvMestaOn:'Given {d} · photo coordinates go to the place-name service',
+      pvMestaOff:'Not given · no place is shown', pvMestaAsk:'Not given · we ask when needed', pvOcr:'Text from image', pvOcrSub:'Works on the phone · images are not sent',
+      pvHint:'Withdrawing consent deletes nothing from Life Archive.', pvRevoked:'Consent withdrawn.', pvAllowed:'Consent given.',
+      pvPolDraft:'The final privacy policy will be published before Life Archive is released on Google Play. Until then this short overview applies:',
+      pvPolAi:'AI processing: only when you start it and agree, the chosen document goes to Google’s Gemini service.',
+      pvPolDr:'Google Drive: only when you connect it, a copy goes to a separate folder on your Drive; Life Archive sees only the files it created itself.',
+      pvPolMesta:'Place names: with your consent, photo coordinates go to Android’s place-name service (on most phones that is Google).',
+      pvPolOcr:'Text from image: works on the phone (Google ML Kit); images are not sent, Google receives only technical usage data.',
+      csWhat:'What is sent', csWho:'To whom', csImp:'Important', csBack:'Withdrawing', csSees:'What Life Archive sees', csWhen:'When', csStop:'Disconnecting', csWhy:'Why',
+      aiCsWhat:'Only the document (or documents) the AI works with — pages or text.', aiCsWho:'Google’s Gemini service, using your key.',
+      aiCsImp:'On the free tier Google may use this content to improve its products. Do not send personal or confidential documents.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Connecting Google Drive', drCsWhat:'A copy of your images, documents and albums — in a separate folder on YOUR Google Drive.',
+      drCsSees:'Only the files it created itself. It does not see the rest of your Drive.', drCsWhen:'Only over Wi-Fi (can be changed).',
+      drCsStop:'{set} → Google Drive → {off}. Nothing is deleted from the phone.', drCsOk:'Continue to Google sign-in',
+      msCsT:'Place names for photos', msCsWhat:'The photo’s coordinates (where it was taken) — not the image itself.', msCsWho:'Android’s place-name service (on most phones that is Google).',
+      msCsWhy:'So the photo shows the place, e.g. “Kalamitsi, Greece”.', msCsOk:'I agree', msCsNo:'No, thanks',
+      g:['Privacy', 'On first start Life Archive briefly explains how it keeps your data: everything is on the phone, with no account, ads or tracking. Nothing leaves the phone until you choose it — before AI processing, before connecting Google Drive and before place names are first looked up for photos, a window first tells you what is sent and to whom, and only after you agree is anything sent. Settings → Privacy: the privacy policy and all consents in one place; you can withdraw any of them, and withdrawing deletes nothing from Life Archive. Text from image works on the phone and images are not sent.']},
+    de: {pvHi:'Bevor du beginnst', pvName:'Deine Privatsphäre', pvSub:'Kurz und klar.', pvH:'Wie wir deine Daten aufbewahren',
+      pv1:'Alles, was du hinzufügst, bleibt auf diesem Handy.', pv2:'Kein Konto, keine E-Mail-Adresse, keine Werbung und kein Tracking.',
+      pv3:'Nichts verlässt das Handy, bis du es selbst wählst – KI-Verarbeitung oder Google Drive. Dann fragen wir dich zuerst.', pv4:'Eine Sicherung kommt nur dorthin, wo du sie speicherst.',
+      pvAccept:'Ich akzeptiere', pvRead:'Datenschutzerklärung lesen ›', pvNote:'Damit stimmst du keiner Datenübertragung zu – dafür fragen wir separat, erst wenn es nötig ist.',
+      pvTile:'Datenschutz', pvTileSub:'Erklärung und Einwilligungen', pvTopB:'Deine Daten sind auf diesem Handy.', pvTopT:'Kein Konto, keine Werbung, kein Tracking. Das Handy verlässt nur, wozu du einwilligst.',
+      pvPolicy:'Datenschutzerklärung', pvAccepted:'Akzeptiert am {d}', pvConsents:'Einwilligungen', pvAi:'KI-Verarbeitung', pvAiOn:'Erteilt am {d} · das gewählte Dokument geht an Google', pvAiOn0:'Erteilt · das gewählte Dokument geht an Google',
+      pvAiOff:'Nicht erteilt · wir fragen vor dem ersten Senden', pvRevoke:'Widerrufen', pvAllow:'Erlauben', pvMesta:'Ortsnamen', pvMestaOn:'Erteilt am {d} · Fotokoordinaten gehen an den Ortsnamendienst',
+      pvMestaOff:'Nicht erteilt · kein Ort wird angezeigt', pvMestaAsk:'Nicht erteilt · wir fragen bei Bedarf', pvOcr:'Text aus Bild', pvOcrSub:'Läuft auf dem Handy · Bilder werden nicht gesendet',
+      pvHint:'Ein Widerruf löscht nichts aus Life Archive.', pvRevoked:'Einwilligung widerrufen.', pvAllowed:'Einwilligung erteilt.',
+      pvPolDraft:'Die endgültige Datenschutzerklärung wird vor dem Start von Life Archive bei Google Play veröffentlicht. Bis dahin gilt diese kurze Übersicht:',
+      pvPolAi:'KI-Verarbeitung: erst wenn du sie startest und zustimmst, geht das gewählte Dokument an Googles Dienst Gemini.',
+      pvPolDr:'Google Drive: erst wenn du es verbindest, geht eine Kopie in einen eigenen Ordner auf deinem Drive; Life Archive sieht nur die Dateien, die es selbst erstellt hat.',
+      pvPolMesta:'Ortsnamen: mit deiner Einwilligung gehen die Koordinaten eines Fotos an den Ortsnamendienst von Android (auf den meisten Handys ist das Google).',
+      pvPolOcr:'Text aus Bild: läuft auf dem Handy (Google ML Kit); Bilder werden nicht gesendet, Google erhält nur technische Nutzungsdaten.',
+      csWhat:'Was gesendet wird', csWho:'An wen', csImp:'Wichtig', csBack:'Widerruf', csSees:'Was Life Archive sieht', csWhen:'Wann', csStop:'Trennen', csWhy:'Warum',
+      aiCsWhat:'Nur das Dokument (oder die Dokumente), mit dem die KI arbeitet – Seiten oder Text.', aiCsWho:'Googles Dienst Gemini, über deinen Schlüssel.',
+      aiCsImp:'In der kostenlosen Stufe kann Google diese Inhalte zur Verbesserung seiner Produkte verwenden. Sende keine persönlichen oder vertraulichen Dokumente.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Google Drive verbinden', drCsWhat:'Eine Kopie deiner Bilder, Dokumente und Alben – in einem eigenen Ordner auf DEINEM Google Drive.',
+      drCsSees:'Nur die Dateien, die es selbst erstellt hat. Den Rest deines Drive sieht es nicht.', drCsWhen:'Nur über WLAN (änderbar).',
+      drCsStop:'{set} → Google Drive → {off}. Auf dem Handy wird nichts gelöscht.', drCsOk:'Weiter zur Google-Anmeldung',
+      msCsT:'Ortsnamen für Fotos', msCsWhat:'Die Koordinaten des Fotos (wo es aufgenommen wurde) – nicht das Bild selbst.', msCsWho:'Den Ortsnamendienst von Android (auf den meisten Handys ist das Google).',
+      msCsWhy:'Damit beim Foto der Ort steht, z. B. „Kalamitsi, Griechenland“.', msCsOk:'Einverstanden', msCsNo:'Nein, danke',
+      g:['Datenschutz', 'Beim ersten Start erklärt Life Archive kurz, wie es deine Daten aufbewahrt: alles ist auf dem Handy, ohne Konto, Werbung und Tracking. Nichts verlässt das Handy, bis du es selbst wählst – vor der KI-Verarbeitung, vor dem Verbinden von Google Drive und bevor zum ersten Mal Ortsnamen für Fotos ermittelt werden, öffnet sich ein Fenster, das sagt, was an wen gesendet wird, und erst nach deiner Zustimmung wird etwas gesendet. Einstellungen → Datenschutz: Datenschutzerklärung und alle Einwilligungen an einem Ort; jede kannst du widerrufen, und ein Widerruf löscht nichts aus Life Archive. Text aus Bild läuft auf dem Handy, Bilder werden nicht gesendet.']},
+    es: {pvHi:'Antes de empezar', pvName:'Tu privacidad', pvSub:'Breve y claro.', pvH:'Cómo guardamos tus datos',
+      pv1:'Todo lo que añades se queda en este teléfono.', pv2:'Sin cuenta, sin correo, sin anuncios y sin seguimiento.',
+      pv3:'Nada sale del teléfono hasta que tú lo elijas: procesamiento con IA o Google Drive. Entonces te preguntamos primero.', pv4:'La copia de seguridad va solo adonde tú la guardes.',
+      pvAccept:'Acepto', pvRead:'Leer la política de privacidad ›', pvNote:'Con esto no das consentimiento para enviar datos: lo pedimos aparte, solo cuando haga falta.',
+      pvTile:'Privacidad', pvTileSub:'Política y consentimientos', pvTopB:'Tus datos están en este teléfono.', pvTopT:'Sin cuenta, anuncios ni seguimiento. Solo sale del teléfono lo que consientes.',
+      pvPolicy:'Política de privacidad', pvAccepted:'Aceptada el {d}', pvConsents:'Consentimientos', pvAi:'Procesamiento con IA', pvAiOn:'Dado el {d} · el documento elegido va a Google', pvAiOn0:'Dado · el documento elegido va a Google',
+      pvAiOff:'No dado · preguntamos antes del primer envío', pvRevoke:'Retirar', pvAllow:'Permitir', pvMesta:'Nombres de lugares', pvMestaOn:'Dado el {d} · las coordenadas de la foto van al servicio de nombres de lugares',
+      pvMestaOff:'No dado · no se muestra el lugar', pvMestaAsk:'No dado · preguntamos cuando haga falta', pvOcr:'Texto de imagen', pvOcrSub:'Funciona en el teléfono · las imágenes no se envían',
+      pvHint:'Retirar un consentimiento no borra nada de Life Archive.', pvRevoked:'Consentimiento retirado.', pvAllowed:'Consentimiento dado.',
+      pvPolDraft:'La política de privacidad definitiva se publicará antes del lanzamiento de Life Archive en Google Play. Hasta entonces se aplica este breve resumen:',
+      pvPolAi:'Procesamiento con IA: solo cuando lo inicias y aceptas, el documento elegido va al servicio Gemini de Google.',
+      pvPolDr:'Google Drive: solo cuando lo conectas, una copia va a una carpeta propia en tu Drive; Life Archive solo ve los archivos que ha creado.',
+      pvPolMesta:'Nombres de lugares: con tu consentimiento, las coordenadas de la foto van al servicio de nombres de lugares de Android (en la mayoría de los teléfonos es Google).',
+      pvPolOcr:'Texto de imagen: funciona en el teléfono (Google ML Kit); las imágenes no se envían, Google solo recibe datos técnicos de uso.',
+      csWhat:'Qué se envía', csWho:'A quién', csImp:'Importante', csBack:'Retirarlo', csSees:'Qué ve Life Archive', csWhen:'Cuándo', csStop:'Desconectar', csWhy:'Por qué',
+      aiCsWhat:'Solo el documento (o los documentos) con los que trabaja la IA: páginas o texto.', aiCsWho:'Al servicio Gemini de Google, con tu clave.',
+      aiCsImp:'En el nivel gratuito, Google puede usar ese contenido para mejorar sus productos. No envíes documentos personales ni confidenciales.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Conectar Google Drive', drCsWhat:'Una copia de tus imágenes, documentos y álbumes, en una carpeta propia en TU Google Drive.',
+      drCsSees:'Solo los archivos que ha creado. No ve el resto de tu Drive.', drCsWhen:'Solo por Wi-Fi (se puede cambiar).',
+      drCsStop:'{set} → Google Drive → {off}. No se borra nada del teléfono.', drCsOk:'Continuar al inicio de sesión de Google',
+      msCsT:'Nombres de lugares para las fotos', msCsWhat:'Las coordenadas de la foto (dónde se tomó), no la imagen.', msCsWho:'Al servicio de nombres de lugares de Android (en la mayoría de los teléfonos es Google).',
+      msCsWhy:'Para que la foto muestre el lugar, p. ej. «Kalamitsi, Grecia».', msCsOk:'Acepto', msCsNo:'No, gracias',
+      g:['Privacidad', 'Al iniciar por primera vez, Life Archive explica brevemente cómo guarda tus datos: todo está en el teléfono, sin cuenta, anuncios ni seguimiento. Nada sale del teléfono hasta que tú lo elijas: antes del procesamiento con IA, antes de conectar Google Drive y antes de buscar por primera vez los nombres de lugares de las fotos, se abre una ventana que dice qué se envía y a quién, y solo tras tu consentimiento se envía algo. Ajustes → Privacidad: la política de privacidad y todos los consentimientos en un solo lugar; puedes retirar cualquiera, y retirarlo no borra nada de Life Archive. El texto de imagen funciona en el teléfono y las imágenes no se envían.']},
+    fr: {pvHi:'Avant de commencer', pvName:'Ta vie privée', pvSub:'Court et clair.', pvH:'Comment nous gardons tes données',
+      pv1:'Tout ce que tu ajoutes reste sur ce téléphone.', pv2:'Sans compte, sans adresse e-mail, sans publicité et sans suivi.',
+      pv3:'Rien ne quitte le téléphone tant que tu ne le choisis pas — traitement par l’IA ou Google Drive. Nous te demandons d’abord.', pv4:'Une sauvegarde va seulement là où tu l’enregistres.',
+      pvAccept:'J’accepte', pvRead:'Lire la politique de confidentialité ›', pvNote:'Tu ne donnes ici aucun consentement à l’envoi de données — nous le demandons à part, seulement quand c’est nécessaire.',
+      pvTile:'Confidentialité', pvTileSub:'Politique et consentements', pvTopB:'Tes données sont sur ce téléphone.', pvTopT:'Sans compte, publicité ni suivi. Seul ce que tu acceptes quitte le téléphone.',
+      pvPolicy:'Politique de confidentialité', pvAccepted:'Acceptée le {d}', pvConsents:'Consentements', pvAi:'Traitement par l’IA', pvAiOn:'Donné le {d} · le document choisi va à Google', pvAiOn0:'Donné · le document choisi va à Google',
+      pvAiOff:'Non donné · nous demandons avant le premier envoi', pvRevoke:'Retirer', pvAllow:'Autoriser', pvMesta:'Noms de lieux', pvMestaOn:'Donné le {d} · les coordonnées des photos vont au service de noms de lieux',
+      pvMestaOff:'Non donné · aucun lieu n’est affiché', pvMestaAsk:'Non donné · nous demandons au besoin', pvOcr:'Texte depuis l’image', pvOcrSub:'Fonctionne sur le téléphone · les images ne sont pas envoyées',
+      pvHint:'Retirer un consentement ne supprime rien de Life Archive.', pvRevoked:'Consentement retiré.', pvAllowed:'Consentement donné.',
+      pvPolDraft:'La politique de confidentialité définitive sera publiée avant la sortie de Life Archive sur Google Play. D’ici là, ce bref aperçu s’applique :',
+      pvPolAi:'Traitement par l’IA : seulement quand tu le lances et acceptes, le document choisi va au service Gemini de Google.',
+      pvPolDr:'Google Drive : seulement quand tu le connectes, une copie va dans un dossier dédié sur ton Drive ; Life Archive ne voit que les fichiers qu’il a créés.',
+      pvPolMesta:'Noms de lieux : avec ton consentement, les coordonnées des photos vont au service de noms de lieux d’Android (sur la plupart des téléphones, c’est Google).',
+      pvPolOcr:'Texte depuis l’image : fonctionne sur le téléphone (Google ML Kit) ; les images ne sont pas envoyées, Google ne reçoit que des données techniques d’utilisation.',
+      csWhat:'Ce qui est envoyé', csWho:'À qui', csImp:'Important', csBack:'Retrait', csSees:'Ce que voit Life Archive', csWhen:'Quand', csStop:'Déconnexion', csWhy:'Pourquoi',
+      aiCsWhat:'Seulement le document (ou les documents) sur lequel travaille l’IA — pages ou texte.', aiCsWho:'Au service Gemini de Google, avec ta clé.',
+      aiCsImp:'Avec l’offre gratuite, Google peut utiliser ce contenu pour améliorer ses produits. N’envoie pas de documents personnels ou confidentiels.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Connexion à Google Drive', drCsWhat:'Une copie de tes images, documents et albums — dans un dossier dédié sur TON Google Drive.',
+      drCsSees:'Seulement les fichiers qu’il a créés. Il ne voit pas le reste de ton Drive.', drCsWhen:'Uniquement en Wi-Fi (modifiable).',
+      drCsStop:'{set} → Google Drive → {off}. Rien n’est supprimé du téléphone.', drCsOk:'Continuer vers la connexion Google',
+      msCsT:'Noms de lieux pour les photos', msCsWhat:'Les coordonnées de la photo (où elle a été prise) — pas l’image elle-même.', msCsWho:'Au service de noms de lieux d’Android (sur la plupart des téléphones, c’est Google).',
+      msCsWhy:'Pour que la photo affiche le lieu, p. ex. « Kalamitsi, Grèce ».', msCsOk:'J’accepte', msCsNo:'Non, merci',
+      g:['Confidentialité', 'Au premier lancement, Life Archive explique brièvement comment il garde tes données : tout est sur le téléphone, sans compte, publicité ni suivi. Rien ne quitte le téléphone tant que tu ne le choisis pas — avant le traitement par l’IA, avant de connecter Google Drive et avant la première recherche de noms de lieux pour les photos, une fenêtre indique ce qui est envoyé et à qui, et rien n’est envoyé sans ton accord. Réglages → Confidentialité : la politique de confidentialité et tous les consentements au même endroit ; tu peux retirer chacun d’eux, et le retrait ne supprime rien de Life Archive. Le texte depuis l’image fonctionne sur le téléphone et les images ne sont pas envoyées.']},
+    it: {pvHi:'Prima di iniziare', pvName:'La tua privacy', pvSub:'Breve e chiaro.', pvH:'Come conserviamo i tuoi dati',
+      pv1:'Tutto ciò che aggiungi resta su questo telefono.', pv2:'Nessun account, nessuna email, nessuna pubblicità e nessun tracciamento.',
+      pv3:'Niente lascia il telefono finché non lo scegli tu: elaborazione IA o Google Drive. Prima ti chiediamo.', pv4:'Il backup va solo dove lo salvi tu.',
+      pvAccept:'Accetto', pvRead:'Leggi l’informativa sulla privacy ›', pvNote:'Così non dai il consenso all’invio di dati: lo chiediamo a parte, solo quando serve.',
+      pvTile:'Privacy', pvTileSub:'Informativa e consensi', pvTopB:'I tuoi dati sono su questo telefono.', pvTopT:'Nessun account, pubblicità o tracciamento. Lascia il telefono solo ciò a cui acconsenti.',
+      pvPolicy:'Informativa sulla privacy', pvAccepted:'Accettata il {d}', pvConsents:'Consensi', pvAi:'Elaborazione IA', pvAiOn:'Dato il {d} · il documento scelto va a Google', pvAiOn0:'Dato · il documento scelto va a Google',
+      pvAiOff:'Non dato · chiediamo prima del primo invio', pvRevoke:'Revoca', pvAllow:'Consenti', pvMesta:'Nomi dei luoghi', pvMestaOn:'Dato il {d} · le coordinate delle foto vanno al servizio dei nomi dei luoghi',
+      pvMestaOff:'Non dato · il luogo non viene mostrato', pvMestaAsk:'Non dato · chiediamo quando serve', pvOcr:'Testo da immagine', pvOcrSub:'Funziona sul telefono · le immagini non vengono inviate',
+      pvHint:'Revocare un consenso non elimina nulla da Life Archive.', pvRevoked:'Consenso revocato.', pvAllowed:'Consenso dato.',
+      pvPolDraft:'L’informativa sulla privacy definitiva sarà pubblicata prima dell’uscita di Life Archive su Google Play. Fino ad allora vale questo breve riepilogo:',
+      pvPolAi:'Elaborazione IA: solo quando la avvii e acconsenti, il documento scelto va al servizio Gemini di Google.',
+      pvPolDr:'Google Drive: solo quando lo colleghi, una copia va in una cartella dedicata sul tuo Drive; Life Archive vede solo i file che ha creato.',
+      pvPolMesta:'Nomi dei luoghi: con il tuo consenso, le coordinate delle foto vanno al servizio dei nomi dei luoghi di Android (sulla maggior parte dei telefoni è Google).',
+      pvPolOcr:'Testo da immagine: funziona sul telefono (Google ML Kit); le immagini non vengono inviate, Google riceve solo dati tecnici di utilizzo.',
+      csWhat:'Cosa viene inviato', csWho:'A chi', csImp:'Importante', csBack:'Revoca', csSees:'Cosa vede Life Archive', csWhen:'Quando', csStop:'Scollegamento', csWhy:'Perché',
+      aiCsWhat:'Solo il documento (o i documenti) su cui lavora l’IA: pagine o testo.', aiCsWho:'Al servizio Gemini di Google, con la tua chiave.',
+      aiCsImp:'Con il livello gratuito Google può usare questi contenuti per migliorare i suoi prodotti. Non inviare documenti personali o riservati.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Collegamento a Google Drive', drCsWhat:'Una copia di immagini, documenti e album, in una cartella dedicata sul TUO Google Drive.',
+      drCsSees:'Solo i file che ha creato. Non vede il resto del tuo Drive.', drCsWhen:'Solo tramite Wi-Fi (modificabile).',
+      drCsStop:'{set} → Google Drive → {off}. Dal telefono non viene eliminato nulla.', drCsOk:'Continua all’accesso Google',
+      msCsT:'Nomi dei luoghi per le foto', msCsWhat:'Le coordinate della foto (dove è stata scattata), non l’immagine.', msCsWho:'Al servizio dei nomi dei luoghi di Android (sulla maggior parte dei telefoni è Google).',
+      msCsWhy:'Perché la foto mostri il luogo, ad es. «Kalamitsi, Grecia».', msCsOk:'Accetto', msCsNo:'No, grazie',
+      g:['Privacy', 'Al primo avvio Life Archive spiega in breve come conserva i tuoi dati: tutto è sul telefono, senza account, pubblicità o tracciamento. Niente lascia il telefono finché non lo scegli tu: prima dell’elaborazione IA, prima di collegare Google Drive e prima di cercare per la prima volta i nomi dei luoghi delle foto si apre una finestra che dice cosa viene inviato e a chi, e solo dopo il tuo consenso viene inviato qualcosa. Impostazioni → Privacy: l’informativa sulla privacy e tutti i consensi in un unico posto; puoi revocarli, e la revoca non elimina nulla da Life Archive. Il testo da immagine funziona sul telefono e le immagini non vengono inviate.']},
+    hr: {pvHi:'Prije nego što počneš', pvName:'Tvoja privatnost', pvSub:'Kratko i jasno.', pvH:'Kako čuvamo tvoje podatke',
+      pv1:'Sve što dodaš ostaje na ovom telefonu.', pv2:'Bez računa, bez e-adrese, bez oglasa i bez praćenja.',
+      pv3:'Ništa ne napušta telefon dok sam ne odabereš — AI obradu ili Google Drive. Tada te prvo pitamo.', pv4:'Sigurnosna kopija ide samo tamo gdje je ti spremiš.',
+      pvAccept:'Prihvaćam', pvRead:'Pročitaj pravila o privatnosti ›', pvNote:'Ovime ne daješ privolu za slanje podataka — za to te pitamo posebno, tek kad zatreba.',
+      pvTile:'Privatnost', pvTileSub:'Pravila i privole', pvTopB:'Tvoji podaci su na ovom telefonu.', pvTopT:'Bez računa, oglasa i praćenja. Izvan telefona ide samo ono za što daš privolu.',
+      pvPolicy:'Pravila o privatnosti', pvAccepted:'Prihvaćena {d}', pvConsents:'Privole', pvAi:'AI obrada', pvAiOn:'Dana {d} · odabrani dokument ide Googleu', pvAiOn0:'Dana · odabrani dokument ide Googleu',
+      pvAiOff:'Nije dana · pitamo prije prvog slanja', pvRevoke:'Povuci', pvAllow:'Dopusti', pvMesta:'Nazivi mjesta', pvMestaOn:'Dana {d} · koordinate fotografije idu usluzi za nazive mjesta',
+      pvMestaOff:'Nije dana · mjesto se ne prikazuje', pvMestaAsk:'Nije dana · pitamo kad zatreba', pvOcr:'Tekst iz slike', pvOcrSub:'Radi na telefonu · slike se ne šalju',
+      pvHint:'Povlačenje privole ne briše ništa iz Life Archive.', pvRevoked:'Privola je povučena.', pvAllowed:'Privola je dana.',
+      pvPolDraft:'Konačan tekst pravila o privatnosti bit će objavljen prije izlaska Life Archive na Google Play. Do tada vrijedi ovaj kratak pregled:',
+      pvPolAi:'AI obrada: tek kad je pokreneš i pristaneš, odabrani dokument ide Googleovoj usluzi Gemini.',
+      pvPolDr:'Google Drive: tek kad ga povežeš, kopija ide u posebnu mapu na tvom Driveu; Life Archive vidi samo datoteke koje je sam izradio.',
+      pvPolMesta:'Nazivi mjesta: uz tvoju privolu, koordinate fotografije idu Androidovoj usluzi za nazive mjesta (na većini telefona to je Google).',
+      pvPolOcr:'Tekst iz slike: radi na telefonu (Google ML Kit); slike se ne šalju, Google prima samo tehničke podatke o radu.',
+      csWhat:'Što se šalje', csWho:'Kome', csImp:'Važno', csBack:'Povlačenje', csSees:'Što Life Archive vidi', csWhen:'Kada', csStop:'Prekid', csWhy:'Zašto',
+      aiCsWhat:'Samo dokument (ili dokumenti) s kojima AI radi — stranice ili tekst.', aiCsWho:'Googleovoj usluzi Gemini, putem tvog ključa.',
+      aiCsImp:'Na besplatnoj razini Google taj sadržaj može koristiti za poboljšanje svojih proizvoda. Ne šalji osobne i povjerljive dokumente.', aiCsBack:'{set} → {pv}.',
+      drCsT:'Povezivanje s Google Driveom', drCsWhat:'Kopija tvojih slika, dokumenata i albuma — u posebnu mapu na TVOM Google Driveu.',
+      drCsSees:'Samo datoteke koje je sam izradio. Ostatak tvog Drivea ne vidi.', drCsWhen:'Samo putem Wi-Fi mreže (može se promijeniti).',
+      drCsStop:'{set} → Google Drive → {off}. Ništa se ne briše s telefona.', drCsOk:'Nastavi na Google prijavu',
+      msCsT:'Nazivi mjesta za fotografije', msCsWhat:'Koordinate fotografije (gdje je snimljena) — ne i sama slika.', msCsWho:'Androidovoj usluzi za nazive mjesta (na većini telefona to je Google).',
+      msCsWhy:'Da uz fotografiju piše mjesto, npr. „Kalamici, Grčka”.', msCsOk:'Pristajem', msCsNo:'Ne, hvala',
+      g:['Privatnost', 'Pri prvom pokretanju Life Archive ukratko kaže kako čuva tvoje podatke: sve je na telefonu, bez računa, oglasa i praćenja. Ništa ne napušta telefon dok sam ne odabereš — prije AI obrade, prije povezivanja Google Drivea i prije prvog određivanja naziva mjesta za fotografije najprije se otvori prozor koji kaže što se šalje i kome, i tek nakon tvoje privole nešto se šalje. Postavke → Privatnost: pravila o privatnosti i sve privole na jednom mjestu; svaku možeš povući, a povlačenje ne briše ništa iz Life Archive. Tekst iz slike radi na telefonu i slike se ne šalju.']}
+  };
+  Object.keys(P).forEach(l=>{ if(!I18N[l]) return; const g = P[l].g; delete P[l].g; Object.assign(I18N[l], P[l]); if(Array.isArray(I18N[l].guide)) I18N[l].guide.push(g); });
+})();
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'bs', 'sh', 'me', 'cnr'];   /* v332: hr ima svoj rečnik */
@@ -16134,7 +16319,7 @@ let _note = null, _noteTimer = null, _notePoll = null, _noteWarn = null;
 /* v148: --pop-top = donja ivica zamrznutog zaglavlja ekrana ispod prozora koji se otvara (merenje u trenutku otvaranja). */
 const POP_HEADS = { modalBg:['#modalPath','#modalBar'], pageEditor:['.set-header'], pgView:['.pv-head','#pvHint'],
   aiWs:['.set-header','#wsTop'], wsResScr:['.set-header'], wsFill:['.set-header','.wf-top'], wsEditW:['.set-header'],
-  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'], proScreen:['.set-header'] };
+  settingsScreen:['.set-header'], expScreen:['.set-header'], syncScreen:['.set-header'], vzScreen:['.set-header'], vzWin:['.vw-hd'], proScreen:['.set-header'], pvPolScreen:['.set-header'] };
 function popTopFor(pop){
   const pz = pop ? (parseInt(getComputedStyle(pop).zIndex, 10) || 0) : 1e9;
   let host = null, hz = -1;
@@ -16166,7 +16351,7 @@ new MutationObserver(ms=>{
   updatePopTop(); cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop);
 }).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(_popRaf); _popRaf = requestAnimationFrame(updatePopTop); });
-const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','zsScr','proScreen'];
+const NOTE_SCREENS = ['cropScr','modalBg','pageEditor','pgView','aiWs','wsResScr','wsBusyScr','wsFill','wfBusyScr','wsEditW','pdScr','wsAddSheet','settingsScreen','expScreen','syncScreen','vzScreen','vzWin','zsScr','proScreen','pvPolScreen'];
 function noteHost(){
   let best = null, bz = -1;
   for(const id of NOTE_SCREENS){
@@ -19568,6 +19753,8 @@ function mestaDana(list){
 let _mestaRadi = false, _mestaJos = false;
 async function mestaPopuni(){
   const n = fzNative(); if(!n || !n.mesto) return;
+  if(!items.some(i=>i.gps && typeof i.gps === 'object' && i.mesto === undefined)) return;
+  if(!(await msConsent())) return;   /* v345: koordinate idu usluzi za nazive mesta tek uz pristanak */
   if(_mestaRadi){ _mestaJos = true; return; }
   _mestaRadi = true; _mestaJos = false;
   let kes = {}; try{ kes = JSON.parse(localStorage.getItem(MESTA_KEY) || '{}') || {}; }catch(e){}
@@ -19895,9 +20082,9 @@ async function askRun(){
   if(_ask && _ask.busy) return;
   if(!aiGetKey()){ _ask = {q:searchEl.value, err:aiError('aiErrNoKey')}; render(); return; }
   if(!aiHasConsent()){
-    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    const ok = await aiConsentAsk();   /* v345 */
     if(!ok || !searchOpen) return;
-    aiLsSet(AI_LS_CONSENT, '1');
+    aiConsentGive();
   }
   searchEl.blur();
   hideNote();   /* stara poruka („upiši pitanje…“) ne ostaje iznad odgovora */
@@ -20049,7 +20236,7 @@ function searchEmptyAlt(inAlbum){
   return d;
 }
 
-loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); introBoot(); checkDeepLink(); checkExpNotices().finally(proNotice); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
+loadAll().then(ok=>{ if(!ok) return; itemsReady = true; scBoot(); rcvBoot(); fzBoot(); vzBoot(); obBoot(); drBoot(); pvBoot(introBoot); checkDeepLink(); checkExpNotices().finally(proNotice); pdfWarmUp(); setTimeout(pdfTextFix, 5000);
   /* v183: posle izbora jezika vrati korisnika na ekran „jezik“ */
   let ol = null; try{ ol = sessionStorage.getItem('galerija:openLang'); sessionStorage.removeItem('galerija:openLang'); }catch(e){}
   let wp = null; try{ wp = sessionStorage.getItem('galerija:wiped'); sessionStorage.removeItem('galerija:wiped'); }catch(e){}
@@ -20465,7 +20652,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 344;
+const APP_VERSION = 345;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -20626,6 +20813,7 @@ function renderSettingsTiles(){
     settingsTile('💾', t('bkTile'), lastBackupDisplay(), "openSettingsSub('backup')")+
     settingsTile('✨', t('aiTile'), aiTileSub(), "openSettingsSub('ai')")+
     settingsTile('♻️', t('trTile'), trashTileSub(), "openSettingsSub('trash')")+
+    settingsTile('🛡️', t('pvTile'), t('pvTileSub'), "openSettingsSub('privacy')")+   /* v345 */
     settingsTile('🗑', t('wipeTile'), t('wipeSub'), 'wipeAllData()', 'danger')+
     settingsTile('💬', t('fbTile'), t('fbSub'), 'sendFeedback()', 'fb-tile')+   /* v317: poslednja stavka (Zoran 13.11.) */
     '<div class="settings-hint" id="storageInfo"></div>'+
@@ -20736,6 +20924,132 @@ function proNotice(){
   showNote(sta === 'kraj' ? t('proEndNote') : t('proSoonNote', {n:s.ostalo, d:dayWord(s.ostalo)}), 9000, {warn:sta === 'kraj', action:{label:t('proAct'), fn:openProScreen}});
 }
 /* ===================== kraj PROBA I PRO ===================== */
+/* =====================================================================
+   PRIVATNOST (v345; Zoran 25.11. „zaštita u tri sloja“, slike 26.11. „to je to“; `arhiva-ideje.md` 10)
+   1) prvo pokretanje: ekran „Tvoja privatnost“ (obaveštenje, NE opšta saglasnost) + „Prihvatam“ → `galerija:privOk` {d, v}; pre upoznavanja.
+   2) posebna saglasnost tačno pre slanja van telefona: pvAsk() — AI (aiConsentAsk, sva 4 mesta), Google Drive (pre Google prijave,
+      svaki put), nazivi mesta (Androidov Geocoder: na većini telefona Google; pita se jednom pre prvog određivanja, `galerija:mestaOk`).
+   3) Podešavanja → Privatnost: politika (u aplikaciji; konačan tekst u D2) i sve saglasnosti, povlačenje ne briše ništa.
+   Tekst iz slike (ML Kit) radi na telefonu → samo obaveštenje. Ključevi su `galerija:*` → „Obriši sve“ ih briše (ponovo prvo pokretanje).
+   ===================================================================== */
+const PV_KEY = LS_PREFIX + 'privOk', PV_VER = 1, PV_AI_D = LS_PREFIX + 'aiConsentD', MS_KEY = LS_PREFIX + 'mestaOk';
+function pvAccepted(){ try{ const o = JSON.parse(localStorage.getItem(PV_KEY) || 'null'); return o && o.v >= PV_VER ? o : null; }catch(e){ return null; } }
+function pvDate(ymd){ return isYmd(ymd) ? fmtExpDate(ymd, true) : ''; }
+function pvBlocking(){ return !!(document.getElementById('pvOv') || document.getElementById('introOv') || (typeof lkState !== 'undefined' && lkState === 'locked')); }
+const PV_MARK = '<svg class="ob-mark" viewBox="0 0 30 30" aria-hidden="true"><defs><linearGradient id="obgpv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2DDA4"/><stop offset=".5" stop-color="#C9A961"/><stop offset="1" stop-color="#8C6A2C"/></linearGradient></defs><path d="M15 1.5l13.5 13.5L15 28.5 1.5 15z" fill="none" stroke="url(#obgpv)" stroke-width="2"/><path d="M15 8.5l6.5 6.5-6.5 6.5-6.5-6.5z" fill="url(#obgpv)"/></svg>';
+/* prvo pokretanje: posle „Prihvatam“ ide dalje (upoznavanje); korak nazad ne zatvara ekran */
+function pvBoot(next){
+  if(pvAccepted()){ next(); return; }
+  const li = (ic, k)=>'<li class="pv-li"><span class="ob-ic">' + ic + '</span><span>' + escapeHtml(t(k)) + '</span></li>';
+  const ov = document.createElement('div');
+  ov.id = 'pvOv'; ov.className = 'ob-ov';
+  ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+  ov.innerHTML = '<div class="ob-track"><section class="ob-sl ob-w"><div class="ob-hero">' + OB_GIL + PV_MARK +
+    '<p class="ob-hi">' + escapeHtml(t('pvHi')) + '</p><h1 class="ob-name">' + escapeHtml(t('pvName')) + '</h1><p class="ob-cmp">' + escapeHtml(t('pvSub')) + '</p><div class="ob-rule"></div></div>' +
+    '<div class="ob-body"><h2 class="ob-h">' + escapeHtml(t('pvH')) + '</h2><ul class="ob-list">' + li('📱', 'pv1') + li('🔒', 'pv2') + li('☁️', 'pv3') + li('🗂', 'pv4') + '</ul></div>' +
+    '<div class="ob-act"><button type="button" class="ob-add" id="pvOk">' + escapeHtml(t('pvAccept')) + '</button>' +
+    '<button type="button" class="ob-rest" id="pvRead">' + escapeHtml(t('pvRead')) + '</button><p class="pv-note">' + escapeHtml(t('pvNote')) + '</p></div></section></div>';
+  document.body.appendChild(ov);
+  document.body.classList.add('intro-on');
+  let done = false;
+  const onBack = ()=>{ if(!done) pushBack(onBack); };
+  pushBack(onBack);
+  ov.querySelector('#pvRead').onclick = ()=>openPvPolicy();
+  ov.querySelector('#pvOk').onclick = ()=>{
+    try{ localStorage.setItem(PV_KEY, JSON.stringify({d:todayYmd(), v:PV_VER})); }catch(e){}
+    done = true;
+    requestCloseThen(()=>{ ov.remove(); document.body.classList.remove('intro-on'); next(); });
+  };
+}
+/* politika privatnosti u aplikaciji (radi i bez interneta); do D2 kratak pregled */
+const pvPolScreen = document.getElementById('pvPolScreen');
+function openPvPolicy(){
+  const li = (k)=>'<li>' + escapeHtml(t(k)) + '</li>';
+  document.getElementById('pvPolPanel').innerHTML = settingsHeader(t('pvPolicy')) + '<div class="set-body"><p class="pv-pol-p">' + escapeHtml(t('pvPolDraft')) + '</p>' +
+    '<ul class="pv-pol">' + li('pv1') + li('pv2') + li('pv3') + li('pv4') + li('pvPolAi') + li('pvPolDr') + li('pvPolMesta') + li('pvPolOcr') + '</ul></div>';
+  pvPolScreen.classList.add('open'); pvPolScreen.scrollTop = 0;
+  pushBack(()=>pvPolScreen.classList.remove('open'));
+}
+/* saglasnost tačno pre slanja: prozor „šta se šalje / kome …“ → true samo na „Pristajem“ */
+let _pvAskChain = Promise.resolve();
+function pvAsk(o){
+  const run = ()=>new Promise(res=>{
+    const sh = document.getElementById('pvSheet');
+    document.getElementById('pvSheetT').textContent = o.title;
+    document.getElementById('pvSheetB').innerHTML = (o.doc ? '<div class="exp-doc">' + escapeHtml(o.doc) + '</div>' : '') +
+      o.rows.map(([ic, h, tx])=>'<div class="cs-li"><span class="k">' + ic + '</span><span><b>' + escapeHtml(h) + '</b>' + escapeHtml(tx) + '</span></div>').join('') +
+      '<button type="button" class="sheet-cta" id="pvSheetOk">' + escapeHtml(o.ok) + '</button>' +
+      '<button type="button" class="sheet-cta secondary ai-gap" id="pvSheetNo">' + escapeHtml(o.no || t('cfCancel')) + '</button>';
+    let r = false;
+    const closer = ()=>{ sh.classList.remove('open'); res(r); };
+    document.getElementById('pvSheetOk').onclick = ()=>{ r = true; requestClose(); };
+    document.getElementById('pvSheetNo').onclick = ()=>requestClose();
+    document.getElementById('pvSheetBack').onclick = ()=>requestClose();
+    sh.onclick = (e)=>{ if(e.target === sh) requestClose(); };
+    sh.classList.add('open'); sh.querySelector('.sheet').scrollTop = 0;
+    pushBack(closer);
+  });
+  const p = _pvAskChain.then(run);
+  _pvAskChain = p.catch(()=>{});
+  return p;
+}
+function pvSet(){ return t('setTitle'); }
+function aiConsentRows(){
+  return [['📄', t('csWhat'), t('aiCsWhat')], ['🏢', t('csWho'), t('aiCsWho')], ['⚠️', t('csImp'), t('aiCsImp')], ['↩️', t('csBack'), t('aiCsBack', {set:pvSet(), pv:t('pvTile')})]];
+}
+function aiConsentGive(){ aiLsSet(AI_LS_CONSENT,'1'); aiLsSet(PV_AI_D, todayYmd()); }
+async function aiConsentAsk(doc){
+  const ok = await pvAsk({title:t('aiConsentTitle'), doc, rows:aiConsentRows(), ok:t('aiConsentOk'), no:t('aiCancel')});
+  if(ok) aiConsentGive();
+  return ok;
+}
+async function drConnectAsk(){
+  if(_drConnecting) return;
+  const ok = await pvAsk({title:t('drCsT'), rows:[['🗂', t('csWhat'), t('drCsWhat')], ['🔒', t('csSees'), t('drCsSees')], ['📶', t('csWhen'), t('drCsWhen')],
+    ['↩️', t('csStop'), t('drCsStop', {set:pvSet(), off:t('drOff')})]], ok:t('drCsOk')});
+  if(ok) drConnect();
+}
+function msState(){ try{ const o = JSON.parse(localStorage.getItem(MS_KEY) || 'null'); return o && (o.s === '1' || o.s === '0') ? o : null; }catch(e){ return null; } }
+function msSet(s){ try{ localStorage.setItem(MS_KEY, JSON.stringify({s, d:todayYmd()})); }catch(e){} }
+let _msAsking = false;
+/* nazivi mesta: true = sme da se šalje; prvi put (ima šta da se odredi) pita, odbijeno = ne pita ponovo (Podešavanja → Privatnost) */
+async function msConsent(){
+  const s = msState();
+  if(s) return s.s === '1';
+  if(_msAsking || document.hidden || pvBlocking()) return false;
+  _msAsking = true;
+  try{
+    const ok = await pvAsk({title:t('msCsT'), rows:[['📍', t('csWhat'), t('msCsWhat')], ['🏢', t('csWho'), t('msCsWho')], ['🏷️', t('csWhy'), t('msCsWhy')],
+      ['↩️', t('csBack'), t('aiCsBack', {set:pvSet(), pv:t('pvTile')})]], ok:t('msCsOk'), no:t('msCsNo')});
+    msSet(ok ? '1' : '0');
+    return ok;
+  }finally{ _msAsking = false; }
+}
+function pvMestaOn(){ const n = fzNative(); return !!(n && n.mesto); }
+function pvSettingsHtml(){
+  const acc = pvAccepted(), ai = aiHasConsent(), aiD = aiLsGet(PV_AI_D), ms = msState();
+  const row = (id, ic, lb, sub, btn)=>(btn === '›' ? '<button type="button" class="settings-row" id="' + id + '">' : '<div class="settings-row" id="' + id + '">') +
+    '<span class="row-icon">' + ic + '</span><span class="row-label">' + escapeHtml(lb) + '<span class="lk-row-sub">' + escapeHtml(sub) + '</span></span>' +
+    (btn === '›' ? '<span class="chevron">›</span></button>' : (btn ? '<button type="button" class="pv-btn" id="' + id + 'B">' + escapeHtml(btn) + '</button>' : '') + '</div>');
+  return '<div class="pv-top"><b>' + escapeHtml(t('pvTopB')) + '</b> ' + escapeHtml(t('pvTopT')) + '</div>' +
+    '<div class="settings-card">' + row('pvPolRow', '📄', t('pvPolicy'), acc ? t('pvAccepted', {d:pvDate(acc.d)}) : '', '›') + '</div>' +
+    '<div class="pv-sec">' + escapeHtml(t('pvConsents')) + '</div><div class="settings-card">' +
+    row('pvAiRow', '✨', t('pvAi'), ai ? (isYmd(aiD) ? t('pvAiOn', {d:pvDate(aiD)}) : t('pvAiOn0')) : t('pvAiOff'), ai ? t('pvRevoke') : '') +
+    (drNative() ? row('pvDrRow', '☁️', 'Google Drive', drTileSub(), '›') : '') +
+    (pvMestaOn() ? row('pvMsRow', '📍', t('pvMesta'), ms && ms.s === '1' ? t('pvMestaOn', {d:pvDate(ms.d)}) : ms ? t('pvMestaOff') : t('pvMestaAsk'), ms && ms.s === '1' ? t('pvRevoke') : t('pvAllow')) : '') +
+    (ocrNative() ? row('pvOcrRow', '🔤', t('pvOcr'), t('pvOcrSub'), '') : '') + '</div>' +
+    '<div class="settings-hint">' + escapeHtml(t('pvHint')) + '</div>';
+}
+function pvWire(){
+  const b = document.querySelector('#settingsPanel #pvSet'); if(!b) return;
+  const again = ()=>{ b.innerHTML = pvSettingsHtml(); pvWire(); };
+  const on = (id, fn)=>{ const e = document.getElementById(id); if(e) e.onclick = fn; };
+  on('pvPolRow', openPvPolicy);
+  on('pvAiRowB', ()=>{ aiLsSet(AI_LS_CONSENT, null); aiLsSet(PV_AI_D, null); toast(t('pvRevoked')); again(); });
+  on('pvDrRow', ()=>openSettingsSub('drive'));
+  on('pvMsRowB', ()=>{ const was = msState(); const give = !(was && was.s === '1'); msSet(give ? '1' : '0'); toast(t(give ? 'pvAllowed' : 'pvRevoked')); again(); if(give) mestaPopuni(); });
+}
+/* ===================== kraj PRIVATNOST ===================== */
 function openSettings(){
   settingsSubOpen = false;
   renderSettingsTiles();
@@ -20817,6 +21131,9 @@ function openSettingsSub(which){
     if(!fzNative() || !fzNative().lokacija) return;
     title = t('gpsTile');
     body = '<div id="gpsSet">'+gpsSettingsHtml()+'</div>';
+  }else if(which === 'privacy'){   /* v345 */
+    title = t('pvTile');
+    body = '<div id="pvSet">'+pvSettingsHtml()+'</div>';
   }else if(which === 'errlog'){
     title = t('errTitle');
     body = errLogBodyHtml();
@@ -20832,6 +21149,7 @@ function openSettingsSub(which){
   if(which === 'drive') drWire();
   if(which === 'folders') fzWire();
   if(which === 'gps'){ gpsWire(); gpsStanje().then(gpsRefresh); }
+  if(which === 'privacy') pvWire();
   settingsScreen.scrollTop = 0;
   if(!settingsSubOpen){
     settingsSubOpen = true;
@@ -23542,10 +23860,10 @@ function aiStartRead(item){
 function aiShowConsent(item){
   aiSetTitle(t('aiConsentTitle'));
   aiBody.innerHTML = '<div class="exp-doc">' + escapeHtml(itemLabel(item)) + '</div>' +
-    '<p class="ai-p">' + escapeHtml(t('aiConsentText')) + '</p>' +
+    aiConsentRows().map(([ic, h, tx])=>'<div class="cs-li"><span class="k">' + ic + '</span><span><b>' + escapeHtml(h) + '</b>' + escapeHtml(tx) + '</span></div>').join('') +   /* v345 */
     '<button type="button" class="sheet-cta" id="aiConsentOk">' + escapeHtml(t('aiConsentOk')) + '</button>' +
     '<button type="button" class="sheet-cta secondary ai-gap" id="aiConsentNo">' + escapeHtml(t('aiCancel')) + '</button>';
-  document.getElementById('aiConsentOk').onclick = ()=>{ aiLsSet(AI_LS_CONSENT, '1'); aiRunRead(item); };
+  document.getElementById('aiConsentOk').onclick = ()=>{ aiConsentGive(); aiRunRead(item); };
   document.getElementById('aiConsentNo').onclick = ()=>requestClose();
 }
 async function aiRunRead(item){
@@ -25877,9 +26195,9 @@ async function wsRun(task){
   const where = task.kind === 'refine' ? 'res' : 'ws';
   if(!aiGetKey()){ _ws.err = {e:aiError('aiErrNoKey'), task:null, where}; wsRender(); return; }
   if(!aiHasConsent()){
-    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    const ok = await aiConsentAsk();   /* v345 */
     if(!ok || !_ws) return;
-    aiLsSet(AI_LS_CONSENT, '1');
+    aiConsentGive();
   }
   const src = _ws.src;
   const base = task.kind === 'refine' ? _ws.vers[_ws.cur] : null;
@@ -26778,9 +27096,9 @@ async function zsRun(){
   try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){}
   if(!aiGetKey()){ z.err = aiError('aiErrNoKey'); zsRender(); return; }
   if(!aiHasConsent()){
-    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    const ok = await aiConsentAsk();   /* v345 */
     if(!ok || _zs !== z) return;
-    aiLsSet(AI_LS_CONSENT, '1');
+    aiConsentGive();
   }
   const req = ++_zsReq, ctrl = new AbortController(), model = aiModel();
   const list = z.docs.map(id=>items.find(x=>x.id === id)).filter(Boolean);
@@ -29662,9 +29980,9 @@ async function weAiRun(){
   const label = req.length > 60 ? req.slice(0, 58) + '…' : req;
   if(!aiGetKey()){ weAiShow({err:aiError('aiErrNoKey')}); return; }
   if(!aiHasConsent()){
-    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    const ok = await aiConsentAsk();   /* v345 */
     if(!ok || _we !== we) return;
-    aiLsSet(AI_LS_CONSENT, '1');
+    aiConsentGive();
   }
   const doc = weAiDocText();
   if(doc.length > WE_AI_MAX){ toast(t('weAiBig', {n:fmtInt(WE_AI_MAX)})); return; }
@@ -29955,9 +30273,9 @@ async function wfAiRun(){
   if(!a.src.length) return;
   if(!aiGetKey()){ a.err = aiError('aiErrNoKey'); wfAiRender(); return; }
   if(!aiHasConsent()){
-    const ok = await askConfirm({icon:'✨', title:t('aiConsentTitle'), text:t('aiConsentText'), okIcon:'✨', okLabel:t('aiConsentOk'), danger:false});
+    const ok = await aiConsentAsk();   /* v345 */
     if(!ok || _wf !== wf) return;
-    aiLsSet(AI_LS_CONSENT, '1');
+    aiConsentGive();
   }
   wfSyncInputs();
   wfCommit();
@@ -32801,7 +33119,7 @@ function drSettingsHtml(){
     btn('drOffBtn', t('drOff'), true) + hint('drSync1') + hint('drSync2') + hint('drOffHint') + hint('drHintSafe');
 }
 function drWire(){
-  const a = document.getElementById('drConnBtn'); if(a) a.onclick = drConnect;
+  const a = document.getElementById('drConnBtn'); if(a) a.onclick = drConnectAsk;   /* v345: prvo naš prozor */
   const b = document.getElementById('drOffBtn'); if(b) b.onclick = drDisconnect;
   const w = document.getElementById('drWifiRow');
   if(w) w.onclick = ()=>{ _dr.wifi = !drWifiOnly(); if(!_dr.wifi && _dr.err === 'wifi') _dr.err = null; drSave(); drRefresh(); drSoon(500); };
