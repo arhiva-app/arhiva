@@ -4626,7 +4626,7 @@ const I18N = {
     lkCurSub: 'Potvrdite pre izmene',
     lkWrongPin: 'Pogrešan PIN. Još {n} pokušaja.',
     lkWrongPat: 'Pogrešan šablon. Još {n} pokušaja.',
-    lkWait: 'Previše pokušaja. Sačekajte {s} s.',
+    lkWait: 'Previše pokušaja. Sačekaj {s} s.', lkWaitMin: 'Previše pokušaja. Sačekaj {m} min.',
     lkMismatch: 'Ne poklapa se. Pokušajte ponovo.',
     lkShort: 'Spojite najmanje 4 tačke.',
     lkForgotPin: 'Zaboravio sam PIN',
@@ -5392,7 +5392,7 @@ const I18N = {
     lkCurSub: 'Confirm before changing',
     lkWrongPin: 'Wrong PIN. {n} attempts left.',
     lkWrongPat: 'Wrong pattern. {n} attempts left.',
-    lkWait: 'Too many attempts. Wait {s} s.',
+    lkWait: 'Too many attempts. Wait {s} s.', lkWaitMin: 'Too many attempts. Wait {m} min.',
     lkMismatch: 'Does not match. Try again.',
     lkShort: 'Connect at least 4 dots.',
     lkForgotPin: 'Forgot PIN',
@@ -6953,6 +6953,7 @@ I18N.de = {
 "lkWrongPin": "Falsche PIN. Noch {n} Versuche.",
 "lkWrongPat": "Falsches Muster. Noch {n} Versuche.",
 "lkWait": "Zu viele Versuche. Warte {s} s.",
+"lkWaitMin": "Zu viele Versuche. Warte {m} Min.",
 "lkMismatch": "Stimmt nicht überein. Versuche es erneut.",
 "lkShort": "Verbinde mindestens 4 Punkte.",
 "lkForgotPin": "PIN vergessen",
@@ -8644,6 +8645,7 @@ I18N.es = {
 "lkWrongPin": "PIN incorrecto. Quedan {n} intentos.",
 "lkWrongPat": "Patrón incorrecto. Quedan {n} intentos.",
 "lkWait": "Demasiados intentos. Espera {s} s.",
+"lkWaitMin": "Demasiados intentos. Espera {m} min.",
 "lkMismatch": "No coincide. Inténtalo de nuevo.",
 "lkShort": "Une al menos 4 puntos.",
 "lkForgotPin": "Olvidé el PIN",
@@ -10335,6 +10337,7 @@ I18N.fr = {
 "lkWrongPin": "PIN incorrect. Encore {n} tentatives.",
 "lkWrongPat": "Schéma incorrect. Encore {n} tentatives.",
 "lkWait": "Trop de tentatives. Attends {s} s.",
+"lkWaitMin": "Trop de tentatives. Attends {m} min.",
 "lkMismatch": "Ça ne correspond pas. Réessaie.",
 "lkShort": "Relie au moins 4 points.",
 "lkForgotPin": "PIN oublié",
@@ -12026,6 +12029,7 @@ I18N.it = {
 "lkWrongPin": "PIN errato. Ancora {n} tentativi.",
 "lkWrongPat": "Sequenza errata. Ancora {n} tentativi.",
 "lkWait": "Troppi tentativi. Attendi {s} s.",
+"lkWaitMin": "Troppi tentativi. Attendi {m} min.",
 "lkMismatch": "Non corrisponde. Riprova.",
 "lkShort": "Collega almeno 4 punti.",
 "lkForgotPin": "PIN dimenticato",
@@ -13716,7 +13720,8 @@ I18N.hr = {
 "lkCurSub": "Potvrdite prije izmjene",
 "lkWrongPin": "Pogrešan PIN. Još {n} pokušaja.",
 "lkWrongPat": "Pogrešan uzorak. Još {n} pokušaja.",
-"lkWait": "Previše pokušaja. Pričekajte {s} s.",
+"lkWait": "Previše pokušaja. Pričekaj {s} s.",
+"lkWaitMin": "Previše pokušaja. Pričekaj {m} min.",
 "lkMismatch": "Ne podudara se. Pokušajte ponovno.",
 "lkShort": "Spojite najmanje 4 točke.",
 "lkForgotPin": "Zaboravio sam PIN",
@@ -20324,7 +20329,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 341;
+const APP_VERSION = 342;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -29915,7 +29920,11 @@ document.getElementById('pgGalleryLbl').textContent = t('pgGallery');
    Zaboravljen PIN/šablon: potvrda telefonom (otisak/lice/PIN telefona) → nov; zato uključivanje traži zaključan telefon.
    Podešavanje (galerija:lock) se ne prenosi kopijom. Čuva se samo SHA-256 sa solju, nikad sam PIN.
    ===================================================================== */
-const LK_KEY = LS_PREFIX + 'lock', LK_72H = 72*3600*1000, LK_TRIES = 5, LK_WAIT = 30000;
+const LK_KEY = LS_PREFIX + 'lock', LK_72H = 72*3600*1000, LK_TRIES = 5;
+/* v342 (Zoran 25.11.): čekanje raste po krugovima od 5 pogrešnih (kao zaključan ekran telefona); tačan PIN/šablon/otisak vraća na početak.
+   Brojač krugova (c.rounds) je u LK_KEY, pa ga zatvaranje aplikacije ne briše. */
+const LK_WAITS = [30000, 60000, 300000, 900000, 3600000];
+function lkWaitMsg(ms){ return ms >= 60000 ? t('lkWaitMin', {m: Math.ceil(ms / 60000)}) : t('lkWait', {s: Math.ceil(ms / 1000)}); }
 const LK_LOGO = '<div class="lk-halo"><svg width="58" height="58" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12 L82 50 L50 88 L18 50 Z" fill="none" stroke="var(--brass)" stroke-width="5"/><path d="M50 34 L64 50 L50 66 L36 50 Z" fill="var(--brass)" opacity=".35"/></svg></div>';
 const LK_FP_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 4a7 7 0 0 0-7 7v2"/><path d="M19 13v-2a7 7 0 0 0-3.5-6.06"/><path d="M12 8a3 3 0 0 0-3 3v3c0 2.5-1 4.5-2.5 6"/><path d="M15 11v3c0 3-1 5.5-3 7.5"/><path d="M12 11v3.5c0 2-.6 3.8-1.8 5.3"/><path d="M18.5 16.5c-.3 1.6-.9 3-1.7 4.3"/></svg>';
 const LK_PAT_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polyline points="5,5 12,5 19,5 12,12 5,19 12,19 19,19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" opacity=".55"/><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>';
@@ -30090,11 +30099,14 @@ function lkPrompt(o){
 /* provera PIN-a ili šablona (kind; podrazumevano izabrani način), sa ograničenjem pokušaja */
 async function lkCheckCurrent(v, kind){
   const c = lkCfg(), now = Date.now();
-  if(c.waitUntil && now < c.waitUntil) return t('lkWait', {s: Math.ceil((c.waitUntil - now)/1000)});
+  if(c.waitUntil && now < c.waitUntil) return lkWaitMsg(c.waitUntil - now);
   const k = c[kind || c.mode];
-  if(k && k.h && await lkHash(v, k.s) === k.h){ c.bad = 0; c.waitUntil = 0; c.last = Date.now(); lkSave(c); return true; }
+  if(k && k.h && await lkHash(v, k.s) === k.h){ c.bad = 0; c.rounds = 0; c.waitUntil = 0; c.last = Date.now(); lkSave(c); return true; }
   c.bad = (c.bad || 0) + 1;
-  if(c.bad >= LK_TRIES){ c.bad = 0; c.waitUntil = Date.now() + LK_WAIT; lkSave(c); return t('lkWait', {s: LK_WAIT/1000}); }
+  if(c.bad >= LK_TRIES){
+    const w = LK_WAITS[Math.min(c.rounds || 0, LK_WAITS.length - 1)];
+    c.bad = 0; c.rounds = (c.rounds || 0) + 1; c.waitUntil = Date.now() + w; lkSave(c); return lkWaitMsg(w);
+  }
   lkSave(c);
   return t((kind || c.mode) === 'pat' ? 'lkWrongPat' : 'lkWrongPin', {n: LK_TRIES - c.bad});
 }
@@ -30105,7 +30117,7 @@ async function lkSetSecret(mode){
   const second = await lkPrompt({kind:mode, title:lkK(mode, 'lkRepPin', 'lkRepPat'), sub:t('lkRepSub'), cancel:true, check:async v=> v === first ? true : t('lkMismatch')});
   if(second == null) return false;
   const c = lkCfg(), salt = lkSalt();
-  c[mode] = {h: await lkHash(second, salt), s: salt}; c.last = Date.now(); c.bad = 0; c.waitUntil = 0; c.asked = true;
+  c[mode] = {h: await lkHash(second, salt), s: salt}; c.last = Date.now(); c.bad = 0; c.rounds = 0; c.waitUntil = 0; c.asked = true;
   lkSave(c);
   return true;
 }
@@ -30181,7 +30193,7 @@ async function lkUnlock(first, fromPeek){
         if(bioBusy) return; bioBusy = true;
         let r = {}; try{ r = (await lkNative().biometrija({naslov:t('lkBioTitle'), podnaslov:t('lkBioSubT'), dugme:lkK(c, 'lkEnterPin', 'lkDrawPat')})) || {}; }catch(e){ r = {razlog:'greska'}; }
         bioBusy = false;
-        if(r.ok){ bioDone = true; if(lkPend){ const f = lkPend; lkPend = null; f(); } }
+        if(r.ok){ bioDone = true; const cb = lkCfg(); if(cb.bad || cb.rounds || cb.waitUntil){ cb.bad = 0; cb.rounds = 0; cb.waitUntil = 0; lkSave(cb); } if(lkPend){ const f = lkPend; lkPend = null; f(); } }   /* v342: otisak vraća brojač na početak */
       };
       const pp = lkPrompt({kind:c.mode, title:lkK(c, 'lkPinTitle', 'lkPatTitle'),
         sub: need72 ? lkK(c, 'lk72Pin', 'lk72Pat') : lkK(c, 'lkPinSub', 'lkPatSub'), forgot:true, onBio: bioOk ? runBio : null, check:lkCheckCurrent,
