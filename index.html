@@ -15326,6 +15326,31 @@ async function fullUrlFor(item, pageIndex){
   }
   return u;
 }
+/* v338 (Zoran 25.11., kao galerija): velika fotografija (duža strana > IMG_MAX_DIM, npr. original iz v337) se na ekranu
+   prikazuje kao kopija veličine ekrana, napravljena u pozadini (worker) i čuvana SAMO u memoriji — ništa se ne snima.
+   Original: pri uvećanju (zmSettled), deljenje, izvoz, kopija, Drive. Manje slike: fullUrlFor kao ranije.
+   B1: zameniti Android-ovim čitanjem umanjene slike (arhiva-play.md). */
+const _viewUrls = new Map();   /* fajl → Promise<url> */
+const VIEW_KEEP = 8;
+function pageIsBig(item, pageIndex){
+  const p = (item.pages || [])[pageIndex || 0];
+  return !!(item.type === 'image' && p && Math.max(p.w || 0, p.h || 0) > IMG_MAX_DIM);
+}
+function viewUrlFor(item, pageIndex){
+  if(!pageIsBig(item, pageIndex)) return fullUrlFor(item, pageIndex);
+  const key = item.pages[pageIndex || 0].file;
+  let pr = _viewUrls.get(key);
+  if(pr){ _viewUrls.delete(key); _viewUrls.set(key, pr); return pr; }
+  pr = getFileBlob(item, pageIndex || 0).then(b=>processImage(b, 'view')).then(r=>URL.createObjectURL(r.blob));
+  pr.catch(()=>{ if(_viewUrls.get(key) === pr) _viewUrls.delete(key); });
+  _viewUrls.set(key, pr);
+  while(_viewUrls.size > VIEW_KEEP){
+    const first = _viewUrls.keys().next().value, old = _viewUrls.get(first);
+    _viewUrls.delete(first);
+    old.then(u=>setTimeout(()=>{ if(modalImg.getAttribute('src') !== u && modalPeekImg.getAttribute('src') !== u) try{ URL.revokeObjectURL(u); }catch(e){} }, 1000)).catch(()=>{});
+  }
+  return pr.catch(()=>fullUrlFor(item, pageIndex));   /* obrada ne uspe → pun fajl, kao ranije */
+}
 /* Tekst za pretragu po sadržaju: učitava se tek kad zatreba */
 let _textsLoaded = false;
 async function loadTexts(){
@@ -17861,7 +17886,7 @@ function showModalItem(item, page){
   if(pg > 0 && !modalImg.getAttribute('src')){
     pageThumbUrl(item, pg).then(u=>{ if(req === _modalReq && !fullShown && u) modalImg.src = u; }).catch(()=>{});
   }
-  fullUrlFor(item, pg).then(u=>{ if(req === _modalReq){ fullShown = true; modalImg.src = u; } })
+  viewUrlFor(item, pg).then(u=>{ if(req === _modalReq){ fullShown = true; modalImg.src = u; } })
     .catch(e=>{ console.error(e); if(req === _modalReq) toast(t('fileMissing')); });
   setModalCaption(item);
   const total = currentGalleryItems.length;
@@ -18818,7 +18843,7 @@ function peekPrep(){
       return;
     }
     if(it.type !== 'image' || !(it.pages || [])[pg]) return;
-    thumbP = pageThumbUrl(it, pg); fullP = fullUrlFor(it, pg);
+    thumbP = pageThumbUrl(it, pg); fullP = viewUrlFor(it, pg);
     thumbP.then(u=>{ if(req === _peek.req && u && !_peek.url[dir]) _peek.url[dir] = u; }).catch(()=>{});
     fullP.then(u=>{ if(req === _peek.req && u){ _peek.url[dir] = u; if(_peek.dir === dir) modalPeekImg.src = u; } }).catch(()=>{});
   });
@@ -19048,6 +19073,7 @@ modalBg.addEventListener('touchcancel', ()=>{ if(_zmG && _zmG.mode === 'swipe'){
 /* PDF: kad je stranica uvećana, iscrta se oštrija (jednom, za tu stranicu) */
 let _zmHi = null;   /* {key, url} */
 function zmSettled(){
+  if(_zm.s > 1.3 && !modalBg.classList.contains('is-pdfview')){ zmOriginal(); return; }
   if(_zm.s <= 1.3 || !modalBg.classList.contains('is-pdfview')) return;
   const it = items.find(i=>i.id === modalItemId);
   if(!it || it.type !== 'pdf') return;
@@ -19062,6 +19088,17 @@ function zmSettled(){
   }).catch(e=>console.error(e));
 }
 
+/* v338: uvećana velika fotografija — original se raspakuje van ekrana (decode), pa tek onda zameni kopiju za ekran */
+function zmOriginal(){
+  const it = items.find(i=>i.id === modalItemId);
+  if(!it || !pageIsBig(it, modalPage)) return;
+  const req = _modalReq, pg = modalPage;
+  fullUrlFor(it, pg).then(u=>{
+    if(req !== _modalReq || modalPage !== pg || modalImg.getAttribute('src') === u) return;
+    const im = new Image(); im.src = u;
+    return (im.decode ? im.decode() : Promise.resolve()).then(()=>{ if(req === _modalReq && modalPage === pg) modalImg.src = u; });
+  }).catch(e=>console.error(e));
+}
 const closeModal = ()=>{ dfHide(); modalBg.classList.remove('open'); _splitOk = false; splitSync(); zmReset(false); docClear(); peekHide(); modalFrame.style.visibility = ''; _swBusy = false; clearDeepLink(); exitModalFullscreen(); if(_vwRet){ _vwRet = false; vwBack(); } else if(_vzBack){ _vzBack = false; vzReturn(); } else if(_vzDocW){ _vzDocW = false; if(!homeUnwind && !_vzLeaving) vzLeave(); } else if(scPeekOn) scPeekClosed(); };
 /* =====================================================================
    TABLET B (v321, Zoran 13.11.): položen tablet (≥ 900 px, vodoravno) — stavka otvorena iz mreže stoji DESNO, spisak ostaje levo
@@ -19681,7 +19718,7 @@ const COMPRESS_WORKER_CODE = [
   "    const W = bitmap.width, H = bitmap.height;",
   "    const out = {id: d.id, w: W, h: H}; const trans = [];",
   "    if(d.maxDim || d.maxPx){ const s = d.maxPx ? fitPx(W, H, d.maxPx) : fit(W, H, d.maxDim); out.buffer = await draw(bitmap, s[0], s[1], d.quality); out.w = s[0]; out.h = s[1]; trans.push(out.buffer); }",
-  "    const ts = thumbSize(W, H, d.thumbShort, d.thumbLong); out.tbuffer = await draw(bitmap, ts[0], ts[1], d.thumbQ); trans.push(out.tbuffer);",
+  "    if(!d.noThumb){ const ts = thumbSize(W, H, d.thumbShort, d.thumbLong); out.tbuffer = await draw(bitmap, ts[0], ts[1], d.thumbQ); trans.push(out.tbuffer); }",
   "    bitmap.close();",
   "    self.postMessage(out, trans);",
   "  }catch(err){",
@@ -19729,12 +19766,12 @@ async function imageViaWorker(blob, resize){
   const id = ++_compressReqId;
   const d = await new Promise((resolve, reject)=>{
     _compressPending.set(id, {resolve, reject});
-    worker.postMessage({id, buffer, mime: blob.type, maxDim: resize === true ? IMG_MAX_DIM : 0, maxPx: (resize && resize.maxPx) || 0, quality: IMG_QUALITY,
+    worker.postMessage({id, buffer, mime: blob.type, maxDim: (resize === true || resize === 'view') ? IMG_MAX_DIM : 0, maxPx: (resize && resize.maxPx) || 0, noThumb: resize === 'view', quality: IMG_QUALITY,
       thumbShort: THUMB_SHORT, thumbLong: THUMB_LONG, thumbQ: THUMB_QUALITY}, [buffer]);
   });
   return {
     blob: d.buffer ? new Blob([d.buffer], {type:'image/jpeg'}) : null,
-    tblob: new Blob([d.tbuffer], {type:'image/jpeg'}),
+    tblob: d.tbuffer ? new Blob([d.tbuffer], {type:'image/jpeg'}) : null,
     w: d.w, h: d.h
   };
 }
@@ -19772,6 +19809,7 @@ async function imageMainThread(blob, resize){
       out.blob = await draw(w, h, IMG_QUALITY);
       out.w = w; out.h = h;
     }
+    if(resize === 'view') return out;   /* v338: kopija za ekran, bez sličice */
     const k = Math.min(1, THUMB_SHORT / Math.min(W, H), THUMB_LONG / Math.max(W, H));
     out.tblob = await draw(Math.max(1, Math.round(W * k)), Math.max(1, Math.round(H * k)), THUMB_QUALITY);
     return out;
@@ -20764,7 +20802,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 337;
+const APP_VERSION = 338;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
