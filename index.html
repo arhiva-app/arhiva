@@ -3814,6 +3814,11 @@ function itemLabel(item){
   const a = autoNameParts(item.name);
   return a ? itemAutoWord(item) + a.tail + ' · ' + itemWhen(item) : item.name;
 }
+/* v351: ispod sličice u korpi (tri kolone) — automatsko ime = vrsta + kratak datum („Slika · 9.11.“ / „Image · Nov 9“); pun naziv sa vremenom u detaljima i pregledu */
+function itemLabelShort(item){
+  const a = autoNameParts(item.name);
+  return a ? itemAutoWord(item) + a.tail + ' · ' + itemDay(item) : item.name;
+}
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -20371,7 +20376,7 @@ function trCell(it){
     : fileTypeIcon(fileTypeOf(it));
   cell.innerHTML = '<div class="trash-thumb">'+inner+'<span class="trash-check">'+(trashSel.has(it.id)?'\u2713':'')+'</span></div>'+
     '<button type="button" class="trash-name"></button><div class="trash-left"></div>';
-  cell.querySelector('.trash-name').textContent = itemLabel(it);
+  cell.querySelector('.trash-name').textContent = itemLabelShort(it);
   cell.querySelector('.trash-left').textContent = trLeftTxt(trashDaysLeft(it));
   cell.querySelector('.trash-thumb').onclick = ()=>{ if(trashSel.has(it.id)) trashSel.delete(it.id); else trashSel.add(it.id); renderTrashList(); };
   cell.querySelector('.trash-name').onclick = ()=>trInfo(it);
@@ -20668,7 +20673,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 350;
+const APP_VERSION = 351;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
