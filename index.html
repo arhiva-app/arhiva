@@ -130,6 +130,11 @@ html.sc-peek #modalUnlock{ display:flex; }
 .lk-chips{ display:flex; gap:8px; flex-wrap:wrap; padding:8px 16px 14px; }
 .lk-chip{ padding:9px 14px; border-radius:999px; border:1.5px solid var(--line); background:none; font:600 14px var(--font-ui); color:var(--ink); cursor:pointer; }
 .lk-chip.on{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+
+/* v348 (nalaz virtuelnog korisnika 4): veće površine za dodir u pretrazi i podsetniku, u svim temama */
+.searchbar .search-close{ min-width:44px; min-height:44px; margin-right:-8px; }
+html .searchbar .deep-search-toggle{ min-height:40px; font-size:13px; padding:0 14px; }
+.pod-row input.pod-on{ width:28px; height:28px; }
 </style>
 <style>
   :root{
@@ -4517,7 +4522,6 @@ const I18N = {
     expNoticeAll: 'Pogledaj',
     expPickDate: 'Dodirni i izaberi datum',
     expNoteLbl: 'Šta treba uraditi (nije obavezno)',
-    expNotePh: 'Npr. obnoviti registraciju, poslati kopiju',
     renTitle: 'Preimenuj',
     renLbl: 'Naziv',
     renSave: 'Sačuvaj',
@@ -5318,7 +5322,6 @@ const I18N = {
     expNoticeAll: 'View',
     expPickDate: 'Tap to pick a date',
     expNoteLbl: 'What needs to be done (optional)',
-    expNotePh: 'E.g. renew the registration, send a copy',
     renTitle: 'Rename',
     renLbl: 'Name',
     renSave: 'Save',
@@ -6787,7 +6790,6 @@ I18N.de = {
 "expNoticeAll": "Ansehen",
 "expPickDate": "Tippen, um ein Datum zu wählen",
 "expNoteLbl": "Was zu tun ist (optional)",
-"expNotePh": "Z. B. Zulassung verlängern, Kopie schicken",
 "renTitle": "Umbenennen",
 "renLbl": "Name",
 "renSave": "Speichern",
@@ -8479,7 +8481,6 @@ I18N.es = {
 "expNoticeAll": "Ver",
 "expPickDate": "Toca para elegir una fecha",
 "expNoteLbl": "Qué hay que hacer (opcional)",
-"expNotePh": "P. ej. renovar la matrícula, enviar una copia",
 "renTitle": "Renombrar",
 "renLbl": "Nombre",
 "renSave": "Guardar",
@@ -10171,7 +10172,6 @@ I18N.fr = {
 "expNoticeAll": "Voir",
 "expPickDate": "Touche pour choisir une date",
 "expNoteLbl": "Ce qu’il faut faire (facultatif)",
-"expNotePh": "P. ex. renouveler l’immatriculation, envoyer une copie",
 "renTitle": "Renommer",
 "renLbl": "Nom",
 "renSave": "Enregistrer",
@@ -11863,7 +11863,6 @@ I18N.it = {
 "expNoticeAll": "Vedi",
 "expPickDate": "Tocca per scegliere una data",
 "expNoteLbl": "Cosa fare (facoltativo)",
-"expNotePh": "Ad es. rinnovare l’immatricolazione, inviare una copia",
 "renTitle": "Rinomina",
 "renLbl": "Nome",
 "renSave": "Salva",
@@ -13523,7 +13522,6 @@ I18N.hr = {
 "expNoticeAll": "Pogledaj",
 "expPickDate": "Dodirni i odaberi datum",
 "expNoteLbl": "Što treba učiniti (nije obavezno)",
-"expNotePh": "Npr. obnoviti registraciju, poslati kopiju",
 "renTitle": "Preimenuj",
 "renLbl": "Naziv",
 "renSave": "Spremi",
@@ -14548,7 +14546,7 @@ function openExpirySheet(o){
   document.getElementById('expClear').style.display = isYmd(o.value) ? '' : 'none';
   expInput.value = isYmd(o.value) ? o.value : '';
   document.getElementById('expNoteLbl').textContent = t('expNoteLbl');
-  expNote.placeholder = t('expNotePh');
+  expNote.placeholder = '';   /* v348: polje bez primera (zajednicko.md 7) */
   expNote.value = isYmd(o.value) ? (o.note || '') : '';
   _expRem = remClean(o.remind) || (isYmd(o.value) ? remLegacy() : remDefault());
   expRenderPods();
@@ -20667,7 +20665,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 347;
+const APP_VERSION = 348;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
