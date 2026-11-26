@@ -3775,6 +3775,7 @@ function autoNameParts(name){
 function itemWhen(item){
   const d = new Date(item.ts || item.updatedAt || Date.now());
   const two = n=>String(n).padStart(2, '0');
+  if(!isSr()) return d.toLocaleString(langLoc(), {day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'});   /* v349: datum po jeziku */
   return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '. ' + d.getHours() + ':' + two(d.getMinutes());
 }
 /* kratko, kao oznaka podsetnika: ove godine „6.10.“, druge godine „15.3.25.“ (staje i na 340 px) */
@@ -20354,7 +20355,8 @@ function trSorted(list){
   return a;
 }
 function trLeftTxt(left){ return left === 0 ? t('trToday') : t(left === 1 ? 'trLeft1' : 'trLeftN', {n:left}); }
-function trDate(ms){ const d = new Date(ms); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'; }
+/* v349 (nalaz virtuelnog korisnika 5): srpski oblik samo za sr/hr, ostali jezici po pravilima jezika (26 Nov 2026 / Nov 26, 2026) */
+function trDate(ms){ const d = new Date(ms); if(!isSr()) return d.toLocaleDateString(langLoc(), {day:'numeric', month:'short', year:'numeric'}); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'; }
 function trFiltered(){
   const q = trSearchOn ? normalizeSr(trQ.trim()) : '';
   return trash.filter(it=>(trKind === 'all' || (trKind === 'img' ? isMedia(it) : !isMedia(it))) &&
@@ -20665,7 +20667,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 348;
+const APP_VERSION = 349;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -25414,7 +25416,7 @@ function wsRenderTpls(busy){
       '<button type="button" class="ws-tpl-del"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 20 7"></polyline><path d="M6 7l1 13h10l1-13"></path><path d="M9 7V4h6v3"></path></svg></button>' +
       '<div class="ws-tpl-acts"><button type="button" class="ws-tpl-fill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"></path><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"></line></svg><span></span></button></div>';
     row.querySelector('b').textContent = tp.name || tp.title || '';
-    row.querySelector('small').textContent = t('wsTplMeta', {n:(tp.fields || []).length, date:d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'});
+    row.querySelector('small').textContent = t('wsTplMeta', {n:(tp.fields || []).length, date:trDate(d.getTime())});
     const op = row.querySelector('.ws-tpl-open'), del = row.querySelector('.ws-tpl-del'), fill = row.querySelector('.ws-tpl-fill');
     del.disabled = fill.disabled = busy;
     /* verzija 90: naziv nije dugme; jedini put do izbora polja je „Napravi šablon“ */
@@ -26947,7 +26949,7 @@ function zsCols(kind, own){
 function zsYmdShow(v){
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
   if(!m) return String(v || '');
-  return appLang() === 'sr' ? m[3] + '.' + m[2] + '.' + m[1] + '.' : m[1] + '-' + m[2] + '-' + m[3];
+  return isSr() ? m[3] + '.' + m[2] + '.' + m[1] + '.' : trDate(new Date(+m[1], +m[2] - 1, +m[3]).getTime());
 }
 function zsMoney(n){
   try{ return Number(n).toLocaleString(aiLocale(), {minimumFractionDigits:2, maximumFractionDigits:2}); }catch(e){ return String(n); }
@@ -30401,7 +30403,7 @@ function aiSettingsHtml(){
     '<div class="settings-card">' +
     (u.last.length ? u.last.map(x=>{
       const d = new Date(x.ts || 0);
-      const when = d.getDate() + '.' + (d.getMonth() + 1) + '. ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      const when = !isSr() ? d.toLocaleString(langLoc(), {day:'numeric', month:'short', hour:'numeric', minute:'2-digit'}) : d.getDate() + '.' + (d.getMonth() + 1) + '. ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       const mm = aiModelById(x.model);
       if(x.fail != null) return '<div class="ai-last ai-fail">✗ ' + escapeHtml(x.name || '') + '<small>' + escapeHtml(when + ' · ' + (mm ? mm.name : (x.model || ''))) + '</small>' +
         '<small class="ai-fail-tx">' + escapeHtml(x.fail) + '</small>' +
@@ -32255,7 +32257,7 @@ function drAgo(ts){
   if(m < 1) return t('drAgoNow');
   if(m < 60) return t('drAgoMin', {n:m});
   if(m < 1440) return t('drAgoH', {n:Math.floor(m / 60)});
-  const d = new Date(ts); return String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+  const d = new Date(ts); if(!isSr()) return trDate(ts); return String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
 }
 function drLocalBytes(){ let b = 0; items.forEach(it=>(it.pages || []).forEach(p=>{ b += p.size || 0; })); return b; }
 function drDriveBytes(){ let b = 0; Object.values(_dr.files).forEach(f=>{ b += f.s || 0; }); return b; }
@@ -32738,7 +32740,7 @@ function syDay(ts){
   const same = (a, b)=>a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   if(same(d, now)) return t('syToday');
   if(same(d, y)) return t('syYest');
-  return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.';
+  return trDate(d.getTime());
 }
 const syScreen = document.getElementById('syncScreen');
 function openSyncScreen(){ syRender(); syScreen.classList.add('open'); syScreen.scrollTop = 0; pushBack(closeSyncScreen); }
