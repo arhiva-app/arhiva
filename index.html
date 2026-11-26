@@ -17751,8 +17751,7 @@ function showModalItem(item, page){
   const showNav = (total > 1 && currentGalleryIndex >= 0) || n > 1;
   document.getElementById('modalPrev').hidden = !showNav;
   document.getElementById('modalNext').hidden = !showNav;
-  document.getElementById('modalPosition').textContent = total > 1 && currentGalleryIndex >= 0
-    ? (currentGalleryIndex+1) + ' / ' + total : '';
+  document.getElementById('modalPosition').textContent = '';   /* v352 (nalaz virtuelnog korisnika 7): bez brojača „2 / 5“ — ličio je na broj strana; kao galerija telefona */
   document.getElementById('modalPageNo').textContent = n > 1 ? t('pgPageNo', {n:pg+1, total:n}) : '';
   updateModalExp(item);
 }
@@ -17795,7 +17794,7 @@ function showModalFile(item){
   const showNav = total > 1 && currentGalleryIndex >= 0;
   document.getElementById('modalPrev').hidden = !showNav;
   document.getElementById('modalNext').hidden = !showNav;
-  document.getElementById('modalPosition').textContent = showNav ? (currentGalleryIndex+1) + ' / ' + total : '';
+  document.getElementById('modalPosition').textContent = '';   /* v352 */
   document.getElementById('modalPageNo').textContent = '';
   updateModalExp(item);
 }
@@ -17884,7 +17883,7 @@ function showModalPdf(item, page){
     const showNav = (total > 1 && currentGalleryIndex >= 0) || n > 1;
     document.getElementById('modalPrev').hidden = !showNav;
     document.getElementById('modalNext').hidden = !showNav;
-    document.getElementById('modalPosition').textContent = total > 1 && currentGalleryIndex >= 0 ? (currentGalleryIndex+1) + ' / ' + total : '';
+    document.getElementById('modalPosition').textContent = '';   /* v352 */
     document.getElementById('modalPageNo').textContent = n > 1 ? t('pgPageNo', {n:modalPage+1, total:n}) : '';
   };
   setNav(known || 1);
@@ -20673,7 +20672,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 351;
+const APP_VERSION = 352;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
