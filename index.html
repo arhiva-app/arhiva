@@ -20672,7 +20672,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 353;
+const APP_VERSION = 354;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
@@ -21303,7 +21303,9 @@ function updateStorageInfo(){
    otvaraju i arhiva-slika i photo.html). Chrome na Androidu pamti fasciklu, ali dozvolu
    trazi ponovo posle zatvaranja: zato upis ide na dodir, uz najvise jedno pitanje "Dozvoli". */
 const BACKUP_KEEP = 3;
-const BACKUP_NAME_RE = /^arhiva-backup-\d{4}-\d{2}-\d{2}\.(json|zip)$/;
+/* v354 (nalaz virtuelnog korisnika 8): ime kopije po aplikaciji — life-archive-backup-GGGG-MM-DD.zip; staro ime arhiva-backup-… se i dalje prepoznaje */
+const BACKUP_NAME_RE = /^(?:life-archive|arhiva)-backup-\d{4}-\d{2}-\d{2}\.(json|zip)$/;
+const backupNameDate = n => (/\d{4}-\d{2}-\d{2}/.exec(n) || [''])[0];
 let backupDirHandle = null;
 /* v293: u Android aplikaciji fascikla ide preko telefona (ARHIVA_KOPIJA_FASCIKLA, nov APK) — showDirectoryPicker tamo ne radi
    (WebView ga ne prikaže bez posebne obrade u aplikaciji). Stari APK: nema fascikle, telefon pita svaki put. */
@@ -21377,7 +21379,7 @@ async function writeBackupToDir(dir, blob, fileName){
     for await (const [name, h] of dir.entries()){
       if(h.kind === 'file' && BACKUP_NAME_RE.test(name)) names.push(name);
     }
-    names.sort().reverse();
+    names.sort((a, b)=>backupNameDate(b).localeCompare(backupNameDate(a)) || b.localeCompare(a));   /* v354: po datumu, ne po slovima (staro i novo ime zajedno) */
     for(const old of names.slice(BACKUP_KEEP)){ await dir.removeEntry(old); }
   }catch(e){ console.error(e); }
 }
@@ -21401,7 +21403,7 @@ async function ensureDirPermission(dir){
 }
 function backupFileName(ext){
   const d = new Date();
-  return 'arhiva-backup-' + d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') + '.' + ext;
+  return 'life-archive-backup-' + d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') + '.' + ext;
 }
 /* Upis u izabranu fasciklu (ako je dozvoljeno), inače preuzimanje. Vraća poruku za korisnika. */
 async function saveBackupFile(blob, fileName, dirOk){
