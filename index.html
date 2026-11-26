@@ -1329,9 +1329,10 @@ html[data-theme="klasicna"] .home-inbox.home-inbox:active{ background:#2A2D32; }
 .pg-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px 10px; margin-top:12px; }
 .pg-tile{ position:relative; aspect-ratio:3/4; background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
   overflow:hidden; cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+/* v350 (nalaz virtuelnog korisnika 6): čipovi korpe široki po natpisu — ceo natpis na svih 7 jezika i na 360 px */
 .all-chips{ display:flex; gap:8px; padding:4px 0 6px; }
-.all-chip{ flex:1 1 0; min-width:0; height:40px; border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
-  font-family:var(--font-ui); font-size:14.5px; font-weight:600; padding:0 8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.all-chip{ flex:1 1 auto; min-width:0; height:40px; border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+  font-family:var(--font-ui); font-size:14.5px; font-weight:600; padding:0 11px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .all-chip.on{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
 [data-theme="ponoc"] .all-chip.on{ background:var(--g-grad); }
 .pg-tile img{ width:100%; height:100%; object-fit:contain; display:block; }
@@ -20667,7 +20668,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 349;
+const APP_VERSION = 350;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
