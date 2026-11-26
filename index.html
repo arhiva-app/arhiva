@@ -3531,8 +3531,8 @@ window.pdfLibP.catch(function(e){ window.__pdfLibErr = true; console.error('pdf.
 <div class="exit-modal-backdrop" id="exitBackdrop">
   <div class="exit-modal">
     <div style="font-size:108px;line-height:1;margin-bottom:8px;">🚪</div>
-    <h2>Izlazak iz aplikacije</h2>
-    <div class="sub">Da li sigurno želiš da izađeš?</div>
+    <h2 id="exitH">Izlazak iz aplikacije</h2>
+    <div class="sub" id="exitSub">Da li sigurno želiš da izađeš?</div>
     <div class="exit-actions">
       <button class="exit-btn stay" id="exitStayBtn"><span class="ic">↩️</span>Ostani</button>
       <button class="exit-btn leave" id="exitLeaveBtn"><span class="ic">🚪</span>Izađi</button>
@@ -3709,7 +3709,13 @@ document.addEventListener('keydown', function onceK(){
   armExitTrap();
   document.removeEventListener('keydown', onceK);
 }, {once:true});
-function showExitConfirm(){ document.getElementById('exitBackdrop').classList.add('open'); }
+function showExitConfirm(){
+  /* v347 (virtuelni korisnik): natpisi su bili samo na srpskom → prevod pri svakom otvaranju */
+  document.getElementById('exitH').textContent = t('exitH'); document.getElementById('exitSub').textContent = t('exitSub');
+  document.getElementById('exitStayBtn').innerHTML = '<span class="ic">↩️</span>' + escapeHtml(t('exitStay'));
+  document.getElementById('exitLeaveBtn').innerHTML = '<span class="ic">🚪</span>' + escapeHtml(t('exitLeave'));
+  document.getElementById('exitBackdrop').classList.add('open');
+}
 function hideExitConfirm(){ document.getElementById('exitBackdrop').classList.remove('open'); }
 document.getElementById('exitLeaveBtn').addEventListener('click', () => {
   hideExitConfirm();
@@ -14356,6 +14362,12 @@ I18N.hr = {
   };
   Object.keys(P).forEach(l=>{ if(!I18N[l]) return; const g = P[l].g; delete P[l].g; Object.assign(I18N[l], P[l]); if(Array.isArray(I18N[l].guide)) I18N[l].guide.push(g); });
 })();
+/* v347: izlazak iz aplikacije — tekstovi za sve jezike */
+(function(){ const E = {sr:['Izlazak iz aplikacije','Da li sigurno želiš da izađeš?','Ostani','Izađi'], en:['Leave the app','Are you sure you want to leave?','Stay','Leave'],
+  de:['App verlassen','Möchtest du die App wirklich verlassen?','Bleiben','Verlassen'], es:['Salir de la aplicación','¿Seguro que quieres salir?','Quedarme','Salir'],
+  fr:['Quitter l’application','Veux-tu vraiment quitter ?','Rester','Quitter'], it:['Esci dall’app','Vuoi davvero uscire?','Resta','Esci'],
+  hr:['Izlazak iz aplikacije','Jesi li siguran da želiš izaći?','Ostani','Izađi']};
+  Object.keys(E).forEach(l=>{ if(I18N[l]) Object.assign(I18N[l], {exitH:E[l][0], exitSub:E[l][1], exitStay:E[l][2], exitLeave:E[l][3]}); }); })();
 /* v183: jezik se pamti; prvi put se uzima jezik telefona (srpski/hrvatski/bosanski → srpski, ostalo → engleski),
    a postojeći korisnik (već ima podešavanja Arhive) ostaje na srpskom */
 const SR_LANGS = ['sr', 'bs', 'sh', 'me', 'cnr'];   /* v332: hr ima svoj rečnik */
@@ -19018,6 +19030,9 @@ document.getElementById('modalDelete').onclick = (e)=>{
   document.getElementById('delSub').textContent = isFile ? t('delFileSub', {name:item.name})
     : (np > 1 ? t('delDocSub', {name:item.name, n:np}) : t('delImgSub', {name:item.name}));
   document.getElementById('delSub').textContent += ' ' + t('delModalTrash', {days:getTrashDays()});
+  /* v347 (virtuelni korisnik): dugmad su bila samo na srpskom */
+  document.getElementById('delCancelBtn').innerHTML = '<span class="ic">↩️</span>' + escapeHtml(t('cfCancel'));
+  document.getElementById('delConfirmBtn').innerHTML = '<span class="ic">🗑️</span>' + escapeHtml(t('barDelete'));
   delBackdrop.classList.add('open');
   pushBack(closeDeleteConfirm);
 };
@@ -20652,7 +20667,7 @@ const SETTINGS_BACK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill=
 /* MODUL dnevnik-gresaka v1 — prilagođeno Arhivi: ključ galerija:errlog, tekstovi kroz t() (sr, en), značka u .set-build,
    ekran openSettingsSub('errlog'), potvrda askConfirm, poruke toast. Upisuju: JS greške, AI greške (aiRequest), neuspelo čuvanje.
    Poslednjih 20, ne ide u rezervnu kopiju; upis tih (bez upozorenja), da dnevnik ne pravi nove greške. */
-const APP_VERSION = 346;
+const APP_VERSION = 347;
 const ERRLOG_KEY = 'galerija:errlog', ERRLOG_MAX = 20;
 function getErrLog(){ try{ const v = localStorage.getItem(ERRLOG_KEY); const a = v ? JSON.parse(v) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function logError(where, msg){
